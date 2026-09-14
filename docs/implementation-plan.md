@@ -8,7 +8,7 @@ milestones — the priority is fast, visible progress toward "that's clearly the
 
 - [ ] Fly drone in a structured overlapping grid pattern (not just a few shots) over the full property, to support photogrammetry terrain generation later
 - [ ] Fly a straight-down pass for a clean top-down orthomosaic (aerial texture)
-- [x] Gather any existing parcel boundary / measurement data (check water rights project docs — parcel is 340732310005) — confirmed acreage via public records, see [docs/parcel-data.md](parcel-data.md); exact boundary polygon and building footprints still need a manual GIS export
+- [x] Gather any existing parcel boundary / measurement data (check water rights project docs — parcel is 340732310005) — confirmed acreage, real boundary polygon, and approximate (ML-derived) building footprints, all via public GIS REST APIs, see [docs/parcel-data.md](parcel-data.md)
 - [ ] Note real-world dimensions of key structures (barn, key fences) for scale validation later
 
 ## Phase 1 — Terrain
@@ -21,8 +21,8 @@ milestones — the priority is fast, visible progress toward "that's clearly the
 
 ## Phase 2 — Layout blockout
 
-- [~] Place boxy placeholder geometry for every building at correct position, orientation, and rough scale — one placeholder building box added at a provisional position; real siting waits on parcel/building GIS data or the orthomosaic (see [docs/parcel-data.md](parcel-data.md))
-- [~] Add fence lines and pasture divisions as simple planes/lines — provisional square boundary fence added, sized to match confirmed 24.06-acre total; not the real parcel shape
+- [~] Place boxy placeholder geometry for every building at correct position, orientation, and rough scale — 7 boxes placed at real (approximate, ML-derived) positions/sizes; not yet attributed to specific structures or rotated to true orientation (see [docs/parcel-data.md](parcel-data.md))
+- [x] Add fence lines and pasture divisions as simple planes/lines — fence now traces the real parcel boundary polygon (13 segments); no pasture-division lines yet
 - [ ] Walk the blockout and compare against memory/photos of the real property
 
 ## Phase 3 — First-person exploration

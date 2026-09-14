@@ -88,11 +88,23 @@ against the real parcel polygon (not just its bounding box) then excludes
 neighboring buildings. Find the current release folder name by listing
 `s3://overturemaps-us-west-2/release/` (no credentials needed).
 
-## How this is used until then
+## How this is used in the scene
 
-The Phase 2 blockout (`project/scenes/main.tscn`) uses a **provisional square
-boundary** sized to match the confirmed 24.06-acre total (≈312m × 312m) and a
-placeholder building box at the field center — not real positions or shape.
-Once the real boundary/building data lands, replace the boundary mesh and
-reposition the placeholder buildings to match; nothing else in the scene
-depends on their current placement.
+The Phase 2 blockout (`project/scenes/main.tscn`) now uses the **real parcel
+boundary** (13 fence segments tracing the actual polygon edges from
+`parcel-340732310005.geojson`) and **7 real building footprints** (boxes
+positioned/sized from `buildings-340732310005.geojson`), converted from
+lat/lon to local meters via a simple equirectangular projection centered on
+the parcel's area centroid (local origin `(0,0)` = that centroid; `+X` = east,
+`+Z` = south, matching the scene's existing convention). The ground plane
+(520m × 520m, centered on the boundary's bounding-box center) was resized to
+fit — the real parcel's bounding box (~430m × 435m) is notably larger and less
+square than the old 312m × 312m placeholder because the parcel shape is
+irregular, not because the acreage changed.
+
+Buildings are still axis-aligned boxes (not rotated to each structure's real
+orientation) and unattributed to specific structures (house/barn/shed) — see
+"Still needed" above. The old provisional-square/single-placeholder-box setup
+this section used to describe is gone, superseded now that real boundary and
+building data are both available (see D-3, D-5 in
+[decisions.md](project/decisions.md)).
