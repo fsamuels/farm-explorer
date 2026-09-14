@@ -7,6 +7,9 @@ farm-sim/
 │   ├── implementation-plan.md    # phased plan, engine-agnostic
 │   ├── drone-capture-plan.md     # drone flight + processing plan
 │   ├── engine-decision.md        # Godot vs Unity vs Unreal tradeoffs
+│   ├── parcel-data.md            # confirmed parcel facts (ID, acreage, boundary source)
+│   ├── gis/
+│   │   └── parcel-*.geojson      # real parcel boundary polygons pulled from county/state GIS
 │   └── repo-structure.md         # this file
 ├── assets/
 │   ├── drone-source/             # raw drone photos (likely gitignored — large files)
