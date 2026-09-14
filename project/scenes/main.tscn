@@ -1,6 +1,7 @@
-[gd_scene load_steps=13 format=3 uid="uid://bqx0f8kq6n4wr"]
+[gd_scene load_steps=14 format=3 uid="uid://bqx0f8kq6n4wr"]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
+[ext_resource type="Texture2D" path="res://textures/ground/naip-340732310005.png" id="2_naip"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -16,7 +17,8 @@ glow_enabled = true
 size = Vector2(520, 520)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
-albedo_color = Color(0.34, 0.49, 0.27, 1)
+albedo_color = Color(1, 1, 1, 1)
+albedo_texture = ExtResource("2_naip")
 roughness = 0.9
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]

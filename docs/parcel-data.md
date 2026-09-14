@@ -30,6 +30,8 @@ size (see the file) or waits for the orthomosaic/on-the-ground knowledge.
       specific outbuildings) — currently just size-sorted guesses
 - [ ] Replace with surveyed/orthomosaic-derived footprints once available, for
       accurate shape and placement (ML footprints are approximate)
+- [ ] Replace the NAIP ground texture with the drone-derived orthomosaic once
+      processed — NAIP is lower-resolution and possibly dated
 
 ## How the boundary polygon was obtained
 
@@ -87,6 +89,41 @@ partitioning (fast, avoids reading unrelated Parquet row groups); `ST_Intersects
 against the real parcel polygon (not just its bounding box) then excludes
 neighboring buildings. Find the current release folder name by listing
 `s3://overturemaps-us-west-2/release/` (no credentials needed).
+
+## How the ground texture was obtained
+
+Real satellite/aerial imagery for the ground plane, pulled before drone capture,
+same "headless public source now, replace with the real thing later" pattern as
+the boundary polygon and building footprints above.
+
+Source: **NAIP** (National Agriculture Imagery Program, USDA) — public domain,
+~0.6–1m resolution aerial imagery, refreshed every 2–3 years. Pulled headlessly
+from the USGS National Map's public `USGSNAIPPlus` ArcGIS `ImageServer` (no
+auth) as a single PNG export sized to match the ground plane's real-world
+extent exactly:
+
+```
+https://imagery.nationalmap.gov/arcgis/rest/services/USGSNAIPPlus/ImageServer/exportImage
+    ?bbox=<lon_min>,<lat_min>,<lon_max>,<lat_max>
+    &bboxSR=4326&imageSR=4326&size=1024,1024&format=png&f=image
+```
+
+(`gis.apfo.usda.gov`, USDA's own NAIP ImageServer, was unreachable from this
+session — the USGS National Map mirror worked instead and serves the same NAIP
+data.) The bbox was derived by inverse-projecting the ground plane's local
+meter rectangle (position + size from `main.tscn`) back through the same
+equirectangular projection used to place the boundary/buildings (D-6), so the
+image lines up with the plane 1:1 without needing to touch the plane's
+existing position/size.
+
+Saved to `project/textures/ground/naip-340732310005.png` (not `assets/orthomosaic/`
+— Godot's `res://` can't reach outside `project/`, see D-7) and applied as
+`albedo_texture` on the ground plane's material in `main.tscn`.
+
+Like the building footprints, this is a stand-in: real resolution is coarser
+than drone imagery and the capture date is unknown/dated, but it beats a flat
+color for getting oriented on the case map. Replace wholesale with the drone
+orthomosaic once that's processed (see `assets/orthomosaic/`).
 
 ## How this is used in the scene
 
