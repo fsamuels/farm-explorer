@@ -1,6 +1,7 @@
 # Engine Decision
 
-Status: **undecided** — leaning discussion captured below, no commitment yet.
+Status: **decided — Godot 4** (2026-09-14). See rationale below the candidate
+comparison, and the project skeleton at [`project/`](../project).
 
 ## Candidates
 
@@ -28,6 +29,28 @@ Status: **undecided** — leaning discussion captured below, no commitment yet.
 - Long-term openness to detail/realism polish — slight edge to Unity given terrain/sim track record
 - No cost sensitivity stated yet, but Godot's zero-licensing-ever is a clean tiebreaker if other factors are close
 
+## Decision
+
+**Godot**, chosen over Unity and Unreal.
+
+- Unreal has the strongest out-of-the-box photorealism ceiling (Lumen, Nanite,
+  native Quixel Megascans), but its overhead — heaviest local install, GUI-only
+  Blueprint workflow, steepest learning curve — is the wrong tradeoff given real
+  risk of losing momentum on this project before it produces anything visible.
+- Not pursuing full photorealism (see README non-goals), which removes Unreal's
+  main advantage and narrows the Godot/Unity gap on visual ceiling.
+- Godot's project files (`.tscn` scenes, `.gd` scripts) are plain text, unlike
+  Unity's fragile-to-hand-edit YAML or Unreal's binary/visual Blueprints. That
+  makes Godot the only one of the three where a Claude Code cloud session can
+  meaningfully contribute — writing scenes, scripts, and logic as text — between
+  local sessions, which matters given the motivation-risk above.
+- Zero licensing cost is irrelevant here (no monetization plan) but was a clean
+  tiebreaker if other factors were close; they weren't — iteration speed and
+  cloud-session compatibility settled it.
+- Terrain/3D tooling is less battle-tested at scale than Unity's, but this
+  project's terrain needs (Phase 1) are modest relative to a AAA open world.
+
 ## Next step
 
-Revisit once Phase 0 (drone data) is in hand — actual terrain import experiments in both engines with real data may settle this faster than further comparison.
+Terrain import experiments in Godot with real drone/orthomosaic data (Phase 0/1
+of the implementation plan) once that data is captured.

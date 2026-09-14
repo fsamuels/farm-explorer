@@ -19,11 +19,11 @@ in that repo).
   per the standard's own threshold.
 - **No link checker yet** — docs don't meaningfully cross-reference each other yet.
   Add one (per `documentation.md#link-integrity-is-enforced-not-hoped-for`) once they do.
-- **Engine and package manager are undecided** — see
-  [`docs/engine-decision.md`](docs/engine-decision.md). The standard's skills
-  (`/sdlc:new-branch`, `/sdlc:create-pr`) don't yet know this project's build/lint/test
-  commands; `create-pr`'s Checks section will say "Skipped — no build tooling yet"
-  until an engine is chosen.
+- **Engine is Godot 4** — see [`docs/engine-decision.md`](docs/engine-decision.md).
+  No build/lint/test tooling is wired up yet (no CI, no headless-export check); the
+  standard's skills (`/sdlc:new-branch`, `/sdlc:create-pr`) still don't know this
+  project's commands, so `create-pr`'s Checks section will keep saying "Skipped —
+  no build tooling yet" until that's added.
 
 ## Where the process differs from this repo's day-to-day
 
