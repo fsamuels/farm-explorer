@@ -1,0 +1,19 @@
+# Raw drone captures — large, keep out of git until an LFS/storage decision is made
+assets/drone-source/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Godot (if selected)
+.godot/
+*.import
+
+# Unity (if selected)
+Library/
+Temp/
+Obj/
+Build/
+Logs/
+*.csproj
+*.sln
