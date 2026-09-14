@@ -6,7 +6,10 @@ and light gameplay — in that order.
 
 ## Status
 
-Pre-engine-selection. See [docs/implementation-plan.md](docs/implementation-plan.md).
+Engine chosen: Godot 4 (see [docs/engine-decision.md](docs/engine-decision.md)).
+Project skeleton is in [`project/`](project) — a walkable first-person controller
+on a placeholder ground plane, ready for real terrain (Phase 1). See
+[docs/implementation-plan.md](docs/implementation-plan.md).
 
 ## Goals (priority order)
 
