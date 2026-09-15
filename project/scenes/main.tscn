@@ -307,7 +307,7 @@ surface_material_override/0 = SubResource("StandardMaterial3D_building")
 shape = SubResource("BoxShape3D_building_unit")
 
 [node name="Player" type="CharacterBody3D" parent="."]
-position = Vector3(0, 1, 5)
+position = Vector3(248.9, 1, -86.3)
 script = ExtResource("1_player")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
