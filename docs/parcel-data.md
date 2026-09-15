@@ -165,3 +165,16 @@ and projecting it into the same local coordinate frame as the boundary/
 buildings, then locating the closest boundary edge to the road and offsetting
 ~15m inward (clear of every building). Facing direction was set by hand in
 the editor afterward.
+
+### Fence segment transforms were fixed after being originally computed skewed
+
+Each fence segment's transform (D-6) encodes its length along whichever of the
+box's local X/Z axes is longer, and its ~0.15m thickness along the other. When
+the boundary data first went in, that thickness axis wasn't actually
+perpendicular to the length axis for any of the 13 segments — several were
+close enough to look right, but two (originally `Fence_10` and `Fence_13`)
+were skewed almost to the point of collapsing into a flat sliver in the ground
+plane. Re-derived directly from each segment's own length axis (rotate it 90°
+in the XZ plane, normalize, keep everything else — position, length, and
+height — unchanged), so every segment is now a proper straight rectangular
+rail rather than a sheared parallelogram.
