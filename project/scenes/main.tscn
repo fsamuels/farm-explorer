@@ -9,6 +9,9 @@
 [ext_resource type="PackedScene" path="res://scenes/coyote.tscn" id="7_coyote_scene"]
 [ext_resource type="PackedScene" path="res://scenes/tree_line_segment.tscn" id="8_tree_line_scene"]
 [ext_resource type="PackedScene" path="res://scenes/minimap.tscn" id="9_minimap_scene"]
+[ext_resource type="PackedScene" path="res://scenes/duck_mallard.tscn" id="10_mallard_scene"]
+[ext_resource type="PackedScene" path="res://scenes/duck_poly.tscn" id="11_duck_poly_scene"]
+[ext_resource type="PackedScene" path="res://scenes/duck_madtroll.tscn" id="12_duck_madtroll_scene"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -188,6 +191,15 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, -10)
 
 [node name="Coyote" parent="." instance=ExtResource("7_coyote_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70, 0, 140)
+
+[node name="MallardDuck" parent="." instance=ExtResource("10_mallard_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.144, 0, -20.103)
+
+[node name="Duck1" parent="." instance=ExtResource("11_duck_poly_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.5, 0, -23)
+
+[node name="Duck2" parent="." instance=ExtResource("12_duck_madtroll_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.5, 0, -17)
 
 [node name="Player" parent="." unique_id=1542815032 instance=ExtResource("2_player_scene")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 247.9, 1, -41.300003)

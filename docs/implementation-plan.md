@@ -50,6 +50,7 @@ recognizable, shareable version.
 - [x] Simple wander/movement AI — done ahead of the plan's stated ordering, at the user's request; picks a random point within a radius of its home position, walks to it, idles, repeats (`scripts/horse.gd`, generalized as `scripts/wander.gd` for the animals below)
 - [x] A loose flock (6 hens + 1 rooster, CC-BY — see D-10 and [docs/credits.md](credits.md)) that wanders the farmyard together — each bird micro-wanders near a shared, slower-wandering flock center, so the group drifts as a unit without moving in lockstep
 - [x] One coyote (CC-BY, same source) wandering a fixed area in the back section of the property, away from the horse and flock
+- [x] 3 ducks (CC-BY — see D-15 and [docs/credits.md](credits.md)) wandering independently near the Back Barn
 
 ## Phase 6 — Chores / gameplay (lowest priority)
 
