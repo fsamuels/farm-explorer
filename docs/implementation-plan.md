@@ -50,7 +50,10 @@ recognizable, shareable version.
 - [x] Simple wander/movement AI — done ahead of the plan's stated ordering, at the user's request; picks a random point within a radius of its home position, walks to it, idles, repeats (`scripts/horse.gd`, generalized as `scripts/wander.gd` for the animals below)
 - [x] A loose flock (6 hens + 1 rooster, CC-BY — see D-10 and [docs/credits.md](credits.md)) that wanders the farmyard together — each bird micro-wanders near a shared, slower-wandering flock center, so the group drifts as a unit without moving in lockstep
 - [x] One coyote (CC-BY, same source) wandering a fixed area in the back section of the property, away from the horse and flock
-- [x] 3 ducks (CC-BY — see D-15 and [docs/credits.md](credits.md)) wandering independently near the Back Barn
+- [x] 3 ducks (CC-BY — see D-15/D-17 and [docs/credits.md](credits.md)) wandering independently south of the Back Barn
+- [x] 10 geese (CC-BY, same source — see D-16) in their own cluster ~30m south of the ducks
+- [x] 6 quail (CC-BY, same source — see D-17) wandering near the player's spawn point
+- Known issue, not yet fixed: the horse (D-9) is ~6.9m tall in the scene — `horse.tscn` applies no scale correction to `models/horse.glb` at all, and D-17's engine-verified AABB check (added after a duck turned out similarly oversized) confirms it. Flagged for the user to decide on; every other animal has been re-verified and is correctly scaled
 
 ## Phase 6 — Chores / gameplay (lowest priority)
 

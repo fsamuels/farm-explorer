@@ -12,6 +12,8 @@
 [ext_resource type="PackedScene" path="res://scenes/duck_mallard.tscn" id="10_mallard_scene"]
 [ext_resource type="PackedScene" path="res://scenes/duck_poly.tscn" id="11_duck_poly_scene"]
 [ext_resource type="PackedScene" path="res://scenes/duck_madtroll.tscn" id="12_duck_madtroll_scene"]
+[ext_resource type="PackedScene" path="res://scenes/goose.tscn" id="13_goose_scene"]
+[ext_resource type="PackedScene" path="res://scenes/quail.tscn" id="14_quail_scene"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -193,13 +195,61 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, -10)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70, 0, 140)
 
 [node name="MallardDuck" parent="." instance=ExtResource("10_mallard_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -35.144, 0, -20.103)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.856, 0, 29.897)
 
 [node name="Duck1" parent="." instance=ExtResource("11_duck_poly_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32.5, 0, -23)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.5, 0, 27)
 
 [node name="Duck2" parent="." instance=ExtResource("12_duck_madtroll_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -37.5, 0, -17)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.5, 0, 33)
+
+[node name="Goose1" parent="." instance=ExtResource("13_goose_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.856, 0, 56.5)
+
+[node name="Goose2" parent="." instance=ExtResource("13_goose_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.856, 0, 58)
+
+[node name="Goose3" parent="." instance=ExtResource("13_goose_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.856, 0, 56)
+
+[node name="Goose4" parent="." instance=ExtResource("13_goose_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.856, 0, 57.5)
+
+[node name="Goose5" parent="." instance=ExtResource("13_goose_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.856, 0, 57)
+
+[node name="Goose6" parent="." instance=ExtResource("13_goose_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.856, 0, 63)
+
+[node name="Goose7" parent="." instance=ExtResource("13_goose_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.856, 0, 61.5)
+
+[node name="Goose8" parent="." instance=ExtResource("13_goose_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.856, 0, 64)
+
+[node name="Goose9" parent="." instance=ExtResource("13_goose_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.856, 0, 62.5)
+
+[node name="Goose10" parent="." instance=ExtResource("13_goose_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.856, 0, 62)
+
+[node name="Quail1" parent="." instance=ExtResource("14_quail_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 241.4, 0, -36.3)
+
+[node name="Quail2" parent="." instance=ExtResource("14_quail_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 238.7, 0, -34.8)
+
+[node name="Quail3" parent="." instance=ExtResource("14_quail_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240.7, 0, -38.1)
+
+[node name="Quail4" parent="." instance=ExtResource("14_quail_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 238.1, 0, -37.2)
+
+[node name="Quail5" parent="." instance=ExtResource("14_quail_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 242.1, 0, -35)
+
+[node name="Quail6" parent="." instance=ExtResource("14_quail_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 239.3, 0, -34.3)
 
 [node name="Player" parent="." unique_id=1542815032 instance=ExtResource("2_player_scene")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 247.9, 1, -41.300003)

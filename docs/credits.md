@@ -14,3 +14,5 @@ CC0 assets (e.g. the horse model, see D-9 in
 | Mallard duck (`project/models/mallard_duck.glb`) | Poly by Google | [poly.pizza/m/frSLi6b6Vid](https://poly.pizza/m/frSLi6b6Vid) | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
 | Duck (`project/models/duck_poly.glb`) | Poly by Google | [poly.pizza/m/6HpauUCfIAb](https://poly.pizza/m/6HpauUCfIAb) | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
 | Duck (`project/models/duck_madtroll.glb`) | madtrollstudio | [poly.pizza/m/4plJcFXhim](https://poly.pizza/m/4plJcFXhim) | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
+| Lesser snow goose (`project/models/goose.glb`) | Poly by Google | [poly.pizza/m/5d10ZQ9QzuS](https://poly.pizza/m/5d10ZQ9QzuS) | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
+| Quail (`project/models/quail.glb`) | Poly by Google | [poly.pizza/m/4A0kLzM65Mg](https://poly.pizza/m/4A0kLzM65Mg) | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |

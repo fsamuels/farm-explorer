@@ -34,23 +34,27 @@ farm-sim/
     │   ├── minimap.tscn           # corner HUD: NAIP texture + rotating player marker — see D-13
     │   ├── duck_mallard.tscn      # wraps models/mallard_duck.glb with wander.gd, instanced once
     │   ├── duck_poly.tscn         # wraps models/duck_poly.glb with wander.gd, instanced once
-    │   └── duck_madtroll.tscn     # wraps models/duck_madtroll.glb with wander.gd, instanced once
+    │   ├── duck_madtroll.tscn     # wraps models/duck_madtroll.glb with wander.gd, instanced once
+    │   ├── goose.tscn             # wraps models/goose.glb with wander.gd, instanced 10x
+    │   └── quail.tscn             # wraps models/quail.glb with wander.gd, instanced 6x
     ├── scripts/
     │   ├── player.gd             # first-person walking controller
     │   ├── horse.gd               # horse-specific wander AI (drives its own AnimationPlayer)
-    │   ├── wander.gd              # generic no-animation wander AI, reused by hen/rooster/flock/coyote/ducks
+    │   ├── wander.gd              # generic no-animation wander AI, reused by hen/rooster/flock/coyote/ducks/geese/quail
     │   ├── fence_segment.gd       # @tool script: builds posts+wire strands from an exported length — see D-11
     │   ├── tree_line_segment.gd   # @tool script: scatters trees + one invisible collision wall from an exported length — see D-11
     │   └── minimap.gd             # maps player world position onto the NAIP texture — see D-13
     ├── models/
-    │   ├── horse.glb              # CC0 rigged/animated horse (Quaternius) — see D-9
+    │   ├── horse.glb              # CC0 rigged/animated horse (Quaternius) — see D-9; scale not yet fixed, see D-17
     │   ├── hen.glb                 # CC-BY static mesh (Poly by Google) — see D-10, credits.md
     │   ├── rooster.glb             # CC-BY static mesh (Poly by Google) — see D-10, credits.md
     │   ├── coyote.glb              # CC-BY static mesh (Poly by Google) — see D-10, credits.md
     │   ├── tree.glb                # CC0 static mesh (Quaternius) — see D-11
     │   ├── mallard_duck.glb        # CC-BY static mesh (Poly by Google) — see D-15, credits.md
-    │   ├── duck_poly.glb           # CC-BY static mesh (Poly by Google) — see D-15, credits.md
-    │   └── duck_madtroll.glb       # CC-BY static mesh (madtrollstudio) — see D-15, credits.md
+    │   ├── duck_poly.glb           # CC-BY static mesh (Poly by Google) — see D-15/D-17, credits.md
+    │   ├── duck_madtroll.glb       # CC-BY static mesh (madtrollstudio) — see D-15/D-17, credits.md
+    │   ├── goose.glb               # CC-BY static mesh (Poly by Google) — see D-16, credits.md
+    │   └── quail.glb               # CC-BY static mesh (Poly by Google) — see D-17, credits.md
     └── textures/
         └── ground/                # ground textures actually loaded by the scene (res://) —
                                      # NAIP imagery for now, replaced by the orthomosaic later
