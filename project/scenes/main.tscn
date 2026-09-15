@@ -1,13 +1,13 @@
-[gd_scene load_steps=13 format=3 uid="uid://bqx0f8kq6n4wr"]
+[gd_scene format=3 uid="uid://bqx0f8kq6n4wr"]
 
-[ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
+[ext_resource type="Script" uid="uid://7bmhp2guvx81" path="res://scripts/player.gd" id="1_player"]
+[ext_resource type="Texture2D" uid="uid://bbg0cdl2pcrfw" path="res://textures/ground/naip-340732310005.png" id="2_naip"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
 background_color = Color(0.55, 0.75, 0.95, 1)
 ambient_light_source = 2
 ambient_light_color = Color(0.6, 0.65, 0.7, 1)
-ambient_light_energy = 1.0
 tonemap_mode = 2
 ssao_enabled = true
 glow_enabled = true
@@ -16,15 +16,11 @@ glow_enabled = true
 size = Vector2(520, 520)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
-albedo_color = Color(0.34, 0.49, 0.27, 1)
+albedo_texture = ExtResource("2_naip")
 roughness = 0.9
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(520, 1, 520)
-
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
-radius = 0.4
-height = 1.8
 
 [sub_resource type="BoxMesh" id="BoxMesh_fence_unit"]
 size = Vector3(1, 1.2, 0.15)
@@ -33,287 +29,256 @@ size = Vector3(1, 1.2, 0.15)
 albedo_color = Color(0.35, 0.25, 0.15, 1)
 roughness = 0.95
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_fence_unit"]
+size = Vector3(1, 1.2, 0.15)
+
 [sub_resource type="BoxMesh" id="BoxMesh_building_unit"]
-size = Vector3(1, 1, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_building"]
 albedo_color = Color(0.6, 0.55, 0.5, 1)
 roughness = 0.9
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_fence_unit"]
-size = Vector3(1, 1.2, 0.15)
-
 [sub_resource type="BoxShape3D" id="BoxShape3D_building_unit"]
-size = Vector3(1, 1, 1)
 
-[node name="Main" type="Node3D"]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
+radius = 0.4
+height = 1.8
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="Main" type="Node3D" unique_id=1543512396]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=396802267]
 environment = SubResource("Environment_main")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-position = Vector3(0, 10, 0)
-rotation_degrees = Vector3(-45, -30, 0)
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1808052382]
+transform = Transform3D(0.8660254, 0.35355338, -0.35355338, 0, 0.70710677, 0.70710677, 0.5, -0.6123724, 0.6123724, 0, 10, 0)
 shadow_enabled = true
 
-[node name="Ground" type="StaticBody3D" parent="."]
-position = Vector3(49.4, 0, -33.7)
+[node name="Ground" type="StaticBody3D" parent="." unique_id=857981195]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.4, 0, -33.7)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=1723483374]
 mesh = SubResource("PlaneMesh_ground")
 surface_material_override/0 = SubResource("StandardMaterial3D_ground")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
-position = Vector3(0, -0.5, 0)
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=1549683488]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 shape = SubResource("BoxShape3D_ground")
 
-[node name="Boundary" type="Node3D" parent="."]
+[node name="Boundary" type="Node3D" parent="." unique_id=1103627573]
 
-[node name="Fence_01" type="StaticBody3D" parent="Boundary"]
-position = Vector3(-67.244, 0.6, -141.910)
-rotation_degrees = Vector3(0, -89.792, 0)
-scale = Vector3(173.829, 1, 1)
+[node name="Fence_01" type="StaticBody3D" parent="Boundary" unique_id=470692083]
+transform = Transform3D(0.63105977, 0, -0.9999934, 0, 1, 0, 173.82785, 0, 0.003630348, -67.244, 0.6, -141.91)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_01"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_01" unique_id=1138363714]
 mesh = SubResource("BoxMesh_fence_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_fence")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_01"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_01" unique_id=162010114]
 shape = SubResource("BoxShape3D_fence_unit")
 
-[node name="Fence_02" type="StaticBody3D" parent="Boundary"]
-position = Vector3(37.477, 0.6, -56.021)
-rotation_degrees = Vector3(0, 0.562, 0)
-scale = Vector3(208.823, 1, 1)
+[node name="Fence_02" type="StaticBody3D" parent="Boundary" unique_id=313624424]
+transform = Transform3D(208.81296, 0, 0.0098085925, 0, 1, 0, -2.0482597, 0, 0.9999519, 37.477, 0.6, -56.021)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_02"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_02" unique_id=1333320785]
 mesh = SubResource("BoxMesh_fence_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_fence")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_02"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_02" unique_id=1491853]
 shape = SubResource("BoxShape3D_fence_unit")
 
-[node name="Fence_03" type="StaticBody3D" parent="Boundary"]
-position = Vector3(142.017, 0.6, -73.151)
-rotation_degrees = Vector3(0, 89.526, 0)
-scale = Vector3(32.213, 1, 1)
+[node name="Fence_03" type="StaticBody3D" parent="Boundary" unique_id=237681165]
+transform = Transform3D(0.26649004, 0, 0.9999658, 0, 1, 0, -32.2119, 0, 0.008272748, 142.017, 0.6, -73.151)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_03"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_03" unique_id=1899199136]
 mesh = SubResource("BoxMesh_fence_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_fence")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_03"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_03" unique_id=1354862895]
 shape = SubResource("BoxShape3D_fence_unit")
 
-[node name="Fence_04" type="StaticBody3D" parent="Boundary"]
-position = Vector3(202.939, 0.6, -89.463)
-rotation_degrees = Vector3(0, 0.195, 0)
-scale = Vector3(121.579, 1, 1)
+[node name="Fence_04" type="StaticBody3D" parent="Boundary" unique_id=1816111974]
+transform = Transform3D(121.5783, 0, 0.0034033854, 0, 1, 0, -0.4137802, 0, 0.9999942, 202.939, 0.6, -89.463)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_04"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_04" unique_id=1640516822]
 mesh = SubResource("BoxMesh_fence_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_fence")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_04"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_04" unique_id=77303065]
 shape = SubResource("BoxShape3D_fence_unit")
 
-[node name="Fence_05" type="StaticBody3D" parent="Boundary"]
-position = Vector3(263.879, 0.6, -87.278)
-rotation_degrees = Vector3(0, -86.416, 0)
-scale = Vector3(4.793, 1, 1)
+[node name="Fence_05" type="StaticBody3D" parent="Boundary" unique_id=1529950090]
+transform = Transform3D(0.29961938, 0, -0.9980442, 0, 1, 0, 4.783626, 0, 0.06251186, 263.879, 0.6, -87.278)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_05"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_05" unique_id=1231652170]
 mesh = SubResource("BoxMesh_fence_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_fence")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_05"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_05" unique_id=1525535699]
 shape = SubResource("BoxShape3D_fence_unit")
 
-[node name="Fence_06" type="StaticBody3D" parent="Boundary"]
-position = Vector3(264.065, 0.6, -82.490)
-rotation_degrees = Vector3(0, -89.131, 0)
-scale = Vector3(4.793, 1, 1)
+[node name="Fence_06" type="StaticBody3D" parent="Boundary" unique_id=1028711314]
+transform = Transform3D(0.07269243, 0, -0.99988496, 0, 1, 0, 4.792449, 0, 0.015166373, 264.065, 0.6, -82.49)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_06"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_06" unique_id=1903791039]
 mesh = SubResource("BoxMesh_fence_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_fence")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_06"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_06" unique_id=488858512]
 shape = SubResource("BoxShape3D_fence_unit")
 
-[node name="Fence_07" type="StaticBody3D" parent="Boundary"]
-position = Vector3(263.473, 0.6, -4.432)
-rotation_degrees = Vector3(0, -90.475, 0)
-scale = Vector3(151.328, 1, 1)
+[node name="Fence_07" type="StaticBody3D" parent="Boundary" unique_id=2064254644]
+transform = Transform3D(-1.2545455, 0, -0.9999656, 0, 1, 0, 151.3228, 0, -0.00829024, 263.473, 0.6, -4.432)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_07"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_07" unique_id=58866994]
 mesh = SubResource("BoxMesh_fence_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_fence")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_07"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_07" unique_id=690826869]
 shape = SubResource("BoxShape3D_fence_unit")
 
-[node name="Fence_08" type="StaticBody3D" parent="Boundary"]
-position = Vector3(148.869, 0.6, 71.540)
-rotation_degrees = Vector3(0, -179.843, 0)
-scale = Vector3(227.955, 1, 1)
+[node name="Fence_08" type="StaticBody3D" parent="Boundary" unique_id=94155385]
+transform = Transform3D(-227.95415, 0, -0.002740054, 0, 1, 0, 0.624609, 0, -0.99999624, 148.869, 0.6, 71.54)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_08"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_08" unique_id=769309943]
 mesh = SubResource("BoxMesh_fence_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_fence")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_08"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_08" unique_id=644763671]
 shape = SubResource("BoxShape3D_fence_unit")
 
-[node name="Fence_09" type="StaticBody3D" parent="Boundary"]
-position = Vector3(35.012, 0.6, 112.830)
-rotation_degrees = Vector3(0, -89.832, 0)
-scale = Vector3(81.956, 1, 1)
+[node name="Fence_09" type="StaticBody3D" parent="Boundary" unique_id=2103075247]
+transform = Transform3D(0.2403067, 0, -0.9999957, 0, 1, 0, 81.95565, 0, 0.002932143, 35.012, 0.6, 112.83)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_09"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_09" unique_id=1340478628]
 mesh = SubResource("BoxMesh_fence_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_fence")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_09"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_09" unique_id=520565883]
 shape = SubResource("BoxShape3D_fence_unit")
 
-[node name="Fence_10" type="StaticBody3D" parent="Boundary"]
-position = Vector3(-24.798, 0.6, 168.726)
-rotation_degrees = Vector3(0, -166.021, 0)
-scale = Vector3(123.518, 1, 1)
+[node name="Fence_10" type="StaticBody3D" parent="Boundary" unique_id=151408184]
+transform = Transform3D(-119.859924, 0, -0.24156627, 0, 1, 0, 29.837782, 0, -0.9703843, -24.798, 0.6, 168.726)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_10"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_10" unique_id=1904688710]
 mesh = SubResource("BoxMesh_fence_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_fence")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_10"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_10" unique_id=76297718]
 shape = SubResource("BoxShape3D_fence_unit")
 
-[node name="Fence_11" type="StaticBody3D" parent="Boundary"]
-position = Vector3(-124.239, 0.6, 183.781)
-rotation_degrees = Vector3(0, -179.802, 0)
-scale = Vector3(79.023, 1, 1)
+[node name="Fence_11" type="StaticBody3D" parent="Boundary" unique_id=676505868]
+transform = Transform3D(-79.02253, 0, -0.003455783, 0, 1, 0, 0.27308634, 0, -0.99999404, -124.239, 0.6, 183.781)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_11"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_11" unique_id=1803455644]
 mesh = SubResource("BoxMesh_fence_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_fence")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_11"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_11" unique_id=162626585]
 shape = SubResource("BoxShape3D_fence_unit")
 
-[node name="Fence_12" type="StaticBody3D" parent="Boundary"]
-position = Vector3(-164.542, 0.6, -33.684)
-rotation_degrees = Vector3(0, 90.208, 0)
-scale = Vector3(435.206, 1, 1)
+[node name="Fence_12" type="StaticBody3D" parent="Boundary" unique_id=688933142]
+transform = Transform3D(-1.5799353, 0, 0.9999934, 0, 1, 0, -435.20313, 0, -0.0036303161, -164.542, 0.6, -33.684)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_12"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_12" unique_id=1348626386]
 mesh = SubResource("BoxMesh_fence_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_fence")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_12"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_12" unique_id=1588568924]
 shape = SubResource("BoxShape3D_fence_unit")
 
-[node name="Fence_13" type="StaticBody3D" parent="Boundary"]
-position = Vector3(-116.446, 0.6, -240.054)
-rotation_degrees = Vector3(0, -12.938, 0)
-scale = Vector3(100.321, 1, 1)
+[node name="Fence_13" type="StaticBody3D" parent="Boundary" unique_id=1371365451]
+transform = Transform3D(97.77414, 0, -0.22389655, 0, 1, 0, 22.461525, 0, 0.9746129, -116.446, 0.6, -240.054)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_13"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Boundary/Fence_13" unique_id=197393980]
 mesh = SubResource("BoxMesh_fence_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_fence")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_13"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Boundary/Fence_13" unique_id=949037775]
 shape = SubResource("BoxShape3D_fence_unit")
 
-[node name="Buildings" type="Node3D" parent="."]
+[node name="Buildings" type="Node3D" parent="." unique_id=1252522290]
 
-[node name="Building_01" type="StaticBody3D" parent="Buildings"]
-position = Vector3(57.757, 2.274, -32.824)
-scale = Vector3(23.218, 4.549, 30.223)
+[node name="Building_01" type="StaticBody3D" parent="Buildings" unique_id=2007507242]
+transform = Transform3D(23.218, 0, 0, 0, 4.549, 0, 0, 0, 30.223, 57.757, 2.274, -32.824)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Buildings/Building_01"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Buildings/Building_01" unique_id=1896072722]
 mesh = SubResource("BoxMesh_building_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_building")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/Building_01"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/Building_01" unique_id=68764602]
 shape = SubResource("BoxShape3D_building_unit")
 
-[node name="Building_02" type="StaticBody3D" parent="Buildings"]
-position = Vector3(204.827, 1.960, -52.205)
-scale = Vector3(14.874, 3.920, 9.807)
+[node name="Building_02" type="StaticBody3D" parent="Buildings" unique_id=551660356]
+transform = Transform3D(14.874, 0, 0, 0, 3.92, 0, 0, 0, 9.807, 204.827, 1.96, -52.205)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Buildings/Building_02"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Buildings/Building_02" unique_id=915670556]
 mesh = SubResource("BoxMesh_building_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_building")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/Building_02"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/Building_02" unique_id=1713701201]
 shape = SubResource("BoxShape3D_building_unit")
 
-[node name="Building_03" type="StaticBody3D" parent="Buildings"]
-position = Vector3(212.449, 2.000, -29.044)
-scale = Vector3(19.914, 4.000, 8.451)
+[node name="Building_03" type="StaticBody3D" parent="Buildings" unique_id=566728455]
+transform = Transform3D(19.914, 0, 0, 0, 4, 0, 0, 0, 8.451, 212.449, 2, -29.044)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Buildings/Building_03"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Buildings/Building_03" unique_id=166868058]
 mesh = SubResource("BoxMesh_building_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_building")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/Building_03"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/Building_03" unique_id=992452307]
 shape = SubResource("BoxShape3D_building_unit")
 
-[node name="Building_04" type="StaticBody3D" parent="Buildings"]
-position = Vector3(14.856, 2.000, -20.103)
-scale = Vector3(12.674, 4.000, 13.899)
+[node name="Building_04" type="StaticBody3D" parent="Buildings" unique_id=165542555]
+transform = Transform3D(12.674, 0, 0, 0, 4, 0, 0, 0, 13.899, 14.856, 2, -20.103)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Buildings/Building_04"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Buildings/Building_04" unique_id=1204809043]
 mesh = SubResource("BoxMesh_building_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_building")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/Building_04"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/Building_04" unique_id=1998070710]
 shape = SubResource("BoxShape3D_building_unit")
 
-[node name="Building_05" type="StaticBody3D" parent="Buildings"]
-position = Vector3(152.227, 2.000, 28.533)
-scale = Vector3(4.739, 4.000, 7.583)
+[node name="Building_05" type="StaticBody3D" parent="Buildings" unique_id=1936705934]
+transform = Transform3D(4.739, 0, 0, 0, 4, 0, 0, 0, 7.583, 152.227, 2, 28.533)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Buildings/Building_05"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Buildings/Building_05" unique_id=1744048269]
 mesh = SubResource("BoxMesh_building_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_building")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/Building_05"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/Building_05" unique_id=2092036256]
 shape = SubResource("BoxShape3D_building_unit")
 
-[node name="Building_06" type="StaticBody3D" parent="Buildings"]
-position = Vector3(146.064, 2.000, 49.888)
-scale = Vector3(14.812, 4.000, 23.117)
+[node name="Building_06" type="StaticBody3D" parent="Buildings" unique_id=950069576]
+transform = Transform3D(14.812, 0, 0, 0, 4, 0, 0, 0, 23.117, 146.064, 2, 49.888)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Buildings/Building_06"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Buildings/Building_06" unique_id=1340432159]
 mesh = SubResource("BoxMesh_building_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_building")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/Building_06"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/Building_06" unique_id=1611466324]
 shape = SubResource("BoxShape3D_building_unit")
 
-[node name="Building_07" type="StaticBody3D" parent="Buildings"]
-position = Vector3(193.442, 2.000, 17.558)
-scale = Vector3(4.871, 4.000, 7.806)
+[node name="Building_07" type="StaticBody3D" parent="Buildings" unique_id=538561230]
+transform = Transform3D(4.871, 0, 0, 0, 4, 0, 0, 0, 7.806, 193.442, 2, 17.558)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Buildings/Building_07"]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Buildings/Building_07" unique_id=1158877225]
 mesh = SubResource("BoxMesh_building_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_building")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/Building_07"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Buildings/Building_07" unique_id=879822968]
 shape = SubResource("BoxShape3D_building_unit")
 
-[node name="Player" type="CharacterBody3D" parent="."]
-position = Vector3(0, 1, 5)
+[node name="Player" type="CharacterBody3D" parent="." unique_id=1744160147]
+position = Vector3(247.9, 1, -41.300003)
+rotation_degrees = Vector3(0, 90, 0)
 script = ExtResource("1_player")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
-position = Vector3(0, 0.9, 0)
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player" unique_id=537017477]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("CapsuleShape3D_player")
 
-[node name="Head" type="Node3D" parent="Player"]
-position = Vector3(0, 1.6, 0)
+[node name="Head" type="Node3D" parent="Player" unique_id=1269251185]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
 
-[node name="Camera3D" type="Camera3D" parent="Player/Head"]
+[node name="Camera3D" type="Camera3D" parent="Player/Head" unique_id=1609087759]
 current = true
