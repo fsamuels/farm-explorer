@@ -146,6 +146,12 @@ this section used to describe is gone, superseded now that real boundary and
 building data are both available (see D-3, D-5 in
 [decisions.md](project/decisions.md)).
 
+Each fence segment and building is an **instance of a shared scene**
+(`scenes/fence_segment.tscn`, `scenes/building.tscn`) rather than an inline
+node subtree in `main.tscn` — only the per-instance `transform` (position,
+rotation, non-uniform scale) lives in `main.tscn` itself (see D-8). The player
+is likewise its own `scenes/player.tscn`, instanced once.
+
 The player's spawn point (`Player` node in `main.tscn`) sits just inside the
 parcel boundary near where the property actually fronts **Lowden-Gardena
 Road**, rather than at the parcel's centroid — found by pulling the road's
