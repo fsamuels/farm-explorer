@@ -19,7 +19,10 @@ farm-sim/
     ├── project.godot             # engine config, input map (WASD + mouse look)
     ├── icon.svg
     ├── scenes/
-    │   └── main.tscn             # ground plane (NAIP-textured) + boundary/buildings + player
+    │   ├── main.tscn             # ground plane (NAIP-textured) + instances the scenes below
+    │   ├── player.tscn           # first-person player, instanced once in main.tscn
+    │   ├── fence_segment.tscn    # one unit fence segment, instanced 13x (boundary polygon)
+    │   └── building.tscn         # one unit building box, instanced 7x (footprint placeholders)
     ├── scripts/
     │   └── player.gd             # first-person walking controller
     └── textures/

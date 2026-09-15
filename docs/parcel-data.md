@@ -20,16 +20,21 @@ matched closely (24.06 vs. 24.01 acres, rounding from a bounding estimate).
 
 The building footprints are **ML-derived approximations, not surveyed data** —
 good enough for Phase 2 blockout positioning/rough scale, but expect shape and
-placement to be off by some margin. They aren't attributed to specific
-structures (house vs. barn vs. shed) — that's a judgment call from footprint
-size (see the file) or waits for the orthomosaic/on-the-ground knowledge.
+placement to be off by some margin. Each is now named after the real
+structure it represents (House, Shop, Sally's House, Back Barn, Front Barn,
+Turn Out Shed 1, Turn Out Shed 2 — see the scene node names in `main.tscn`),
+based on on-the-ground knowledge rather than a footprint-size guess.
 
 ## Still needed
 
-- [ ] Attribute each of the 7 footprints to a real structure (house, barn,
-      specific outbuildings) — currently just size-sorted guesses
+- [x] Attribute each of the 7 footprints to a real structure — named in the
+      scene (House, Shop, Sally's House, Back Barn, Front Barn, Turn Out Shed 1,
+      Turn Out Shed 2) based on on-the-ground knowledge of the property, not
+      footprint size
 - [ ] Replace with surveyed/orthomosaic-derived footprints once available, for
-      accurate shape and placement (ML footprints are approximate)
+      accurate shape and placement (ML footprints are approximate) — the
+      building-to-structure mapping above should carry over even once the
+      footprint geometry itself is replaced
 - [ ] Replace the NAIP ground texture with the drone-derived orthomosaic once
       processed — NAIP is lower-resolution and possibly dated
 
@@ -145,6 +150,12 @@ orientation) and unattributed to specific structures (house/barn/shed) — see
 this section used to describe is gone, superseded now that real boundary and
 building data are both available (see D-3, D-5 in
 [decisions.md](project/decisions.md)).
+
+Each fence segment and building is an **instance of a shared scene**
+(`scenes/fence_segment.tscn`, `scenes/building.tscn`) rather than an inline
+node subtree in `main.tscn` — only the per-instance `transform` (position,
+rotation, non-uniform scale) lives in `main.tscn` itself (see D-8). The player
+is likewise its own `scenes/player.tscn`, instanced once.
 
 The player's spawn point (`Player` node in `main.tscn`) sits just inside the
 parcel boundary near where the property actually fronts **Lowden-Gardena
