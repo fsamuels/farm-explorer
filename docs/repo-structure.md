@@ -30,13 +30,15 @@ farm-sim/
     │   ├── hen.tscn               # wraps models/hen.glb with wander.gd, instanced 6x inside flock.tscn
     │   ├── rooster.tscn           # wraps models/rooster.glb with wander.gd, instanced once inside flock.tscn
     │   ├── flock.tscn             # 6 hens + 1 rooster around a shared, slower-wandering center
-    │   └── coyote.tscn            # wraps models/coyote.glb with wander.gd, instanced once
+    │   ├── coyote.tscn            # wraps models/coyote.glb with wander.gd, instanced once
+    │   └── minimap.tscn           # corner HUD: NAIP texture + rotating player marker — see D-13
     ├── scripts/
     │   ├── player.gd             # first-person walking controller
     │   ├── horse.gd               # horse-specific wander AI (drives its own AnimationPlayer)
     │   ├── wander.gd              # generic no-animation wander AI, reused by hen/rooster/flock/coyote
     │   ├── fence_segment.gd       # @tool script: builds posts+wire strands from an exported length — see D-11
-    │   └── tree_line_segment.gd   # @tool script: scatters trees + one invisible collision wall from an exported length — see D-11
+    │   ├── tree_line_segment.gd   # @tool script: scatters trees + one invisible collision wall from an exported length — see D-11
+    │   └── minimap.gd             # maps player world position onto the NAIP texture — see D-13
     ├── models/
     │   ├── horse.glb              # CC0 rigged/animated horse (Quaternius) — see D-9
     │   ├── hen.glb                 # CC-BY static mesh (Poly by Google) — see D-10, credits.md

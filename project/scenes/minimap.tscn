@@ -1,0 +1,41 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" uid="uid://bbg0cdl2pcrfw" path="res://textures/ground/naip-340732310005.png" id="1_naip"]
+[ext_resource type="Script" path="res://scripts/minimap.gd" id="2_minimap_script"]
+
+[node name="Minimap" type="CanvasLayer"]
+
+[node name="Root" type="Control" parent="."]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = -196.0
+offset_right = 196.0
+offset_bottom = -16.0
+script = ExtResource("2_minimap_script")
+
+[node name="Frame" type="Panel" parent="Root"]
+layout_mode = 0
+offset_left = -4.0
+offset_top = -4.0
+offset_right = 184.0
+offset_bottom = 184.0
+
+[node name="Map" type="Control" parent="Root"]
+layout_mode = 0
+offset_right = 180.0
+offset_bottom = 180.0
+clip_contents = true
+
+[node name="Background" type="TextureRect" parent="Root/Map"]
+layout_mode = 0
+offset_right = 180.0
+offset_bottom = 180.0
+texture = ExtResource("1_naip")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Marker" type="Polygon2D" parent="Root/Map"]
+color = Color(1, 0.15, 0.1, 1)
+polygon = PackedVector2Array(0, -6, 4, 5, -4, 5)
