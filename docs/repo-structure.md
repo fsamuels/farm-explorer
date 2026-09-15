@@ -22,7 +22,9 @@ farm-sim/
     ├── scenes/
     │   ├── main.tscn             # ground plane (NAIP-textured) + instances the scenes below
     │   ├── player.tscn           # first-person player, instanced once in main.tscn
-    │   ├── fence_segment.tscn    # one unit fence segment, instanced 13x (boundary polygon)
+    │   ├── fence_segment.tscn    # procedurally-generated wire/post fence, instanced 13x (boundary polygon) — see D-11
+    │   ├── tree_line_segment.tscn # procedurally-scattered treeline + invisible collision wall, instanced 13x, 20m outside the boundary — see D-11
+    │   ├── tree.tscn              # wraps models/tree.glb, instanced by tree_line_segment.gd
     │   ├── building.tscn         # one unit building box, instanced 7x (footprint placeholders)
     │   ├── horse.tscn            # wraps models/horse.glb with wander-AI script, instanced once
     │   ├── hen.tscn               # wraps models/hen.glb with wander.gd, instanced 6x inside flock.tscn
@@ -32,12 +34,15 @@ farm-sim/
     ├── scripts/
     │   ├── player.gd             # first-person walking controller
     │   ├── horse.gd               # horse-specific wander AI (drives its own AnimationPlayer)
-    │   └── wander.gd              # generic no-animation wander AI, reused by hen/rooster/flock/coyote
+    │   ├── wander.gd              # generic no-animation wander AI, reused by hen/rooster/flock/coyote
+    │   ├── fence_segment.gd       # @tool script: builds posts+wire strands from an exported length — see D-11
+    │   └── tree_line_segment.gd   # @tool script: scatters trees + one invisible collision wall from an exported length — see D-11
     ├── models/
     │   ├── horse.glb              # CC0 rigged/animated horse (Quaternius) — see D-9
     │   ├── hen.glb                 # CC-BY static mesh (Poly by Google) — see D-10, credits.md
     │   ├── rooster.glb             # CC-BY static mesh (Poly by Google) — see D-10, credits.md
-    │   └── coyote.glb              # CC-BY static mesh (Poly by Google) — see D-10, credits.md
+    │   ├── coyote.glb              # CC-BY static mesh (Poly by Google) — see D-10, credits.md
+    │   └── tree.glb                # CC0 static mesh (Quaternius) — see D-11
     └── textures/
         └── ground/                # ground textures actually loaded by the scene (res://) —
                                      # NAIP imagery for now, replaced by the orthomosaic later

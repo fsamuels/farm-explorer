@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/tree_line_segment.gd" id="1_tree_line_script"]
+
+[node name="TreeLineSegment" type="StaticBody3D"]
+script = ExtResource("1_tree_line_script")
