@@ -47,43 +47,43 @@ shape = SubResource("BoxShape3D_ground")
 [node name="Boundary" type="Node3D" parent="." unique_id=1203940462]
 
 [node name="Fence_01" parent="Boundary" unique_id=1160178493 instance=ExtResource("3_fence_scene")]
-transform = Transform3D(0.63105977, 0, -0.9999934, 0, 1, 0, 173.82785, 0, 0.003630348, -67.244, 0.6, -141.91)
+transform = Transform3D(2.088473e-05, 0, -1, 0, 1, 0, 173.8279, 0, 0.003630348, -67.244, 0.6, -141.91)
 
 [node name="Fence_02" parent="Boundary" unique_id=933398087 instance=ExtResource("3_fence_scene")]
-transform = Transform3D(208.81296, 0, 0.0098085925, 0, 1, 0, -2.0482597, 0, 0.9999519, 37.477, 0.6, -56.021)
+transform = Transform3D(208.813, 0, 0.009808592, 0, 1, 0, 4.69731e-05, 0, -1, 37.477, 0.6, -56.021)
 
 [node name="Fence_03" parent="Boundary" unique_id=1993268676 instance=ExtResource("3_fence_scene")]
-transform = Transform3D(0.26649004, 0, 0.9999658, 0, 1, 0, -32.2119, 0, 0.008272748, 142.017, 0.6, -73.151)
+transform = Transform3D(0.0002568227, 0, 1, 0, 1, 0, -32.2119, 0, 0.008272748, 142.017, 0.6, -73.151)
 
 [node name="Fence_04" parent="Boundary" unique_id=179225319 instance=ExtResource("3_fence_scene")]
-transform = Transform3D(121.5783, 0, 0.0034033854, 0, 1, 0, -0.4137802, 0, 0.9999942, 202.939, 0.6, -89.463)
+transform = Transform3D(121.5783, 0, 0.003403385, 0, 1, 0, 2.799336e-05, 0, -1, 202.939, 0.6, -89.463)
 
 [node name="Fence_05" parent="Boundary" unique_id=892657189 instance=ExtResource("3_fence_scene")]
-transform = Transform3D(0.29961938, 0, -0.9980442, 0, 1, 0, 4.783626, 0, 0.06251186, 263.879, 0.6, -87.278)
+transform = Transform3D(0.01306677, 0, -0.9999146, 0, 1, 0, 4.783626, 0, 0.06251186, 263.879, 0.6, -87.278)
 
 [node name="Fence_06" parent="Boundary" unique_id=1853489496 instance=ExtResource("3_fence_scene")]
-transform = Transform3D(0.07269243, 0, -0.99988496, 0, 1, 0, 4.792449, 0, 0.015166373, 264.065, 0.6, -82.49)
+transform = Transform3D(0.003164624, 0, -0.999995, 0, 1, 0, 4.792449, 0, 0.01516637, 264.065, 0.6, -82.49)
 
 [node name="Fence_07" parent="Boundary" unique_id=965184285 instance=ExtResource("3_fence_scene")]
-transform = Transform3D(-1.2545455, 0, -0.9999656, 0, 1, 0, 151.3228, 0, -0.00829024, 263.473, 0.6, -4.432)
+transform = Transform3D(-5.478513e-05, 0, -1, 0, 1, 0, 151.3228, 0, -0.00829024, 263.473, 0.6, -4.432)
 
 [node name="Fence_08" parent="Boundary" unique_id=1539968707 instance=ExtResource("3_fence_scene")]
-transform = Transform3D(-227.95415, 0, -0.002740054, 0, 1, 0, 0.624609, 0, -0.99999624, 148.869, 0.6, 71.54)
+transform = Transform3D(-227.9541, 0, -0.002740054, 0, 1, 0, -1.20202e-05, 0, 1, 148.869, 0.6, 71.54)
 
 [node name="Fence_09" parent="Boundary" unique_id=344609746 instance=ExtResource("3_fence_scene")]
-transform = Transform3D(0.2403067, 0, -0.9999957, 0, 1, 0, 81.95565, 0, 0.002932143, 35.012, 0.6, 112.83)
+transform = Transform3D(3.577719e-05, 0, -1, 0, 1, 0, 81.95565, 0, 0.002932143, 35.012, 0.6, 112.83)
 
 [node name="Fence_10" parent="Boundary" unique_id=631956847 instance=ExtResource("3_fence_scene")]
-transform = Transform3D(-119.859924, 0, -0.24156627, 0, 1, 0, 29.837782, 0, -0.9703843, -24.798, 0.6, 168.726)
+transform = Transform3D(-119.8599, 0, -0.2415663, 0, 1, 0, -0.002015401, 0, 0.999998, -24.798, 0.6, 168.726)
 
 [node name="Fence_11" parent="Boundary" unique_id=2029706735 instance=ExtResource("3_fence_scene")]
-transform = Transform3D(-79.02253, 0, -0.003455783, 0, 1, 0, 0.27308634, 0, -0.99999404, -124.239, 0.6, 183.781)
+transform = Transform3D(-79.02253, 0, -0.003455783, 0, 1, 0, -4.373162e-05, 0, 1, -124.239, 0.6, 183.781)
 
 [node name="Fence_12" parent="Boundary" unique_id=353483393 instance=ExtResource("3_fence_scene")]
-transform = Transform3D(-1.5799353, 0, 0.9999934, 0, 1, 0, -435.20313, 0, -0.0036303161, -164.542, 0.6, -33.684)
+transform = Transform3D(-8.341659e-06, 0, 1, 0, 1, 0, -435.2031, 0, -0.003630316, -164.542, 0.6, -33.684)
 
 [node name="Fence_13" parent="Boundary" unique_id=743420869 instance=ExtResource("3_fence_scene")]
-transform = Transform3D(97.77414, 0, -0.22389655, 0, 1, 0, 22.461525, 0, 0.9746129, -116.446, 0.6, -240.054)
+transform = Transform3D(97.77414, 0, -0.2238965, 0, 1, 0, -0.00228993, 0, -0.9999974, -116.446, 0.6, -240.054)
 
 [node name="Buildings" type="Node3D" parent="." unique_id=1610982085]
 
