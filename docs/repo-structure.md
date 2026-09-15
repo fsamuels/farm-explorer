@@ -22,9 +22,13 @@ farm-sim/
     │   ├── main.tscn             # ground plane (NAIP-textured) + instances the scenes below
     │   ├── player.tscn           # first-person player, instanced once in main.tscn
     │   ├── fence_segment.tscn    # one unit fence segment, instanced 13x (boundary polygon)
-    │   └── building.tscn         # one unit building box, instanced 7x (footprint placeholders)
+    │   ├── building.tscn         # one unit building box, instanced 7x (footprint placeholders)
+    │   └── horse.tscn            # wraps models/horse.glb with wander-AI script, instanced once
     ├── scripts/
-    │   └── player.gd             # first-person walking controller
+    │   ├── player.gd             # first-person walking controller
+    │   └── horse.gd               # simple wander AI (idle/walk between random points)
+    ├── models/
+    │   └── horse.glb              # CC0 rigged/animated horse (Quaternius) — see D-9
     └── textures/
         └── ground/                # ground textures actually loaded by the scene (res://) —
                                      # NAIP imagery for now, replaced by the orthomosaic later
@@ -41,4 +45,5 @@ farm-sim/
   `res://` root is the `project/` directory and can't reach outside it (no
   `res://../assets`). `assets/` stays the place for source/raw material and
   anything not directly loaded by the engine; see D-7 in
-  [decisions.md](project/decisions.md).
+  [decisions.md](project/decisions.md). The same constraint is why 3D models
+  live under `project/models/` rather than `assets/models/` — see D-9.

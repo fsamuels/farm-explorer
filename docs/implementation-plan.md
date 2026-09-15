@@ -44,8 +44,8 @@ recognizable, shareable version.
 
 ## Phase 5 — Animals
 
-- [ ] Static horse models placed in pastures
-- [ ] Simple wander/movement AI (deferred until base environment is solid)
+- [x] Static horse models placed in pastures — one CC0 rigged/animated horse model (Quaternius, see [decisions.md](project/decisions.md) D-9) placed near Turn Out Shed 1
+- [x] Simple wander/movement AI — done ahead of the plan's stated ordering, at the user's request; picks a random point within a radius of its home position, walks to it, idles, repeats (`scripts/horse.gd`)
 
 ## Phase 6 — Chores / gameplay (lowest priority)
 
