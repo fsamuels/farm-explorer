@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://scenes/flock.tscn" id="6_flock_scene"]
 [ext_resource type="PackedScene" path="res://scenes/coyote.tscn" id="7_coyote_scene"]
 [ext_resource type="PackedScene" path="res://scenes/tree_line_segment.tscn" id="8_tree_line_scene"]
+[ext_resource type="PackedScene" path="res://scenes/minimap.tscn" id="9_minimap_scene"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -105,7 +106,7 @@ length = 100.4337
 [node name="TreeLine" type="Node3D" parent="."]
 
 [node name="TreeLine_01" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(0.003621551, 0, 0.9999934, 0, 1, 0, -0.9999934, 0, 0.003621551, -87.31946, 0, -141.9967)
+transform = Transform3D(0.003621551, 0, 0.9999934, 0, 1, 0, 0.9999934, 0, -0.003621551, -47.31973, 0, -142.1416)
 length = 174.0234
 
 [node name="TreeLine_02" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
@@ -113,7 +114,7 @@ transform = Transform3D(0.9999519, 0, -0.009809674, 0, 1, 0, -0.009809674, 0, -0
 length = 209.0572
 
 [node name="TreeLine_03" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(0.008274428, 0, -0.9999658, 0, 1, 0, 0.9999658, 0, 0.008274428, 162.1754, 0, -73.06724)
+transform = Transform3D(0.008274428, 0, -0.9999658, 0, 1, 0, -0.9999658, 0, -0.008274428, 122.1768, 0, -73.39822)
 length = 32.24888
 
 [node name="TreeLine_04" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
@@ -190,3 +191,8 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70, 0, 140)
 
 [node name="Player" parent="." unique_id=1542815032 instance=ExtResource("2_player_scene")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 247.9, 1, -41.300003)
+
+[node name="Minimap" parent="." instance=ExtResource("9_minimap_scene")]
+
+[node name="Root" parent="Minimap"]
+player_path = NodePath("../../Player")
