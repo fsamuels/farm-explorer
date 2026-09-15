@@ -1,0 +1,14 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://models/rooster.glb" id="1_rooster_model"]
+[ext_resource type="Script" path="res://scripts/wander.gd" id="2_wander_script"]
+
+[node name="Rooster" type="Node3D"]
+script = ExtResource("2_wander_script")
+wander_radius = 3.0
+move_speed = 0.6
+idle_time_min = 1.0
+idle_time_max = 4.0
+
+[node name="Model" parent="." instance=ExtResource("1_rooster_model")]
+transform = Transform3D(0.19, 0, 0, 0, 0.19, 0, 0, 0, 0.19, 0, 0, 0)
