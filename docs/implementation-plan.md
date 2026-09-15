@@ -16,7 +16,7 @@ milestones — the priority is fast, visible progress toward "that's clearly the
 - [ ] Process drone photos into an orthomosaic (top-down stitched image) — tool TBD pending engine choice (e.g. WebODM, Meshroom, or engine-specific plugin)
 - [ ] Optionally process into a heightmap/DEM if photogrammetry is used
 - [ ] Import terrain into engine, scaled to match real property dimensions
-- [ ] Apply orthomosaic as terrain texture
+- [~] Apply orthomosaic as terrain texture — interim stand-in applied early: public NAIP aerial imagery textures the ground plane (see [docs/parcel-data.md](parcel-data.md)); still pending replacement with the real drone-derived orthomosaic
 - [ ] Validate scale: confirm walking speed vs. known real-world distances (e.g. barn to fence line) feels correct
 
 ## Phase 2 — Layout blockout
