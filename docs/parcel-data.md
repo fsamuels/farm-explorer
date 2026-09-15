@@ -145,3 +145,12 @@ orientation) and unattributed to specific structures (house/barn/shed) — see
 this section used to describe is gone, superseded now that real boundary and
 building data are both available (see D-3, D-5 in
 [decisions.md](project/decisions.md)).
+
+The player's spawn point (`Player` node in `main.tscn`) sits just inside the
+parcel boundary near where the property actually fronts **Lowden-Gardena
+Road**, rather than at the parcel's centroid — found by pulling the road's
+real geometry from OpenStreetMap (Overpass API, way "Lowden-Gardena Road")
+and projecting it into the same local coordinate frame as the boundary/
+buildings, then locating the closest boundary edge to the road and offsetting
+~15m inward (clear of every building). Facing direction was set by hand in
+the editor afterward.
