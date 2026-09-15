@@ -30,7 +30,7 @@ milestones — the priority is fast, visible progress toward "that's clearly the
 
 - [x] Add built-in first-person/walking character controller — WASD movement, mouse look, jump, and gravity in `player.gd`
 - [x] Add collision to terrain, buildings, fences — `StaticBody3D`/`CollisionShape3D` on the ground plane, every building, and every fence segment
-- [ ] Confirm free exploration of full property bounds — not yet walked end-to-end in-editor; fence segment collision shapes were previously skewed (see `parcel-data.md`), now fixed, but a walkthrough is still pending
+- [ ] Confirm free exploration of full property bounds — not yet walked end-to-end in-editor; the boundary itself has now been wrong twice (skewed collision shapes, then wrong edge directions entirely — see `parcel-data.md` and D-12) and caught both times by inspection rather than an actual walkthrough, so this is worth doing for real before trusting the boundary further
 
 **Milestone: first "show someone" build.** This is the target for the first
 recognizable, shareable version.
