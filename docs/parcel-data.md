@@ -178,3 +178,21 @@ plane. Re-derived directly from each segment's own length axis (rotate it 90°
 in the XZ plane, normalize, keep everything else — position, length, and
 height — unchanged), so every segment is now a proper straight rectangular
 rail rather than a sheared parallelogram.
+
+That first fix only made each segment's own two axes perpendicular to each
+other — it didn't check whether the *length axis itself* pointed the right
+way in the world, and it turned out several didn't (D-12). Each segment's
+length and rough position were correct all along (confirmed by cross-checking
+against the seven building positions, which reproduce almost exactly under
+the same projection), but a number of segments' **directions** were wrong —
+e.g. one edge stored as running due east was actually running due south. The
+boundary as a whole never actually closed into the real polygon shape, which
+is why it looked "very odd" once the fence became visible as a real
+wire/post fence and treeline (D-11) rather than a boxy placeholder. Every
+`Fence_XX`/`TreeLine_XX` transform in `main.tscn` was regenerated from
+scratch directly from the source GeoJSON (`gis/parcel-340732310005.geojson`),
+using the polygon's true area-weighted centroid (not a simple vertex average)
+as the projection origin — verified to reproduce the existing building
+positions almost exactly, and to close into a simple polygon with zero
+error walking edge-to-edge. All 7 buildings, the horse, flock, coyote, and
+player spawn were checked against the corrected polygon and fall inside it.

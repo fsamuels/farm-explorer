@@ -22,14 +22,15 @@ milestones — the priority is fast, visible progress toward "that's clearly the
 ## Phase 2 — Layout blockout
 
 - [~] Place boxy placeholder geometry for every building at correct position, orientation, and rough scale — 7 boxes placed at real (approximate, ML-derived) positions/sizes; not yet attributed to specific structures or rotated to true orientation (see [docs/parcel-data.md](parcel-data.md))
-- [x] Add fence lines and pasture divisions as simple planes/lines — fence now traces the real parcel boundary polygon (13 segments); no pasture-division lines yet
+- [x] Add fence lines and pasture divisions as simple planes/lines — fence now traces the real parcel boundary polygon (13 segments) as a procedurally-generated wire/post fence rather than a placeholder box (see D-11); no pasture-division lines yet
+- [x] Edge-of-map treatment — a treeline 20m outside the real boundary (`scenes/tree_line_segment.tscn`) is the actual hard limit on exploration, rather than the property fence itself (see D-11); not an item from the original plan, added at the user's request
 - [ ] Walk the blockout and compare against memory/photos of the real property
 
 ## Phase 3 — First-person exploration
 
 - [x] Add built-in first-person/walking character controller — WASD movement, mouse look, jump, and gravity in `player.gd`
 - [x] Add collision to terrain, buildings, fences — `StaticBody3D`/`CollisionShape3D` on the ground plane, every building, and every fence segment
-- [ ] Confirm free exploration of full property bounds — not yet walked end-to-end in-editor; fence segment collision shapes were previously skewed (see `parcel-data.md`), now fixed, but a walkthrough is still pending
+- [ ] Confirm free exploration of full property bounds — not yet walked end-to-end in-editor; the boundary itself has now been wrong twice (skewed collision shapes, then wrong edge directions entirely — see `parcel-data.md` and D-12) and caught both times by inspection rather than an actual walkthrough, so this is worth doing for real before trusting the boundary further
 
 **Milestone: first "show someone" build.** This is the target for the first
 recognizable, shareable version.
