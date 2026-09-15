@@ -1,0 +1,34 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/wander.gd" id="1_wander_script"]
+[ext_resource type="PackedScene" path="res://scenes/hen.tscn" id="2_hen_scene"]
+[ext_resource type="PackedScene" path="res://scenes/rooster.tscn" id="3_rooster_scene"]
+
+[node name="Flock" type="Node3D"]
+script = ExtResource("1_wander_script")
+wander_radius = 15.0
+move_speed = 0.8
+idle_time_min = 4.0
+idle_time_max = 10.0
+faces_movement = false
+
+[node name="Hen1" parent="." instance=ExtResource("2_hen_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 0)
+
+[node name="Hen2" parent="." instance=ExtResource("2_hen_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 0, 1)
+
+[node name="Hen3" parent="." instance=ExtResource("2_hen_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0, -1.4)
+
+[node name="Hen4" parent="." instance=ExtResource("2_hen_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6, 0, -0.8)
+
+[node name="Hen5" parent="." instance=ExtResource("2_hen_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 1.2)
+
+[node name="Hen6" parent="." instance=ExtResource("2_hen_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 0, 1.8)
+
+[node name="Rooster" parent="." instance=ExtResource("3_rooster_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)

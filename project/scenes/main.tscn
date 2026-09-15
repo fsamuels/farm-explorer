@@ -5,6 +5,8 @@
 [ext_resource type="PackedScene" path="res://scenes/fence_segment.tscn" id="3_fence_scene"]
 [ext_resource type="PackedScene" path="res://scenes/building.tscn" id="4_building_scene"]
 [ext_resource type="PackedScene" path="res://scenes/horse.tscn" id="5_horse_scene"]
+[ext_resource type="PackedScene" path="res://scenes/flock.tscn" id="6_flock_scene"]
+[ext_resource type="PackedScene" path="res://scenes/coyote.tscn" id="7_coyote_scene"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -111,6 +113,12 @@ transform = Transform3D(4.871, 0, 0, 0, 4, 0, 0, 0, 7.806, 193.442, 2, 17.558)
 
 [node name="Horse" parent="." instance=ExtResource("5_horse_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 165, 0, 35)
+
+[node name="Flock" parent="." instance=ExtResource("6_flock_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, -10)
+
+[node name="Coyote" parent="." instance=ExtResource("7_coyote_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70, 0, 140)
 
 [node name="Player" parent="." unique_id=1542815032 instance=ExtResource("2_player_scene")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 247.9, 1, -41.300003)

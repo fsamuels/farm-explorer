@@ -8,6 +8,7 @@ farm-sim/
 │   ├── drone-capture-plan.md     # drone flight + processing plan
 │   ├── engine-decision.md        # Godot vs Unity vs Unreal tradeoffs
 │   ├── parcel-data.md            # confirmed parcel facts (ID, acreage, boundary source)
+│   ├── credits.md                # attribution for non-CC0 third-party assets
 │   ├── gis/
 │   │   └── parcel-*.geojson      # real parcel boundary polygons pulled from county/state GIS
 │   └── repo-structure.md         # this file
@@ -23,12 +24,20 @@ farm-sim/
     │   ├── player.tscn           # first-person player, instanced once in main.tscn
     │   ├── fence_segment.tscn    # one unit fence segment, instanced 13x (boundary polygon)
     │   ├── building.tscn         # one unit building box, instanced 7x (footprint placeholders)
-    │   └── horse.tscn            # wraps models/horse.glb with wander-AI script, instanced once
+    │   ├── horse.tscn            # wraps models/horse.glb with wander-AI script, instanced once
+    │   ├── hen.tscn               # wraps models/hen.glb with wander.gd, instanced 6x inside flock.tscn
+    │   ├── rooster.tscn           # wraps models/rooster.glb with wander.gd, instanced once inside flock.tscn
+    │   ├── flock.tscn             # 6 hens + 1 rooster around a shared, slower-wandering center
+    │   └── coyote.tscn            # wraps models/coyote.glb with wander.gd, instanced once
     ├── scripts/
     │   ├── player.gd             # first-person walking controller
-    │   └── horse.gd               # simple wander AI (idle/walk between random points)
+    │   ├── horse.gd               # horse-specific wander AI (drives its own AnimationPlayer)
+    │   └── wander.gd              # generic no-animation wander AI, reused by hen/rooster/flock/coyote
     ├── models/
-    │   └── horse.glb              # CC0 rigged/animated horse (Quaternius) — see D-9
+    │   ├── horse.glb              # CC0 rigged/animated horse (Quaternius) — see D-9
+    │   ├── hen.glb                 # CC-BY static mesh (Poly by Google) — see D-10, credits.md
+    │   ├── rooster.glb             # CC-BY static mesh (Poly by Google) — see D-10, credits.md
+    │   └── coyote.glb              # CC-BY static mesh (Poly by Google) — see D-10, credits.md
     └── textures/
         └── ground/                # ground textures actually loaded by the scene (res://) —
                                      # NAIP imagery for now, replaced by the orthomosaic later

@@ -1,0 +1,13 @@
+# Credits
+
+Third-party assets used in this project that require attribution under their license.
+CC0 assets (e.g. the horse model, see D-9 in
+[decisions.md](project/decisions.md)) need no entry here — they're public domain.
+
+## Models
+
+| Asset | Creator | Source | License |
+| --- | --- | --- | --- |
+| Hen (`project/models/hen.glb`) | Poly by Google | [poly.pizza/m/8Unya0rw9tR](https://poly.pizza/m/8Unya0rw9tR) | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
+| Rooster (`project/models/rooster.glb`) | Poly by Google | [poly.pizza/m/6NTegstc5Jy](https://poly.pizza/m/6NTegstc5Jy) | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
+| Coyote (`project/models/coyote.glb`) | Poly by Google | [poly.pizza/m/auVAs_kT6nE](https://poly.pizza/m/auVAs_kT6nE) | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
