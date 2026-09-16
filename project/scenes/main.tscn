@@ -263,22 +263,22 @@ transform = Transform3D(3.938453, 0, -1.047568, 0, 4, 0, 0.5735754, 0, 7.193119,
 transform = Transform3D(2.432578, 0, -0.9500533, 0, 2.59, 0, 0.1901665, 0, 12.15292, 194.29, 1.295, -29.7)
 
 [node name="Shop_Roof_North" type="MeshInstance3D" parent="Buildings" unique_id=3721904820]
-transform = Transform3D(14.87828, -0.00761205, -0.07855635, 0, 0.8660254, -2.979127, -0.2265346, -0.4999421, -5.159402, 202.2936, 3.449564, -55.1079)
+transform = Transform3D(14.87828, -0.00761205, -0.07855635, 0, 0.8660254, -2.979127, -0.2265346, -0.4999421, -5.159402, 202.2936, 5.409564, -55.1079)
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_shop_n")
 
 [node name="Shop_Roof_South" type="MeshInstance3D" parent="Buildings" unique_id=3721904821]
-transform = Transform3D(14.87828, 0.00761205, 0.07855635, 0, 0.8660254, -2.979127, -0.2265346, 0.4999421, 5.159402, 202.3722, 3.449564, -49.9485)
+transform = Transform3D(14.87828, 0.00761205, 0.07855635, 0, 0.8660254, -2.979127, -0.2265346, 0.4999421, 5.159402, 202.3722, 5.409564, -49.9485)
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_shop_s")
 
 [node name="SallysHouse_Roof_North" type="MeshInstance3D" parent="Buildings" unique_id=3721904822]
-transform = Transform3D(17.9664, -0.010006, -0.09185506, 0, 0.8660254, -2.650038, -0.3596155, -0.4998999, -4.589081, 216.1195, 3.325019, -29.48874)
+transform = Transform3D(17.9664, -0.010006, -0.09185506, 0, 0.8660254, -2.650038, -0.3596155, -0.4998999, -4.589081, 216.1195, 5.325019, -29.48874)
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_sh_n")
 
 [node name="SallysHouse_Roof_South" type="MeshInstance3D" parent="Buildings" unique_id=3721904823]
-transform = Transform3D(17.9664, 0.010006, 0.09185506, 0, 0.8660254, -2.650038, -0.3596155, 0.4998999, 4.589081, 216.2114, 3.325019, -24.89966)
+transform = Transform3D(17.9664, 0.010006, 0.09185506, 0, 0.8660254, -2.650038, -0.3596155, 0.4998999, 4.589081, 216.2114, 5.325019, -24.89966)
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_sh_s")
 
@@ -288,12 +288,12 @@ mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_tos1_w")
 
 [node name="FrontBarn_Roof_West" type="MeshInstance3D" parent="Buildings" unique_id=3721904826]
-transform = Transform3D(-1.688852, -0.4984312, -8.124428, 0, 0.8660254, -4.705405, 21.26905, -0.03957753, -0.6451137, 139.4352, 4.352702, 46.15412)
+transform = Transform3D(-1.688852, -0.4984312, -8.124428, 0, 0.8660254, -4.705405, 21.26905, -0.03957753, -0.6451137, 139.4352, 6.352702, 46.15412)
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_fb_w")
 
 [node name="FrontBarn_Roof_East" type="MeshInstance3D" parent="Buildings" unique_id=3721904827]
-transform = Transform3D(-1.688852, 0.4984312, 8.124428, 0, 0.8660254, -4.705405, 21.26905, 0.03957753, 0.6451137, 147.5596, 4.352702, 46.79923)
+transform = Transform3D(-1.688852, 0.4984312, 8.124428, 0, 0.8660254, -4.705405, 21.26905, 0.03957753, 0.6451137, 147.5596, 6.352702, 46.79923)
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_fb_e")
 
