@@ -16,6 +16,9 @@ listed together here since they're the immediate priority as a group:
    Maps' ML-detected footprints (D-5); an ML model trained on satellite
    imagery can miss small/irregular real structures (sheds, coops, run-ins).
    Needs a real on-the-ground inventory of what's out there but not yet placed.
+   Partial progress: a `Sally's House Garage` wing, a third turnout shed, and
+   a red shipping container were added from what's visible in the orthomosaic
+   itself (D-32–D-34) — still not a full ground-truth inventory pass.
 2. **Fence gates** (Phase 2) — the boundary fence (13 segments, D-11) is
    currently one fully closed loop with no openings anywhere, including at
    the real driveway entrance near Lowden-Gardena Road the player already
@@ -25,12 +28,11 @@ listed together here since they're the immediate priority as a group:
    so far (5 of 7 buildings, D-20 through D-23), and only because the drone
    orthomosaic happened to cover them from above; every wall is still the
    placeholder box color.
-4. **Building/overlay alignment** (Phase 4) — building positions are still
-   the ML-approximated Overture footprints (D-5), never cross-checked against
-   the real drone orthomosaic now sitting under 5 of them; that orthomosaic's
-   own placement fit landed only 0.7–2.2m accurate against those same
-   building positions (D-19), so some visible mismatch between building and
-   ground texture is expected.
+4. ~~**Building/overlay alignment** (Phase 4)~~ — done for the 5 buildings
+   covered by the front-section orthomosaic: position, size, and rotation
+   all re-derived from the orthomosaic pixels rather than the ML footprints
+   (D-30–D-34). House and Back Barn still use the ML-approximated positions,
+   pending the second drone flight (item 7 below).
 5. **Missing animals** (Phase 5) — current roster is 2 horses, a flock (6
    hens + 1 rooster), 1 coyote, 3 ducks, 10 geese, 6 quail. Needs the real
    list of what's actually kept on the property today.
@@ -64,7 +66,7 @@ listed together here since they're the immediate priority as a group:
 
 ## Phase 2 — Layout blockout
 
-- [~] Place boxy placeholder geometry for every building at correct position, orientation, and rough scale — 7 boxes placed at real (approximate, ML-derived) positions/sizes, now individually named/attributed (House, Shop, Sally's House, Back Barn, Front Barn, Turn Out Shed 1, Turn Out Shed 2) with sloped roofs and gable-end fills added to 5 of the 7 (Phase 4, D-20 through D-23/D-25); still axis-aligned boxes rather than rotated to true orientation, and House/Back Barn remain flat-topped, not yet covered by a drone pass (see [docs/parcel-data.md](parcel-data.md))
+- [~] Place boxy placeholder geometry for every building at correct position, orientation, and rough scale — 10 boxes now (the original 7 plus a Sally's House garage wing, a third turnout shed, and a red shipping container, D-32), with the 5 orthomosaic-covered buildings re-positioned/sized/rotated from real drone imagery rather than ML approximations (D-30–D-34) and sloped roofs/gable-end fills on the original 5 (Phase 4, D-20 through D-23/D-25); House and Back Barn remain flat-topped, axis-aligned ML approximations, not yet covered by a drone pass (see [docs/parcel-data.md](parcel-data.md))
 - [x] Add fence lines and pasture divisions as simple planes/lines — fence now traces the real parcel boundary polygon (13 segments) as a procedurally-generated wire/post fence rather than a placeholder box (see D-11); no pasture-division lines yet
 - [x] Edge-of-map treatment — a treeline 20m outside the real boundary (`scenes/tree_line_segment.tscn`) is the actual hard limit on exploration, rather than the property fence itself (see D-11); not an item from the original plan, added at the user's request. Known rough edge: corners look a bit off since each segment is offset independently with no mitering (D-11) — acceptable for now, flagged by the user as something to revisit later, not a blocker
 - [ ] Walk the blockout and compare against memory/photos of the real property
@@ -92,7 +94,7 @@ recognizable, shareable version.
 - [x] Sloped roof geometry and gable-end fills for the 5 buildings covered by that orthomosaic — roof crops textured per building/slope, plus a shared procedural gable-fill script (D-20 through D-23, D-25); House and Back Barn remain flat-topped, not yet covered by a drone pass — not an item from the original plan
 - [x] One decorative parked prop — a Triumph TR6 east of the Shop, facing south (CC BY 4.0, Configcars via Sketchfab, D-26); simplified from a 32MB/879k-triangle download to 7.7MB since it's a static background object — not an item from the original plan, added at the user's request
 - [ ] Texture each building's exterior walls — only roofs have real photo textures so far (5 of 7 buildings, D-20 through D-23); every wall is still the placeholder box color — current priority, see above
-- [ ] Re-align building placement (and their roof-texture overlays) against the real drone orthomosaic/ground imagery — building positions are still the ML-approximated Overture footprints (D-5), never cross-checked against the orthomosaic now sitting under 5 of them; that orthomosaic's own placement fit landed only 0.7–2.2m accurate against those same building positions (D-19), so some visible mismatch is expected — current priority, see above
+- [x] Re-align building placement (and their roof-texture overlays) against the real drone orthomosaic/ground imagery — the 5 buildings under the front-section orthomosaic had position, size, and rotation re-derived directly from the orthomosaic pixels (D-30–D-34); House and Back Barn are unchanged, still the ML-approximated positions, pending the second drone flight
 - [ ] Add trees and other foliage scattered around the property itself (yard trees, wooded areas, brush) — distinct from the D-11 boundary treeline, which is a hard map-edge limit 20m *outside* the property, not real vegetation placement — current priority, see above
 
 ## Phase 5 — Animals
