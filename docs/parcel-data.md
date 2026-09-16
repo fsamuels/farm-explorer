@@ -25,7 +25,7 @@ structure it represents (House, Shop, Sally's House, Back Barn, Front Barn,
 Turn Out Shed 1, Turn Out Shed 2 — see the scene node names in `main.tscn`),
 based on on-the-ground knowledge rather than a footprint-size guess.
 
-**Update (D-29–D-33):** the 5 buildings covered by the front-section
+**Update (D-30–D-34):** the 5 buildings covered by the front-section
 orthomosaic (Shop, Sally's House, Turn Out Shed 1, Turn Out Shed 2, Front
 Barn) now have their position, footprint size, and rotation re-derived
 directly from that orthomosaic's pixel data instead of the ML footprints
@@ -46,7 +46,7 @@ Sally's House.
       footprint size
 - [x] Replace with surveyed/orthomosaic-derived footprints once available, for
       accurate shape and placement (ML footprints are approximate) — done for
-      the 5 buildings covered by the front-section orthomosaic (D-29–D-33):
+      the 5 buildings covered by the front-section orthomosaic (D-30–D-34):
       position, size, and rotation all re-derived from the orthomosaic
       pixels, not just the roof textures (D-20). House and Back Barn still
       use the ML footprints, pending a second drone flight over that area
@@ -197,7 +197,7 @@ square than the old 312m × 312m placeholder because the parcel shape is
 irregular, not because the acreage changed.
 
 Buildings are attributed to specific structures (house/barn/shed — see "Still
-needed" above), and as of D-29–D-33 the 5 orthomosaic-covered buildings are no
+needed" above), and as of D-30–D-34 the 5 orthomosaic-covered buildings are no
 longer simple axis-aligned boxes: several carry a real rotation derived from
 the imagery (e.g. Front Barn ~-4.5°). House and Back Barn remain axis-aligned
 ML approximations pending a second drone flight. The old
