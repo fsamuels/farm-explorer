@@ -25,19 +25,31 @@ structure it represents (House, Shop, Sally's House, Back Barn, Front Barn,
 Turn Out Shed 1, Turn Out Shed 2 — see the scene node names in `main.tscn`),
 based on on-the-ground knowledge rather than a footprint-size guess.
 
+**Update (D-29–D-33):** the 5 buildings covered by the front-section
+orthomosaic (Shop, Sally's House, Turn Out Shed 1, Turn Out Shed 2, Front
+Barn) now have their position, footprint size, and rotation re-derived
+directly from that orthomosaic's pixel data instead of the ML footprints
+above — several turned out to be meaningfully rotated relative to scene axes
+(e.g. Front Barn ~-4.5°), which this table's ML data never captured. House
+and Back Barn are unchanged (still ML-approximate; outside/at the edge of the
+current drone flight coverage). Three more structures visible in the
+orthomosaic but absent from the Overture data entirely were also added the
+same way: a `Sally's House Garage` wing, a third turnout shed (`Turn Out Shed
+3`, near the round pen by Front Barn), and a `Red Shipping Container` west of
+Sally's House.
+
 ## Still needed
 
 - [x] Attribute each of the 7 footprints to a real structure — named in the
       scene (House, Shop, Sally's House, Back Barn, Front Barn, Turn Out Shed 1,
       Turn Out Shed 2) based on on-the-ground knowledge of the property, not
       footprint size
-- [ ] Replace with surveyed/orthomosaic-derived footprints once available, for
-      accurate shape and placement (ML footprints are approximate) — the
-      building-to-structure mapping above should carry over even once the
-      footprint geometry itself is replaced. Note: the 5 buildings covered by
-      the front-section orthomosaic now have real roof *textures* (D-20) —
-      the box shape/placement underneath is still the ML-approximate one,
-      only the surface appearance changed
+- [x] Replace with surveyed/orthomosaic-derived footprints once available, for
+      accurate shape and placement (ML footprints are approximate) — done for
+      the 5 buildings covered by the front-section orthomosaic (D-29–D-33):
+      position, size, and rotation all re-derived from the orthomosaic
+      pixels, not just the roof textures (D-20). House and Back Barn still
+      use the ML footprints, pending a second drone flight over that area
 - [x] Replace the NAIP ground texture with the drone-derived orthomosaic for
       the Front Barn/Shop/Sally's House area — see "How the front-section
       orthomosaic was obtained" below. NAIP still covers the rest of the
@@ -184,12 +196,14 @@ fit — the real parcel's bounding box (~430m × 435m) is notably larger and les
 square than the old 312m × 312m placeholder because the parcel shape is
 irregular, not because the acreage changed.
 
-Buildings are still axis-aligned boxes (not rotated to each structure's real
-orientation) and unattributed to specific structures (house/barn/shed) — see
-"Still needed" above. The old provisional-square/single-placeholder-box setup
-this section used to describe is gone, superseded now that real boundary and
-building data are both available (see D-3, D-5 in
-[decisions.md](project/decisions.md)).
+Buildings are attributed to specific structures (house/barn/shed — see "Still
+needed" above), and as of D-29–D-33 the 5 orthomosaic-covered buildings are no
+longer simple axis-aligned boxes: several carry a real rotation derived from
+the imagery (e.g. Front Barn ~-4.5°). House and Back Barn remain axis-aligned
+ML approximations pending a second drone flight. The old
+provisional-square/single-placeholder-box setup this section used to describe
+is gone, superseded now that real boundary and building data are both
+available (see D-3, D-5 in [decisions.md](project/decisions.md)).
 
 Each fence segment and building is an **instance of a shared scene**
 (`scenes/fence_segment.tscn`, `scenes/building.tscn`) rather than an inline
