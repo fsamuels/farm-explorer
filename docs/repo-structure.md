@@ -37,7 +37,8 @@ farm-sim/
     │   ├── duck_poly.tscn         # wraps models/duck_poly.glb with wander.gd, instanced once
     │   ├── duck_madtroll.tscn     # wraps models/duck_madtroll.glb with wander.gd, instanced once
     │   ├── goose.tscn             # wraps models/goose.glb with wander.gd, instanced 10x
-    │   └── quail.tscn             # wraps models/quail.glb with wander.gd, instanced 6x
+    │   ├── quail.tscn             # wraps models/quail.glb with wander.gd, instanced 6x
+    │   └── tr6.tscn               # wraps models/tr6.glb (no script — stationary prop), instanced once
     ├── scripts/
     │   ├── player.gd             # first-person walking controller
     │   ├── horse.gd               # horse-specific wander AI (drives its own AnimationPlayer)
@@ -55,7 +56,9 @@ farm-sim/
     │   ├── duck_poly.glb           # CC-BY static mesh (Poly by Google) — see D-15/D-17, credits.md
     │   ├── duck_madtroll.glb       # CC-BY static mesh (madtrollstudio) — see D-15/D-17, credits.md
     │   ├── goose.glb               # CC-BY static mesh (Poly by Google) — see D-16, credits.md
-    │   └── quail.glb               # CC-BY static mesh (Poly by Google) — see D-17, credits.md
+    │   ├── quail.glb               # CC-BY static mesh (Poly by Google) — see D-17, credits.md
+    │   └── tr6.glb                 # CC-BY static mesh (Configcars, Sketchfab), simplified from a 32MB/879k-tri
+    │                                # download to 7.7MB — see D-25, credits.md
     └── textures/
         ├── ground/                # ground textures actually loaded by the scene (res://) —
         │                          # NAIP imagery (whole property) plus a real drone
