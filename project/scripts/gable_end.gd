@@ -23,9 +23,9 @@ func _rebuild() -> void:
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var normal := Vector3(0.0, 0.0, 1.0)
 	st.set_normal(normal)
-	st.add_vertex(Vector3(-width / 2.0, 0.0, 0.0))
-	st.set_normal(normal)
 	st.add_vertex(Vector3(width / 2.0, 0.0, 0.0))
+	st.set_normal(normal)
+	st.add_vertex(Vector3(-width / 2.0, 0.0, 0.0))
 	st.set_normal(normal)
 	st.add_vertex(Vector3(0.0, rise, 0.0))
 
