@@ -45,7 +45,7 @@ farm-sim/
     │   ├── tree_line_segment.gd   # @tool script: scatters trees + one invisible collision wall from an exported length — see D-11
     │   └── minimap.gd             # maps player world position onto the NAIP texture — see D-13
     ├── models/
-    │   ├── horse.glb              # CC0 rigged/animated horse (Quaternius) — see D-9; scale not yet fixed, see D-17
+    │   ├── horse.glb              # CC0 rigged/animated horse (Quaternius) — see D-9; scale fixed in D-18
     │   ├── hen.glb                 # CC-BY static mesh (Poly by Google) — see D-10, credits.md
     │   ├── rooster.glb             # CC-BY static mesh (Poly by Google) — see D-10, credits.md
     │   ├── coyote.glb              # CC-BY static mesh (Poly by Google) — see D-10, credits.md

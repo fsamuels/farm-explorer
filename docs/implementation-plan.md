@@ -53,7 +53,7 @@ recognizable, shareable version.
 - [x] 3 ducks (CC-BY — see D-15/D-17 and [docs/credits.md](credits.md)) wandering independently south of the Back Barn
 - [x] 10 geese (CC-BY, same source — see D-16) in their own cluster ~30m south of the ducks
 - [x] 6 quail (CC-BY, same source — see D-17) wandering near the player's spawn point
-- Known issue, not yet fixed: the horse (D-9) is ~6.9m tall in the scene — `horse.tscn` applies no scale correction to `models/horse.glb` at all, and D-17's engine-verified AABB check (added after a duck turned out similarly oversized) confirms it. Flagged for the user to decide on; every other animal has been re-verified and is correctly scaled
+- The horse (D-9) was found to be ~6.9m tall — `horse.tscn` had never applied a scale correction at all — and fixed to ~1.6m (D-18). Every animal in the scene has now been re-verified with an engine-instanced bounding-box check rather than an assumed or hand-parsed scale
 
 ## Phase 6 — Chores / gameplay (lowest priority)
 
