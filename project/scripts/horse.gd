@@ -1,6 +1,10 @@
 extends Node3D
 
-const WANDER_RADIUS := 12.0
+@export var roam_min_x := 163.2
+@export var roam_max_x := 249.1
+@export var roam_min_z := 30.6
+@export var roam_max_z := 39.8
+
 const WALK_SPEED := 1.5
 const ARRIVAL_DISTANCE := 0.3
 const IDLE_TIME_MIN := 2.0
@@ -8,13 +12,11 @@ const IDLE_TIME_MAX := 6.0
 
 @onready var anim_player: AnimationPlayer = $Model/AnimationPlayer
 
-var home_position: Vector3
 var target_position: Vector3
 var idle_timer := 0.0
 var is_walking := false
 
 func _ready() -> void:
-	home_position = global_position
 	_start_idle()
 
 func _start_idle() -> void:
@@ -23,9 +25,11 @@ func _start_idle() -> void:
 	anim_player.play("Armature|Idle")
 
 func _pick_new_target() -> void:
-	var angle := randf_range(0.0, TAU)
-	var radius := randf_range(0.0, WANDER_RADIUS)
-	target_position = home_position + Vector3(cos(angle), 0.0, sin(angle)) * radius
+	target_position = Vector3(
+		randf_range(roam_min_x, roam_max_x),
+		global_position.y,
+		randf_range(roam_min_z, roam_max_z)
+	)
 	is_walking = true
 	anim_player.play("Armature|Walk")
 

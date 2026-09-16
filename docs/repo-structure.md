@@ -27,7 +27,7 @@ farm-sim/
     │   ├── tree_line_segment.tscn # procedurally-scattered treeline + invisible collision wall, instanced 13x, 20m outside the boundary — see D-11
     │   ├── tree.tscn              # wraps models/tree.glb, instanced by tree_line_segment.gd
     │   ├── building.tscn         # one unit building box, instanced 7x (footprint placeholders)
-    │   ├── horse.tscn            # wraps models/horse.glb with wander-AI script, instanced once
+    │   ├── horse.tscn            # wraps models/horse.glb with wander-AI script, instanced 2x, roams a shared rectangle (D-27)
     │   ├── hen.tscn               # wraps models/hen.glb with wander.gd, instanced 6x inside flock.tscn
     │   ├── rooster.tscn           # wraps models/rooster.glb with wander.gd, instanced once inside flock.tscn
     │   ├── flock.tscn             # 6 hens + 1 rooster around a shared, slower-wandering center

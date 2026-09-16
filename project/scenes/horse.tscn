@@ -7,4 +7,4 @@
 script = ExtResource("2_horse_script")
 
 [node name="Model" parent="." instance=ExtResource("1_horse_model")]
-transform = Transform3D(0.2317, 0, 0, 0, 0.2317, 0, 0, 0, 0.2317, 0, 0, 0)
+transform = Transform3D(-0.2317, 0, 0, 0, 0.2317, 0, 0, 0, -0.2317, 0, 0, 0)
