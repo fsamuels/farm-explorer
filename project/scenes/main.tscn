@@ -25,6 +25,7 @@
 [ext_resource type="Texture2D" path="res://textures/roofs/front_barn_east.png" id="23_roof_fb_e"]
 [ext_resource type="Texture2D" path="res://textures/roofs/turn_out_shed_2_west.png" id="24_roof_tos2_w"]
 [ext_resource type="Texture2D" path="res://textures/roofs/turn_out_shed_2_east.png" id="25_roof_tos2_e"]
+[ext_resource type="PackedScene" path="res://scenes/gable_end.tscn" id="26_gable_scene"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -301,6 +302,56 @@ surface_material_override/0 = SubResource("StandardMaterial3D_roof_tos2_w")
 transform = Transform3D(0, 0.5, 2.4355, 0, 0.86603, -1.4061, 7.806, -0, 0, 194.66, 4.7031, 17.558)
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_tos2_e")
+
+[node name="Shop_Gable_West" parent="Buildings" unique_id=3721904830 instance=ExtResource("26_gable_scene")]
+transform = Transform3D(0, 0, -1, -0, 1, 0, 1, 0, 0, 197.39, 3.92, -52.205)
+width = 9.807
+rise = 2.831
+
+[node name="Shop_Gable_East" parent="Buildings" unique_id=3721904831 instance=ExtResource("26_gable_scene")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 212.26, 3.92, -52.205)
+width = 9.807
+rise = 2.831
+
+[node name="SallysHouse_Gable_West" parent="Buildings" unique_id=3721904832 instance=ExtResource("26_gable_scene")]
+transform = Transform3D(0, 0, -1, -0, 1, 0, 1, 0, 0, 202.49, 4, -29.044)
+width = 8.451
+rise = 2.4396
+
+[node name="SallysHouse_Gable_East" parent="Buildings" unique_id=3721904833 instance=ExtResource("26_gable_scene")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 222.41, 4, -29.044)
+width = 8.451
+rise = 2.4396
+
+[node name="TurnOutShed1_Gable_North" parent="Buildings" unique_id=3721904834 instance=ExtResource("26_gable_scene")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 152.23, 4, 24.742)
+width = 4.739
+rise = 1.368
+
+[node name="TurnOutShed1_Gable_South" parent="Buildings" unique_id=3721904835 instance=ExtResource("26_gable_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 152.23, 4, 32.325)
+width = 4.739
+rise = 1.368
+
+[node name="FrontBarn_Gable_North" parent="Buildings" unique_id=3721904836 instance=ExtResource("26_gable_scene")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 146.06, 4, 38.329)
+width = 14.812
+rise = 4.2759
+
+[node name="FrontBarn_Gable_South" parent="Buildings" unique_id=3721904837 instance=ExtResource("26_gable_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 146.06, 4, 61.447)
+width = 14.812
+rise = 4.2759
+
+[node name="TurnOutShed2_Gable_North" parent="Buildings" unique_id=3721904838 instance=ExtResource("26_gable_scene")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 193.44, 4, 13.655)
+width = 4.871
+rise = 1.4061
+
+[node name="TurnOutShed2_Gable_South" parent="Buildings" unique_id=3721904839 instance=ExtResource("26_gable_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 193.44, 4, 21.461)
+width = 4.871
+rise = 1.4061
 
 [node name="Horse" parent="." instance=ExtResource("5_horse_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 165, 0, 35)
