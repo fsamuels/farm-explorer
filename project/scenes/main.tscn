@@ -265,7 +265,7 @@ transform = Transform3D(4.031068, 0, 0.3627614, 0, 4, 0, -0.2112593, 0, 6.921901
 transform = Transform3D(3.938453, 0, -1.047568, 0, 4, 0, 0.5735754, 0, 7.193119, 115.764, 2, 30.202)
 
 [node name="Red Shipping Container" parent="Buildings" instance=ExtResource("4_building_scene")]
-transform = Transform3D(2.439511, 0, 0.2440144, 0, 2.59, 0, -0.04884292, 0, 12.18756, 192.683, 1.295, -29.721)
+transform = Transform3D(2.432578, 0, -0.9500533, 0, 2.59, 0, 0.1901665, 0, 12.15292, 194.29, 1.295, -29.7)
 
 [node name="Shop_Roof_North" type="MeshInstance3D" parent="Buildings" unique_id=3721904820]
 transform = Transform3D(14.87828, -0.00761205, -0.07855635, 0, 0.8660254, -2.979127, -0.2265346, -0.4999421, -5.159402, 202.2936, 3.449564, -55.1079)
