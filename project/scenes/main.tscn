@@ -98,6 +98,10 @@ roughness = 0.7
 albedo_texture = ExtResource("25_roof_tos2_e")
 roughness = 0.7
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_roof_tos3"]
+albedo_color = Color(0.75, 0.78, 0.8, 1)
+roughness = 0.7
+
 [node name="Main" type="Node3D" unique_id=1143109196]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=215844830]
@@ -257,6 +261,12 @@ transform = Transform3D(16.24886, 0, -1.688852, 0, 4, 0, 1.290227, 0, 21.26905, 
 [node name="Turn Out Shed 2" parent="Buildings" unique_id=863312485 instance=ExtResource("4_building_scene")]
 transform = Transform3D(4.031068, 0, 0.3627614, 0, 4, 0, -0.2112593, 0, 6.921901, 191.1501, 2, 14.9029)
 
+[node name="Turn Out Shed 3" parent="Buildings" instance=ExtResource("4_building_scene")]
+transform = Transform3D(3.938453, 0, -1.047568, 0, 4, 0, 0.5735754, 0, 7.193119, 114.764, 2, 30.202)
+
+[node name="Red Shipping Container" parent="Buildings" instance=ExtResource("4_building_scene")]
+transform = Transform3D(2.318848, 0, -3.793414, 0, 2.59, 0, 0.7593052, 0, 11.58474, 192.683, 1.295, -29.721)
+
 [node name="Shop_Roof_North" type="MeshInstance3D" parent="Buildings" unique_id=3721904820]
 transform = Transform3D(14.87828, -0.00761205, -0.07855635, 0, 0.8660254, -2.979127, -0.2265346, -0.4999421, -5.159402, 202.2936, 3.449564, -55.1079)
 mesh = SubResource("PlaneMesh_roof_unit")
@@ -356,6 +366,26 @@ rise = 1.165266
 transform = Transform3D(0.9986295, 0, 0.05233596, 0, 1, 0, -0.05233596, 0, 0.9986295, 191.3315, 4, 18.36385)
 width = 4.0366
 rise = 1.165266
+
+[node name="TurnOutShed3_Roof_West" type="MeshInstance3D" parent="Buildings"]
+transform = Transform3D(-1.047568, -0.4947805, -1.969226, 0, 0.8660254, -1.148927, 7.193119, -0.0720572, -0.2867877, 113.7794, 2.574464, 30.05861)
+mesh = SubResource("PlaneMesh_roof_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_roof_tos3")
+
+[node name="TurnOutShed3_Roof_East" type="MeshInstance3D" parent="Buildings"]
+transform = Transform3D(-1.047568, 0.4947805, 1.969226, 0, 0.8660254, -1.148927, 7.193119, 0.0720572, 0.2867877, 115.7486, 2.574464, 30.34539)
+mesh = SubResource("PlaneMesh_roof_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_roof_tos3")
+
+[node name="TurnOutShed3_Gable_North" parent="Buildings" instance=ExtResource("26_gable_scene")]
+transform = Transform3D(-0.989561, 0, 0.1441144, 0, 1, 0, -0.1441144, 0, -0.989561, 115.2878, 4, 26.60544)
+width = 3.98
+rise = 1.148927
+
+[node name="TurnOutShed3_Gable_South" parent="Buildings" instance=ExtResource("26_gable_scene")]
+transform = Transform3D(0.989561, 0, -0.1441144, 0, 1, 0, 0.1441144, 0, 0.989561, 114.2402, 4, 33.79856)
+width = 3.98
+rise = 1.148927
 
 [node name="Horse" parent="." instance=ExtResource("5_horse_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 165, 0, 35)
