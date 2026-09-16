@@ -1,0 +1,14 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://models/quail.glb" id="1_quail_model"]
+[ext_resource type="Script" path="res://scripts/wander.gd" id="2_wander_script"]
+
+[node name="Quail" type="Node3D"]
+script = ExtResource("2_wander_script")
+wander_radius = 2.5
+move_speed = 0.6
+idle_time_min = 1.0
+idle_time_max = 4.0
+
+[node name="Model" parent="." instance=ExtResource("1_quail_model")]
+transform = Transform3D(0.0437, 0, 0, 0, 0.0437, 0, 0, 0, 0.0437, 0, 0, 0)

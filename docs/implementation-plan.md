@@ -50,6 +50,10 @@ recognizable, shareable version.
 - [x] Simple wander/movement AI — done ahead of the plan's stated ordering, at the user's request; picks a random point within a radius of its home position, walks to it, idles, repeats (`scripts/horse.gd`, generalized as `scripts/wander.gd` for the animals below)
 - [x] A loose flock (6 hens + 1 rooster, CC-BY — see D-10 and [docs/credits.md](credits.md)) that wanders the farmyard together — each bird micro-wanders near a shared, slower-wandering flock center, so the group drifts as a unit without moving in lockstep
 - [x] One coyote (CC-BY, same source) wandering a fixed area in the back section of the property, away from the horse and flock
+- [x] 3 ducks (CC-BY — see D-15/D-17 and [docs/credits.md](credits.md)) wandering independently south of the Back Barn
+- [x] 10 geese (CC-BY, same source — see D-16) in their own cluster ~30m south of the ducks
+- [x] 6 quail (CC-BY, same source — see D-17) wandering near the player's spawn point
+- The horse (D-9) was found to be ~6.9m tall — `horse.tscn` had never applied a scale correction at all — and fixed to ~1.6m (D-18). Every animal in the scene has now been re-verified with an engine-instanced bounding-box check rather than an assumed or hand-parsed scale
 
 ## Phase 6 — Chores / gameplay (lowest priority)
 
