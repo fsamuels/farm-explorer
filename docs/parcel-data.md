@@ -34,7 +34,10 @@ based on on-the-ground knowledge rather than a footprint-size guess.
 - [ ] Replace with surveyed/orthomosaic-derived footprints once available, for
       accurate shape and placement (ML footprints are approximate) — the
       building-to-structure mapping above should carry over even once the
-      footprint geometry itself is replaced
+      footprint geometry itself is replaced. Note: the 5 buildings covered by
+      the front-section orthomosaic now have real roof *textures* (D-20) —
+      the box shape/placement underneath is still the ML-approximate one,
+      only the surface appearance changed
 - [x] Replace the NAIP ground texture with the drone-derived orthomosaic for
       the Front Barn/Shop/Sally's House area — see "How the front-section
       orthomosaic was obtained" below. NAIP still covers the rest of the

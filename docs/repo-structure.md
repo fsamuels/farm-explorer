@@ -57,10 +57,12 @@ farm-sim/
     │   ├── goose.glb               # CC-BY static mesh (Poly by Google) — see D-16, credits.md
     │   └── quail.glb               # CC-BY static mesh (Poly by Google) — see D-17, credits.md
     └── textures/
-        └── ground/                # ground textures actually loaded by the scene (res://) —
-                                     # NAIP imagery (whole property) plus a real drone
-                                     # orthomosaic patch over the front section (see D-19);
-                                     # rest of the property still NAIP-only for now
+        ├── ground/                # ground textures actually loaded by the scene (res://) —
+        │                          # NAIP imagery (whole property) plus a real drone
+        │                          # orthomosaic patch over the front section (see D-19);
+        │                          # rest of the property still NAIP-only for now
+        └── roofs/                 # real roof imagery cropped from the front-section
+                                     # orthomosaic, one per covered building (see D-20)
 ```
 
 ## Notes
