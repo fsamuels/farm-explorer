@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/lean_to_end.gd" id="1_lean_to_end_script"]
+
+[node name="LeanToEnd" type="MeshInstance3D"]
+script = ExtResource("1_lean_to_end_script")

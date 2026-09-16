@@ -20,13 +20,12 @@
 [ext_resource type="Texture2D" path="res://textures/roofs/sallys_house_north.png" id="18_roof_sh_n"]
 [ext_resource type="Texture2D" path="res://textures/roofs/sallys_house_south.png" id="19_roof_sh_s"]
 [ext_resource type="Texture2D" path="res://textures/roofs/turn_out_shed_1_west.png" id="20_roof_tos1_w"]
-[ext_resource type="Texture2D" path="res://textures/roofs/turn_out_shed_1_east.png" id="21_roof_tos1_e"]
 [ext_resource type="Texture2D" path="res://textures/roofs/front_barn_west.png" id="22_roof_fb_w"]
 [ext_resource type="Texture2D" path="res://textures/roofs/front_barn_east.png" id="23_roof_fb_e"]
 [ext_resource type="Texture2D" path="res://textures/roofs/turn_out_shed_2_west.png" id="24_roof_tos2_w"]
-[ext_resource type="Texture2D" path="res://textures/roofs/turn_out_shed_2_east.png" id="25_roof_tos2_e"]
 [ext_resource type="PackedScene" path="res://scenes/gable_end.tscn" id="26_gable_scene"]
 [ext_resource type="PackedScene" path="res://scenes/tr6.tscn" id="27_tr6_scene"]
+[ext_resource type="PackedScene" path="res://scenes/lean_to_end.tscn" id="28_lean_to_end_scene"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -78,10 +77,6 @@ roughness = 0.7
 albedo_texture = ExtResource("20_roof_tos1_w")
 roughness = 0.7
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_roof_tos1_e"]
-albedo_texture = ExtResource("21_roof_tos1_e")
-roughness = 0.7
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_roof_fb_w"]
 albedo_texture = ExtResource("22_roof_fb_w")
 roughness = 0.7
@@ -94,13 +89,13 @@ roughness = 0.7
 albedo_texture = ExtResource("24_roof_tos2_w")
 roughness = 0.7
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_roof_tos2_e"]
-albedo_texture = ExtResource("25_roof_tos2_e")
-roughness = 0.7
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_roof_tos3"]
 albedo_color = Color(0.75, 0.78, 0.8, 1)
 roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pumphouse_wall"]
+albedo_color = Color(0.92, 0.92, 0.9, 1)
+roughness = 0.9
 
 [node name="Main" type="Node3D" unique_id=1143109196]
 
@@ -287,15 +282,10 @@ transform = Transform3D(17.9664, 0.010006, 0.09185506, 0, 0.8660254, -2.650038, 
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_sh_s")
 
-[node name="TurnOutShed1_Roof_West" type="MeshInstance3D" parent="Buildings" unique_id=3721904824]
-transform = Transform3D(-0.5929789, -0.498553, -2.218561, 0, 0.8660254, -1.284604, 7.777427, -0.03801147, -0.169151, 150.7963, 2.642302, 25.6299)
+[node name="TurnOutShed1_Roof" type="MeshInstance3D" parent="Buildings"]
+transform = Transform3D(-0.5929789, -0.20731, 4.437122, 0, 0.9781476, 0.9458767, 7.777427, -0.0158061, 0.3383021, 151.9055, 4.4729383, 25.71448)
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_tos1_w")
-
-[node name="TurnOutShed1_Roof_East" type="MeshInstance3D" parent="Buildings" unique_id=3721904825]
-transform = Transform3D(-0.5929789, 0.498553, 2.218561, 0, 0.8660254, -1.284604, 7.777427, 0.03801147, 0.169151, 153.0148, 2.642302, 25.79905)
-mesh = SubResource("PlaneMesh_roof_unit")
-surface_material_override/0 = SubResource("StandardMaterial3D_roof_tos1_e")
 
 [node name="FrontBarn_Roof_West" type="MeshInstance3D" parent="Buildings" unique_id=3721904826]
 transform = Transform3D(-1.688852, -0.4984312, -8.124428, 0, 0.8660254, -4.705405, 21.26905, -0.03957753, -0.6451137, 139.4352, 4.352702, 46.15412)
@@ -307,15 +297,10 @@ transform = Transform3D(-1.688852, 0.4984312, 8.124428, 0, 0.8660254, -4.705405,
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_fb_e")
 
-[node name="TurnOutShed2_Roof_West" type="MeshInstance3D" parent="Buildings" unique_id=3721904828]
-transform = Transform3D(0.3627614, -0.4993148, -2.015534, 0, 0.8660254, -1.165266, 6.921901, 0.02616798, 0.1056297, 190.1423, 2.582633, 14.95571)
+[node name="TurnOutShed2_Roof" type="MeshInstance3D" parent="Buildings"]
+transform = Transform3D(0.3627614, -0.2076268, 4.031068, 0, 0.9781476, 0.8580058, 6.921901, 0.0108813, -0.2112593, 191.1501, 4.4290029, 14.9029)
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_tos2_w")
-
-[node name="TurnOutShed2_Roof_East" type="MeshInstance3D" parent="Buildings" unique_id=3721904829]
-transform = Transform3D(0.3627614, 0.4993148, 2.015534, 0, 0.8660254, -1.165266, 6.921901, -0.02616798, -0.1056297, 192.1579, 2.582633, 14.85009)
-mesh = SubResource("PlaneMesh_roof_unit")
-surface_material_override/0 = SubResource("StandardMaterial3D_roof_tos2_e")
 
 [node name="Shop_Gable_West" parent="Buildings" unique_id=3721904830 instance=ExtResource("26_gable_scene")]
 transform = Transform3D(0.0152241, 0, -0.9998841, 0, 1, 0, 0.9998841, 0, 0.0152241, 194.8937, 3.92, -52.41494)
@@ -337,15 +322,17 @@ transform = Transform3D(-0.02001199, 0, 0.9997997, 0, 1, 0, -0.9997997, 0, -0.02
 width = 9.178162
 rise = 2.650038
 
-[node name="TurnOutShed1_Gable_North" parent="Buildings" unique_id=3721904834 instance=ExtResource("26_gable_scene")]
-transform = Transform3D(-0.9971061, 0, 0.07602294, 0, 1, 0, -0.07602294, 0, -0.9971061, 152.202, 4, 21.82577)
-width = 4.437122
-rise = 1.284604
+[node name="TurnOutShed1_End_North" parent="Buildings" instance=ExtResource("28_lean_to_end_scene")]
+transform = Transform3D(-0.9971061, 0, 0.0760229, 0, 1, 0, -0.0760229, 0, -0.9971061, 152.2019894, 4, 21.8257665)
+width = 4.449999994803192
+rise = 0.9458766983269828
+high_side = -1.0
 
-[node name="TurnOutShed1_Gable_South" parent="Buildings" unique_id=3721904835 instance=ExtResource("26_gable_scene")]
-transform = Transform3D(0.9971061, 0, -0.07602294, 0, 1, 0, 0.07602294, 0, 0.9971061, 151.6091, 4, 29.60319)
-width = 4.437122
-rise = 1.284604
+[node name="TurnOutShed1_End_South" parent="Buildings" instance=ExtResource("28_lean_to_end_scene")]
+transform = Transform3D(0.9971061, 0, -0.0760229, 0, 1, 0, 0.0760229, 0, 0.9971061, 151.6090105, 4, 29.6031935)
+width = 4.449999994803192
+rise = 0.9458766983269828
+high_side = 1.0
 
 [node name="FrontBarn_Gable_North" parent="Buildings" unique_id=3721904836 instance=ExtResource("26_gable_scene")]
 transform = Transform3D(-0.9968623, 0, 0.07915506, 0, 1, 0, -0.07915506, 0, -0.9968623, 144.3418, 4, 35.84215)
@@ -357,35 +344,57 @@ transform = Transform3D(0.9968623, 0, -0.07915506, 0, 1, 0, 0.07915506, 0, 0.996
 width = 16.24886
 rise = 4.705405
 
-[node name="TurnOutShed2_Gable_North" parent="Buildings" unique_id=3721904838 instance=ExtResource("26_gable_scene")]
-transform = Transform3D(-0.9986295, 0, -0.05233596, 0, 1, 0, 0.05233596, 0, -0.9986295, 190.9687, 4, 11.44195)
-width = 4.0366
-rise = 1.165266
+[node name="TurnOutShed2_End_North" parent="Buildings" instance=ExtResource("28_lean_to_end_scene")]
+transform = Transform3D(-0.9986295, 0, -0.0523359, 0, 1, 0, 0.052336, 0, -0.9986295, 190.9687193, 4, 11.4419495)
+width = 4.036600018884766
+rise = 0.8580058208512922
+high_side = -1.0
 
-[node name="TurnOutShed2_Gable_South" parent="Buildings" unique_id=3721904839 instance=ExtResource("26_gable_scene")]
-transform = Transform3D(0.9986295, 0, 0.05233596, 0, 1, 0, -0.05233596, 0, 0.9986295, 191.3315, 4, 18.36385)
-width = 4.0366
-rise = 1.165266
+[node name="TurnOutShed2_End_South" parent="Buildings" instance=ExtResource("28_lean_to_end_scene")]
+transform = Transform3D(0.9986295, 0, 0.0523359, 0, 1, 0, -0.052336, 0, 0.9986295, 191.3314807, 4, 18.3638505)
+width = 4.036600018884766
+rise = 0.8580058208512922
+high_side = 1.0
 
-[node name="TurnOutShed3_Roof_West" type="MeshInstance3D" parent="Buildings"]
-transform = Transform3D(-1.047568, -0.4947805, -1.969226, 0, 0.8660254, -1.148927, 7.193119, -0.0720572, -0.2867877, 114.7794, 2.574464, 30.05861)
+[node name="TurnOutShed3_Roof" type="MeshInstance3D" parent="Buildings"]
+transform = Transform3D(-1.047568, -0.2057413, 3.938453, 0, 0.9781476, 0.8459751, 7.193119, -0.0299631, 0.5735754, 115.764, 4.4229876, 30.202)
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_tos3")
 
-[node name="TurnOutShed3_Roof_East" type="MeshInstance3D" parent="Buildings"]
-transform = Transform3D(-1.047568, 0.4947805, 1.969226, 0, 0.8660254, -1.148927, 7.193119, 0.0720572, 0.2867877, 116.7486, 2.574464, 30.34539)
+[node name="TurnOutShed3_End_North" parent="Buildings" instance=ExtResource("28_lean_to_end_scene")]
+transform = Transform3D(-0.989561, 0, 0.1441145, 0, 1, 0, -0.1441144, 0, -0.989561, 116.287784, 4, 26.6054405)
+width = 3.9800000970721294
+rise = 0.8459751360800061
+high_side = -1.0
+
+[node name="TurnOutShed3_End_South" parent="Buildings" instance=ExtResource("28_lean_to_end_scene")]
+transform = Transform3D(0.989561, 0, -0.1441145, 0, 1, 0, 0.1441144, 0, 0.989561, 115.240216, 4, 33.7985595)
+width = 3.9800000970721294
+rise = 0.8459751360800061
+high_side = 1.0
+
+[node name="Pump House" parent="Buildings" instance=ExtResource("4_building_scene")]
+transform = Transform3D(0, 0, -2.5, 0, 2.8, 0, 2.5, 0, 0, 232, 1.4, -27)
+
+[node name="MeshInstance3D" parent="Buildings/Pump House"]
+surface_material_override/0 = SubResource("StandardMaterial3D_pumphouse_wall")
+
+[node name="PumpHouse_Roof" type="MeshInstance3D" parent="Buildings"]
+transform = Transform3D(-2.5, 0, 0, 0, 0.9781476, 0.5313914, 0, 0.2079117, -2.5, 232, 3.0656957, -27)
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_tos3")
 
-[node name="TurnOutShed3_Gable_North" parent="Buildings" instance=ExtResource("26_gable_scene")]
-transform = Transform3D(-0.989561, 0, 0.1441144, 0, 1, 0, -0.1441144, 0, -0.989561, 116.2878, 4, 26.60544)
-width = 3.98
-rise = 1.148927
+[node name="PumpHouse_End_East" parent="Buildings" instance=ExtResource("28_lean_to_end_scene")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 233.25, 2.8, -27)
+width = 2.5
+rise = 0.5313914041750554
+high_side = 1.0
 
-[node name="TurnOutShed3_Gable_South" parent="Buildings" instance=ExtResource("26_gable_scene")]
-transform = Transform3D(0.989561, 0, -0.1441144, 0, 1, 0, 0.1441144, 0, 0.989561, 115.2402, 4, 33.79856)
-width = 3.98
-rise = 1.148927
+[node name="PumpHouse_End_West" parent="Buildings" instance=ExtResource("28_lean_to_end_scene")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 230.75, 2.8, -27)
+width = 2.5
+rise = 0.5313914041750554
+high_side = -1.0
 
 [node name="Horse" parent="." instance=ExtResource("5_horse_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 165, 0, 35)
