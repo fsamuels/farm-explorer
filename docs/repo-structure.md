@@ -74,7 +74,9 @@ farm-sim/
   consider Git LFS or keeping them out of git entirely (local/cloud storage
   with a pointer/README in assets/) once volume is known.
 - `.godot/` (editor cache) and `*.import` files are gitignored — regenerated
-  locally when the project is opened in the Godot editor.
+  locally when the project is opened in the Godot editor. `tr6.glb.import`
+  is the one tracked exception (embeds textures instead of the default
+  Extract mode) — see D-29.
 - Textures the scene actually loads must live under `project/` — Godot's
   `res://` root is the `project/` directory and can't reach outside it (no
   `res://../assets`). `assets/` stays the place for source/raw material and
