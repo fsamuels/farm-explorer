@@ -26,6 +26,8 @@
 
 ## Output checklist
 
-- [ ] Orthomosaic image (for terrain texture)
+- [x] Orthomosaic image (for terrain texture) — Front Barn/Shop/Sally's House
+      section done via ODM `--fast-orthophoto`, see `docs/parcel-data.md`.
+      Rest of the property still needs its own flight(s).
 - [ ] Heightmap/DEM (if doing photogrammetry terrain)
-- [ ] Raw photo set retained (useful later for photogrammetry on individual buildings)
+- [x] Raw photo set retained — `assets/drone-source/front-section/` (gitignored)
