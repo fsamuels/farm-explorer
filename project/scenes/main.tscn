@@ -357,7 +357,7 @@ rise = 1.4061
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 165, 0, 35)
 
 [node name="Flock" parent="." instance=ExtResource("6_flock_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, -10)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, -16.096)
 
 [node name="Coyote" parent="." instance=ExtResource("7_coyote_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70, 0, 140)
