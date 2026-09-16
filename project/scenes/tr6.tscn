@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://models/tr6.glb" id="1_tr6_model"]
+
+[node name="TR6" type="Node3D"]
+
+[node name="Model" parent="." instance=ExtResource("1_tr6_model")]
+transform = Transform3D(0.67, 0, 0, 0, 0.67, 0, 0, 0, 0.67, 0, 0.945631, 0)

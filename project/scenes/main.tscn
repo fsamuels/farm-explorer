@@ -26,6 +26,7 @@
 [ext_resource type="Texture2D" path="res://textures/roofs/turn_out_shed_2_west.png" id="24_roof_tos2_w"]
 [ext_resource type="Texture2D" path="res://textures/roofs/turn_out_shed_2_east.png" id="25_roof_tos2_e"]
 [ext_resource type="PackedScene" path="res://scenes/gable_end.tscn" id="26_gable_scene"]
+[ext_resource type="PackedScene" path="res://scenes/tr6.tscn" id="27_tr6_scene"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -418,6 +419,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 242.1, 0, -35)
 
 [node name="Quail6" parent="." instance=ExtResource("14_quail_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 239.3, 0, -34.3)
+
+[node name="TR6" parent="." instance=ExtResource("27_tr6_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 215, 0, -52.205)
 
 [node name="Player" parent="." unique_id=1542815032 instance=ExtResource("2_player_scene")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 247.9, 1, -41.300003)

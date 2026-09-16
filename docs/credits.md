@@ -16,3 +16,4 @@ CC0 assets (e.g. the horse model, see D-9 in
 | Duck (`project/models/duck_madtroll.glb`) | madtrollstudio | [poly.pizza/m/4plJcFXhim](https://poly.pizza/m/4plJcFXhim) | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
 | Lesser snow goose (`project/models/goose.glb`) | Poly by Google | [poly.pizza/m/5d10ZQ9QzuS](https://poly.pizza/m/5d10ZQ9QzuS) | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
 | Quail (`project/models/quail.glb`) | Poly by Google | [poly.pizza/m/4A0kLzM65Mg](https://poly.pizza/m/4A0kLzM65Mg) | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
+| Triumph TR6 (`project/models/tr6.glb`) | Configcars | [sketchfab.com/3d-models/tr6-with-open-top-8a926ced77064fea803b5f2eaa220372](https://sketchfab.com/3d-models/tr6-with-open-top-8a926ced77064fea803b5f2eaa220372) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
