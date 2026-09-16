@@ -5,10 +5,52 @@ Built on Godot 4 — the engine decision is finalized (D-2; see
 Steps are ordered by recognition-impact-per-hour, not by conventional game dev
 milestones — the priority is fast, visible progress toward "that's clearly the farm."
 
+## Current priority — realism pass
+
+The user's stated next focus, ahead of finishing out any one phase in full:
+make the property look and feel more like the real place, rather than a
+placeholder blockout. Tracked as new items in their respective phases below;
+listed together here since they're the immediate priority as a group:
+
+1. **Missing buildings** (Phase 2) — the current 7 buildings are all Overture
+   Maps' ML-detected footprints (D-5); an ML model trained on satellite
+   imagery can miss small/irregular real structures (sheds, coops, run-ins).
+   Needs a real on-the-ground inventory of what's out there but not yet placed.
+2. **Fence gates** (Phase 2) — the boundary fence (13 segments, D-11) is
+   currently one fully closed loop with no openings anywhere, including at
+   the real driveway entrance near Lowden-Gardena Road the player already
+   spawns next to ([docs/parcel-data.md](parcel-data.md)). Needs real gate
+   locations.
+3. **Building wall textures** (Phase 4) — only roofs have real photo textures
+   so far (5 of 7 buildings, D-20 through D-23), and only because the drone
+   orthomosaic happened to cover them from above; every wall is still the
+   placeholder box color.
+4. **Building/overlay alignment** (Phase 4) — building positions are still
+   the ML-approximated Overture footprints (D-5), never cross-checked against
+   the real drone orthomosaic now sitting under 5 of them; that orthomosaic's
+   own placement fit landed only 0.7–2.2m accurate against those same
+   building positions (D-19), so some visible mismatch between building and
+   ground texture is expected.
+5. **Missing animals** (Phase 5) — current roster is 2 horses, a flock (6
+   hens + 1 rooster), 1 coyote, 3 ducks, 10 geese, 6 quail. Needs the real
+   list of what's actually kept on the property today.
+6. **Trees and other foliage** (Phase 4) — the only vegetation so far is the
+   D-11 boundary treeline, which exists as a hard map-edge limit 20m *outside*
+   the real property, not as real foliage placement; the property itself
+   (yard trees, wooded areas, brush) has none yet.
+7. **Drone coverage for the back of the property** (Phase 0/1) — the only
+   real drone capture so far is D-19's single flight over the "front
+   section" (Front Barn/Shop/Sally's House, all near the Lowden-Gardena Road
+   entrance); House and Back Barn sit much farther from the road and are
+   still on the NAIP stand-in with no orthomosaic, which is also why they're
+   still flat-topped with no roof texture (item 4 above, Phase 4). Needs a
+   second drone flight over that back section, then the same OpenDroneMap
+   processing D-19 already proved out.
+
 ## Phase 0 — Source data
 
-- [~] Fly drone in a structured overlapping grid pattern over the full property, to support photogrammetry terrain generation later — first capture done for one section only (129 nadir, GPS-tagged photos over the Front Barn/Shop/Sally's House area, D-19); full-property coverage still pending
-- [x] Fly a straight-down pass for a clean top-down orthomosaic (aerial texture) — done for that same section (D-19); repeat for the rest of the property as further sections are captured
+- [~] Fly drone in a structured overlapping grid pattern over the full property, to support photogrammetry terrain generation later — first capture done for one section only (129 nadir, GPS-tagged photos over the Front Barn/Shop/Sally's House area, D-19); **next up: a second flight over the back section (House, Back Barn) — current priority, see above**
+- [x] Fly a straight-down pass for a clean top-down orthomosaic (aerial texture) — done for that same front section (D-19); repeat for the back section next
 - [x] Gather any existing parcel boundary / measurement data (check water rights project docs — parcel is 340732310005) — confirmed acreage, real boundary polygon, and approximate (ML-derived) building footprints, all via public GIS REST APIs, see [docs/parcel-data.md](parcel-data.md)
 - [ ] Note real-world dimensions of key structures (barn, key fences) for scale validation later
 
@@ -17,7 +59,7 @@ milestones — the priority is fast, visible progress toward "that's clearly the
 - [x] Process drone photos into an orthomosaic (top-down stitched image) — OpenDroneMap (`opendronemap/odm` Docker image, `--fast-orthophoto --skip-report`) processed the D-19 capture into a real orthophoto; proven for one section, repeatable as more sections are flown
 - [ ] Optionally process into a heightmap/DEM if photogrammetry is used — explicitly skipped for the D-19 run (orthophoto only, no 3D mesh was needed for a ground texture)
 - [ ] Import terrain into engine, scaled to match real property dimensions — still a flat ground plane; no real terrain geometry yet, only ground *texture* has improved
-- [~] Apply orthomosaic as terrain texture — the front section (Front Barn/Shop/Sally's House area) now uses the real drone-derived orthomosaic as a higher-resolution ground patch layered over the base texture, positioned via its own UTM georeferencing (D-19); the rest of the property is still the public-NAIP-imagery stand-in (see [docs/parcel-data.md](parcel-data.md))
+- [~] Apply orthomosaic as terrain texture — the front section (Front Barn/Shop/Sally's House area) now uses the real drone-derived orthomosaic as a higher-resolution ground patch layered over the base texture, positioned via its own UTM georeferencing (D-19); the back section (House, Back Barn) and rest of the property are still the public-NAIP-imagery stand-in (see [docs/parcel-data.md](parcel-data.md)) — current priority, see above
 - [ ] Validate scale: confirm walking speed vs. known real-world distances (e.g. barn to fence line) feels correct
 
 ## Phase 2 — Layout blockout
@@ -26,6 +68,8 @@ milestones — the priority is fast, visible progress toward "that's clearly the
 - [x] Add fence lines and pasture divisions as simple planes/lines — fence now traces the real parcel boundary polygon (13 segments) as a procedurally-generated wire/post fence rather than a placeholder box (see D-11); no pasture-division lines yet
 - [x] Edge-of-map treatment — a treeline 20m outside the real boundary (`scenes/tree_line_segment.tscn`) is the actual hard limit on exploration, rather than the property fence itself (see D-11); not an item from the original plan, added at the user's request. Known rough edge: corners look a bit off since each segment is offset independently with no mitering (D-11) — acceptable for now, flagged by the user as something to revisit later, not a blocker
 - [ ] Walk the blockout and compare against memory/photos of the real property
+- [ ] Add any real buildings not yet represented — current 7 are Overture Maps' ML-detected footprints (D-5); small/irregular structures (sheds, coops, run-ins) an ML model can miss may be unrepresented. Needs a real inventory from the user — current priority, see above
+- [ ] Add gate openings to the boundary fence at real vehicle/pedestrian access points (e.g. the driveway near Lowden-Gardena Road the player already spawns next to) — the fence is currently one fully closed 13-segment loop with no way through it anywhere (D-11) — current priority, see above
 
 ## Phase 3 — First-person exploration
 
@@ -40,13 +84,16 @@ recognizable, shareable version.
 ## Phase 4 — Detail pass
 
 - [ ] Ground-level textures (grass, dirt, gravel) blended into terrain
-- [ ] Vegetation scatter (grass shader/tool)
+- [ ] Vegetation scatter (grass shader/tool) — ground-cover only (grass/dirt shading); see the separate discrete-tree/foliage item below
 - [ ] Dynamic lighting / time-of-day
 - [ ] Hero building detail pass (start with barn) — hand-modeled or photogrammetry
 - [ ] Ambient effects (wind, sound) — cheap realism wins
 - [x] Higher-resolution ground patch over the front section (Front Barn/Shop/Sally's House area) from the first real drone capture, layered over the base NAIP ground plane (D-19) — not an item from the original plan, pulled forward once drone photos became available
 - [x] Sloped roof geometry and gable-end fills for the 5 buildings covered by that orthomosaic — roof crops textured per building/slope, plus a shared procedural gable-fill script (D-20 through D-23, D-25); House and Back Barn remain flat-topped, not yet covered by a drone pass — not an item from the original plan
 - [x] One decorative parked prop — a Triumph TR6 east of the Shop, facing south (CC BY 4.0, Configcars via Sketchfab, D-26); simplified from a 32MB/879k-triangle download to 7.7MB since it's a static background object — not an item from the original plan, added at the user's request
+- [ ] Texture each building's exterior walls — only roofs have real photo textures so far (5 of 7 buildings, D-20 through D-23); every wall is still the placeholder box color — current priority, see above
+- [ ] Re-align building placement (and their roof-texture overlays) against the real drone orthomosaic/ground imagery — building positions are still the ML-approximated Overture footprints (D-5), never cross-checked against the orthomosaic now sitting under 5 of them; that orthomosaic's own placement fit landed only 0.7–2.2m accurate against those same building positions (D-19), so some visible mismatch is expected — current priority, see above
+- [ ] Add trees and other foliage scattered around the property itself (yard trees, wooded areas, brush) — distinct from the D-11 boundary treeline, which is a hard map-edge limit 20m *outside* the property, not real vegetation placement — current priority, see above
 
 ## Phase 5 — Animals
 
@@ -60,6 +107,7 @@ recognizable, shareable version.
 - The horse (D-9) was found to be ~6.9m tall — `horse.tscn` had never applied a scale correction at all — and fixed to ~1.6m (D-18). Every animal in the scene has now been re-verified with an engine-instanced bounding-box check rather than an assumed or hand-parsed scale
 - The flock's hens were floating with their feet buried — `hen.glb`'s origin was at the model's vertical center rather than its feet (unlike the rooster) — fixed with a Y-offset in `hen.tscn`, and the flock moved 20 ft north at the user's request (D-24)
 - The horses were found facing 180° backwards while walking ("moonwalking" per the user) — `horse.gd`'s `look_at()` was correctly orienting them toward their direction of travel, but the model's own local forward axis didn't match, so the body faced away from the direction of movement while the walk animation kept cycling; fixed with a rotation correction in `horse.tscn` (D-28)
+- [ ] Add any real animals not yet represented — current roster is 2 horses, a flock (6 hens + 1 rooster), 1 coyote, 3 ducks, 10 geese, 6 quail. Needs the real list of what's actually kept on the property today — current priority, see above
 - [ ] Upgrade the horse model to something more realistic with a richer action set (current CC0 Quaternius horse only has Idle/Walk/Run/etc., see D-9) — not started, no asset chosen yet. Research so far (2026-09-15), prompted by [this Godot horse-locomotion demo](https://www.reddit.com/r/godot/comments/1td8uzx/testing_two_different_horse_locomotion_systems/):
   - The Reddit demo's variety traces back to a [Sketchfab "Armored Horse" by naminoff](https://sketchfab.com/3d-models/armored-horse-98c3f1c40a6b422dba76bf5403e0a3d8) (CC BY 4.0, free, 44k tris, medieval/fantasy armor) via its creator's own [Horse-Riding-Simulator](https://github.com/Lakshman-YT/Horse-Riding-Simulator) repo — but the extra actions were **hand-animated in Blender by that developer**, not shipped with the download, so there's no ready-made rich-animation asset to just pull from there
   - Considered as free/CC alternatives: [abhayexe's "Horse Rigged (Game Ready)"](https://sketchfab.com/3d-models/horse-riggedgame-ready-bc64f4ff7966474ca9bacd42fa73a754) (CC BY, free, but low-poly/stylized at 2.9k tris — not more realistic than what we have); more Quaternius horse variants exist on poly.pizza but are almost certainly the same limited animation set as the current model
