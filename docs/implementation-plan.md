@@ -54,6 +54,7 @@ recognizable, shareable version.
 - [x] 10 geese (CC-BY, same source — see D-16) in their own cluster ~30m south of the ducks
 - [x] 6 quail (CC-BY, same source — see D-17) wandering near the player's spawn point
 - The horse (D-9) was found to be ~6.9m tall — `horse.tscn` had never applied a scale correction at all — and fixed to ~1.6m (D-18). Every animal in the scene has now been re-verified with an engine-instanced bounding-box check rather than an assumed or hand-parsed scale
+- The flock's hens were floating with their feet buried — `hen.glb`'s origin was at the model's vertical center rather than its feet (unlike the rooster) — fixed with a Y-offset in `hen.tscn`, and the flock moved 20 ft north at the user's request (D-24)
 
 ## Phase 6 — Chores / gameplay (lowest priority)
 
