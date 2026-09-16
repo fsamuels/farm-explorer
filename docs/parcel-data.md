@@ -35,8 +35,10 @@ based on on-the-ground knowledge rather than a footprint-size guess.
       accurate shape and placement (ML footprints are approximate) — the
       building-to-structure mapping above should carry over even once the
       footprint geometry itself is replaced
-- [ ] Replace the NAIP ground texture with the drone-derived orthomosaic once
-      processed — NAIP is lower-resolution and possibly dated
+- [x] Replace the NAIP ground texture with the drone-derived orthomosaic for
+      the Front Barn/Shop/Sally's House area — see "How the front-section
+      orthomosaic was obtained" below. NAIP still covers the rest of the
+      property; replacing it elsewhere needs its own drone flight + ODM run.
 
 ## How the boundary polygon was obtained
 
@@ -129,6 +131,41 @@ Like the building footprints, this is a stand-in: real resolution is coarser
 than drone imagery and the capture date is unknown/dated, but it beats a flat
 color for getting oriented on the case map. Replace wholesale with the drone
 orthomosaic once that's processed (see `assets/orthomosaic/`).
+
+## How the front-section orthomosaic was obtained
+
+The first real drone capture: 129 nadir (straight-down), GPS-tagged photos
+from a single DJI flight over the Front Barn/Shop/Sally's House area,
+retained under `assets/drone-source/front-section/` (gitignored — see
+`docs/drone-capture-plan.md`). Stitched with **OpenDroneMap**
+(`opendronemap/odm` Docker image — has a native arm64 build, no emulation
+needed) using `--fast-orthophoto --skip-report`, since only a 2D orthophoto
+was needed, not a full 3D reconstruction. All 129 images were used in the
+reconstruction; output is a ~5cm/pixel GeoTIFF (UTM 11N / EPSG:32611)
+including an alpha channel marking pixels outside the actual flight coverage
+as transparent.
+
+To place it in the scene, the orthophoto's UTM corners were converted to
+lon/lat then through the same equirectangular projection as the rest of the
+scene (D-6 in [decisions.md](project/decisions.md)) — but with that
+projection's origin fit directly against the 7 real building positions
+already in `main.tscn` (rather than re-deriving the boundary polygon's
+centroid independently), so the new patch is guaranteed to agree with what's
+already placed. That fit came out accurate to 0.7–2.2m against the known
+building positions (consistent with their ML-approximation noise, D-5) and
+revealed the patch is rotated about 1.147° relative to the scene's axes —
+real, not noise, at this size (246m×173.5m) — which is baked into the
+`FrontSectionOrthomosaic` node's transform in `main.tscn` rather than
+ignored. See D-19 for how this was verified (corner-position algebra +
+an independently-derived top-down composite image) before being wired in.
+
+Saved to `project/textures/ground/orthomosaic-front-section.png` (same
+`project/` constraint as the NAIP texture, D-7) and added as a separate
+`PlaneMesh` layered just above the existing ground plane — not pasted into
+the single 1024×1024 NAIP texture — specifically to keep its much higher
+resolution; the orthophoto's own alpha channel makes it blend into the
+surrounding NAIP along the true, irregular flight boundary instead of a
+hard rectangle.
 
 ## How this is used in the scene
 

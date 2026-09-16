@@ -20,7 +20,8 @@ farm-sim/
     ├── project.godot             # engine config, input map (WASD + mouse look)
     ├── icon.svg
     ├── scenes/
-    │   ├── main.tscn             # ground plane (NAIP-textured) + instances the scenes below
+    │   ├── main.tscn             # ground plane (NAIP-textured) + a higher-res drone-orthomosaic
+    │   │                          # patch over the front section (see D-19) + instances below
     │   ├── player.tscn           # first-person player, instanced once in main.tscn
     │   ├── fence_segment.tscn    # procedurally-generated wire/post fence, instanced 13x (boundary polygon) — see D-11
     │   ├── tree_line_segment.tscn # procedurally-scattered treeline + invisible collision wall, instanced 13x, 20m outside the boundary — see D-11
@@ -57,7 +58,9 @@ farm-sim/
     │   └── quail.glb               # CC-BY static mesh (Poly by Google) — see D-17, credits.md
     └── textures/
         └── ground/                # ground textures actually loaded by the scene (res://) —
-                                     # NAIP imagery for now, replaced by the orthomosaic later
+                                     # NAIP imagery (whole property) plus a real drone
+                                     # orthomosaic patch over the front section (see D-19);
+                                     # rest of the property still NAIP-only for now
 ```
 
 ## Notes

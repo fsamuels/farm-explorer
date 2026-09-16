@@ -14,6 +14,7 @@
 [ext_resource type="PackedScene" path="res://scenes/duck_madtroll.tscn" id="12_duck_madtroll_scene"]
 [ext_resource type="PackedScene" path="res://scenes/goose.tscn" id="13_goose_scene"]
 [ext_resource type="PackedScene" path="res://scenes/quail.tscn" id="14_quail_scene"]
+[ext_resource type="Texture2D" path="res://textures/ground/orthomosaic-front-section.png" id="15_front_section_ortho"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -34,6 +35,14 @@ roughness = 0.9
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(520, 1, 520)
 
+[sub_resource type="PlaneMesh" id="PlaneMesh_front_section"]
+size = Vector2(246.0823, 173.5148)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_front_section"]
+transparency = 1
+albedo_texture = ExtResource("15_front_section_ortho")
+roughness = 0.9
+
 [node name="Main" type="Node3D" unique_id=1143109196]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=215844830]
@@ -53,6 +62,11 @@ surface_material_override/0 = SubResource("StandardMaterial3D_ground")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=49619739]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 shape = SubResource("BoxShape3D_ground")
+
+[node name="FrontSectionOrthomosaic" type="MeshInstance3D" parent="." unique_id=2847193061]
+transform = Transform3D(0.9998, 0, -0.020012, 0, 1, 0, 0.020012, 0, 0.9998, 155.019, 0.03, -13.2403)
+mesh = SubResource("PlaneMesh_front_section")
+surface_material_override/0 = SubResource("StandardMaterial3D_front_section")
 
 [node name="Boundary" type="Node3D" parent="." unique_id=1203940462]
 
