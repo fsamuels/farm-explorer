@@ -357,6 +357,9 @@ rise = 1.4061
 [node name="Horse" parent="." instance=ExtResource("5_horse_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 165, 0, 35)
 
+[node name="Horse2" parent="." instance=ExtResource("5_horse_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 235, 0, 33)
+
 [node name="Flock" parent="." instance=ExtResource("6_flock_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, -16.096)
 
@@ -364,43 +367,43 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, -16.096)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70, 0, 140)
 
 [node name="MallardDuck" parent="." instance=ExtResource("10_mallard_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.856, 0, 29.897)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.404, 0, 15.545)
 
 [node name="Duck1" parent="." instance=ExtResource("11_duck_poly_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17.5, 0, 27)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40.048, 0, 12.648)
 
 [node name="Duck2" parent="." instance=ExtResource("12_duck_madtroll_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.5, 0, 33)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 35.048, 0, 18.648)
 
 [node name="Goose1" parent="." instance=ExtResource("13_goose_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.856, 0, 56.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.5, 0, 16.886)
 
 [node name="Goose2" parent="." instance=ExtResource("13_goose_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.856, 0, 58)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.5, 0, 18.386)
 
 [node name="Goose3" parent="." instance=ExtResource("13_goose_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.856, 0, 56)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.5, 0, 16.386)
 
 [node name="Goose4" parent="." instance=ExtResource("13_goose_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.856, 0, 57.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.5, 0, 17.886)
 
 [node name="Goose5" parent="." instance=ExtResource("13_goose_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.856, 0, 57)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45.5, 0, 17.386)
 
 [node name="Goose6" parent="." instance=ExtResource("13_goose_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.856, 0, 63)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 29.5, 0, 23.386)
 
 [node name="Goose7" parent="." instance=ExtResource("13_goose_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10.856, 0, 61.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 33.5, 0, 21.886)
 
 [node name="Goose8" parent="." instance=ExtResource("13_goose_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14.856, 0, 64)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 37.5, 0, 24.386)
 
 [node name="Goose9" parent="." instance=ExtResource("13_goose_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18.856, 0, 62.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 41.5, 0, 22.886)
 
 [node name="Goose10" parent="." instance=ExtResource("13_goose_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22.856, 0, 62)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45.5, 0, 22.386)
 
 [node name="Quail1" parent="." instance=ExtResource("14_quail_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 241.4, 0, -36.3)

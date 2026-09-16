@@ -46,7 +46,7 @@ recognizable, shareable version.
 
 ## Phase 5 — Animals
 
-- [x] Static horse models placed in pastures — one CC0 rigged/animated horse model (Quaternius, see [decisions.md](project/decisions.md) D-9) placed near Turn Out Shed 1
+- [x] Static horse models placed in pastures — CC0 rigged/animated horse model (Quaternius, see [decisions.md](project/decisions.md) D-9), now 2 instances roaming a shared rectangular pasture area near Turn Out Shed 1 rather than circling a fixed home point (D-27)
 - [x] Simple wander/movement AI — done ahead of the plan's stated ordering, at the user's request; picks a random point within a radius of its home position, walks to it, idles, repeats (`scripts/horse.gd`, generalized as `scripts/wander.gd` for the animals below)
 - [x] A loose flock (6 hens + 1 rooster, CC-BY — see D-10 and [docs/credits.md](credits.md)) that wanders the farmyard together — each bird micro-wanders near a shared, slower-wandering flock center, so the group drifts as a unit without moving in lockstep
 - [x] One coyote (CC-BY, same source) wandering a fixed area in the back section of the property, away from the horse and flock
