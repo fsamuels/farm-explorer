@@ -385,26 +385,26 @@ rise = 0.8459751360800061
 high_side = 1.0
 
 [node name="Pump House" parent="Buildings" instance=ExtResource("4_building_scene")]
-transform = Transform3D(0, 0, -4.24, 0, 2.8, 0, 2.0, 0, 0, 236.64481, 1.4, -24.61562)
+transform = Transform3D(0.036077, 0, -1.596969, 0, 2.8, 0, 1.802391, 0, 0.031965, 236.716662, 1.4, -24.767317)
 
 [node name="MeshInstance3D" parent="Buildings/Pump House"]
 surface_material_override/0 = SubResource("StandardMaterial3D_pumphouse_wall")
 
 [node name="PumpHouse_Roof" type="MeshInstance3D" parent="Buildings"]
-transform = Transform3D(-4.24, 0, 0, 0, 0.9781476, 0.42511312, 0, 0.2079117, -2.0, 236.64481, 3.01255656, -24.61562)
+transform = Transform3D(-1.596969, 0.004161, -0.036077, 0, 0.9781476, 0.383222, 0.031965, 0.20787, -1.802391, 236.716662, 2.991611, -24.767317)
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_tos3")
 
 [node name="PumpHouse_End_East" parent="Buildings" instance=ExtResource("28_lean_to_end_scene")]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 238.76481, 2.8, -24.61562)
-width = 2.0
-rise = 0.42511312334004425
+transform = Transform3D(-0.020012, 0, 0.9998, 0, 1, 0, -0.9998, 0, -0.020012, 237.515147, 2.8, -24.7833)
+width = 1.802752
+rise = 0.383222
 high_side = 1.0
 
 [node name="PumpHouse_End_West" parent="Buildings" instance=ExtResource("28_lean_to_end_scene")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 234.52481, 2.8, -24.61562)
-width = 2.0
-rise = 0.42511312334004425
+transform = Transform3D(0.020012, 0, -0.9998, 0, 1, 0, 0.9998, 0, 0.020012, 235.918177, 2.8, -24.751334)
+width = 1.802752
+rise = 0.383222
 high_side = -1.0
 
 [node name="Horse" parent="." instance=ExtResource("5_horse_scene")]
