@@ -9,10 +9,11 @@ Thumbs.db
 .godot/
 *.import
 
-# tr6.glb embeds its textures instead of extracting them (unlike other
-# models), so its .import settings must be tracked or a fresh reimport
-# falls back to the default Extract mode and breaks the scene again.
+# tr6.glb and bmw_2002_tii.glb embed their textures instead of extracting them
+# (unlike other models), so their .import settings must be tracked or a fresh
+# reimport falls back to the default Extract mode and breaks the scene again.
 !project/models/tr6.glb.import
+!project/models/bmw_2002_tii.glb.import
 
 # Unity (if selected)
 Library/
