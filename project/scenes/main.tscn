@@ -26,6 +26,7 @@
 [ext_resource type="PackedScene" path="res://scenes/gable_end.tscn" id="26_gable_scene"]
 [ext_resource type="PackedScene" path="res://scenes/tr6.tscn" id="27_tr6_scene"]
 [ext_resource type="PackedScene" path="res://scenes/lean_to_end.tscn" id="28_lean_to_end_scene"]
+[ext_resource type="Texture2D" path="res://textures/buildings/red_shipping_container.png" id="29_container_tex"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -96,6 +97,12 @@ roughness = 0.7
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pumphouse_wall"]
 albedo_color = Color(0.92, 0.92, 0.9, 1)
 roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_container_corrugated"]
+albedo_texture = ExtResource("29_container_tex")
+roughness = 0.6
+uv1_triplanar = true
+uv1_scale = Vector3(0.513693, 0.407538, 0.513693)
 
 [node name="Main" type="Node3D" unique_id=1143109196]
 
@@ -261,6 +268,9 @@ transform = Transform3D(3.938453, 0, -1.047568, 0, 4, 0, 0.5735754, 0, 7.193119,
 
 [node name="Red Shipping Container" parent="Buildings" instance=ExtResource("4_building_scene")]
 transform = Transform3D(2.432578, 0, -0.9500533, 0, 2.59, 0, 0.1901665, 0, 12.15292, 194.29, 1.295, -29.7)
+
+[node name="MeshInstance3D" parent="Buildings/Red Shipping Container"]
+surface_material_override/0 = SubResource("StandardMaterial3D_container_corrugated")
 
 [node name="Shop_Roof_North" type="MeshInstance3D" parent="Buildings" unique_id=3721904820]
 transform = Transform3D(14.87828, -0.00761205, -0.07855635, 0, 0.8660254, -2.979127, -0.2265346, -0.4999421, -5.159402, 202.2936, 5.409564, -55.1079)
