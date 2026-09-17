@@ -247,7 +247,7 @@ transform = Transform3D(23.218, 0, 0, 0, 4.549, 0, 0, 0, 30.223, 57.757, 2.274, 
 transform = Transform3D(14.87828, 0, 0.1571127, 0, 3.92, 0, -0.2265346, 0, 10.3188, 202.3329, 1.96, -52.5282)
 
 [node name="Sally\'s House" parent="Buildings" unique_id=1054562146 instance=ExtResource("4_building_scene")]
-transform = Transform3D(17.9664, 0, 0.1837101, 0, 4, 0, -0.3596155, 0, 9.178162, 216.1654, 2, -27.1942)
+transform = Transform3D(15.404382, 0, 0.18371, 0, 4, 0, -0.308334, 0, 9.178162, 214.884391, 2, -27.168559)
 
 [node name="Sally's House Garage" parent="Buildings" instance=ExtResource("4_building_scene")]
 transform = Transform3D(7.93541, 0, 0.1473495, 0, 4, 0, -0.1588796, 0, 7.359525, 211.6169, 2, -35.3591)
@@ -284,12 +284,12 @@ mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_shop_s")
 
 [node name="SallysHouse_Roof_North" type="MeshInstance3D" parent="Buildings" unique_id=3721904822]
-transform = Transform3D(17.9664, -0.010006, -0.09185506, 0, 0.8660254, -2.650038, -0.3596155, -0.4998999, -4.589081, 216.1195, 5.325019, -29.48874)
+transform = Transform3D(15.404382, -0.010006, -0.091855, 0, 0.8660254, -2.650038, -0.308334, -0.4999, -4.589081, 214.838463, 5.325019, -29.4631)
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_sh_n")
 
 [node name="SallysHouse_Roof_South" type="MeshInstance3D" parent="Buildings" unique_id=3721904823]
-transform = Transform3D(17.9664, 0.010006, 0.09185506, 0, 0.8660254, -2.650038, -0.3596155, 0.4998999, 4.589081, 216.2114, 5.325019, -24.89966)
+transform = Transform3D(15.404382, 0.010006, 0.091855, 0, 0.8660254, -2.650038, -0.308334, 0.4999, 4.589081, 214.930319, 5.325019, -24.874019)
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_sh_s")
 
@@ -329,7 +329,7 @@ width = 9.178162
 rise = 2.650038
 
 [node name="SallysHouse_Gable_East" parent="Buildings" unique_id=3721904833 instance=ExtResource("26_gable_scene")]
-transform = Transform3D(-0.02001199, 0, 0.9997997, 0, 1, 0, -0.9997997, 0, -0.02001199, 225.1486, 4, -27.374)
+transform = Transform3D(-0.02001199, 0, 0.9997997, 0, 1, 0, -0.9997997, 0, -0.02001199, 222.586582, 4, -27.322726)
 width = 9.178162
 rise = 2.650038
 
@@ -385,26 +385,26 @@ rise = 0.8459751360800061
 high_side = 1.0
 
 [node name="Pump House" parent="Buildings" instance=ExtResource("4_building_scene")]
-transform = Transform3D(0, 0, -4.24, 0, 2.8, 0, 2.0, 0, 0, 236.64481, 1.4, -24.61562)
+transform = Transform3D(0.036077, 0, -1.596969, 0, 2.8, 0, 1.802391, 0, 0.031965, 236.716662, 1.4, -24.767317)
 
 [node name="MeshInstance3D" parent="Buildings/Pump House"]
 surface_material_override/0 = SubResource("StandardMaterial3D_pumphouse_wall")
 
 [node name="PumpHouse_Roof" type="MeshInstance3D" parent="Buildings"]
-transform = Transform3D(-4.24, 0, 0, 0, 0.9781476, 0.42511312, 0, 0.2079117, -2.0, 236.64481, 3.01255656, -24.61562)
+transform = Transform3D(-1.596969, 0.004161, -0.036077, 0, 0.9781476, 0.383222, 0.031965, 0.20787, -1.802391, 236.716662, 2.991611, -24.767317)
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_tos3")
 
 [node name="PumpHouse_End_East" parent="Buildings" instance=ExtResource("28_lean_to_end_scene")]
-transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 238.76481, 2.8, -24.61562)
-width = 2.0
-rise = 0.42511312334004425
+transform = Transform3D(-0.020012, 0, 0.9998, 0, 1, 0, -0.9998, 0, -0.020012, 237.515147, 2.8, -24.7833)
+width = 1.802752
+rise = 0.383222
 high_side = 1.0
 
 [node name="PumpHouse_End_West" parent="Buildings" instance=ExtResource("28_lean_to_end_scene")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 234.52481, 2.8, -24.61562)
-width = 2.0
-rise = 0.42511312334004425
+transform = Transform3D(0.020012, 0, -0.9998, 0, 1, 0, 0.9998, 0, 0.020012, 235.918177, 2.8, -24.751334)
+width = 1.802752
+rise = 0.383222
 high_side = -1.0
 
 [node name="Horse" parent="." instance=ExtResource("5_horse_scene")]
