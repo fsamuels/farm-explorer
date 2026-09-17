@@ -1,0 +1,8 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://models/bmw_2002_tii.glb" id="1_bmw_model"]
+
+[node name="BMW2002tii" type="Node3D"]
+
+[node name="Model" parent="." instance=ExtResource("1_bmw_model")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0.77636, 0)
