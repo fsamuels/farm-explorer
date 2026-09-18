@@ -1,6 +1,13 @@
 # Raw drone captures — large, keep out of git until an LFS/storage decision is made
 assets/drone-source/
 
+# Ground-level reference photos for wall texturing — will accumulate across every
+# building as texturing continues, so treated the same as drone-source rather than
+# committed. The elevation-rectifier tool (tools/elevation-rectifier.html) never
+# uploads these raw photos anyway, only the rectified crop it produces, so nothing
+# in the texturing workflow actually needs them tracked in git.
+assets/reference-photos/
+
 # OS
 .DS_Store
 Thumbs.db
