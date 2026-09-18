@@ -28,6 +28,11 @@
 [ext_resource type="PackedScene" path="res://scenes/lean_to_end.tscn" id="28_lean_to_end_scene"]
 [ext_resource type="Texture2D" path="res://textures/buildings/red_shipping_container.png" id="29_container_tex"]
 [ext_resource type="PackedScene" path="res://scenes/bmw_2002_tii.tscn" id="30_bmw_scene"]
+[ext_resource type="Texture2D" path="res://textures/buildings/sallys_house_north_wall.png" id="31_wall_sh_n"]
+[ext_resource type="Texture2D" path="res://textures/buildings/sallys_house_south_wall.png" id="32_wall_sh_s"]
+[ext_resource type="Texture2D" path="res://textures/buildings/sallys_house_garage_north_wall.png" id="33_wall_shg_n"]
+[ext_resource type="Texture2D" path="res://textures/buildings/sallys_house_garage_east_wall.png" id="34_wall_shg_e"]
+[ext_resource type="Texture2D" path="res://textures/buildings/sallys_house_east_wall.png" id="35_wall_sh_e"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -104,6 +109,31 @@ albedo_texture = ExtResource("29_container_tex")
 roughness = 0.6
 uv1_triplanar = true
 uv1_scale = Vector3(0.513693, 0.407538, 0.513693)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall_sh_n"]
+albedo_texture = ExtResource("31_wall_sh_n")
+roughness = 0.9
+cull_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall_sh_s"]
+albedo_texture = ExtResource("32_wall_sh_s")
+roughness = 0.9
+cull_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall_shg_n"]
+albedo_texture = ExtResource("33_wall_shg_n")
+roughness = 0.9
+cull_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall_shg_e"]
+albedo_texture = ExtResource("34_wall_shg_e")
+roughness = 0.9
+cull_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall_sh_e"]
+albedo_texture = ExtResource("35_wall_sh_e")
+roughness = 0.9
+cull_mode = 2
 
 [node name="Main" type="Node3D" unique_id=1143109196]
 
@@ -332,6 +362,31 @@ rise = 2.650038
 transform = Transform3D(-0.02001199, 0, 0.9997997, 0, 1, 0, -0.9997997, 0, -0.02001199, 222.586582, 4, -27.322726)
 width = 9.178162
 rise = 2.650038
+
+[node name="SallysHouse_Wall_North" type="MeshInstance3D" parent="Buildings"]
+transform = Transform3D(-15.404382, -0.020012, 0.0, -0.0, -0.0, -4.0, 0.308334, -0.9998, 0.0, 214.792136, 2.0, -31.777636)
+mesh = SubResource("PlaneMesh_roof_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall_sh_n")
+
+[node name="SallysHouse_Wall_South" type="MeshInstance3D" parent="Buildings"]
+transform = Transform3D(15.404382, 0.020012, 0.0, 0.0, 0.0, -4.0, -0.308334, 0.9998, 0.0, 214.976646, 2.0, -22.559482)
+mesh = SubResource("PlaneMesh_roof_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall_sh_s")
+
+[node name="SallysHouseGarage_Wall_North" type="MeshInstance3D" parent="Buildings"]
+transform = Transform3D(-7.93541, -0.020018, 0.0, -0.0, -0.0, -4.0, 0.15888, -0.9998, 0.0, 211.542825, 2.0, -39.058858)
+mesh = SubResource("PlaneMesh_roof_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall_shg_n")
+
+[node name="SallysHouseGarage_Wall_East" type="MeshInstance3D" parent="Buildings"]
+transform = Transform3D(-0.147349, 0.9998, 0.0, -0.0, 0.0, -4.0, -7.359525, -0.020018, 0.0, 215.604601, 2.0, -35.43894)
+mesh = SubResource("PlaneMesh_roof_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall_shg_e")
+
+[node name="SallysHouse_Wall_East" type="MeshInstance3D" parent="Buildings"]
+transform = Transform3D(-0.18371, 0.9998, 0.0, -0.0, 0.0, -4.0, -9.178162, -0.020012, 0.0, 222.606578, 2.0, -27.323126)
+mesh = SubResource("PlaneMesh_roof_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_wall_sh_e")
 
 [node name="TurnOutShed1_End_North" parent="Buildings" instance=ExtResource("28_lean_to_end_scene")]
 transform = Transform3D(-0.9971061, 0, 0.0760229, 0, 1, 0, -0.0760229, 0, -0.9971061, 152.2019894, 4, 21.8257665)

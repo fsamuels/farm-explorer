@@ -15,7 +15,22 @@ farm-sim/
 ├── assets/
 │   ├── drone-source/             # raw drone photos (likely gitignored — large files)
 │   ├── orthomosaic/              # placeholder for the eventual drone-derived orthomosaic
+│   ├── reference-photos/         # gitignored (D-49) — ground-level phone photos of individual
+│   │                              # buildings, named by building + compass-facing wall (e.g.
+│   │                              # sallys_house/house_north.jpg), local-only source material
+│   │                              # for the tools/elevation-rectifier.html wall-texturing
+│   │                              # workflow (D-44, D-46); only the rectified crop it produces
+│   │                              # ever needs to leave the photographer's machine
 │   └── models/                   # 3D models (buildings, animals) once created
+├── tools/
+│   └── elevation-rectifier.html  # standalone web tool: drag a photo's 4 wall corners
+│                                    into a homography-corrected, real-proportioned wall
+│                                    texture (D-44). Open directly as a local file (corner
+│                                    picking + preview work fully offline; the "save into
+│                                    Claude" step instead downloads the PNG, since that
+│                                    step needs the claude.ai Artifact runtime's `assets`/
+│                                    `db` capabilities, which only exist when the same file
+│                                    is opened as a published Artifact, not a local file)
 └── project/                      # Godot project (chosen 2026-09-14, see engine-decision.md)
     ├── project.godot             # engine config, input map (WASD + mouse look)
     ├── icon.svg
@@ -64,8 +79,12 @@ farm-sim/
         │                          # NAIP imagery (whole property) plus a real drone
         │                          # orthomosaic patch over the front section (see D-19);
         │                          # rest of the property still NAIP-only for now
-        └── roofs/                 # real roof imagery cropped from the front-section
-                                     # orthomosaic, one per covered building (see D-20)
+        ├── roofs/                 # real roof imagery cropped from the front-section
+        │                            orthomosaic, one per covered building (see D-20)
+        └── buildings/             # real exterior-wall/siding imagery cropped from ground-level
+                                     reference photos (D-39, D-44) — one file per photographed
+                                     wall face; most buildings are still placeholder-color on
+                                     the sides that have no photo yet
 ```
 
 ## Notes
