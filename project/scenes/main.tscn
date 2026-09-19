@@ -38,6 +38,8 @@
 [ext_resource type="Texture2D" path="res://textures/roofs/garage_west.png" id="38_roof_garage_w"]
 [ext_resource type="Texture2D" path="res://textures/buildings/sallys_house_east_gable.png" id="39_gable_tex_sh_e"]
 [ext_resource type="Texture2D" path="res://textures/buildings/sallys_house_garage_north_gable.png" id="40_gable_tex_shg_n"]
+[ext_resource type="Texture2D" path="res://textures/horses/spots_small.png" id="41_horse_spots_small"]
+[ext_resource type="Texture2D" path="res://textures/horses/spots_large.png" id="42_horse_spots_large"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -148,6 +150,50 @@ roughness = 0.7
 albedo_texture = ExtResource("38_roof_garage_w")
 roughness = 0.7
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_coat_scarlett"]
+albedo_color = Color(0.35, 0.22, 0.16, 1)
+metallic = 0.4
+roughness = 0.415
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_coat_beauty"]
+albedo_color = Color(0.55, 0.3, 0.16, 1)
+metallic = 0.4
+roughness = 0.415
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_coat_pale"]
+albedo_color = Color(0.85, 0.82, 0.75, 1)
+metallic = 0.4
+roughness = 0.415
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_coat_black"]
+albedo_color = Color(0.045, 0.045, 0.05, 1)
+metallic = 0.4
+roughness = 0.415
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_coat_white"]
+albedo_color = Color(0.92, 0.92, 0.9, 1)
+metallic = 0.4
+roughness = 0.415
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_coat_spotted_small"]
+albedo_texture = ExtResource("41_horse_spots_small")
+uv1_triplanar = true
+uv1_scale = Vector3(3, 3, 3)
+metallic = 0.4
+roughness = 0.415
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_coat_spotted_large"]
+albedo_texture = ExtResource("42_horse_spots_large")
+uv1_triplanar = true
+uv1_scale = Vector3(3, 3, 3)
+metallic = 0.4
+roughness = 0.415
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_coat_grey"]
+albedo_color = Color(0.5, 0.5, 0.52, 1)
+metallic = 0.4
+roughness = 0.415
+
 [node name="Main" type="Node3D" unique_id=1143109196]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=215844830]
@@ -226,6 +272,53 @@ length = 435.6934
 [node name="Fence_13" parent="Boundary" instance=ExtResource("3_fence_scene")]
 transform = Transform3D(0.974614, 0, 0.2238918, 0, 1, 0, 0.2238918, 0, -0.974614, -116.5768, 0, -240.3234)
 length = 100.4337
+
+[node name="PastureFences" type="Node3D" parent="."]
+
+[node name="Fence_P5_North" parent="PastureFences" instance=ExtResource("3_fence_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 220, 0, -8.5)
+length = 60.0
+collision_layer = 0
+
+[node name="Fence_P4P5" parent="PastureFences" instance=ExtResource("3_fence_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 205, 0, 20)
+length = 90.0
+collision_layer = 0
+
+[node name="Fence_P3P4" parent="PastureFences" instance=ExtResource("3_fence_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 205, 0, 28)
+length = 90.0
+collision_layer = 0
+
+[node name="Fence_P2P3" parent="PastureFences" instance=ExtResource("3_fence_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 205, 0, 41)
+length = 90.0
+collision_layer = 0
+
+[node name="Fence_P1P2" parent="PastureFences" instance=ExtResource("3_fence_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 205, 0, 50)
+length = 90.0
+collision_layer = 0
+
+[node name="Fence_P1_South" parent="PastureFences" instance=ExtResource("3_fence_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 205, 0, 56)
+length = 90.0
+collision_layer = 0
+
+[node name="Fence_West_P1toP4" parent="PastureFences" instance=ExtResource("3_fence_scene")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 160, 0, 38)
+length = 36.0
+collision_layer = 0
+
+[node name="Fence_West_P5" parent="PastureFences" instance=ExtResource("3_fence_scene")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 190, 0, 5.75)
+length = 28.5
+collision_layer = 0
+
+[node name="Fence_East" parent="PastureFences" instance=ExtResource("3_fence_scene")]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 250, 0, 23.75)
+length = 64.5
+collision_layer = 0
 
 [node name="TreeLine" type="Node3D" parent="."]
 
@@ -504,11 +597,132 @@ width = 1.802752
 rise = 0.383222
 high_side = -1.0
 
-[node name="Horse" parent="." instance=ExtResource("5_horse_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 165, 0, 35)
+[node name="Martha" parent="." instance=ExtResource("5_horse_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 185, 0, 53)
+roam_min_x = 163.2
+roam_max_x = 249.1
+roam_min_z = 51.3
+roam_max_z = 54.7
 
-[node name="Horse2" parent="." instance=ExtResource("5_horse_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 235, 0, 33)
+[node name="Ximena" parent="." instance=ExtResource("5_horse_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 225, 0, 53)
+roam_min_x = 163.2
+roam_max_x = 249.1
+roam_min_z = 51.3
+roam_max_z = 54.7
+
+[node name="Zag" parent="." instance=ExtResource("5_horse_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 205, 0, 45.5)
+roam_min_x = 163.2
+roam_max_x = 249.1
+roam_min_z = 42.3
+roam_max_z = 48.7
+
+[node name="Cagey" parent="." instance=ExtResource("5_horse_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 205, 0, 35)
+
+[node name="Horse" parent="Cagey/Model/RootNode/Armature/Skeleton3D"]
+surface_material_override/0 = SubResource("StandardMaterial3D_coat_beauty")
+
+[node name="Parker" parent="." instance=ExtResource("5_horse_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 205, 0, 24)
+roam_min_x = 163.2
+roam_max_x = 249.1
+roam_min_z = 21.3
+roam_max_z = 26.7
+
+[node name="Horse" parent="Parker/Model/RootNode/Armature/Skeleton3D"]
+surface_material_override/0 = SubResource("StandardMaterial3D_coat_black")
+
+[node name="Mozart" parent="." instance=ExtResource("5_horse_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 205, 0, 0)
+roam_min_x = 191.5
+roam_max_x = 248.5
+roam_min_z = -7.0
+roam_max_z = 18.5
+
+[node name="Horse" parent="Mozart/Model/RootNode/Armature/Skeleton3D"]
+surface_material_override/0 = SubResource("StandardMaterial3D_coat_grey")
+
+[node name="Unico" parent="." instance=ExtResource("5_horse_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 225, 0, 6)
+roam_min_x = 191.5
+roam_max_x = 248.5
+roam_min_z = -7.0
+roam_max_z = 18.5
+
+[node name="Horse" parent="Unico/Model/RootNode/Armature/Skeleton3D"]
+surface_material_override/0 = SubResource("StandardMaterial3D_coat_white")
+
+[node name="MrT" parent="." instance=ExtResource("5_horse_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 240, 0, 12)
+roam_min_x = 191.5
+roam_max_x = 248.5
+roam_min_z = -7.0
+roam_max_z = 18.5
+
+[node name="Horse" parent="MrT/Model/RootNode/Armature/Skeleton3D"]
+surface_material_override/0 = SubResource("StandardMaterial3D_coat_spotted_large")
+
+[node name="Scarlett" parent="." instance=ExtResource("5_horse_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 78.8, 0, 52.8)
+roam_min_x = 77.0
+roam_max_x = 101.0
+roam_min_z = 48.0
+roam_max_z = 59.0
+
+[node name="Horse" parent="Scarlett/Model/RootNode/Armature/Skeleton3D"]
+surface_material_override/0 = SubResource("StandardMaterial3D_coat_scarlett")
+
+[node name="Beauty" parent="." instance=ExtResource("5_horse_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 85.4, 0, 58.4)
+roam_min_x = 77.0
+roam_max_x = 101.0
+roam_min_z = 48.0
+roam_max_z = 59.0
+
+[node name="Horse" parent="Beauty/Model/RootNode/Armature/Skeleton3D"]
+surface_material_override/0 = SubResource("StandardMaterial3D_coat_beauty")
+
+[node name="Seth" parent="." instance=ExtResource("5_horse_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 93.8, 0, 51.1)
+roam_min_x = 77.0
+roam_max_x = 101.0
+roam_min_z = 48.0
+roam_max_z = 59.0
+
+[node name="Horse" parent="Seth/Model/RootNode/Armature/Skeleton3D"]
+surface_material_override/0 = SubResource("StandardMaterial3D_coat_spotted_large")
+
+[node name="Aspen" parent="." instance=ExtResource("5_horse_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 95.6, 0, 54.4)
+roam_min_x = 77.0
+roam_max_x = 101.0
+roam_min_z = 48.0
+roam_max_z = 59.0
+
+[node name="Horse" parent="Aspen/Model/RootNode/Armature/Skeleton3D"]
+surface_material_override/0 = SubResource("StandardMaterial3D_coat_pale")
+
+[node name="Tumago" parent="." instance=ExtResource("5_horse_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 91.7, 0, 56.5)
+roam_min_x = 77.0
+roam_max_x = 101.0
+roam_min_z = 48.0
+roam_max_z = 59.0
+
+[node name="Horse" parent="Tumago/Model/RootNode/Armature/Skeleton3D"]
+surface_material_override/0 = SubResource("StandardMaterial3D_coat_spotted_small")
+
+[node name="Ocelot" parent="." instance=ExtResource("5_horse_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 90.9, 0, 58.0)
+roam_min_x = 77.0
+roam_max_x = 101.0
+roam_min_z = 48.0
+roam_max_z = 59.0
+
+[node name="Horse" parent="Ocelot/Model/RootNode/Armature/Skeleton3D"]
+surface_material_override/0 = SubResource("StandardMaterial3D_coat_spotted_small")
 
 [node name="Flock" parent="." instance=ExtResource("6_flock_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, -16.096)
