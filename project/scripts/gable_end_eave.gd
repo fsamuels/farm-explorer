@@ -49,17 +49,29 @@ func _rebuild() -> void:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var normal := Vector3(0.0, 0.0, 1.0)
+	# Fan from pts[0], visiting the rest in REVERSE (pts[i+1] before pts[i]) --
+	# matches gable_end.gd's (right, left, peak) winding order exactly when
+	# overhang/fascia_height collapse to 0 (verified by hand: with those at 0,
+	# the one surviving non-degenerate triangle here is (P0, P4, P3) = (right,
+	# left, peak), the original's own vertex order). Getting this backwards is
+	# exactly what made the eave gables render as invisible/"transparent" from
+	# outside the first time -- see D-52.
 	for i in range(1, pts.size() - 1):
 		st.set_normal(normal)
 		st.add_vertex(pts[0])
 		st.set_normal(normal)
-		st.add_vertex(pts[i])
-		st.set_normal(normal)
 		st.add_vertex(pts[i + 1])
+		st.set_normal(normal)
+		st.add_vertex(pts[i])
 
 	var material := StandardMaterial3D.new()
 	material.albedo_color = WALL_COLOR
 	material.roughness = 0.9
+	# Belt-and-suspenders alongside the winding fix above: this shape is new,
+	# untested-in-render code (unlike gable_end.gd's already-verified
+	# triangle), so don't let a residual winding mistake make it disappear
+	# from one side again.
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
 
 	mesh = st.commit()
 	material_override = material

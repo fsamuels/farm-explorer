@@ -397,24 +397,17 @@ mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_wall_shg_e")
 
 [node name="GarageRoof_East" type="MeshInstance3D" parent="Buildings"]
-transform = Transform3D(0.147349, 0.560782, 3.967705, 0.0, 0.827887, -2.688666, 7.359525, -0.011228, -0.07944, 213.600752, 5.344333, -35.39882)
+transform = Transform3D(0.197393, 0.560782, 3.967705, 0.0, 0.827887, -2.688666, 9.859024, -0.011228, -0.07944, 213.625774, 5.344333, -34.14907)
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_garage_e")
 
 [node name="GarageRoof_West" type="MeshInstance3D" parent="Buildings"]
-transform = Transform3D(0.147349, 0.560782, -3.967705, 0.0, -0.827887, -2.688666, 7.359525, -0.011228, 0.07944, 209.633047, 5.344333, -35.31938)
+transform = Transform3D(0.197393, 0.560782, -3.967705, 0.0, -0.827887, -2.688666, 9.859024, -0.011228, 0.07944, 209.658069, 5.344333, -34.069631)
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_garage_w")
 
 [node name="SallysHouseGarage_Gable_North" parent="Buildings" instance=ExtResource("36_gable_eave_scene")]
 transform = Transform3D(0.9998, 0.0, -0.020018, 0.0, 1.0, -0.0, -0.020018, 0.0, -0.9998, 211.543225, 4.0, -39.038863)
-width = 7.937
-rise = 2.6886655883525385
-overhang = 0.448
-fascia_height = 0.35
-
-[node name="SallysHouseGarage_Gable_South" parent="Buildings" instance=ExtResource("36_gable_eave_scene")]
-transform = Transform3D(0.9998, 0.0, 0.020018, 0.0, 1.0, 0.0, -0.020018, 0.0, 0.9998, 211.690575, 4.0, -31.679337)
 width = 7.937
 rise = 2.6886655883525385
 overhang = 0.448
