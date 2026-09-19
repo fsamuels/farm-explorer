@@ -155,6 +155,33 @@
   .saved-card .meta .key{font-size:.78rem; font-weight:600;}
   .saved-card .meta .sub{font-size:.7rem; color:var(--ink-dim); font-family:"JetBrains Mono",monospace;}
 
+  .trace-bar{display:flex; gap:8px; margin-block-start:10px; flex-wrap:wrap;}
+  .trace-bar button{font-size:.82rem; padding:6px 11px;}
+  .trace-bar button.active{background:var(--grid); border-color:var(--grid); color:#fff;}
+  #traceHint{margin-block-start:6px;}
+
+  .profile-list{display:flex; flex-direction:column; gap:6px; margin-block-start:10px;}
+  .profile-row{
+    display:flex; align-items:center; gap:8px; background:var(--surface-2); border:1px solid var(--line);
+    border-radius:6px; padding:6px 8px; font-size:.8rem;
+  }
+  .profile-row .letter{
+    width:20px; height:20px; border-radius:50%; background:var(--grid); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:.68rem; font-weight:600; flex:none;
+  }
+  .profile-row input[type=text]{flex:1; padding:5px 7px; font-size:.78rem;}
+  .profile-row .coord{color:var(--ink-dim); white-space:nowrap; font-size:.76rem;}
+  .profile-row .del{background:transparent; border:none; color:var(--ink-dim); cursor:pointer; font-size:1rem; padding:0 4px; flex:none;}
+  .profile-row .del:hover{color:var(--accent);}
+
+  .blueprint-card{margin-block-start:22px;}
+  #blueprintCanvas{width:100%; height:auto; border:1px solid var(--line); border-radius:6px; background:var(--surface-2); display:block;}
+  .pitch-readout{
+    margin-block-start:10px; font-family:"JetBrains Mono",monospace; font-size:.85rem;
+    color:var(--ink); background:var(--good-soft); border-radius:6px; padding:8px 12px; display:none;
+  }
+  .pitch-readout.show{display:block;}
+
   .callout{
     background:var(--surface-2); border-left:3px solid var(--grid); border-radius:0 6px 6px 0;
     padding:10px 12px; font-size:.82rem; color:var(--ink-dim); margin-block-end:16px; line-height:1.5;
@@ -186,6 +213,16 @@
       <canvas id="srcCanvas"></canvas>
     </div>
     <div class="corner-key" id="cornerKey"></div>
+
+    <div class="trace-bar" id="traceBar">
+      <button class="ghost" id="traceToggle">Trace profile</button>
+      <button class="ghost" id="traceUndo">Undo point</button>
+      <button class="ghost" id="traceClear">Clear profile</button>
+    </div>
+    <div class="hint" id="traceHint">
+      Use this when the wall isn't a plain rectangle — eave overhangs, a gable peak, a step in the roofline. Turn on <strong>Trace profile</strong>, then click along the real outline in order; each point becomes an exact (x, y) measurement in meters via the same corner mapping above, extrapolated beyond it. Drag any point to adjust, arrow keys nudge the selected one.
+    </div>
+    <div class="profile-list" id="profileList"></div>
   </div>
 
   <div class="card">
@@ -197,6 +234,12 @@
         <select id="wallSelect"></select>
       </div>
     </div>
+    <div class="field-row">
+      <div class="field" style="flex-basis:100%;">
+        <button class="ghost" id="restoreBtn" style="width:100%;" disabled>Restore saved corners/profile for this wall</button>
+      </div>
+    </div>
+    <div class="status" id="restoreStatus"></div>
     <div class="field-row" id="customKeyRow" style="display:none;">
       <div class="field" style="flex-basis:100%;">
         <label for="customKeyInput">Save as (id)</label>
@@ -226,6 +269,13 @@
   </div>
 </div>
 
+<div class="card blueprint-card">
+  <h2>4 &middot; Elevation blueprint</h2>
+  <div class="hint">A to-scale drawing of the traced outline, in meters &mdash; this is what gets sent along with the crop so the real shape (not just a flat texture) can be modeled.</div>
+  <canvas id="blueprintCanvas" width="900" height="480"></canvas>
+  <div class="pitch-readout" id="pitchReadout"></div>
+</div>
+
 <div class="saved-list">
   <h2>Saved crops this session</h2>
   <div class="hint" style="margin-block-start:4px;">Claude will pick these up directly from the artifact once you've saved the walls you want mapped.</div>
@@ -237,6 +287,25 @@
 <script>
 (function(){
   "use strict";
+
+  // profile tracing: extra points anywhere on the photo, converted to real
+  // meters through the same 4-corner homography (valid anywhere on that flat
+  // plane, not just inside the rectangle -- see invertUV below). Used both
+  // for a wall whose true outline isn't a plain rectangle (eaves, dormers)
+  // and for measuring a real roof pitch from a gable-end photo. Declared up
+  // top, before anything else runs, since applyPreset() (called during
+  // initial setup, below) already reads profilePoints.length.
+  var profilePoints = [];      // {x,y} in natural pixel coords
+  var profileLabels = [];      // parallel array of user-editable labels
+  var profileDragIdx = -1, profileSelIdx = -1;
+  var traceMode = false;
+
+  // Also declared up top for the same reason: applyPreset()'s initial call
+  // (during setup, below) redraws the stage/blueprint immediately.
+  var blueprintCanvas = document.getElementById("blueprintCanvas");
+  var bpCtx = blueprintCanvas.getContext("2d");
+  var pitchReadout = document.getElementById("pitchReadout");
+  var PROFILE_COLOR = "#3d5a68";
 
   // ---- known wall footprints (current placeholder-box dimensions in main.tscn) ----
   var WALLS = [
@@ -272,12 +341,13 @@
   function applyPreset(){
     var w = WALLS.find(function(x){return x.key===wallSelect.value;});
     customKeyRow.style.display = wallSelect.value==="custom" ? "flex" : "none";
-    if(w){ widthInput.value = w.w; heightInput.value = w.h; renderOutput(true); }
+    if(w){ widthInput.value = w.w; heightInput.value = w.h; renderOutput(true); drawStage(); if(profilePoints.length) renderProfileList(); }
   }
   wallSelect.addEventListener("change", applyPreset);
-  widthInput.addEventListener("input", function(){ renderOutput(true); });
-  heightInput.addEventListener("input", function(){ renderOutput(true); });
+  widthInput.addEventListener("input", function(){ renderOutput(true); drawStage(); if(profilePoints.length) renderProfileList(); });
+  heightInput.addEventListener("input", function(){ renderOutput(true); drawStage(); if(profilePoints.length) renderProfileList(); });
   applyPreset();
+  drawBlueprint();
 
   // ---- image loading ----
   var dropzone = document.getElementById("dropzone");
@@ -340,6 +410,8 @@
           {x: imgW*inset,       y: imgH*(1-inset)}
         ];
         selIdx = -1;
+        profilePoints = []; profileLabels = []; profileSelIdx = -1;
+        setTraceMode(false);
 
         // guess a wall preset from the filename
         var name = file.name.toLowerCase();
@@ -352,7 +424,9 @@
 
         drawStage();
         renderOutput(true);
+        renderProfileList();
         updateSaveEnabled();
+        updateRestoreEnabled();
       };
       im.src = reader.result;
     };
@@ -372,7 +446,7 @@
     if(!img) return;
     srcCtx.clearRect(0,0,srcCanvas.width, srcCanvas.height);
     srcCtx.drawImage(img, 0,0, srcCanvas.width, srcCanvas.height);
-    if(!points) return;
+    if(!points){ drawBlueprint(); return; }
     var d = points.map(toDisp);
     srcCtx.save();
     srcCtx.strokeStyle = "rgba(226,105,79,.9)";
@@ -390,6 +464,36 @@
       srcCtx.stroke();
     });
     srcCtx.restore();
+
+    // profile trace overlay
+    if(profilePoints.length){
+      var pd = profilePoints.map(toDisp);
+      srcCtx.save();
+      srcCtx.strokeStyle = PROFILE_COLOR;
+      srcCtx.lineWidth = 2;
+      srcCtx.setLineDash([6,4]);
+      srcCtx.beginPath();
+      pd.forEach(function(p,i){ i===0?srcCtx.moveTo(p.x,p.y):srcCtx.lineTo(p.x,p.y); });
+      srcCtx.stroke();
+      srcCtx.setLineDash([]);
+      pd.forEach(function(p,i){
+        var sel = i===profileSelIdx;
+        srcCtx.fillStyle = PROFILE_COLOR;
+        srcCtx.fillRect(p.x-(sel?8:6), p.y-(sel?8:6), sel?16:12, sel?16:12);
+        srcCtx.lineWidth = sel?3:1.5;
+        srcCtx.strokeStyle = "#fff";
+        srcCtx.strokeRect(p.x-(sel?8:6), p.y-(sel?8:6), sel?16:12, sel?16:12);
+        srcCtx.fillStyle = "#fff";
+        srcCtx.font = "11px 'JetBrains Mono', monospace";
+        srcCtx.fillText(profileLetter(i), p.x+10, p.y-8);
+      });
+      srcCtx.restore();
+    }
+    drawBlueprint();
+  }
+
+  function profileLetter(i){
+    return String.fromCharCode(65 + (i % 26)) + (i>=26 ? Math.floor(i/26) : "");
   }
 
   // ---- pointer interaction + loupe ----
@@ -401,6 +505,15 @@
     if(!points) return -1;
     var best=-1, bestD=22*22;
     points.map(toDisp).forEach(function(p,i){
+      var dd = (p.x-dx)*(p.x-dx)+(p.y-dy)*(p.y-dy);
+      if(dd<bestD){bestD=dd; best=i;}
+    });
+    return best;
+  }
+  function nearestProfileHandle(dx,dy){
+    if(!profilePoints.length) return -1;
+    var best=-1, bestD=22*22;
+    profilePoints.map(toDisp).forEach(function(p,i){
       var dd = (p.x-dx)*(p.x-dx)+(p.y-dy)*(p.y-dy);
       if(dd<bestD){bestD=dd; best=i;}
     });
@@ -457,42 +570,117 @@
     var idx = nearestHandle(p.x,p.y);
     if(idx>=0){
       dragIdx = idx; selIdx = idx;
+      profileSelIdx = -1;
       srcCanvas.setPointerCapture(e.pointerId);
       showLoupe(e.clientX, e.clientY, points[idx]);
       drawStage();
+      return;
+    }
+    var pidx = nearestProfileHandle(p.x,p.y);
+    if(pidx>=0){
+      profileDragIdx = pidx; profileSelIdx = pidx; selIdx = -1;
+      srcCanvas.setPointerCapture(e.pointerId);
+      showLoupe(e.clientX, e.clientY, profilePoints[pidx]);
+      drawStage();
+      return;
+    }
+    if(traceMode){
+      var nat = toNatural(p.x,p.y);
+      profilePoints.push(nat);
+      profileLabels.push("");
+      profileDragIdx = profilePoints.length-1;
+      profileSelIdx = profileDragIdx;
+      selIdx = -1;
+      srcCanvas.setPointerCapture(e.pointerId);
+      showLoupe(e.clientX, e.clientY, nat);
+      drawStage();
+      renderProfileList();
     }
   });
   srcCanvas.addEventListener("pointermove", function(e){
-    if(dragIdx<0) return;
+    if(dragIdx<0 && profileDragIdx<0) return;
     var p = toCanvasPx(e);
     var nat = toNatural(p.x,p.y);
-    points[dragIdx] = nat;
+    if(dragIdx>=0) points[dragIdx] = nat;
+    if(profileDragIdx>=0) profilePoints[profileDragIdx] = nat;
     showLoupe(e.clientX, e.clientY, nat);
     scheduleLiveRender();
   });
   function endDrag(e){
-    if(dragIdx<0) return;
-    dragIdx = -1;
+    var wasProfile = profileDragIdx>=0;
+    if(dragIdx<0 && profileDragIdx<0) return;
+    dragIdx = -1; profileDragIdx = -1;
     hideLoupe();
     drawStage();
     renderOutput(true);
+    if(wasProfile) renderProfileList();
   }
   srcCanvas.addEventListener("pointerup", endDrag);
   srcCanvas.addEventListener("pointercancel", endDrag);
 
   window.addEventListener("keydown", function(e){
-    if(selIdx<0 || !points) return;
+    if(!points) return;
     if(!["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) return;
+    if(selIdx<0 && profileSelIdx<0) return;
     e.preventDefault();
     var step = e.shiftKey ? 10 : 1;
-    var p = points[selIdx];
+    var p = profileSelIdx>=0 ? profilePoints[profileSelIdx] : points[selIdx];
     if(e.key==="ArrowUp") p.y -= step;
     if(e.key==="ArrowDown") p.y += step;
     if(e.key==="ArrowLeft") p.x -= step;
     if(e.key==="ArrowRight") p.x += step;
     drawStage();
     renderOutput(true);
+    if(profileSelIdx>=0) renderProfileList();
   });
+
+  // ---- trace mode toggle + profile list ----
+  var traceToggle = document.getElementById("traceToggle");
+  var traceBar = document.getElementById("traceBar");
+  var profileListEl = document.getElementById("profileList");
+  function setTraceMode(on){
+    traceMode = on;
+    traceToggle.classList.toggle("active", on);
+    traceToggle.textContent = on ? "Tracing… (click to add)" : "Trace profile";
+    srcCanvas.style.cursor = on ? "copy" : "crosshair";
+  }
+  traceToggle.addEventListener("click", function(){ setTraceMode(!traceMode); });
+  document.getElementById("traceUndo").addEventListener("click", function(){
+    profilePoints.pop(); profileLabels.pop();
+    profileSelIdx = -1;
+    drawStage(); renderProfileList();
+  });
+  document.getElementById("traceClear").addEventListener("click", function(){
+    profilePoints = []; profileLabels = []; profileSelIdx = -1;
+    drawStage(); renderProfileList();
+  });
+
+  function renderProfileList(){
+    profileListEl.innerHTML = "";
+    profilePoints.forEach(function(pt,i){
+      var r = realCoordsFor(pt.x, pt.y);
+      var row = document.createElement("div");
+      row.className = "profile-row";
+      var letter = document.createElement("span");
+      letter.className = "letter"; letter.textContent = profileLetter(i);
+      var label = document.createElement("input");
+      label.type = "text"; label.placeholder = "label (e.g. eave, peak)";
+      label.value = profileLabels[i] || "";
+      label.addEventListener("input", function(){ profileLabels[i] = label.value; });
+      var coord = document.createElement("span");
+      coord.className = "coord";
+      coord.textContent = r.x.toFixed(2)+"m, "+r.y.toFixed(2)+"m";
+      var del = document.createElement("button");
+      del.className = "del"; del.textContent = "×";
+      del.addEventListener("click", function(){
+        profilePoints.splice(i,1); profileLabels.splice(i,1);
+        profileSelIdx = -1;
+        drawStage(); renderProfileList();
+      });
+      row.appendChild(letter); row.appendChild(label); row.appendChild(coord); row.appendChild(del);
+      profileListEl.appendChild(row);
+    });
+  }
 
   // ---- projective mapping (square -> quad), Heckbert's closed form ----
   function computeProjective(q){
@@ -517,6 +705,136 @@
     var w = t.g*u + t.h*v + 1;
     return {x:(t.a*u+t.b*v+t.c)/w, y:(t.d*u+t.e*v+t.f)/w};
   }
+  // Inverse of mapUV: given a source pixel (x,y), solve for the (u,v) that
+  // produced it. u,v are allowed outside [0,1] -- a point above the wall
+  // rectangle's top edge (v<0) or past a side (u<0 or u>1) is still valid,
+  // as long as it lies on the same flat plane the 4 corners define (true
+  // for a gable-end wall, whose siding is one flat plane all the way to the
+  // ridge -- see D-50 for why this works and where it doesn't).
+  function invertUV(t,x,y){
+    var A11 = x*t.g - t.a, A12 = x*t.h - t.b;
+    var A21 = y*t.g - t.d, A22 = y*t.h - t.e;
+    var B1 = t.c - x, B2 = t.f - y;
+    var det = A11*A22 - A12*A21;
+    if(Math.abs(det) < 1e-12) return {u:0, v:0};
+    return {
+      u: (B1*A22 - A12*B2) / det,
+      v: (A11*B2 - A21*B1) / det
+    };
+  }
+  // Real-world coordinates (meters) of a source pixel, in the wall's own
+  // frame: x from the left edge, y ABOVE the ground (so points above the
+  // eave read taller than the wall's own height).
+  function realCoordsFor(sx, sy){
+    if(!points) return {x:0,y:0};
+    var t = computeProjective(points);
+    var uv = invertUV(t, sx, sy);
+    var wM = parseFloat(widthInput.value)||1, hM = parseFloat(heightInput.value)||1;
+    return { x: uv.u*wM, y: hM*(1-uv.v) };
+  }
+
+  // ---- blueprint: a to-scale elevation drawing of the wall rectangle plus
+  // the traced profile, in real meters ----
+  function cssVar(name){
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  function drawBlueprint(){
+    var W = blueprintCanvas.width, H = blueprintCanvas.height;
+    bpCtx.clearRect(0,0,W,H);
+    var ink = cssVar("--ink") || "#2a2420", dim = cssVar("--ink-dim") || "#6f6355";
+    var line = cssVar("--line") || "#ddd2bf";
+
+    if(!points){
+      bpCtx.fillStyle = dim;
+      bpCtx.font = "14px 'Source Sans 3', sans-serif";
+      bpCtx.fillText("Load a photo and set the 4 corners to see the blueprint.", 20, H/2);
+      pitchReadout.classList.remove("show");
+      return;
+    }
+
+    var wM = parseFloat(widthInput.value)||1, hM = parseFloat(heightInput.value)||1;
+    var profileReal = profilePoints.map(function(p){ return realCoordsFor(p.x,p.y); });
+
+    var xs = [0,wM].concat(profileReal.map(function(p){return p.x;}));
+    var ys = [0,hM].concat(profileReal.map(function(p){return p.y;}));
+    var minX = Math.min.apply(null,xs), maxX = Math.max.apply(null,xs);
+    var minY = Math.min.apply(null,ys), maxY = Math.max.apply(null,ys);
+    var padM = Math.max(0.3, (maxX-minX)*0.08);
+    minX -= padM; maxX += padM; minY -= padM*0.6; maxY += padM;
+
+    var padPx = 36;
+    var scale = Math.min((W-2*padPx)/(maxX-minX), (H-2*padPx)/(maxY-minY));
+    function sx(rx){ return padPx + (rx-minX)*scale; }
+    function sy(ry){ return H-padPx - (ry-minY)*scale; }
+
+    // grid
+    bpCtx.save();
+    bpCtx.strokeStyle = line; bpCtx.lineWidth = 1; bpCtx.font = "10px 'JetBrains Mono', monospace";
+    bpCtx.fillStyle = dim;
+    var gx0 = Math.floor(minX*2)/2, gy0 = Math.floor(minY*2)/2;
+    for(var gx=gx0; gx<=maxX; gx+=0.5){
+      var X = sx(gx);
+      bpCtx.globalAlpha = Math.abs(gx - Math.round(gx))<1e-6 ? 0.6 : 0.25;
+      bpCtx.beginPath(); bpCtx.moveTo(X,padPx); bpCtx.lineTo(X,H-padPx); bpCtx.stroke();
+      if(Math.abs(gx - Math.round(gx))<1e-6){ bpCtx.globalAlpha=1; bpCtx.fillText(gx.toFixed(0)+"m", X+2, H-padPx+12); }
+    }
+    for(var gy=gy0; gy<=maxY; gy+=0.5){
+      var Y = sy(gy);
+      bpCtx.globalAlpha = Math.abs(gy - Math.round(gy))<1e-6 ? 0.6 : 0.25;
+      bpCtx.beginPath(); bpCtx.moveTo(padPx,Y); bpCtx.lineTo(W-padPx,Y); bpCtx.stroke();
+      if(Math.abs(gy - Math.round(gy))<1e-6){ bpCtx.globalAlpha=1; bpCtx.fillText(gy.toFixed(0)+"m", 4, Y-2); }
+    }
+    bpCtx.globalAlpha = 1;
+    bpCtx.restore();
+
+    // ground line
+    bpCtx.strokeStyle = ink; bpCtx.lineWidth = 2;
+    bpCtx.beginPath(); bpCtx.moveTo(padPx, sy(0)); bpCtx.lineTo(W-padPx, sy(0)); bpCtx.stroke();
+
+    // wall rectangle
+    var rect = [{x:0,y:0},{x:wM,y:0},{x:wM,y:hM},{x:0,y:hM}];
+    bpCtx.strokeStyle = ink; bpCtx.lineWidth = 2;
+    bpCtx.beginPath();
+    rect.forEach(function(p,i){ var X=sx(p.x),Y=sy(p.y); i===0?bpCtx.moveTo(X,Y):bpCtx.lineTo(X,Y); });
+    bpCtx.closePath(); bpCtx.stroke();
+
+    // profile
+    if(profileReal.length){
+      bpCtx.strokeStyle = PROFILE_COLOR; bpCtx.lineWidth = 2.5; bpCtx.setLineDash([7,4]);
+      bpCtx.beginPath();
+      profileReal.forEach(function(p,i){ var X=sx(p.x),Y=sy(p.y); i===0?bpCtx.moveTo(X,Y):bpCtx.lineTo(X,Y); });
+      bpCtx.stroke(); bpCtx.setLineDash([]);
+      profileReal.forEach(function(p,i){
+        var X=sx(p.x), Y=sy(p.y);
+        bpCtx.fillStyle = PROFILE_COLOR;
+        bpCtx.beginPath(); bpCtx.arc(X,Y,5,0,Math.PI*2); bpCtx.fill();
+        bpCtx.strokeStyle="#fff"; bpCtx.lineWidth=1.5; bpCtx.stroke();
+        bpCtx.fillStyle = ink;
+        bpCtx.font = "11px 'JetBrains Mono', monospace";
+        var lbl = profileLetter(i) + (profileLabels[i] ? " "+profileLabels[i] : "");
+        bpCtx.fillText(lbl+"  ("+p.x.toFixed(2)+", "+p.y.toFixed(2)+")", X+8, Y-8);
+      });
+    }
+
+    // pitch readout, from the highest traced point
+    if(profileReal.length){
+      var top = profileReal.reduce(function(a,b){ return b.y>a.y?b:a; });
+      var rise = top.y - hM;
+      if(rise > 0.02){
+        var run = Math.min(top.x, wM-top.x);
+        var deg = Math.atan2(rise, Math.max(run,0.01)) * 180/Math.PI;
+        pitchReadout.textContent = "Roof pitch from " + profileLetter(profileReal.indexOf(top)) + ": " +
+          deg.toFixed(1) + "° — rise " + rise.toFixed(2) + "m over run " + run.toFixed(2) +
+          "m (assumes the ridge is roughly centered; add a point on each eave to check)";
+        pitchReadout.classList.add("show");
+      } else {
+        pitchReadout.classList.remove("show");
+      }
+    } else {
+      pitchReadout.classList.remove("show");
+    }
+  }
   function sampleBilinear(data,w,h,x,y){
     if(x<0) x=0; if(y<0) y=0; if(x>w-1.001) x=w-1.001; if(y>h-1.001) y=h-1.001;
     var x0=Math.floor(x), y0=Math.floor(y), x1=Math.min(x0+1,w-1), y1=Math.min(y0+1,h-1);
@@ -538,24 +856,45 @@
   var outAspectEl = document.getElementById("outAspect");
   var lastFinalCanvas = null;
 
-  function renderOutput(highQuality){
-    if(!points || !fullData) return;
-    var wM = parseFloat(widthInput.value)||1, hM = parseFloat(heightInput.value)||1;
-    var aspect = wM/hM;
-    var longEdge = highQuality ? 2048 : 420;
-    var outW, outH;
-    if(aspect>=1){ outW=longEdge; outH=Math.max(1,Math.round(longEdge/aspect)); }
-    else { outH=longEdge; outW=Math.max(1,Math.round(longEdge*aspect)); }
-
+  // Core sampler: renders an outW x outH canvas by walking (u,v) in [0,1]^2
+  // through the SAME homography as the wall crop. The homography itself
+  // doesn't know or care what real-world size u,v=0..1 represents -- that's
+  // purely a function of the aspect ratio the caller picks. So extending
+  // coverage above the wall rectangle (for the gable) is just a matter of
+  // computing outW/outH from a *taller* meters figure and calling this same
+  // sampler again; no new sampling logic needed.
+  // heightRatio lets the caller cover a TALLER real-world range than the
+  // wall rectangle: mapUV's own v=0..1 is fixed by `points` to always mean
+  // "the wall's [0, height_m]" -- it does NOT automatically stretch just
+  // because the output canvas is taller. To actually reach real height
+  // h = heightRatio*height_m at the top of the image, v fed to mapUV must
+  // be rescaled to v_orig = heightRatio*v_new - (heightRatio-1), which
+  // reduces to the identity (v_orig=v_new) when heightRatio=1. Getting
+  // this wrong silently re-samples the *same* wall rectangle at a
+  // different resolution instead of reaching any new content above it --
+  // see D-54.
+  // General sampler: renders the real-world rectangle [xMin,xMax] x [yMin,yMax]
+  // (meters, in the wall's own frame -- x from its left edge, y above ground)
+  // into an outW x outH canvas. mapUV's own (u,v) are fixed to mean "x_m =
+  // u*width_m, y_m = height_m*(1-v)" by the 4 wall corners, so any other real
+  // box -- taller (reaching a ridge) OR wider (reaching a fascia overhang
+  // past the wall's own left/right edges) -- has to be converted into that
+  // fixed parameterization here, not by picking a different output aspect
+  // ratio and hoping (see D-54 for the height version of this mistake, and
+  // D-57 for the width one).
+  function sampleRealBox(xMin, xMax, yMin, yMax, outW, outH){
     var t = computeProjective(points);
+    var wM = parseFloat(widthInput.value)||1, hM = parseFloat(heightInput.value)||1;
     var off = document.createElement("canvas");
     off.width = outW; off.height = outH;
     var octx = off.getContext("2d");
     var outData = octx.createImageData(outW, outH);
     for(var py=0; py<outH; py++){
-      var v = (py+0.5)/outH;
+      var realY = yMax - (py+0.5)/outH*(yMax-yMin);
+      var v = 1 - realY/hM;
       for(var px=0; px<outW; px++){
-        var u = (px+0.5)/outW;
+        var realX = xMin + (px+0.5)/outW*(xMax-xMin);
+        var u = realX/wM;
         var s = mapUV(t,u,v);
         var c = sampleBilinear(fullData, imgW, imgH, s.x, s.y);
         var o = (py*outW+px)*4;
@@ -563,6 +902,22 @@
       }
     }
     octx.putImageData(outData,0,0);
+    return off;
+  }
+
+  function outputSize(wM, hM, longEdge){
+    var aspect = wM/hM;
+    if(aspect>=1) return [longEdge, Math.max(1,Math.round(longEdge/aspect))];
+    return [Math.max(1,Math.round(longEdge*aspect)), longEdge];
+  }
+
+  function renderOutput(highQuality){
+    if(!points || !fullData) return;
+    var wM = parseFloat(widthInput.value)||1, hM = parseFloat(heightInput.value)||1;
+    var longEdge = highQuality ? 2048 : 420;
+    var sz = outputSize(wM, hM, longEdge);
+    var outW = sz[0], outH = sz[1];
+    var off = sampleRealBox(0, wM, 0, hM, outW, outH);
 
     outCanvas.width = outW; outCanvas.height = outH;
     outCanvas.getContext("2d").drawImage(off,0,0);
@@ -570,6 +925,31 @@
     outAspectEl.textContent = wM.toFixed(2)+"m × "+hM.toFixed(2)+"m";
     if(highQuality) lastFinalCanvas = off;
     updateSaveEnabled();
+  }
+
+  // Gable-extended crop: tall enough to reach the highest traced profile
+  // point (the ridge) AND wide enough to reach the leftmost/rightmost traced
+  // point (a fascia overhang sticking out past the wall's own edges), so a
+  // gable mesh built from that same profile -- overhang included -- can be
+  // textured with real photo content everywhere it actually has geometry.
+  // Missing the width half of this (only extending height) is what produced
+  // out-of-[0,1] U coordinates on the overhang triangles and the washed-out
+  // patches the user saw -- see D-57. Returns null when nothing was traced
+  // above the wall rectangle.
+  function renderGableCrop(){
+    if(!points || !fullData || !profilePoints.length) return null;
+    var wM = parseFloat(widthInput.value)||1, hM = parseFloat(heightInput.value)||1;
+    var profileReal = profilePoints.map(function(p){ return realCoordsFor(p.x,p.y); });
+    var maxY = profileReal.reduce(function(m,p){ return Math.max(m,p.y); }, hM);
+    if(maxY <= hM + 0.02) return null;
+    var minX = profileReal.reduce(function(m,p){ return Math.min(m,p.x); }, 0);
+    var maxX = profileReal.reduce(function(m,p){ return Math.max(m,p.x); }, wM);
+    var margin = 0.03; // so ridge/edge lines aren't right at the pixel border
+    var xMin = minX - margin, xMax = maxX + margin, yMax = maxY + margin;
+    var gableWidthM = xMax - xMin, gableHeightM = yMax;
+    var sz = outputSize(gableWidthM, gableHeightM, 2048);
+    var canvas = sampleRealBox(xMin, xMax, 0, yMax, sz[0], sz[1]);
+    return {canvas: canvas, width_m: gableWidthM, height_m: gableHeightM, x_offset_m: xMin};
   }
 
   function updateSaveEnabled(){
@@ -590,16 +970,82 @@
 
   if(HOSTED){
     saveBtn.textContent = "Save this crop";
-    modeHint.textContent = "Saved crops land in this page's own storage — Claude pulls them from here directly.";
+    modeHint.textContent = "Saved crops land in this page's own storage — Claude pulls them from here directly. Traced a profile above the wall (a roofline)? A taller gable texture reaching the highest traced point is saved automatically alongside the wall crop.";
   } else {
     saveBtn.textContent = "Download this crop";
-    modeHint.textContent = "Running as a local file, so there's no live link back to Claude — this downloads the rectified PNG instead, already named to match the wall (drop it straight into project/textures/buildings/).";
+    modeHint.textContent = "Running as a local file, so there's no live link back to Claude — this downloads the rectified PNG instead, already named to match the wall (drop it straight into project/textures/buildings/). A traced profile also downloads a taller \"_gable\" texture reaching the highest traced point.";
     savedGridWrap.style.display = "none";
   }
 
   function setStatus(msg, cls){
     statusEl.textContent = msg;
     statusEl.className = "status" + (cls?(" "+cls):"");
+  }
+
+  // ---- restore a previous save's corners/profile, so re-tracing a wall by
+  // hand (needed every time this tool's own math changes -- see D-54/D-57)
+  // isn't required once you've already placed the points correctly once.
+  // Only the raw photo is never stored (by design, see the tool's own
+  // description); everything derived from it -- the 4 corners in this
+  // photo's own pixel space, and the profile's real-world coordinates --
+  // already lives in this artifact's db from your last save.
+  var restoreBtn = document.getElementById("restoreBtn");
+  var restoreStatus = document.getElementById("restoreStatus");
+  function setRestoreStatus(msg, cls){
+    restoreStatus.textContent = msg;
+    restoreStatus.className = "status" + (cls?(" "+cls):"");
+  }
+  function updateRestoreEnabled(){
+    restoreBtn.disabled = !(HOSTED && img);
+  }
+  if(!HOSTED){
+    restoreBtn.style.display = "none";
+  } else {
+    restoreBtn.addEventListener("click", async function(){
+      if(!img){ return; }
+      restoreBtn.disabled = true;
+      setRestoreStatus("Looking up saved data…");
+      try{
+        var db = await claude.use("db");
+        if(!db){
+          setRestoreStatus("Restore isn't available in this view.", "err");
+          return;
+        }
+        var key = wallSelect.value === "custom"
+          ? (document.getElementById("customKeyInput").value || "custom_wall").trim().toLowerCase().replace(/[^a-z0-9_-]+/g, "_")
+          : wallSelect.value;
+        var snap = await db.doc("crops/"+key).get();
+        if(!snap.exists || !snap.data() || !snap.data().corners){
+          setRestoreStatus("No saved corners found yet for “"+key+"” — pick them by hand this first time.", "err");
+          return;
+        }
+        var data = snap.data();
+        widthInput.value = data.width_m;
+        heightInput.value = data.height_m;
+        points = data.corners.map(function(p){ return {x: p.x, y: p.y}; });
+        selIdx = -1;
+        profilePoints = []; profileLabels = []; profileSelIdx = -1;
+        if(data.profile && data.profile.length){
+          var t = computeProjective(points);
+          var wM = parseFloat(widthInput.value), hM = parseFloat(heightInput.value);
+          data.profile.forEach(function(pt){
+            var u = pt.x_m / wM, v = 1 - pt.y_m / hM;
+            var s = mapUV(t, u, v);
+            profilePoints.push({x: s.x, y: s.y});
+            profileLabels.push(pt.label || "");
+          });
+        }
+        drawStage();
+        renderOutput(true);
+        renderProfileList();
+        updateSaveEnabled();
+        setRestoreStatus("Restored "+points.length+" corners"+(profilePoints.length ? " + "+profilePoints.length+" profile points" : "")+" from your last save of “"+key+"”. Check them against the loupe before saving — they're reproduced from the saved numbers, not re-detected from this photo.", "ok");
+      } catch(err){
+        setRestoreStatus("Restore failed: " + (err && err.message ? err.message : err), "err");
+      } finally {
+        updateRestoreEnabled();
+      }
+    });
   }
 
   function renderSavedCard(key, data){
@@ -628,63 +1074,90 @@
   }
   if(HOSTED) loadExistingSaved();
 
+  function canvasToBlob(canvas){
+    return new Promise(function(resolve){ canvas.toBlob(resolve, "image/png"); });
+  }
+
   saveBtn.addEventListener("click", async function(){
     if(!lastFinalCanvas) renderOutput(true);
     saveBtn.disabled = true;
     setStatus("Rendering full-resolution crop…");
     await new Promise(function(r){ setTimeout(r,10); });
     renderOutput(true);
+    drawBlueprint();
 
     var key = wallSelect.value === "custom"
       ? (document.getElementById("customKeyInput").value || "custom_wall")
       : wallSelect.value;
     key = key.trim().toLowerCase().replace(/[^a-z0-9_-]+/g, "_").replace(/^_+|_+$/g, "") || "custom_wall";
 
-    lastFinalCanvas.toBlob(async function(blob){
-      if(!HOSTED){
-        try{
-          var url = URL.createObjectURL(blob);
+    var profileData = profilePoints.map(function(p,i){
+      var r = realCoordsFor(p.x,p.y);
+      return {label: profileLabels[i] || profileLetter(i), x_m: r.x, y_m: r.y};
+    });
+
+    var blob = await canvasToBlob(lastFinalCanvas);
+    var blueprintBlob = profileData.length ? await canvasToBlob(blueprintCanvas) : null;
+    var gable = renderGableCrop();
+    var gableBlob = gable ? await canvasToBlob(gable.canvas) : null;
+
+    if(!HOSTED){
+      try{
+        function download(b, name){
+          var url = URL.createObjectURL(b);
           var a = document.createElement("a");
-          a.href = url; a.download = key + ".png";
+          a.href = url; a.download = name;
           document.body.appendChild(a); a.click(); a.remove();
           setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
-          setStatus("Downloaded " + key + ".png", "ok");
-        } catch(err){
-          setStatus("Download failed: " + (err && err.message ? err.message : err), "err");
-        } finally {
-          saveBtn.disabled = false;
         }
-        return;
-      }
-      try{
-        setStatus("Saving…");
-        var assets = await claude.use("assets");
-        var db = await claude.use("db");
-        if(!assets || !db){
-          setStatus("Saving isn't available in this view — open this artifact as yourself (not a shared preview) and try again.", "err");
-          saveBtn.disabled = false;
-          return;
-        }
-        var up = await assets.upload(blob, {type:"image/png"});
-        await db.doc("crops/"+key).set({
-          asset_id: up.id,
-          width_m: parseFloat(widthInput.value),
-          height_m: parseFloat(heightInput.value),
-          corners: points,
-          source_natural_size: {w: imgW, h: imgH},
-          source_name: filenameEl.textContent,
-          saved_at: new Date().toISOString()
-        });
-        setStatus("Saved ✓ " + key, "ok");
-        var existing = savedGrid.querySelector('[data-key="'+key+'"]');
-        if(existing) existing.remove();
-        renderSavedCard(key, {asset_id: up.id, width_m: parseFloat(widthInput.value), height_m: parseFloat(heightInput.value)});
+        download(blob, key + ".png");
+        if(blueprintBlob) download(blueprintBlob, key + "_profile.png");
+        if(gableBlob) download(gableBlob, key + "_gable.png");
+        setStatus("Downloaded " + key + ".png" + (blueprintBlob ? " + profile" : "") + (gableBlob ? " + gable ("+gable.height_m.toFixed(3)+"m tall)" : ""), "ok");
       } catch(err){
-        setStatus("Save failed: " + (err && err.message ? err.message : err), "err");
+        setStatus("Download failed: " + (err && err.message ? err.message : err), "err");
       } finally {
         saveBtn.disabled = false;
       }
-    }, "image/png");
+      return;
+    }
+
+    try{
+      setStatus("Saving…");
+      var assets = await claude.use("assets");
+      var db = await claude.use("db");
+      if(!assets || !db){
+        setStatus("Saving isn't available in this view — open this artifact as yourself (not a shared preview) and try again.", "err");
+        saveBtn.disabled = false;
+        return;
+      }
+      var up = await assets.upload(blob, {type:"image/png"});
+      var profileUp = blueprintBlob ? await assets.upload(blueprintBlob, {type:"image/png"}) : null;
+      var gableUp = gableBlob ? await assets.upload(gableBlob, {type:"image/png"}) : null;
+      await db.doc("crops/"+key).set({
+        asset_id: up.id,
+        width_m: parseFloat(widthInput.value),
+        height_m: parseFloat(heightInput.value),
+        corners: points,
+        profile: profileData,
+        profile_asset_id: profileUp ? profileUp.id : null,
+        gable_asset_id: gableUp ? gableUp.id : null,
+        gable_height_m: gable ? gable.height_m : null,
+        gable_width_m: gable ? gable.width_m : null,
+        gable_x_offset_m: gable ? gable.x_offset_m : null,
+        source_natural_size: {w: imgW, h: imgH},
+        source_name: filenameEl.textContent,
+        saved_at: new Date().toISOString()
+      });
+      setStatus("Saved ✓ " + key + (profileData.length ? " (+ "+profileData.length+"-point profile)" : "") + (gableUp ? " (+ gable texture)" : ""), "ok");
+      var existing = savedGrid.querySelector('[data-key="'+key+'"]');
+      if(existing) existing.remove();
+      renderSavedCard(key, {asset_id: up.id, width_m: parseFloat(widthInput.value), height_m: parseFloat(heightInput.value)});
+    } catch(err){
+      setStatus("Save failed: " + (err && err.message ? err.message : err), "err");
+    } finally {
+      saveBtn.disabled = false;
+    }
   });
 
 })();

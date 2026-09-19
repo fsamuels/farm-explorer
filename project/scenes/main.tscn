@@ -33,6 +33,11 @@
 [ext_resource type="Texture2D" path="res://textures/buildings/sallys_house_garage_north_wall.png" id="33_wall_shg_n"]
 [ext_resource type="Texture2D" path="res://textures/buildings/sallys_house_garage_east_wall.png" id="34_wall_shg_e"]
 [ext_resource type="Texture2D" path="res://textures/buildings/sallys_house_east_wall.png" id="35_wall_sh_e"]
+[ext_resource type="PackedScene" path="res://scenes/gable_end_eave.tscn" id="36_gable_eave_scene"]
+[ext_resource type="Texture2D" path="res://textures/roofs/garage_east.png" id="37_roof_garage_e"]
+[ext_resource type="Texture2D" path="res://textures/roofs/garage_west.png" id="38_roof_garage_w"]
+[ext_resource type="Texture2D" path="res://textures/buildings/sallys_house_east_gable.png" id="39_gable_tex_sh_e"]
+[ext_resource type="Texture2D" path="res://textures/buildings/sallys_house_garage_north_gable.png" id="40_gable_tex_shg_n"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -134,6 +139,14 @@ cull_mode = 2
 albedo_texture = ExtResource("35_wall_sh_e")
 roughness = 0.9
 cull_mode = 2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_roof_garage_e"]
+albedo_texture = ExtResource("37_roof_garage_e")
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_roof_garage_w"]
+albedo_texture = ExtResource("38_roof_garage_w")
+roughness = 0.7
 
 [node name="Main" type="Node3D" unique_id=1143109196]
 
@@ -358,10 +371,17 @@ transform = Transform3D(0.02001199, 0, -0.9997997, 0, 1, 0, 0.9997997, 0, 0.0200
 width = 9.178162
 rise = 2.650038
 
-[node name="SallysHouse_Gable_East" parent="Buildings" unique_id=3721904833 instance=ExtResource("26_gable_scene")]
-transform = Transform3D(-0.02001199, 0, 0.9997997, 0, 1, 0, -0.9997997, 0, -0.02001199, 222.586582, 4, -27.322726)
+[node name="SallysHouse_Gable_East" parent="Buildings" unique_id=3721904833 instance=ExtResource("36_gable_eave_scene")]
+transform = Transform3D(0.020012, 0.0, 0.9998, 0.0, 1.0, 0.0, 0.9998, 0.0, -0.020012, 222.586582, 4.0, -27.322726)
 width = 9.178162
-rise = 2.650038
+rise = 2.4777391755364375
+overhang = 0.5651459419598587
+fascia_height = 0.3498487896121514
+wall_texture = ExtResource("39_gable_tex_sh_e")
+texture_height_m = 6.507739175536438
+texture_width_m = 10.387482054701236
+texture_x_offset_m = -0.604087234010741
+eave_height_m = 4.0
 
 [node name="SallysHouse_Wall_North" type="MeshInstance3D" parent="Buildings"]
 transform = Transform3D(-15.404382, -0.020012, 0.0, -0.0, -0.0, -4.0, 0.308334, -0.9998, 0.0, 214.792136, 2.0, -31.777636)
@@ -382,6 +402,28 @@ surface_material_override/0 = SubResource("StandardMaterial3D_wall_shg_n")
 transform = Transform3D(-0.147349, 0.9998, 0.0, -0.0, 0.0, -4.0, -7.359525, -0.020018, 0.0, 215.604601, 2.0, -35.43894)
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_wall_shg_e")
+
+[node name="GarageRoof_East" type="MeshInstance3D" parent="Buildings"]
+transform = Transform3D(0.197393, 0.52475, 4.426284, 0.0, 0.851192, -2.729848, 9.859024, -0.010506, -0.088621, 213.855064, 5.364924, -34.153661)
+mesh = SubResource("PlaneMesh_roof_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_roof_garage_e")
+
+[node name="GarageRoof_West" type="MeshInstance3D" parent="Buildings"]
+transform = Transform3D(0.197393, 0.52475, -4.426284, 0.0, -0.851192, -2.729848, 9.859024, -0.010506, 0.088621, 209.42878, 5.364924, -34.06504)
+mesh = SubResource("PlaneMesh_roof_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_roof_garage_w")
+
+[node name="SallysHouseGarage_Gable_North" parent="Buildings" instance=ExtResource("36_gable_eave_scene")]
+transform = Transform3D(0.9998, 0.0, -0.020018, 0.0, 1.0, -0.0, -0.020018, 0.0, -0.9998, 211.543225, 4.0, -39.038863)
+width = 7.937
+rise = 2.7298478414299137
+overhang = 0.4586713866830553
+fascia_height = 0.3505032537736221
+wall_texture = ExtResource("40_gable_tex_shg_n")
+texture_height_m = 6.759847841429914
+texture_width_m = 8.912752773366108
+texture_x_offset_m = -0.47527908537165686
+eave_height_m = 4.0
 
 [node name="SallysHouse_Wall_East" type="MeshInstance3D" parent="Buildings"]
 transform = Transform3D(-0.18371, 0.9998, 0.0, -0.0, 0.0, -4.0, -9.178162, -0.020012, 0.0, 222.606578, 2.0, -27.323126)
