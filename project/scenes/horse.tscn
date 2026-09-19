@@ -3,8 +3,15 @@
 [ext_resource type="PackedScene" path="res://models/horse.glb" id="1_horse_model"]
 [ext_resource type="Script" path="res://scripts/horse.gd" id="2_horse_script"]
 
-[node name="Horse" type="Node3D"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_horse"]
+size = Vector3(0.7, 1.4, 2.0)
+
+[node name="Horse" type="CharacterBody3D"]
 script = ExtResource("2_horse_script")
 
 [node name="Model" parent="." instance=ExtResource("1_horse_model")]
 transform = Transform3D(-0.2317, 0, 0, 0, 0.2317, 0, 0, 0, -0.2317, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.7, 0)
+shape = SubResource("BoxShape3D_horse")

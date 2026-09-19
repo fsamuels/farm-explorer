@@ -81,10 +81,13 @@ farm-sim/
         │                          # rest of the property still NAIP-only for now
         ├── roofs/                 # real roof imagery cropped from the front-section
         │                            orthomosaic, one per covered building (see D-20)
-        └── buildings/             # real exterior-wall/siding imagery cropped from ground-level
-                                     reference photos (D-39, D-44) — one file per photographed
-                                     wall face; most buildings are still placeholder-color on
-                                     the sides that have no photo yet
+        ├── buildings/             # real exterior-wall/siding imagery cropped from ground-level
+        │                            reference photos (D-39, D-44) — one file per photographed
+        │                            wall face; most buildings are still placeholder-color on
+        │                            the sides that have no photo yet
+        └── horses/                # small generated tileable polka-dot textures standing in for
+                                     appaloosa/pinto coat markings, triplanar-projected since
+                                     horse.glb has no UV coordinates (see D-64)
 ```
 
 ## Notes
