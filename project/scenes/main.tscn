@@ -379,6 +379,8 @@ overhang = 0.5651459419598587
 fascia_height = 0.3498487896121514
 wall_texture = ExtResource("39_gable_tex_sh_e")
 texture_height_m = 6.507739175536438
+texture_width_m = 10.387482054701236
+texture_x_offset_m = -0.604087234010741
 eave_height_m = 4.0
 
 [node name="SallysHouse_Wall_North" type="MeshInstance3D" parent="Buildings"]
@@ -419,6 +421,8 @@ overhang = 0.4586713866830553
 fascia_height = 0.3505032537736221
 wall_texture = ExtResource("40_gable_tex_shg_n")
 texture_height_m = 6.759847841429914
+texture_width_m = 8.912752773366108
+texture_x_offset_m = -0.47527908537165686
 eave_height_m = 4.0
 
 [node name="SallysHouse_Wall_East" type="MeshInstance3D" parent="Buildings"]
