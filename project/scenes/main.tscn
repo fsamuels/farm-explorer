@@ -402,12 +402,12 @@ mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_wall_shg_e")
 
 [node name="GarageRoof_East" type="MeshInstance3D" parent="Buildings"]
-transform = Transform3D(0.197393, 0.566627, 3.967705, 0.0, 0.823896, -2.729848, 9.859024, -0.011345, -0.07944, 213.625774, 5.364924, -34.14907)
+transform = Transform3D(0.197393, 0.52475, 4.426284, 0.0, 0.851192, -2.729848, 9.859024, -0.010506, -0.088621, 213.855064, 5.364924, -34.153661)
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_garage_e")
 
 [node name="GarageRoof_West" type="MeshInstance3D" parent="Buildings"]
-transform = Transform3D(0.197393, 0.566627, -3.967705, 0.0, -0.823896, -2.729848, 9.859024, -0.011345, 0.07944, 209.658069, 5.364924, -34.069631)
+transform = Transform3D(0.197393, 0.52475, -4.426284, 0.0, -0.851192, -2.729848, 9.859024, -0.010506, 0.088621, 209.42878, 5.364924, -34.06504)
 mesh = SubResource("PlaneMesh_roof_unit")
 surface_material_override/0 = SubResource("StandardMaterial3D_roof_garage_w")
 
