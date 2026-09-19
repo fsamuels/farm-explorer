@@ -25,6 +25,29 @@ const WALL_COLOR := Color(0.6, 0.55, 0.5)
 		fascia_height = value
 		_rebuild()
 
+## Real photo texture for this gable, exported by the elevation-rectifier
+## tool's "gable crop" (same width as the wall below, but tall enough to
+## reach the traced ridge point) -- see D-53. Leave unset for the plain
+## WALL_COLOR fill the other (unphotographed) gables still use.
+@export var wall_texture: Texture2D:
+	set(value):
+		wall_texture = value
+		_rebuild()
+## Real-world height (meters, ground to top) the texture image spans --
+## must match the elevation-rectifier tool's own gable_height_m for this
+## wall exactly, or the photo will sit at the wrong scale on the mesh.
+@export var texture_height_m := 0.0:
+	set(value):
+		texture_height_m = value
+		_rebuild()
+## Height (meters) of local y=0 above the ground -- the eave line the wall
+## texture below this gable was itself rectified against (4.0 for every
+## building box in this scene so far).
+@export var eave_height_m := 4.0:
+	set(value):
+		eave_height_m = value
+		_rebuild()
+
 func _ready() -> void:
 	_rebuild()
 
@@ -36,7 +59,7 @@ func _rebuild() -> void:
 	var outer := hw + overhang
 	# Perimeter, box-top-right around through the peak to box-top-left --
 	# same winding sense as gable_end.gd's (right, left, peak) triangle.
-	var pts := [
+	var pts: Array[Vector3] = [
 		Vector3(hw, 0.0, 0.0),
 		Vector3(outer, 0.0, 0.0),
 		Vector3(outer, fascia_height, 0.0),
@@ -45,6 +68,19 @@ func _rebuild() -> void:
 		Vector3(-outer, 0.0, 0.0),
 		Vector3(-hw, 0.0, 0.0),
 	]
+
+	var has_texture := wall_texture != null and texture_height_m > 0.0
+
+	# UV per point, matching the elevation-rectifier's own convention: image
+	# row 0 (v=0) is the TOP of what it rendered (the ridge, for a gable
+	# crop), row max (v=1) is the ground; u=0/1 are the wall's left/right
+	# edges (same width_m the wall crop below used).
+	var uvs: Array[Vector2] = []
+	if has_texture:
+		for p: Vector3 in pts:
+			var real_x: float = p.x + hw
+			var real_y: float = eave_height_m + p.y
+			uvs.append(Vector2(real_x / width, 1.0 - real_y / texture_height_m))
 
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -58,14 +94,20 @@ func _rebuild() -> void:
 	# outside the first time -- see D-52.
 	for i in range(1, pts.size() - 1):
 		st.set_normal(normal)
+		if has_texture: st.set_uv(uvs[0])
 		st.add_vertex(pts[0])
 		st.set_normal(normal)
+		if has_texture: st.set_uv(uvs[i + 1])
 		st.add_vertex(pts[i + 1])
 		st.set_normal(normal)
+		if has_texture: st.set_uv(uvs[i])
 		st.add_vertex(pts[i])
 
 	var material := StandardMaterial3D.new()
-	material.albedo_color = WALL_COLOR
+	if has_texture:
+		material.albedo_texture = wall_texture
+	else:
+		material.albedo_color = WALL_COLOR
 	material.roughness = 0.9
 	# Belt-and-suspenders alongside the winding fix above: this shape is new,
 	# untested-in-render code (unlike gable_end.gd's already-verified

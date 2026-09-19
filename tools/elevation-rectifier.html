@@ -849,15 +849,14 @@
   var outAspectEl = document.getElementById("outAspect");
   var lastFinalCanvas = null;
 
-  function renderOutput(highQuality){
-    if(!points || !fullData) return;
-    var wM = parseFloat(widthInput.value)||1, hM = parseFloat(heightInput.value)||1;
-    var aspect = wM/hM;
-    var longEdge = highQuality ? 2048 : 420;
-    var outW, outH;
-    if(aspect>=1){ outW=longEdge; outH=Math.max(1,Math.round(longEdge/aspect)); }
-    else { outH=longEdge; outW=Math.max(1,Math.round(longEdge*aspect)); }
-
+  // Core sampler: renders an outW x outH canvas by walking (u,v) in [0,1]^2
+  // through the SAME homography as the wall crop. The homography itself
+  // doesn't know or care what real-world size u,v=0..1 represents -- that's
+  // purely a function of the aspect ratio the caller picks. So extending
+  // coverage above the wall rectangle (for the gable) is just a matter of
+  // computing outW/outH from a *taller* meters figure and calling this same
+  // sampler again; no new sampling logic needed.
+  function sampleQuadToCanvas(outW, outH){
     var t = computeProjective(points);
     var off = document.createElement("canvas");
     off.width = outW; off.height = outH;
@@ -874,6 +873,22 @@
       }
     }
     octx.putImageData(outData,0,0);
+    return off;
+  }
+
+  function outputSize(wM, hM, longEdge){
+    var aspect = wM/hM;
+    if(aspect>=1) return [longEdge, Math.max(1,Math.round(longEdge/aspect))];
+    return [Math.max(1,Math.round(longEdge*aspect)), longEdge];
+  }
+
+  function renderOutput(highQuality){
+    if(!points || !fullData) return;
+    var wM = parseFloat(widthInput.value)||1, hM = parseFloat(heightInput.value)||1;
+    var longEdge = highQuality ? 2048 : 420;
+    var sz = outputSize(wM, hM, longEdge);
+    var outW = sz[0], outH = sz[1];
+    var off = sampleQuadToCanvas(outW, outH);
 
     outCanvas.width = outW; outCanvas.height = outH;
     outCanvas.getContext("2d").drawImage(off,0,0);
@@ -881,6 +896,23 @@
     outAspectEl.textContent = wM.toFixed(2)+"m × "+hM.toFixed(2)+"m";
     if(highQuality) lastFinalCanvas = off;
     updateSaveEnabled();
+  }
+
+  // Gable-extended crop: same width, but tall enough to reach the highest
+  // traced profile point (the ridge), so a gable mesh built from that same
+  // profile can be textured with real photo content instead of a flat
+  // placeholder color. Returns null when there's nothing above the wall
+  // rectangle to justify one.
+  function renderGableCrop(){
+    if(!points || !fullData || !profilePoints.length) return null;
+    var wM = parseFloat(widthInput.value)||1, hM = parseFloat(heightInput.value)||1;
+    var profileReal = profilePoints.map(function(p){ return realCoordsFor(p.x,p.y); });
+    var maxY = profileReal.reduce(function(m,p){ return Math.max(m,p.y); }, hM);
+    if(maxY <= hM + 0.02) return null;
+    var gableHeightM = maxY + 0.03; // small margin so the ridge line isn't right at the pixel edge
+    var sz = outputSize(wM, gableHeightM, 2048);
+    var canvas = sampleQuadToCanvas(sz[0], sz[1]);
+    return {canvas: canvas, width_m: wM, height_m: gableHeightM};
   }
 
   function updateSaveEnabled(){
@@ -901,10 +933,10 @@
 
   if(HOSTED){
     saveBtn.textContent = "Save this crop";
-    modeHint.textContent = "Saved crops land in this page's own storage — Claude pulls them from here directly.";
+    modeHint.textContent = "Saved crops land in this page's own storage — Claude pulls them from here directly. Traced a profile above the wall (a roofline)? A taller gable texture reaching the highest traced point is saved automatically alongside the wall crop.";
   } else {
     saveBtn.textContent = "Download this crop";
-    modeHint.textContent = "Running as a local file, so there's no live link back to Claude — this downloads the rectified PNG instead, already named to match the wall (drop it straight into project/textures/buildings/).";
+    modeHint.textContent = "Running as a local file, so there's no live link back to Claude — this downloads the rectified PNG instead, already named to match the wall (drop it straight into project/textures/buildings/). A traced profile also downloads a taller \"_gable\" texture reaching the highest traced point.";
     savedGridWrap.style.display = "none";
   }
 
@@ -963,6 +995,8 @@
 
     var blob = await canvasToBlob(lastFinalCanvas);
     var blueprintBlob = profileData.length ? await canvasToBlob(blueprintCanvas) : null;
+    var gable = renderGableCrop();
+    var gableBlob = gable ? await canvasToBlob(gable.canvas) : null;
 
     if(!HOSTED){
       try{
@@ -975,7 +1009,8 @@
         }
         download(blob, key + ".png");
         if(blueprintBlob) download(blueprintBlob, key + "_profile.png");
-        setStatus("Downloaded " + key + ".png" + (blueprintBlob ? " + profile" : ""), "ok");
+        if(gableBlob) download(gableBlob, key + "_gable.png");
+        setStatus("Downloaded " + key + ".png" + (blueprintBlob ? " + profile" : "") + (gableBlob ? " + gable ("+gable.height_m.toFixed(3)+"m tall)" : ""), "ok");
       } catch(err){
         setStatus("Download failed: " + (err && err.message ? err.message : err), "err");
       } finally {
@@ -995,6 +1030,7 @@
       }
       var up = await assets.upload(blob, {type:"image/png"});
       var profileUp = blueprintBlob ? await assets.upload(blueprintBlob, {type:"image/png"}) : null;
+      var gableUp = gableBlob ? await assets.upload(gableBlob, {type:"image/png"}) : null;
       await db.doc("crops/"+key).set({
         asset_id: up.id,
         width_m: parseFloat(widthInput.value),
@@ -1002,11 +1038,13 @@
         corners: points,
         profile: profileData,
         profile_asset_id: profileUp ? profileUp.id : null,
+        gable_asset_id: gableUp ? gableUp.id : null,
+        gable_height_m: gable ? gable.height_m : null,
         source_natural_size: {w: imgW, h: imgH},
         source_name: filenameEl.textContent,
         saved_at: new Date().toISOString()
       });
-      setStatus("Saved ✓ " + key + (profileData.length ? " (+ "+profileData.length+"-point profile)" : ""), "ok");
+      setStatus("Saved ✓ " + key + (profileData.length ? " (+ "+profileData.length+"-point profile)" : "") + (gableUp ? " (+ gable texture)" : ""), "ok");
       var existing = savedGrid.querySelector('[data-key="'+key+'"]');
       if(existing) existing.remove();
       renderSavedCard(key, {asset_id: up.id, width_m: parseFloat(widthInput.value), height_m: parseFloat(heightInput.value)});
