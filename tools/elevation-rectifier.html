@@ -234,6 +234,12 @@
         <select id="wallSelect"></select>
       </div>
     </div>
+    <div class="field-row">
+      <div class="field" style="flex-basis:100%;">
+        <button class="ghost" id="restoreBtn" style="width:100%;" disabled>Restore saved corners/profile for this wall</button>
+      </div>
+    </div>
+    <div class="status" id="restoreStatus"></div>
     <div class="field-row" id="customKeyRow" style="display:none;">
       <div class="field" style="flex-basis:100%;">
         <label for="customKeyInput">Save as (id)</label>
@@ -420,6 +426,7 @@
         renderOutput(true);
         renderProfileList();
         updateSaveEnabled();
+        updateRestoreEnabled();
       };
       im.src = reader.result;
     };
@@ -973,6 +980,72 @@
   function setStatus(msg, cls){
     statusEl.textContent = msg;
     statusEl.className = "status" + (cls?(" "+cls):"");
+  }
+
+  // ---- restore a previous save's corners/profile, so re-tracing a wall by
+  // hand (needed every time this tool's own math changes -- see D-54/D-57)
+  // isn't required once you've already placed the points correctly once.
+  // Only the raw photo is never stored (by design, see the tool's own
+  // description); everything derived from it -- the 4 corners in this
+  // photo's own pixel space, and the profile's real-world coordinates --
+  // already lives in this artifact's db from your last save.
+  var restoreBtn = document.getElementById("restoreBtn");
+  var restoreStatus = document.getElementById("restoreStatus");
+  function setRestoreStatus(msg, cls){
+    restoreStatus.textContent = msg;
+    restoreStatus.className = "status" + (cls?(" "+cls):"");
+  }
+  function updateRestoreEnabled(){
+    restoreBtn.disabled = !(HOSTED && img);
+  }
+  if(!HOSTED){
+    restoreBtn.style.display = "none";
+  } else {
+    restoreBtn.addEventListener("click", async function(){
+      if(!img){ return; }
+      restoreBtn.disabled = true;
+      setRestoreStatus("Looking up saved data…");
+      try{
+        var db = await claude.use("db");
+        if(!db){
+          setRestoreStatus("Restore isn't available in this view.", "err");
+          return;
+        }
+        var key = wallSelect.value === "custom"
+          ? (document.getElementById("customKeyInput").value || "custom_wall").trim().toLowerCase().replace(/[^a-z0-9_-]+/g, "_")
+          : wallSelect.value;
+        var snap = await db.doc("crops/"+key).get();
+        if(!snap.exists || !snap.data() || !snap.data().corners){
+          setRestoreStatus("No saved corners found yet for “"+key+"” — pick them by hand this first time.", "err");
+          return;
+        }
+        var data = snap.data();
+        widthInput.value = data.width_m;
+        heightInput.value = data.height_m;
+        points = data.corners.map(function(p){ return {x: p.x, y: p.y}; });
+        selIdx = -1;
+        profilePoints = []; profileLabels = []; profileSelIdx = -1;
+        if(data.profile && data.profile.length){
+          var t = computeProjective(points);
+          var wM = parseFloat(widthInput.value), hM = parseFloat(heightInput.value);
+          data.profile.forEach(function(pt){
+            var u = pt.x_m / wM, v = 1 - pt.y_m / hM;
+            var s = mapUV(t, u, v);
+            profilePoints.push({x: s.x, y: s.y});
+            profileLabels.push(pt.label || "");
+          });
+        }
+        drawStage();
+        renderOutput(true);
+        renderProfileList();
+        updateSaveEnabled();
+        setRestoreStatus("Restored "+points.length+" corners"+(profilePoints.length ? " + "+profilePoints.length+" profile points" : "")+" from your last save of “"+key+"”. Check them against the loupe before saving — they're reproduced from the saved numbers, not re-detected from this photo.", "ok");
+      } catch(err){
+        setRestoreStatus("Restore failed: " + (err && err.message ? err.message : err), "err");
+      } finally {
+        updateRestoreEnabled();
+      }
+    });
   }
 
   function renderSavedCard(key, data){
