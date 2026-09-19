@@ -856,14 +856,26 @@
   // coverage above the wall rectangle (for the gable) is just a matter of
   // computing outW/outH from a *taller* meters figure and calling this same
   // sampler again; no new sampling logic needed.
-  function sampleQuadToCanvas(outW, outH){
+  // heightRatio lets the caller cover a TALLER real-world range than the
+  // wall rectangle: mapUV's own v=0..1 is fixed by `points` to always mean
+  // "the wall's [0, height_m]" -- it does NOT automatically stretch just
+  // because the output canvas is taller. To actually reach real height
+  // h = heightRatio*height_m at the top of the image, v fed to mapUV must
+  // be rescaled to v_orig = heightRatio*v_new - (heightRatio-1), which
+  // reduces to the identity (v_orig=v_new) when heightRatio=1. Getting
+  // this wrong silently re-samples the *same* wall rectangle at a
+  // different resolution instead of reaching any new content above it --
+  // see D-54.
+  function sampleQuadToCanvas(outW, outH, heightRatio){
+    heightRatio = heightRatio || 1;
     var t = computeProjective(points);
     var off = document.createElement("canvas");
     off.width = outW; off.height = outH;
     var octx = off.getContext("2d");
     var outData = octx.createImageData(outW, outH);
     for(var py=0; py<outH; py++){
-      var v = (py+0.5)/outH;
+      var vNew = (py+0.5)/outH;
+      var v = heightRatio*vNew - (heightRatio-1);
       for(var px=0; px<outW; px++){
         var u = (px+0.5)/outW;
         var s = mapUV(t,u,v);
@@ -911,7 +923,7 @@
     if(maxY <= hM + 0.02) return null;
     var gableHeightM = maxY + 0.03; // small margin so the ridge line isn't right at the pixel edge
     var sz = outputSize(wM, gableHeightM, 2048);
-    var canvas = sampleQuadToCanvas(sz[0], sz[1]);
+    var canvas = sampleQuadToCanvas(sz[0], sz[1], gableHeightM/hM);
     return {canvas: canvas, width_m: wM, height_m: gableHeightM};
   }
 
