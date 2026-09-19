@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/gable_end_eave.gd" id="1_gable_eave_script"]
+
+[node name="GableEndEave" type="MeshInstance3D"]
+script = ExtResource("1_gable_eave_script")
