@@ -866,18 +866,28 @@
   // this wrong silently re-samples the *same* wall rectangle at a
   // different resolution instead of reaching any new content above it --
   // see D-54.
-  function sampleQuadToCanvas(outW, outH, heightRatio){
-    heightRatio = heightRatio || 1;
+  // General sampler: renders the real-world rectangle [xMin,xMax] x [yMin,yMax]
+  // (meters, in the wall's own frame -- x from its left edge, y above ground)
+  // into an outW x outH canvas. mapUV's own (u,v) are fixed to mean "x_m =
+  // u*width_m, y_m = height_m*(1-v)" by the 4 wall corners, so any other real
+  // box -- taller (reaching a ridge) OR wider (reaching a fascia overhang
+  // past the wall's own left/right edges) -- has to be converted into that
+  // fixed parameterization here, not by picking a different output aspect
+  // ratio and hoping (see D-54 for the height version of this mistake, and
+  // D-57 for the width one).
+  function sampleRealBox(xMin, xMax, yMin, yMax, outW, outH){
     var t = computeProjective(points);
+    var wM = parseFloat(widthInput.value)||1, hM = parseFloat(heightInput.value)||1;
     var off = document.createElement("canvas");
     off.width = outW; off.height = outH;
     var octx = off.getContext("2d");
     var outData = octx.createImageData(outW, outH);
     for(var py=0; py<outH; py++){
-      var vNew = (py+0.5)/outH;
-      var v = heightRatio*vNew - (heightRatio-1);
+      var realY = yMax - (py+0.5)/outH*(yMax-yMin);
+      var v = 1 - realY/hM;
       for(var px=0; px<outW; px++){
-        var u = (px+0.5)/outW;
+        var realX = xMin + (px+0.5)/outW*(xMax-xMin);
+        var u = realX/wM;
         var s = mapUV(t,u,v);
         var c = sampleBilinear(fullData, imgW, imgH, s.x, s.y);
         var o = (py*outW+px)*4;
@@ -900,7 +910,7 @@
     var longEdge = highQuality ? 2048 : 420;
     var sz = outputSize(wM, hM, longEdge);
     var outW = sz[0], outH = sz[1];
-    var off = sampleQuadToCanvas(outW, outH);
+    var off = sampleRealBox(0, wM, 0, hM, outW, outH);
 
     outCanvas.width = outW; outCanvas.height = outH;
     outCanvas.getContext("2d").drawImage(off,0,0);
@@ -910,21 +920,29 @@
     updateSaveEnabled();
   }
 
-  // Gable-extended crop: same width, but tall enough to reach the highest
-  // traced profile point (the ridge), so a gable mesh built from that same
-  // profile can be textured with real photo content instead of a flat
-  // placeholder color. Returns null when there's nothing above the wall
-  // rectangle to justify one.
+  // Gable-extended crop: tall enough to reach the highest traced profile
+  // point (the ridge) AND wide enough to reach the leftmost/rightmost traced
+  // point (a fascia overhang sticking out past the wall's own edges), so a
+  // gable mesh built from that same profile -- overhang included -- can be
+  // textured with real photo content everywhere it actually has geometry.
+  // Missing the width half of this (only extending height) is what produced
+  // out-of-[0,1] U coordinates on the overhang triangles and the washed-out
+  // patches the user saw -- see D-57. Returns null when nothing was traced
+  // above the wall rectangle.
   function renderGableCrop(){
     if(!points || !fullData || !profilePoints.length) return null;
     var wM = parseFloat(widthInput.value)||1, hM = parseFloat(heightInput.value)||1;
     var profileReal = profilePoints.map(function(p){ return realCoordsFor(p.x,p.y); });
     var maxY = profileReal.reduce(function(m,p){ return Math.max(m,p.y); }, hM);
     if(maxY <= hM + 0.02) return null;
-    var gableHeightM = maxY + 0.03; // small margin so the ridge line isn't right at the pixel edge
-    var sz = outputSize(wM, gableHeightM, 2048);
-    var canvas = sampleQuadToCanvas(sz[0], sz[1], gableHeightM/hM);
-    return {canvas: canvas, width_m: wM, height_m: gableHeightM};
+    var minX = profileReal.reduce(function(m,p){ return Math.min(m,p.x); }, 0);
+    var maxX = profileReal.reduce(function(m,p){ return Math.max(m,p.x); }, wM);
+    var margin = 0.03; // so ridge/edge lines aren't right at the pixel border
+    var xMin = minX - margin, xMax = maxX + margin, yMax = maxY + margin;
+    var gableWidthM = xMax - xMin, gableHeightM = yMax;
+    var sz = outputSize(gableWidthM, gableHeightM, 2048);
+    var canvas = sampleRealBox(xMin, xMax, 0, yMax, sz[0], sz[1]);
+    return {canvas: canvas, width_m: gableWidthM, height_m: gableHeightM, x_offset_m: xMin};
   }
 
   function updateSaveEnabled(){
@@ -1052,6 +1070,8 @@
         profile_asset_id: profileUp ? profileUp.id : null,
         gable_asset_id: gableUp ? gableUp.id : null,
         gable_height_m: gable ? gable.height_m : null,
+        gable_width_m: gable ? gable.width_m : null,
+        gable_x_offset_m: gable ? gable.x_offset_m : null,
         source_natural_size: {w: imgW, h: imgH},
         source_name: filenameEl.textContent,
         saved_at: new Date().toISOString()
