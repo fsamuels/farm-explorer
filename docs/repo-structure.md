@@ -39,6 +39,7 @@ farm-sim/
     │   │                          # patch over the front section (see D-19) + instances below
     │   ├── player.tscn           # first-person player, instanced once in main.tscn
     │   ├── fence_segment.tscn    # procedurally-generated wire/post fence, instanced 13x (boundary polygon) — see D-11
+    │   ├── fence_path.tscn       # same wire/post look, but built from a Path3D/Curve3D's points instead of a length — instanced 2x for the round pens, hand-editable in the editor by clicking points on the ground — see D-67/D-69
     │   ├── tree_line_segment.tscn # procedurally-scattered treeline + invisible collision wall, instanced 13x, 20m outside the boundary — see D-11
     │   ├── tree.tscn              # wraps models/tree.glb, instanced by tree_line_segment.gd
     │   ├── building.tscn         # one unit building box, instanced 7x (footprint placeholders)
@@ -59,6 +60,7 @@ farm-sim/
     │   ├── horse.gd               # horse-specific wander AI (drives its own AnimationPlayer)
     │   ├── wander.gd              # generic no-animation wander AI, reused by hen/rooster/flock/coyote/ducks/geese/quail
     │   ├── fence_segment.gd       # @tool script: builds posts+wire strands from an exported length — see D-11
+    │   ├── fence_path.gd          # @tool script: builds posts+wire strands from a Path3D/Curve3D's points instead of a length, closing the loop back to the first point — see D-67/D-69
     │   ├── tree_line_segment.gd   # @tool script: scatters trees + one invisible collision wall from an exported length — see D-11
     │   └── minimap.gd             # maps player world position onto the NAIP texture — see D-13
     ├── models/
