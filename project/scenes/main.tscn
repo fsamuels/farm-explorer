@@ -40,6 +40,7 @@
 [ext_resource type="Texture2D" path="res://textures/buildings/sallys_house_garage_north_gable.png" id="40_gable_tex_shg_n"]
 [ext_resource type="Texture2D" path="res://textures/horses/spots_small.png" id="41_horse_spots_small"]
 [ext_resource type="Texture2D" path="res://textures/horses/spots_large.png" id="42_horse_spots_large"]
+[ext_resource type="PackedScene" path="res://scenes/fence_path.tscn" id="44_fence_path_scene"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -194,6 +195,20 @@ albedo_color = Color(0.5, 0.5, 0.52, 1)
 metallic = 0.4
 roughness = 0.415
 
+[sub_resource type="Curve3D" id="Curve3D_round_pen_front_barn"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 130.1, 0, 49.7, 0, 0, 0, 0, 0, 0, 129.748991, 0, 52.815293, 0, 0, 0, 0, 0, 0, 128.713564, 0, 55.774372, 0, 0, 0, 0, 0, 0, 127.045641, 0, 58.428857, 0, 0, 0, 0, 0, 0, 124.828857, 0, 60.645641, 0, 0, 0, 0, 0, 0, 122.174372, 0, 62.313564, 0, 0, 0, 0, 0, 0, 119.215293, 0, 63.348991, 0, 0, 0, 0, 0, 0, 116.1, 0, 63.7, 0, 0, 0, 0, 0, 0, 112.984707, 0, 63.348991, 0, 0, 0, 0, 0, 0, 110.025628, 0, 62.313564, 0, 0, 0, 0, 0, 0, 107.371143, 0, 60.645641, 0, 0, 0, 0, 0, 0, 105.154359, 0, 58.428857, 0, 0, 0, 0, 0, 0, 103.486436, 0, 55.774372, 0, 0, 0, 0, 0, 0, 102.451009, 0, 52.815293, 0, 0, 0, 0, 0, 0, 102.1, 0, 49.7, 0, 0, 0, 0, 0, 0, 102.451009, 0, 46.584707, 0, 0, 0, 0, 0, 0, 103.486436, 0, 43.625628, 0, 0, 0, 0, 0, 0, 105.154359, 0, 40.971143, 0, 0, 0, 0, 0, 0, 107.371143, 0, 38.754359, 0, 0, 0, 0, 0, 0, 110.025628, 0, 37.086436, 0, 0, 0, 0, 0, 0, 112.984707, 0, 36.051009, 0, 0, 0, 0, 0, 0, 116.1, 0, 35.7, 0, 0, 0, 0, 0, 0, 119.215293, 0, 36.051009, 0, 0, 0, 0, 0, 0, 122.174372, 0, 37.086436, 0, 0, 0, 0, 0, 0, 124.828857, 0, 38.754359, 0, 0, 0, 0, 0, 0, 127.045641, 0, 40.971143, 0, 0, 0, 0, 0, 0, 128.713564, 0, 43.625628, 0, 0, 0, 0, 0, 0, 129.748991, 0, 46.584707),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 28
+
+[sub_resource type="Curve3D" id="Curve3D_round_pen_shop_house"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 163.5, 0, -69.1, 0, 0, 0, 0, 0, 0, 163.035037, 0, -66.164339, 0, 0, 0, 0, 0, 0, 161.685661, 0, -63.51604, 0, 0, 0, 0, 0, 0, 159.58396, 0, -61.414339, 0, 0, 0, 0, 0, 0, 156.935661, 0, -60.064963, 0, 0, 0, 0, 0, 0, 154.0, 0, -59.6, 0, 0, 0, 0, 0, 0, 151.064339, 0, -60.064963, 0, 0, 0, 0, 0, 0, 148.41604, 0, -61.414339, 0, 0, 0, 0, 0, 0, 146.314339, 0, -63.51604, 0, 0, 0, 0, 0, 0, 144.964963, 0, -66.164339, 0, 0, 0, 0, 0, 0, 144.5, 0, -69.1, 0, 0, 0, 0, 0, 0, 144.964963, 0, -72.035661, 0, 0, 0, 0, 0, 0, 146.314339, 0, -74.68396, 0, 0, 0, 0, 0, 0, 148.41604, 0, -76.785661, 0, 0, 0, 0, 0, 0, 151.064339, 0, -78.135037, 0, 0, 0, 0, 0, 0, 154.0, 0, -78.6, 0, 0, 0, 0, 0, 0, 156.935661, 0, -78.135037, 0, 0, 0, 0, 0, 0, 159.58396, 0, -76.785661, 0, 0, 0, 0, 0, 0, 161.685661, 0, -74.68396, 0, 0, 0, 0, 0, 0, 163.035037, 0, -72.035661),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 20
+
 [node name="Main" type="Node3D" unique_id=1143109196]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=215844830]
@@ -319,6 +334,14 @@ collision_layer = 0
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 250, 0, 23.75)
 length = 64.5
 collision_layer = 0
+
+[node name="RoundPens" type="Node3D" parent="."]
+
+[node name="RoundPen_FrontBarn" parent="RoundPens" instance=ExtResource("44_fence_path_scene")]
+curve = SubResource("Curve3D_round_pen_front_barn")
+
+[node name="RoundPen_ShopHouse" parent="RoundPens" instance=ExtResource("44_fence_path_scene")]
+curve = SubResource("Curve3D_round_pen_shop_house")
 
 [node name="TreeLine" type="Node3D" parent="."]
 
