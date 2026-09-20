@@ -9,6 +9,7 @@ farm-sim/
 │   ├── engine-decision.md        # Godot vs Unity vs Unreal tradeoffs
 │   ├── parcel-data.md            # confirmed parcel facts (ID, acreage, boundary source)
 │   ├── credits.md                # attribution for non-CC0 third-party assets
+│   ├── distribution.md           # Web export + itch.io publishing steps
 │   ├── gis/
 │   │   └── parcel-*.geojson      # real parcel boundary polygons pulled from county/state GIS
 │   └── repo-structure.md         # this file
@@ -33,6 +34,7 @@ farm-sim/
 │                                    is opened as a published Artifact, not a local file)
 └── project/                      # Godot project (chosen 2026-09-14, see engine-decision.md)
     ├── project.godot             # engine config, input map (WASD + mouse look)
+    ├── export_presets.cfg        # export target config — currently one "Web" preset, for itch.io (docs/distribution.md)
     ├── icon.svg
     ├── scenes/
     │   ├── main.tscn             # ground plane (NAIP-textured) + a higher-res drone-orthomosaic
