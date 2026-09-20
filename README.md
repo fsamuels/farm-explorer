@@ -42,6 +42,7 @@ See [docs/repo-structure.md](docs/repo-structure.md).
 | [docs/parcel-data.md](docs/parcel-data.md) | Confirmed parcel facts (ID, acreage, boundary source) and how the boundary GeoJSON was obtained | As real GIS/survey data lands |
 | [docs/repo-structure.md](docs/repo-structure.md) | Repo layout reference | Rarely, when layout changes |
 | [docs/credits.md](docs/credits.md) | Attribution for third-party assets that require it (CC-BY etc.) | Whenever a non-CC0 asset is added |
+| [docs/distribution.md](docs/distribution.md) | How to export a Web build and publish it to itch.io | As export/publishing steps change |
 | [docs/project/decisions.md](docs/project/decisions.md) | Append-only decision log | Every decision |
 
 ## Process
