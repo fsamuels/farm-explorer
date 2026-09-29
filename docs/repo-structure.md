@@ -24,6 +24,10 @@ farm-sim/
 │   │                              # ever needs to leave the photographer's machine
 │   └── models/                   # 3D models (buildings, animals) once created
 ├── tools/
+│   ├── ortho_fence_trace.py      # Python (Pillow + numpy) helpers to trace white fence
+│   │                              lines off the front-section orthomosaic and convert
+│   │                              pixels to scene meters via the ground plane's own
+│   │                              transform in main.tscn (D-71)
 │   └── elevation-rectifier.html  # standalone web tool: drag a photo's 4 wall corners
 │                                    into a homography-corrected, real-proportioned wall
 │                                    texture (D-44). Open directly as a local file (corner
