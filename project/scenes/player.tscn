@@ -18,3 +18,37 @@ position = Vector3(0, 1.6, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Head"]
 current = true
+
+[node name="InteractRay" type="RayCast3D" parent="Head/Camera3D"]
+target_position = Vector3(0, 0, -2.5)
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="Crosshair" type="ColorRect" parent="HUD"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -2.0
+offset_top = -2.0
+offset_right = 2.0
+offset_bottom = 2.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0.6)
+
+[node name="InteractPrompt" type="Label" parent="HUD"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = 24.0
+offset_right = 150.0
+offset_bottom = 56.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1

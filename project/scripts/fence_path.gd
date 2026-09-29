@@ -13,6 +13,13 @@ const WIRE_COLOR := Color(0.55, 0.55, 0.52)
 		closed = value
 		_rebuild()
 
+## Blocks the player with a thin box per segment. Off by default: most fences are
+## still walk-through (D-62/D-72); turn it on per fence as they're made solid.
+@export var solid := false:
+	set(value):
+		solid = value
+		_rebuild()
+
 func _ready() -> void:
 	if curve and not curve.changed.is_connected(_rebuild):
 		curve.changed.connect(_rebuild)
@@ -51,6 +58,11 @@ func _rebuild() -> void:
 		post.position = Vector3(pos.x, POST_HEIGHT / 2.0, pos.z)
 		add_child(post)
 
+	var body: StaticBody3D = null
+	if solid:
+		body = StaticBody3D.new()
+		add_child(body)
+
 	var segment_count := point_count if closed else point_count - 1
 	for i in range(segment_count):
 		var a := positions[i]
@@ -81,3 +93,12 @@ func _rebuild() -> void:
 			wire.material_override = wire_material
 			wire.transform = Transform3D(rot_basis, Vector3(mid.x, wire_height, mid.z))
 			add_child(wire)
+
+		if body:
+			var shape := BoxShape3D.new()
+			shape.size = Vector3(seg_length, POST_HEIGHT, 0.2)
+			var collision := CollisionShape3D.new()
+			collision.shape = shape
+			var yaw := atan2(-direction.z, direction.x)
+			collision.transform = Transform3D(Basis(Vector3.UP, yaw), Vector3(mid.x, POST_HEIGHT / 2.0, mid.z))
+			body.add_child(collision)

@@ -46,6 +46,7 @@ farm-sim/
     │   ├── player.tscn           # first-person player, instanced once in main.tscn
     │   ├── fence_segment.tscn    # procedurally-generated wire/post fence, instanced 13x (boundary polygon) — see D-11
     │   ├── fence_path.tscn       # same wire/post look, but built from a Path3D/Curve3D's points instead of a length — instanced 2x for the round pens, hand-editable in the editor by clicking points on the ground — see D-67/D-69
+    │   ├── gate.tscn              # swinging pipe-panel gate (hinge at the origin, panel along +X), opened/closed with E via player.gd — see D-76
     │   ├── tree_line_segment.tscn # procedurally-scattered treeline + invisible collision wall, instanced 13x, 20m outside the boundary — see D-11
     │   ├── tree.tscn              # wraps models/tree.glb, instanced by tree_line_segment.gd
     │   ├── building.tscn         # one unit building box, instanced 7x (footprint placeholders)
@@ -62,11 +63,12 @@ farm-sim/
     │   ├── quail.tscn             # wraps models/quail.glb with wander.gd, instanced 6x
     │   └── tr6.tscn               # wraps models/tr6.glb (no script — stationary prop), instanced once
     ├── scripts/
-    │   ├── player.gd             # first-person walking controller
+    │   ├── player.gd             # first-person walking controller + look-at-and-press-E interaction ray and prompt (D-76)
     │   ├── horse.gd               # horse-specific wander AI (drives its own AnimationPlayer)
     │   ├── wander.gd              # generic no-animation wander AI, reused by hen/rooster/flock/coyote/ducks/geese/quail
     │   ├── fence_segment.gd       # @tool script: builds posts+wire strands from an exported length — see D-11
-    │   ├── fence_path.gd          # @tool script: builds posts+wire strands from a Path3D/Curve3D's points instead of a length, closing the loop back to the first point — see D-67/D-69
+    │   ├── fence_path.gd          # @tool script: builds posts+wire strands from a Path3D/Curve3D's points instead of a length, closing the loop back to the first point (optional `solid` collision, D-76) — see D-67/D-69
+    │   ├── gate.gd                # @tool script: builds the gate and swings its AnimatableBody3D hinge on interact() — see D-76
     │   ├── tree_line_segment.gd   # @tool script: scatters trees + one invisible collision wall from an exported length — see D-11
     │   └── minimap.gd             # maps player world position onto the NAIP texture — see D-13
     ├── models/
