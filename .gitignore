@@ -12,6 +12,10 @@ assets/reference-photos/
 .DS_Store
 Thumbs.db
 
+# Python
+__pycache__/
+*.pyc
+
 # Godot (if selected)
 .godot/
 *.import
