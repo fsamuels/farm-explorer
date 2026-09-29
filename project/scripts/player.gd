@@ -6,6 +6,8 @@ const MOUSE_SENSITIVITY := 0.003
 
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera3D
+@onready var interact_ray: RayCast3D = $Head/Camera3D/InteractRay
+@onready var interact_prompt: Label = $HUD/InteractPrompt
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
@@ -18,10 +20,31 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event is InputEventMouseButton and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
+	if event.is_action_pressed("interact"):
+		var target := _interact_target()
+		if target:
+			target.interact(self)
+
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
 		head.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
 		head.rotation.x = clamp(head.rotation.x, deg_to_rad(-89.0), deg_to_rad(89.0))
+
+func _process(_delta: float) -> void:
+	var target := _interact_target()
+	interact_prompt.visible = target != null
+	if target:
+		interact_prompt.text = "E — " + target.get_interact_prompt()
+
+## The nearest node under the crosshair that can be interacted with: the ray's
+## collider or its closest ancestor with an `interact(actor)` method (e.g. gate.gd).
+func _interact_target() -> Node:
+	if not interact_ray.is_colliding():
+		return null
+	var node: Node = interact_ray.get_collider()
+	while node and not node.has_method("interact"):
+		node = node.get_parent()
+	return node
 
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():
