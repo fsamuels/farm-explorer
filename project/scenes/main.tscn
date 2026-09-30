@@ -371,6 +371,13 @@ _data = {
 }
 point_count = 10
 
+[sub_resource type="Curve3D" id="Curve3D_northeast_driveway"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 220.187, 0, -51.500, 0, 0, 0, 0, 0, 0, 225.546, 0, -51.594, 0, 0, 0, 0, 0, 0, 230.137, 0, -51.674, 0, 0, 0, 0, 0, 0, 234.779, 0, -51.754, 0, 0, 0, 0, 0, 0, 239.470, 0, -51.836, 0, 0, 0, 0, 0, 0, 244.261, 0, -51.919, 0, 0, 0, 0, 0, 0, 249.052, 0, -52.003, 0, 0, 0, 0, 0, 0, 253.793, 0, -52.085, 0, 0, 0, 0, 0, 0, 258.635, 0, -52.169, 0, 0, 0, 0, 0, 0, 262.323, 0, -52.234, 0, 0, 0, 0, 0, 0, 262.376, 0, -54.279, 0, 0, 0, 0, 0, 0, 262.439, 0, -56.734, 0, 0, 0, 0, 0, 0, 262.500, 0, -59.082, 0, 0, 0, 0, 0, 0, 262.561, 0, -61.446, 0, 0, 0, 0, 0, 0, 262.625, 0, -63.906, 0, 0, 0, 0, 0, 0, 262.686, 0, -66.261, 0, 0, 0, 0, 0, 0, 262.750, 0, -68.718, 0, 0, 0, 0, 0, 0, 262.801, 0, -70.720, 0, 0, 0, 0, 0, 0, 262.865, 0, -73.178, 0, 0, 0, 0, 0, 0, 262.927, 0, -75.585, 0, 0, 0, 0, 0, 0, 262.991, 0, -78.037, 0, 0, 0, 0, 0, 0, 263.046, 0, -80.147, 0, 0, 0, 0, 0, 0, 263.107, 0, -82.536, 0, 0, 0, 0, 0, 0, 263.153, 0, -84.286, 0, 0, 0, 0, 0, 0, 263.219, 0, -86.843, 0, 0, 0, 0, 0, 0, 263.296, 0, -89.798),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 26
+
 [node name="Main" type="Node3D" unique_id=1143109196]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=215844830]
@@ -577,6 +584,12 @@ closed = false
 
 [node name="FrontBarn_LaneFence" parent="DryLotFences" instance=ExtResource("44_fence_path_scene")]
 curve = SubResource("Curve3D_frontbarn_lanefence")
+closed = false
+
+[node name="NorthEastFences" type="Node3D" parent="."]
+
+[node name="NorthEast_DrivewayFence" parent="NorthEastFences" instance=ExtResource("44_fence_path_scene")]
+curve = SubResource("Curve3D_northeast_driveway")
 closed = false
 
 [node name="TreeLine" type="Node3D" parent="."]
