@@ -44,10 +44,10 @@ farm-sim/
     │   ├── main.tscn             # ground plane (NAIP-textured) + a higher-res drone-orthomosaic
     │   │                          # patch over the front section (see D-19) + instances below
     │   ├── player.tscn           # first-person player, instanced once in main.tscn
-    │   ├── fence_segment.tscn    # procedurally-generated wire/post fence, instanced 13x (boundary polygon) — see D-11
+    │   ├── fence_segment.tscn    # procedurally-generated wire/post fence, instanced 11x (boundary polygon, east side across the road) — see D-11, D-82
     │   ├── fence_path.tscn       # same wire/post look, but built from a Path3D/Curve3D's points instead of a length — instanced 2x for the round pens, hand-editable in the editor by clicking points on the ground — see D-67/D-69
     │   ├── gate.tscn              # swinging pipe-panel gate (hinge at the origin, panel along +X), opened/closed with E via player.gd — see D-76
-    │   ├── tree_line_segment.tscn # procedurally-scattered treeline + invisible collision wall, instanced 13x, 20m outside the boundary — see D-11
+    │   ├── tree_line_segment.tscn # procedurally-scattered treeline + invisible collision wall, instanced 11x, 20m outside the boundary — see D-11, D-82
     │   ├── tree.tscn              # wraps models/tree.glb, instanced by tree_line_segment.gd
     │   ├── building.tscn         # one unit building box, instanced 7x (footprint placeholders)
     │   ├── horse.tscn            # wraps models/horse.glb with wander-AI script, instanced 2x, roams a shared rectangle (D-27)

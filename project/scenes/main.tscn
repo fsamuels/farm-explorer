@@ -439,24 +439,16 @@ transform = Transform3D(0.008274428, 0, -0.9999658, 0, 1, 0, -0.9999658, 0, -0.0
 length = 32.24888
 
 [node name="Fence_04" parent="Boundary" instance=ExtResource("3_fence_scene")]
-transform = Transform3D(0.9999942, 0, -0.003401248, 0, 1, 0, -0.003401248, 0, -0.9999942, 203.1668, 0, -89.56361)
-length = 121.7154
-
-[node name="Fence_05" parent="Boundary" instance=ExtResource("3_fence_scene")]
-transform = Transform3D(0.06251447, 0, 0.9980441, 0, 1, 0, 0.9980441, 0, -0.06251447, 264.1741, 0, -87.37605)
-length = 4.798478
-
-[node name="Fence_06" parent="Boundary" instance=ExtResource("3_fence_scene")]
-transform = Transform3D(0.0151651, 0, 0.999885, 0, 1, 0, 0.999885, 0, -0.0151651, 264.3605, 0, -82.58246)
-length = 4.798639
+transform = Transform3D(0.9999942, 0, 0.003397069, 0, 1, 0, -0.003397069, 0, 0.9999942, 212.6547, 0, -89.59559)
+length = 140.6914
 
 [node name="Fence_07" parent="Boundary" instance=ExtResource("3_fence_scene")]
-transform = Transform3D(-0.008295903, 0, 0.9999656, 0, 1, 0, 0.9999656, 0, 0.008295903, 263.7685, 0, -4.437417)
-length = 151.4972
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 283, 0, -9.28943)
+length = 161.0903
 
 [node name="Fence_08" parent="Boundary" instance=ExtResource("3_fence_scene")]
-transform = Transform3D(-0.9999963, 0, 0.002734314, 0, 1, 0, 0.002734314, 0, 0.9999963, 149.0354, 0, 71.62059)
-length = 228.2102
+transform = Transform3D(-0.9999963, 0, -0.002728634, 0, 1, 0, 0.002728634, 0, -0.9999963, 158.9654, 0, 71.59414)
+length = 248.0702
 
 [node name="Fence_09" parent="Boundary" instance=ExtResource("3_fence_scene")]
 transform = Transform3D(0.002937905, 0, 0.9999957, 0, 1, 0, 0.9999957, 0, -0.002937905, 35.05128, 0, 112.9564)
@@ -653,24 +645,16 @@ transform = Transform3D(0.008274428, 0, -0.9999658, 0, 1, 0, -0.9999658, 0, -0.0
 length = 32.24888
 
 [node name="TreeLine_04" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(0.9999942, 0, -0.003401248, 0, 1, 0, -0.003401248, 0, -0.9999942, 203.0988, 0, -109.5635)
-length = 121.7154
-
-[node name="TreeLine_05" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(0.06251447, 0, 0.9980441, 0, 1, 0, 0.9980441, 0, -0.06251447, 284.135, 0, -88.62634)
-length = 4.798478
-
-[node name="TreeLine_06" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(0.0151651, 0, 0.999885, 0, 1, 0, 0.999885, 0, -0.0151651, 284.3582, 0, -82.88577)
-length = 4.798639
+transform = Transform3D(0.9999942, 0, 0.003401248, 0, 1, 0, -0.003401248, 0, 0.9999942, 222.6207, 0, -109.6299)
+length = 160.7595
 
 [node name="TreeLine_07" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(-0.008295903, 0, 0.9999656, 0, 1, 0, 0.9999656, 0, 0.008295903, 283.7678, 0, -4.271499)
-length = 151.4972
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 303, 0, -9.35181)
+length = 201.103
 
 [node name="TreeLine_08" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(-0.9999963, 0, 0.002734314, 0, 1, 0, 0.002734314, 0, 0.9999963, 149.0901, 0, 91.62051)
-length = 228.2102
+transform = Transform3D(-0.9999963, 0, -0.002734314, 0, 1, 0, 0.002734314, 0, -0.9999963, 168.9927, 0, 91.56609)
+length = 268.0156
 
 [node name="TreeLine_09" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
 transform = Transform3D(0.002937905, 0, 0.9999957, 0, 1, 0, 0.9999957, 0, -0.002937905, 55.0512, 0, 112.8976)
