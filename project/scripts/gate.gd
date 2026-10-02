@@ -20,6 +20,10 @@ const LATCH_CLEARANCE := 0.06
 		_rebuild()
 
 @export_range(10.0, 180.0) var open_angle_deg := 90.0
+## Swing used instead when the panel opens toward local +Z (i.e. it's opened
+## from the -Z side), for gates that hit a fence sooner on that side. Negative
+## means use `open_angle_deg` both ways.
+@export_range(-1.0, 180.0) var open_angle_plus_z_deg := -1.0
 @export var swing_time := 0.6
 
 var is_open := false
@@ -38,7 +42,11 @@ func interact(actor: Node3D) -> void:
 		# Rotating by +angle about Y swings the latch end toward local -Z, so
 		# pick the sign that moves it to the side opposite the actor.
 		var side := to_local(actor.global_position).z
-		target = deg_to_rad(open_angle_deg) * (1.0 if side >= 0.0 else -1.0)
+		if side >= 0.0:
+			target = deg_to_rad(open_angle_deg)
+		else:
+			var angle := open_angle_plus_z_deg if open_angle_plus_z_deg >= 0.0 else open_angle_deg
+			target = -deg_to_rad(angle)
 	is_open = not is_open
 	if _tween:
 		_tween.kill()

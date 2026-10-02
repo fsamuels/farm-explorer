@@ -185,8 +185,10 @@ hard rectangle.
 ## How this is used in the scene
 
 The Phase 2 blockout (`project/scenes/main.tscn`) now uses the **real parcel
-boundary** (13 fence segments tracing the actual polygon edges from
-`parcel-340732310005.geojson`) and **7 real building footprints** (boxes
+boundary** (fence segments tracing the actual polygon edges from
+`parcel-340732310005.geojson`, except on the east side, where the fence and
+treeline were moved out across Lowden-Gardena Road so the road is explorable —
+see D-82) and **7 real building footprints** (boxes
 positioned/sized from `buildings-340732310005.geojson`), converted from
 lat/lon to local meters via a simple equirectangular projection centered on
 the parcel's area centroid (local origin `(0,0)` = that centroid; `+X` = east,
