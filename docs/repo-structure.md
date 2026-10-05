@@ -94,8 +94,8 @@ farm-sim/
         │                          # orthomosaic patch over the front section (see D-19)
         │                          # and the middle section (see D-83); the back of the
         │                          # property is still NAIP-only for now
-        ├── roofs/                 # real roof imagery cropped from the front-section
-        │                            orthomosaic, one per covered building (see D-20)
+        ├── roofs/                 # real roof imagery cropped from the front- and middle-
+        │                            section orthomosaics, one per roof slope (see D-20, D-85)
         ├── buildings/             # real exterior-wall/siding imagery cropped from ground-level
         │                            reference photos (D-39, D-44) — one file per photographed
         │                            wall face; most buildings are still placeholder-color on
