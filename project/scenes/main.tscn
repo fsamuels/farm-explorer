@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" path="res://scenes/goose.tscn" id="13_goose_scene"]
 [ext_resource type="PackedScene" path="res://scenes/quail.tscn" id="14_quail_scene"]
 [ext_resource type="Texture2D" path="res://textures/ground/orthomosaic-front-section.png" id="15_front_section_ortho"]
+[ext_resource type="Texture2D" path="res://textures/ground/orthomosaic-middle-section.png" id="46_middle_section_ortho"]
 [ext_resource type="Texture2D" path="res://textures/roofs/shop_north.png" id="16_roof_shop_n"]
 [ext_resource type="Texture2D" path="res://textures/roofs/shop_south.png" id="17_roof_shop_s"]
 [ext_resource type="Texture2D" path="res://textures/roofs/sallys_house_north.png" id="18_roof_sh_n"]
@@ -68,6 +69,15 @@ size = Vector2(246.0823, 173.5148)
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_front_section"]
 transparency = 1
 albedo_texture = ExtResource("15_front_section_ortho")
+roughness = 0.9
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_middle_section"]
+size = Vector2(187.7649, 178.1064)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_middle_section"]
+render_priority = 1
+transparency = 1
+albedo_texture = ExtResource("46_middle_section_ortho")
 roughness = 0.9
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_roof_unit"]
@@ -423,6 +433,11 @@ shape = SubResource("BoxShape3D_ground")
 transform = Transform3D(0.9998, 0, 0.020012, 0, 1, 0, -0.020012, 0, 0.9998, 155.02, 0.03, -13.24)
 mesh = SubResource("PlaneMesh_front_section")
 surface_material_override/0 = SubResource("StandardMaterial3D_front_section")
+
+[node name="MiddleSectionOrthomosaic" type="MeshInstance3D" parent="." unique_id=1648302957]
+transform = Transform3D(0.9998, 0, 0.020012, 0, 1, 0, -0.020012, 0, 0.9998, -9.83, 0.04, 7.9)
+mesh = SubResource("PlaneMesh_middle_section")
+surface_material_override/0 = SubResource("StandardMaterial3D_middle_section")
 
 [node name="Boundary" type="Node3D" parent="." unique_id=1203940462]
 

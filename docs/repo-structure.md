@@ -28,6 +28,9 @@ farm-sim/
 │   │                              lines off the front-section orthomosaic and convert
 │   │                              pixels to scene meters via the ground plane's own
 │   │                              transform in main.tscn (D-71)
+│   ├── ortho_join_section.py     # joins a newly stitched ODM orthophoto onto the front
+│   │                              one: registers it, matches its light to the front
+│   │                              section's, feathers the seam (D-83)
 │   └── elevation-rectifier.html  # standalone web tool: drag a photo's 4 wall corners
 │                                    into a homography-corrected, real-proportioned wall
 │                                    texture (D-44). Open directly as a local file (corner
@@ -42,7 +45,8 @@ farm-sim/
     ├── icon.svg
     ├── scenes/
     │   ├── main.tscn             # ground plane (NAIP-textured) + a higher-res drone-orthomosaic
-    │   │                          # patch over the front section (see D-19) + instances below
+    │   │                          # patch over the front section (see D-19) and one over the
+    │   │                          # middle section (see D-83) + instances below
     │   ├── player.tscn           # first-person player, instanced once in main.tscn
     │   ├── fence_segment.tscn    # procedurally-generated wire/post fence, instanced 11x (boundary polygon, east side across the road) — see D-11, D-82
     │   ├── fence_path.tscn       # same wire/post look, but built from a Path3D/Curve3D's points instead of a length — instanced 2x for the round pens, hand-editable in the editor by clicking points on the ground — see D-67/D-69
@@ -87,8 +91,9 @@ farm-sim/
     └── textures/
         ├── ground/                # ground textures actually loaded by the scene (res://) —
         │                          # NAIP imagery (whole property) plus a real drone
-        │                          # orthomosaic patch over the front section (see D-19);
-        │                          # rest of the property still NAIP-only for now
+        │                          # orthomosaic patch over the front section (see D-19)
+        │                          # and the middle section (see D-83); the back of the
+        │                          # property is still NAIP-only for now
         ├── roofs/                 # real roof imagery cropped from the front-section
         │                            orthomosaic, one per covered building (see D-20)
         ├── buildings/             # real exterior-wall/siding imagery cropped from ground-level
