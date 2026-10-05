@@ -41,19 +41,23 @@ listed together here since they're the immediate priority as a group:
    D-11 boundary treeline, which exists as a hard map-edge limit 20m *outside*
    the real property, not as real foliage placement; the property itself
    (yard trees, wooded areas, brush) has none yet.
-7. **Drone coverage for the back of the property** (Phase 0/1) — the only
-   real drone capture so far is D-19's single flight over the "front
+7. **Drone coverage for the back of the property** (Phase 0/1) — the first
+   real drone capture was D-19's single flight over the "front
    section" (Front Barn/Shop/Sally's House, all near the Lowden-Gardena Road
-   entrance); House and Back Barn sit much farther from the road and are
-   still on the NAIP stand-in with no orthomosaic, which is also why they're
-   still flat-topped with no roof texture (item 4 above, Phase 4). Needs a
-   second drone flight over that back section, then the same OpenDroneMap
-   processing D-19 already proved out.
+   entrance). **Update (D-83):** a second flight now covers the middle
+   section (House, Back Barn, the paddocks behind it, pond and tree belt)
+   and is in the scene as a second ground patch, but it was shot at dusk and
+   is ground texture only — House and Back Barn are still the ML-footprint
+   boxes, flat-topped with no roof texture (item 4 above, Phase 4), and are
+   visibly off the real roofs in the new imagery. The far back of the
+   property is still on the NAIP stand-in. Needs its
+   own flight, then the same OpenDroneMap processing plus
+   `tools/ortho_join_section.py` to join it on.
 
 ## Phase 0 — Source data
 
 - [~] Fly drone in a structured overlapping grid pattern over the full property, to support photogrammetry terrain generation later — first capture done for one section only (129 nadir, GPS-tagged photos over the Front Barn/Shop/Sally's House area, D-19); **next up: a second flight over the back section (House, Back Barn) — current priority, see above**
-- [x] Fly a straight-down pass for a clean top-down orthomosaic (aerial texture) — done for that same front section (D-19); repeat for the back section next
+- [x] Fly a straight-down pass for a clean top-down orthomosaic (aerial texture) — done for that same front section (D-19) and, at dusk, the middle section (D-83); the far back of the property is next
 - [x] Gather any existing parcel boundary / measurement data (check water rights project docs — parcel is 340732310005) — confirmed acreage, real boundary polygon, and approximate (ML-derived) building footprints, all via public GIS REST APIs, see [docs/parcel-data.md](parcel-data.md)
 - [ ] Note real-world dimensions of key structures (barn, key fences) for scale validation later
 
@@ -62,7 +66,7 @@ listed together here since they're the immediate priority as a group:
 - [x] Process drone photos into an orthomosaic (top-down stitched image) — OpenDroneMap (`opendronemap/odm` Docker image, `--fast-orthophoto --skip-report`) processed the D-19 capture into a real orthophoto; proven for one section, repeatable as more sections are flown
 - [ ] Optionally process into a heightmap/DEM if photogrammetry is used — explicitly skipped for the D-19 run (orthophoto only, no 3D mesh was needed for a ground texture)
 - [ ] Import terrain into engine, scaled to match real property dimensions — still a flat ground plane; no real terrain geometry yet, only ground *texture* has improved
-- [~] Apply orthomosaic as terrain texture — the front section (Front Barn/Shop/Sally's House area) now uses the real drone-derived orthomosaic as a higher-resolution ground patch layered over the base texture, positioned via its own UTM georeferencing (D-19); the back section (House, Back Barn) and rest of the property are still the public-NAIP-imagery stand-in (see [docs/parcel-data.md](parcel-data.md)) — current priority, see above
+- [~] Apply orthomosaic as terrain texture — the front section (Front Barn/Shop/Sally's House area) now uses the real drone-derived orthomosaic as a higher-resolution ground patch layered over the base texture, positioned via its own UTM georeferencing (D-19); the middle section (House, Back Barn, pond) has a second patch joined to it and light-matched by `tools/ortho_join_section.py` (D-83); the far back of the property is still the public-NAIP-imagery stand-in (see [docs/parcel-data.md](parcel-data.md)) — current priority, see above
 - [ ] Validate scale: confirm walking speed vs. known real-world distances (e.g. barn to fence line) feels correct
 
 ## Phase 2 — Layout blockout
@@ -93,6 +97,7 @@ recognizable, shareable version.
 - [ ] Hero building detail pass (start with barn) — hand-modeled or photogrammetry
 - [ ] Ambient effects (wind, sound) — cheap realism wins
 - [x] Higher-resolution ground patch over the front section (Front Barn/Shop/Sally's House area) from the first real drone capture, layered over the base NAIP ground plane (D-19) — not an item from the original plan, pulled forward once drone photos became available
+- [x] Second ground patch over the middle section (House, Back Barn, pond and tree belt) from a dusk flight, registered to the front patch, light-matched to it and feathered at the seam (D-83)
 - [x] Sloped roof geometry and gable-end fills for the 5 buildings covered by that orthomosaic — roof crops textured per building/slope, plus a shared procedural gable-fill script (D-20 through D-23, D-25); House and Back Barn remain flat-topped, not yet covered by a drone pass — not an item from the original plan
 - [x] One decorative parked prop — a Triumph TR6 east of the Shop, facing south (CC BY 4.0, Configcars via Sketchfab, D-26); simplified from a 32MB/879k-triangle download to 7.7MB since it's a static background object — not an item from the original plan, added at the user's request
 - [x] A second decorative parked prop — a BMW 2002 tii in Sally's House's driveway, facing north (Sketchfab, D-40); simplified from a 22.63MB/1.79M-vertex download to 5.6MB — not an item from the original plan, added at the user's request

@@ -54,6 +54,9 @@ Sally's House.
       the Front Barn/Shop/Sally's House area — see "How the front-section
       orthomosaic was obtained" below. NAIP still covers the rest of the
       property; replacing it elsewhere needs its own drone flight + ODM run.
+- [x] Same for the middle section (House, Back Barn, the paddocks behind it,
+      pond and tree belt) — see "How the middle-section orthomosaic was joined
+      on" below (D-83). The back of the property is still NAIP-only.
 
 ## How the boundary polygon was obtained
 
@@ -181,6 +184,53 @@ the single 1024×1024 NAIP texture — specifically to keep its much higher
 resolution; the orthophoto's own alpha channel makes it blend into the
 surrounding NAIP along the true, irregular flight boundary instead of a
 hard rectangle.
+
+## How the middle-section orthomosaic was joined on
+
+The second capture (D-83): 41 nadir photos over the House, Back Barn, the
+paddocks behind it and the pond/tree belt, retained under
+`assets/drone-source/middle-section/`. They were flown just after sunset on
+2026-10-04 (ISO 840–1300, 1/8–1/15s, ~70m), so they are much darker than the
+front set, carry a magenta dusk cast, and are a little softer. All 41 went into
+a single ODM reconstruction, run exactly like the front one but as its own
+project:
+
+```
+cd assets/drone-source
+mkdir -p odm-middle-section/images && cp middle-section/*.jpg odm-middle-section/images/
+docker run --rm -v "$PWD":/datasets/code opendronemap/odm \
+    --project-path /datasets/code odm-middle-section --fast-orthophoto --skip-report
+cd ../.. && python3 tools/ortho_join_section.py odm-middle-section orthomosaic-middle-section.png
+```
+
+The raw ODM output is not used directly. `tools/ortho_join_section.py` joins it
+to the front ortho, which stays untouched as the reference:
+
+- **Registration.** GPS drift between the two flights leaves the orthos 2–4.5m
+  apart where they overlap (about 8,700m², including the House), and the offset
+  changes along the seam. It is measured in 24m windows and fitted as a smooth
+  field (0.26m residual, against 1.06m for a single shift), applied in full
+  near the seam and faded to a plain (+3.12, +0.97)m shift over the 80m west of
+  it. Both reconstructions agree with their own GPS tags to the same rotation,
+  so the patch as a whole is only shifted, not rotated.
+- **Light match.** A per-channel tone curve is fitted on overlap surfaces that
+  look the same in any season — roofing, concrete, gravel, bare dirt — and
+  applied to the whole patch. This brings exposure and white balance to the
+  front section's level without forcing October's dry grass and turning leaves
+  to September's green; that difference is real and is still visible.
+- **Feather.** The patch fades out over the first 6m inside the front patch's
+  coverage instead of ending on a hard line.
+
+The tool prints the `PlaneMesh` size and node origin for `main.tscn`. The
+`MiddleSectionOrthomosaic` node reuses `FrontSectionOrthomosaic`'s basis
+(the output grid is UTM-aligned like the front one), sits 1cm above it, and has
+`render_priority = 1` on its material so the cross-fade is always drawn over
+the front patch.
+
+This is ground texture only. The House and Back Barn boxes are still the ML
+footprints and are visibly off the real roofs in the new imagery; re-aligning
+them, as D-30–D-34 did for the front buildings, is a separate change. The
+dusk imagery is also a reasonable candidate for a daylight re-flight.
 
 ## How this is used in the scene
 
