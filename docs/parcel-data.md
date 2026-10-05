@@ -31,8 +31,10 @@ Barn) now have their position, footprint size, and rotation re-derived
 directly from that orthomosaic's pixel data instead of the ML footprints
 above — several turned out to be meaningfully rotated relative to scene axes
 (e.g. Front Barn ~-4.5°), which this table's ML data never captured. House
-and Back Barn are unchanged (still ML-approximate; outside/at the edge of the
-current drone flight coverage). Three more structures visible in the
+and Back Barn were re-derived the same way once the middle-section flight
+covered them (D-84): both sit about 15–20° off scene axes, and the House is
+now three boxes (main body, `House Garage`, `House South Wing`) instead of
+one 23m × 30m rectangle. Three more structures visible in the
 orthomosaic but absent from the Overture data entirely were also added the
 same way: a `Sally's House Garage` wing, a third turnout shed (`Turn Out Shed
 3`, near the round pen by Front Barn), and a `Red Shipping Container` west of
@@ -48,8 +50,8 @@ Sally's House.
       accurate shape and placement (ML footprints are approximate) — done for
       the 5 buildings covered by the front-section orthomosaic (D-30–D-34):
       position, size, and rotation all re-derived from the orthomosaic
-      pixels, not just the roof textures (D-20). House and Back Barn still
-      use the ML footprints, pending a second drone flight over that area
+      pixels, not just the roof textures (D-20). House and Back Barn
+      followed in D-84, from the front- and middle-section orthomosaics
 - [x] Replace the NAIP ground texture with the drone-derived orthomosaic for
       the Front Barn/Shop/Sally's House area — see "How the front-section
       orthomosaic was obtained" below. NAIP still covers the rest of the
@@ -227,10 +229,12 @@ The tool prints the `PlaneMesh` size and node origin for `main.tscn`. The
 `render_priority = 1` on its material so the cross-fade is always drawn over
 the front patch.
 
-This is ground texture only. The House and Back Barn boxes are still the ML
-footprints and are visibly off the real roofs in the new imagery; re-aligning
-them, as D-30–D-34 did for the front buildings, is a separate change. The
-dusk imagery is also a reasonable candidate for a daylight re-flight.
+D-83 itself was ground texture only; the House and Back Barn boxes were
+re-aligned to the imagery afterwards in D-84. Note the House sits in the strip
+both flights cover, deep enough inside the front patch that the pixels shown
+under it are the front section's, so it was fitted to those; the Back Barn is
+only in the middle patch. The dusk imagery is a reasonable candidate for a
+daylight re-flight.
 
 ## How this is used in the scene
 
@@ -251,8 +255,8 @@ irregular, not because the acreage changed.
 Buildings are attributed to specific structures (house/barn/shed — see "Still
 needed" above), and as of D-30–D-34 the 5 orthomosaic-covered buildings are no
 longer simple axis-aligned boxes: several carry a real rotation derived from
-the imagery (e.g. Front Barn ~-4.5°). House and Back Barn remain axis-aligned
-ML approximations pending a second drone flight. The old
+the imagery (e.g. Front Barn ~-4.5°). House and Back Barn got the same treatment in
+D-84 (about -20° and -15°), and gable roofs textured from the imagery in D-85. The old
 provisional-square/single-placeholder-box setup this section used to describe
 is gone, superseded now that real boundary and building data are both
 available (see D-3, D-5 in [decisions.md](project/decisions.md)).

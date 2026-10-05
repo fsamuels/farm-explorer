@@ -43,6 +43,14 @@
 [ext_resource type="Texture2D" path="res://textures/horses/spots_large.png" id="42_horse_spots_large"]
 [ext_resource type="PackedScene" path="res://scenes/fence_path.tscn" id="44_fence_path_scene"]
 [ext_resource type="PackedScene" path="res://scenes/gate.tscn" id="45_gate_scene"]
+[ext_resource type="Texture2D" path="res://textures/roofs/house_east.png" id="47_roof_h_e"]
+[ext_resource type="Texture2D" path="res://textures/roofs/house_west.png" id="48_roof_h_w"]
+[ext_resource type="Texture2D" path="res://textures/roofs/house_garage_east.png" id="49_roof_hg_e"]
+[ext_resource type="Texture2D" path="res://textures/roofs/house_garage_west.png" id="50_roof_hg_w"]
+[ext_resource type="Texture2D" path="res://textures/roofs/house_south_wing_south.png" id="51_roof_hsw_s"]
+[ext_resource type="Texture2D" path="res://textures/roofs/house_south_wing_north.png" id="52_roof_hsw_n"]
+[ext_resource type="Texture2D" path="res://textures/roofs/back_barn_south.png" id="53_roof_bb_s"]
+[ext_resource type="Texture2D" path="res://textures/roofs/back_barn_north.png" id="54_roof_bb_n"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -79,6 +87,38 @@ render_priority = 1
 transparency = 1
 albedo_texture = ExtResource("46_middle_section_ortho")
 roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_roof_h_e"]
+albedo_texture = ExtResource("47_roof_h_e")
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_roof_h_w"]
+albedo_texture = ExtResource("48_roof_h_w")
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_roof_hg_e"]
+albedo_texture = ExtResource("49_roof_hg_e")
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_roof_hg_w"]
+albedo_texture = ExtResource("50_roof_hg_w")
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_roof_hsw_s"]
+albedo_texture = ExtResource("51_roof_hsw_s")
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_roof_hsw_n"]
+albedo_texture = ExtResource("52_roof_hsw_n")
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_roof_bb_s"]
+albedo_texture = ExtResource("53_roof_bb_s")
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_roof_bb_n"]
+albedo_texture = ExtResource("54_roof_bb_n")
+roughness = 0.7
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_roof_unit"]
 size = Vector2(1, 1)
@@ -694,7 +734,13 @@ length = 100.4337
 [node name="Buildings" type="Node3D" parent="." unique_id=1610982085]
 
 [node name="House" parent="Buildings" unique_id=834222410 instance=ExtResource("4_building_scene")]
-transform = Transform3D(23.218, 0, 0, 0, 4.549, 0, 0, 0, 30.223, 57.757, 2.274, -32.824)
+transform = Transform3D(10.644, 0, -5.0348, 0, 2.7, 0, 3.9134, 0, 13.694, 61.770, 1.35, -31.305)
+
+[node name="House Garage" parent="Buildings" instance=ExtResource("4_building_scene")]
+transform = Transform3D(7.9676, 0, -2.6207, 0, 2.7, 0, 2.4932, 0, 8.3753, 61.376, 1.35, -42.859)
+
+[node name="House South Wing" parent="Buildings" instance=ExtResource("4_building_scene")]
+transform = Transform3D(12.511, 0, -2.1478, 0, 2.7, 0, 4.5115, 0, 5.9561, 55.635, 1.35, -23.397)
 
 [node name="Shop" parent="Buildings" unique_id=1803641495 instance=ExtResource("4_building_scene")]
 transform = Transform3D(14.87828, 0, 0.1571127, 0, 3.92, 0, -0.2265346, 0, 10.3188, 202.3329, 1.96, -52.5282)
@@ -706,7 +752,7 @@ transform = Transform3D(15.404382, 0, 0.18371, 0, 4, 0, -0.308334, 0, 9.178162, 
 transform = Transform3D(7.93541, 0, 0.1473495, 0, 4, 0, -0.1588796, 0, 7.359525, 211.6169, 2, -35.3591)
 
 [node name="Back Barn" parent="Buildings" unique_id=949387090 instance=ExtResource("4_building_scene")]
-transform = Transform3D(12.674, 0, 0, 0, 4, 0, 0, 0, 13.899, 14.856, 2, -20.103)
+transform = Transform3D(11.188, 0, -3.2318, 0, 4, 0, 3.0725, 0, 11.768, 15.838, 2, -20.582)
 
 [node name="Turn Out Shed 1" parent="Buildings" unique_id=863939474 instance=ExtResource("4_building_scene")]
 transform = Transform3D(4.411892, 0, -0.642147, 0, 4, 0, 0.4306271, 0, 6.630191, 151.3778, 2, 25.62595)
@@ -913,6 +959,81 @@ transform = Transform3D(0.020012, 0, -0.9998, 0, 1, 0, 0.9998, 0, 0.020012, 235.
 width = 1.802752
 rise = 0.383222
 high_side = -1.0
+
+[node name="House_Roof_East" type="MeshInstance3D" parent="Buildings"]
+transform = Transform3D(-5.0348, 0.351596, 5.322, 0, 0.927184, -2.29095, 13.694, 0.129269, 1.95671, 64.431, 3.84548, -30.3266)
+mesh = SubResource("PlaneMesh_roof_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_roof_h_e")
+
+[node name="House_Roof_West" type="MeshInstance3D" parent="Buildings"]
+transform = Transform3D(-5.0348, -0.351596, -5.322, 0, 0.927184, -2.29095, 13.694, -0.129269, -1.95671, 59.109, 3.84548, -32.2834)
+mesh = SubResource("PlaneMesh_roof_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_roof_h_w")
+
+[node name="House_Gable_South" parent="Buildings" instance=ExtResource("26_gable_scene")]
+transform = Transform3D(-0.938573, 0, -0.34508, 0, 1, 0, -0.34508, 0, 0.938573, 59.2526, 2.7, -24.458)
+width = 11.3406
+rise = 2.29095
+
+[node name="House_Gable_North" parent="Buildings" instance=ExtResource("26_gable_scene")]
+transform = Transform3D(0.938573, 0, 0.34508, 0, 1, 0, 0.34508, 0, -0.938573, 64.2874, 2.7, -38.152)
+width = 11.3406
+rise = 2.29095
+
+[node name="HouseGarage_Roof_East" type="MeshInstance3D" parent="Buildings"]
+transform = Transform3D(-2.6207, 0.357513, 3.98381, 0, 0.927184, -1.68652, 8.3753, 0.111869, 1.24657, 63.3679, 3.54326, -42.2357)
+mesh = SubResource("PlaneMesh_roof_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_roof_hg_e")
+
+[node name="HouseGarage_Roof_West" type="MeshInstance3D" parent="Buildings"]
+transform = Transform3D(-2.6207, -0.357513, -3.98381, 0, 0.927184, -1.68652, 8.3753, -0.111869, -1.24657, 59.3841, 3.54326, -43.4823)
+mesh = SubResource("PlaneMesh_roof_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_roof_hg_w")
+
+[node name="HouseGarage_Gable_North" parent="Buildings" instance=ExtResource("26_gable_scene")]
+transform = Transform3D(0.954369, 0, 0.29863, 0, 1, 0, 0.29863, 0, -0.954369, 62.6863, 2.7, -47.0466)
+width = 8.34857
+rise = 1.68652
+
+[node name="HouseSouthWing_Roof_South" type="MeshInstance3D" parent="Buildings"]
+transform = Transform3D(12.511, -0.127075, -1.0739, 0, 0.927184, -1.27905, 4.51153, 0.352395, 2.97805, 55.0981, 3.33953, -21.908)
+mesh = SubResource("PlaneMesh_roof_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_roof_hsw_s")
+
+[node name="HouseSouthWing_Roof_North" type="MeshInstance3D" parent="Buildings"]
+transform = Transform3D(12.511, 0.127075, 1.0739, 0, 0.927184, -1.27905, 4.51153, -0.352395, -2.97805, 56.1719, 3.33953, -24.886)
+mesh = SubResource("PlaneMesh_roof_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_roof_hsw_n")
+
+[node name="HouseSouthWing_Gable_East" parent="Buildings" instance=ExtResource("26_gable_scene")]
+transform = Transform3D(-0.339223, 0, 0.940706, 0, 1, 0, 0.940706, 0, 0.339223, 61.8905, 2.7, -21.1412)
+width = 6.33152
+rise = 1.27905
+
+[node name="HouseSouthWing_Gable_West" parent="Buildings" instance=ExtResource("26_gable_scene")]
+transform = Transform3D(0.339223, 0, -0.940706, 0, 1, 0, -0.940706, 0, -0.339223, 49.3795, 2.7, -25.6528)
+width = 6.33152
+rise = 1.27905
+
+[node name="BackBarn_Roof_South" type="MeshInstance3D" parent="Buildings"]
+transform = Transform3D(11.188, -0.132411, -1.6159, 0, 0.866025, -3.52291, 3.07252, 0.482149, 5.884, 15.03, 5.76145, -17.64)
+mesh = SubResource("PlaneMesh_roof_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_roof_bb_s")
+
+[node name="BackBarn_Roof_North" type="MeshInstance3D" parent="Buildings"]
+transform = Transform3D(11.188, 0.132411, 1.6159, 0, 0.866025, -3.52291, 3.07252, -0.482149, -5.884, 16.6459, 5.76145, -23.524)
+mesh = SubResource("PlaneMesh_roof_unit")
+surface_material_override/0 = SubResource("StandardMaterial3D_roof_bb_n")
+
+[node name="BackBarn_Gable_East" parent="Buildings" instance=ExtResource("26_gable_scene")]
+transform = Transform3D(-0.264821, 0, 0.964298, 0, 1, 0, 0.964298, 0, 0.264821, 21.432, 4, -19.0457)
+width = 12.2037
+rise = 3.52291
+
+[node name="BackBarn_Gable_West" parent="Buildings" instance=ExtResource("26_gable_scene")]
+transform = Transform3D(0.264821, 0, -0.964298, 0, 1, 0, -0.964298, 0, -0.264821, 10.244, 4, -22.1183)
+width = 12.2037
+rise = 3.52291
 
 [node name="Martha" parent="." instance=ExtResource("5_horse_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 185, 0, 53)
