@@ -276,6 +276,10 @@ buildings, then locating the closest boundary edge to the road and offsetting
 ~15m inward (clear of every building). Facing direction was set by hand in
 the editor afterward.
 
+**Update (D-88):** the player now starts in the middle of the front yard, the
+lawn east of the House, at (97, −25), facing the Front Barn. The road-side
+spot above is no longer the spawn.
+
 ### Fence segment transforms were fixed after being originally computed skewed
 
 Each fence segment's transform (D-6) encodes its length along whichever of the
