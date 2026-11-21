@@ -71,7 +71,8 @@ farm-sim/
     │   ├── quail.tscn             # wraps models/quail.glb with wander.gd, instanced 6x
     │   └── tr6.tscn               # wraps models/tr6.glb (no script — stationary prop), instanced once
     ├── shaders/
-    │   └── night_sky.gdshader     # sky shader: flat sky colour + stars, Milky Way, constellation lines — see D-104
+    │   ├── night_sky.gdshader     # sky shader: flat sky colour + stars, Milky Way, constellation lines, northern lights — see D-104, D-105
+    │   └── weather_surface.gdshader # overlay for the ground and roofs: wet darkening, puddles, settled snow — see D-105
     ├── scripts/
     │   ├── controls_overlay.gd    # read-only controls help panel in the player HUD, F1 toggles — see D-90/D-91
     │   ├── player.gd             # walking controller (hold Shift to walk, D-90), F or the mouse wheel switches 1st/3rd person (D-91), drives the body's animations (D-89) + look-at-and-press-E interaction ray and prompt (D-76)

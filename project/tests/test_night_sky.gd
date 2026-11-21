@@ -167,6 +167,16 @@ func _test_scene() -> void:
 	_check(is_zero_approx(mat.get_shader_parameter("star_strength")), "overcast hides the stars")
 	tod.set_overcast(0.0)
 	_check(is_equal_approx(mat.get_shader_parameter("star_strength"), 1.0), "clear sky brings them back")
+	# The northern lights reach the shader at night, not by day, and are hidden by cloud.
+	tod.set_aurora(1.0)
+	_check(is_equal_approx(mat.get_shader_parameter("aurora_strength"), 1.0), "the aurora is passed to the shader at night")
+	tod.set_overcast(1.0)
+	_check(is_zero_approx(mat.get_shader_parameter("aurora_strength")), "cloud hides the aurora in the shader")
+	tod.set_overcast(0.0)
+	tod.set_preset("day", true)
+	_check(is_zero_approx(mat.get_shader_parameter("aurora_strength")), "no aurora by day, even when asked for")
+	tod.set_aurora(0.0)
+	tod.set_preset("night", true)
 	# The sky turns with the clock.
 	tod.hour = 23.0
 	tod.sky_hour = 23.0

@@ -20,6 +20,10 @@ extends Node
 ## stars sit where they really are over Lowden for today's date and the clock
 ## hour, so they turn with the running clock; N toggles the constellation lines.
 ##
+## The northern lights (D-105) are drawn by the same sky shader, in the north
+## (-z) sky: weather.gd turns them on with set_aurora(), and they show only as
+## far as the stars do, so they need a dark, clear sky.
+##
 ## Weather (weather.gd, D-95) dims the scene through `set_overcast()`: the
 ## preset stays as chosen and `overcast_preset()` greys it on the way to the
 ## screen, so time of day and weather can change independently.
@@ -44,6 +48,7 @@ const PRESETS := {
 		"fog_color": Color(0.55, 0.75, 0.95),
 		"fog_density": 0.0,
 		"stars": 0.0,
+		"aurora": 0.0,
 	},
 	"sunset": {
 		"label": "Sunset",
@@ -56,6 +61,7 @@ const PRESETS := {
 		"fog_color": Color(0.95, 0.65, 0.45),
 		"fog_density": 0.003,
 		"stars": 0.0,
+		"aurora": 0.0,
 	},
 	"dusk": {
 		"label": "Dusk",
@@ -68,6 +74,7 @@ const PRESETS := {
 		"fog_color": Color(0.35, 0.32, 0.5),
 		"fog_density": 0.004,
 		"stars": 0.45,
+		"aurora": 0.0,
 	},
 	"night": {
 		"label": "Night",
@@ -80,6 +87,7 @@ const PRESETS := {
 		"fog_color": Color(0.04, 0.05, 0.1),
 		"fog_density": 0.006,
 		"stars": 1.0,
+		"aurora": 0.0,
 	},
 	"dawn": {
 		"label": "Dawn",
@@ -92,6 +100,7 @@ const PRESETS := {
 		"fog_color": Color(0.88, 0.78, 0.8),
 		"fog_density": 0.004,
 		"stars": 0.35,
+		"aurora": 0.0,
 	},
 	"sunrise": {
 		"label": "Sunrise",
@@ -104,6 +113,7 @@ const PRESETS := {
 		"fog_color": Color(0.95, 0.8, 0.66),
 		"fog_density": 0.002,
 		"stars": 0.0,
+		"aurora": 0.0,
 	},
 }
 const ORDER := ["day", "sunset", "dusk", "night", "dawn", "sunrise"]
@@ -137,6 +147,10 @@ var overcast := 0.0
 var fog_extra := 0.0
 ## Lightning flash brightness, 0..1 (set by weather.gd during thunderstorms).
 var flash := 0.0
+## Northern lights, 0..1 (set by weather.gd); shown only when the sky is dark.
+var aurora_level := 0.0
+var _aurora_time := 0.0
+var _aurora_shown := 0.0
 ## The clock hour (0..24) the lighting is at, and whether it's advancing.
 var hour := 13.0
 var clock_running := false
@@ -182,7 +196,7 @@ static func blend(a: Dictionary, b: Dictionary, t: float) -> Dictionary:
 ## `flash` (0..1) is a lightning flash that brightens the sky and ambient
 ## light. Always returns a fresh, writable copy (never one of the read-only
 ## PRESETS).
-static func overcast_preset(p: Dictionary, amount: float, extra_fog := 0.0, flash_amount := 0.0) -> Dictionary:
+static func overcast_preset(p: Dictionary, amount: float, extra_fog := 0.0, flash_amount := 0.0, aurora_amount := 0.0) -> Dictionary:
 	var out := p.duplicate()
 	if amount > 0.0:
 		# Cloud hides the stars much faster than it dims the sun.
@@ -202,6 +216,10 @@ static func overcast_preset(p: Dictionary, amount: float, extra_fog := 0.0, flas
 		# the fog or the sky shows as a seam above the greyed-out distance.
 		out.sky_color = out.sky_color.lerp(out.fog_color, thick)
 		out.stars *= 1.0 - minf(1.0, extra_fog / 0.03)  # light fog dims them, heavy fog hides them
+	if aurora_amount > 0.0:
+		# The northern lights show only against a dark sky, so they follow the
+		# stars: gone by day, and hidden by the same cloud and fog.
+		out.aurora = clampf(aurora_amount, 0.0, 1.0) * out.stars
 	if flash_amount > 0.0:
 		var f := clampf(flash_amount, 0.0, 1.0)
 		out.sky_color = out.sky_color.lerp(Color(0.85, 0.9, 1.0), 0.7 * f)
@@ -273,6 +291,9 @@ func _ready() -> void:
 	set_preset(start_preset, true)
 
 func _process(delta: float) -> void:
+	if _aurora_shown > 0.001 and _sky_material:
+		_aurora_time += delta
+		_sky_material.set_shader_parameter("aurora_time", _aurora_time)
 	if clock_running:
 		hour = fposmod(hour + delta * 24.0 / maxf(day_seconds, 1.0), 24.0)
 		current = keyframe_before(hour)
@@ -351,6 +372,12 @@ func set_fog_extra(amount: float) -> void:
 	if not _shown.is_empty():
 		_apply(_shown)
 
+## Set the northern lights (0..1) and redraw.
+func set_aurora(amount: float) -> void:
+	aurora_level = clampf(amount, 0.0, 1.0)
+	if not _shown.is_empty():
+		_apply(_shown)
+
 ## Set the lightning flash (0..1) and redraw.
 func set_flash(amount: float) -> void:
 	flash = clampf(amount, 0.0, 1.0)
@@ -360,11 +387,11 @@ func set_flash(amount: float) -> void:
 ## What's on screen now: the (possibly mid-blend) preset under the current
 ## weather.
 func shown() -> Dictionary:
-	return overcast_preset(_shown, overcast, fog_extra, flash)
+	return overcast_preset(_shown, overcast, fog_extra, flash, aurora_level)
 
 func _apply(preset: Dictionary) -> void:
 	_shown = preset
-	var p := overcast_preset(preset, overcast, fog_extra, flash)
+	var p := overcast_preset(preset, overcast, fog_extra, flash, aurora_level)
 	var sun := get_node_or_null(sun_path) as DirectionalLight3D
 	if sun:
 		sun.rotation_degrees = p.sun_rotation
@@ -414,6 +441,8 @@ func _apply_sky(p: Dictionary) -> void:
 		return
 	_sky_material.set_shader_parameter("sky_color", p.sky_color)
 	_sky_material.set_shader_parameter("star_strength", p.stars)
+	_sky_material.set_shader_parameter("aurora_strength", p.aurora)
+	_aurora_shown = p.aurora
 	_sky_material.set_shader_parameter("line_strength", 0.14 if show_constellations else 0.0)
 	var lst := SkyMath.sidereal_degrees(_sky_days, sky_hour)
 	_sky_material.set_shader_parameter("sky_to_celestial", SkyMath.celestial_to_world(SkyMath.LATITUDE, lst).transposed())
