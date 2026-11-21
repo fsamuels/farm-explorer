@@ -74,9 +74,13 @@ func _test_rainbow() -> void:
 	_check(inner_edge > 0.0, "the innermost band stays outside the centre")
 	var top_i := 4 * 2  # outer vertex of band 0 at the top
 	_check(is_equal_approx(arrays[Mesh.ARRAY_VERTEX][top_i].y, 90.0), "the outer band's top is at the radius")
-	_check(arrays[Mesh.ARRAY_COLOR][0].a < 0.001 and is_equal_approx(arrays[Mesh.ARRAY_COLOR][top_i].a, 1.0), "feet fade out, top is opaque")
-	var c: Vector3 = Weather.RAINBOW_CENTER
-	_check(c.x > 141.0 and c.x < 191.0 and c.z > -43.0 and c.z < 21.0, "the rainbow is centred on the arena")
+	_check(arrays[Mesh.ARRAY_COLOR][0].a < 0.001 and absf(arrays[Mesh.ARRAY_COLOR][top_i].a - Weather.RAINBOW_BAND_ALPHA[0]) < 0.01, "feet fade out, the top is at the band opacity")
+	var at := Weather.rainbow_position(Vector3(10, 2, -30))
+	_check(is_equal_approx(at.x, 10.0 + Weather.RAINBOW_DISTANCE) and at.y == 0.0 and is_equal_approx(at.z, -30.0), "the rainbow stands due east of the camera")
+	_check(Weather.RAINBOW_ALPHA <= 0.3, "the rainbow is faint")
+	_check(Weather.RAINBOW_BAND_ALPHA.size() == bands, "one opacity per band")
+	var mid_top_i := 2 * 18 + 8  # band 2 (yellow), at the top
+	_check(arrays[Mesh.ARRAY_COLOR][top_i].a < arrays[Mesh.ARRAY_COLOR][mid_top_i].a, "outer bands are fainter than the middle")
 
 func _test_lightning() -> void:
 	_check(is_equal_approx(Weather.lightning_delay(0.0), Weather.LIGHTNING_MIN), "shortest wait")
@@ -213,8 +217,10 @@ func _test_scene() -> void:
 	await create_timer(0.2).timeout
 	_check(weather.current == "rainbow" and rainbow.visible and not snow.emitting and not rain.emitting, "R after snow shows the rainbow")
 	var rainbow_mat := rainbow.material_override as StandardMaterial3D
-	_check(rainbow_mat.albedo_color.a > 0.5, "the rainbow fades in: %s" % rainbow_mat.albedo_color.a)
-	_check(rainbow.global_position.x > Weather.RAINBOW_CENTER.x, "the rainbow stands east of the arena")
+	_check(rainbow_mat.albedo_color.a > 0.15, "the rainbow fades in: %s" % rainbow_mat.albedo_color.a)
+	if cam:
+		await process_frame
+		_check(rainbow.global_position.distance_to(Weather.rainbow_position(cam.global_position)) < 0.01, "the rainbow follows the camera")
 	_check(tod.overcast > 0.0 and tod.overcast < 0.5, "a rainbow sky is only lightly clouded: %s" % tod.overcast)
 	tod.set_preset("night", true)
 	_check(rainbow_mat.albedo_color.v < 0.5, "the rainbow is dimmed at night: %s" % rainbow_mat.albedo_color)
