@@ -5,6 +5,7 @@ extends SceneTree
 
 const CN := preload("res://scripts/constellation_names.gd")
 const SkyMath := preload("res://scripts/sky_math.gd")
+const Weather := preload("res://scripts/weather.gd")
 
 var _failures := 0
 
@@ -56,6 +57,37 @@ func _test_scene() -> void:
 	_check(tod.current == "night" and weather.current == "snow", "the menu picks the time and weather directly: %s %s" % [tod.current, weather.current])
 	_check((menu._time_buttons["night"] as Button).button_pressed and not (menu._time_buttons["day"] as Button).button_pressed, "the current time is marked")
 	_check((menu._weather_buttons["snow"] as Button).button_pressed, "the current weather is marked")
+	# Rainbow by day only, aurora at dusk / night only.
+	_check(not Weather.allowed_at("rainbow", "night") and not Weather.allowed_at("rainbow", "dusk"), "no rainbow at dusk or night")
+	for t in ["dawn", "sunrise", "day", "sunset"]:
+		_check(Weather.allowed_at("rainbow", t) and not Weather.allowed_at("aurora", t), "rainbow but no aurora at %s" % t)
+	_check(Weather.allowed_at("aurora", "dusk") and Weather.allowed_at("aurora", "night"), "aurora at dusk and night")
+	_check(Weather.allowed_at("snow", "day") and Weather.allowed_at("snow", "night"), "ordinary weather at any time")
+	_check((menu._weather_buttons["rainbow"] as Button).disabled and not (menu._weather_buttons["aurora"] as Button).disabled, "at night the rainbow is greyed out, the aurora is not")
+	menu.choose_weather("rainbow")
+	_check(weather.current == "snow", "a rainbow can't be picked at night: %s" % weather.current)
+	menu.choose_weather("aurora")
+	_check(weather.current == "aurora", "the aurora can be picked at night")
+	menu.choose_weather("aurora")
+	_check(weather.current == "clear", "picking the aurora again turns it off: %s" % weather.current)
+	menu.choose_weather("aurora")
+	menu.choose_time("day")
+	_check(weather.current == "clear", "moving to day drops the aurora: %s" % weather.current)
+	_check((menu._weather_buttons["aurora"] as Button).disabled and not (menu._weather_buttons["rainbow"] as Button).disabled, "by day the aurora is greyed out, the rainbow is not")
+	menu.choose_weather("rainbow")
+	_check(weather.current == "rainbow", "the rainbow can be picked by day")
+	menu.choose_time("sunset")
+	_check(weather.current == "rainbow", "the rainbow stays through sunset")
+	menu.choose_time("dusk")
+	_check(weather.current == "clear", "dusk drops the rainbow: %s" % weather.current)
+	# A special left on at the wrong time (R, the clock) can still be switched off.
+	weather.set_weather("rainbow", true)
+	menu.refresh()
+	_check(not (menu._weather_buttons["rainbow"] as Button).disabled, "an active special is never locked")
+	menu.choose_weather("rainbow")
+	_check(weather.current == "clear", "it can be switched off: %s" % weather.current)
+	menu.choose_time("night")
+	menu.choose_weather("snow")
 	menu.toggle_clock()
 	_check(tod.clock_running, "the menu starts the clock")
 	menu.toggle_clock()

@@ -51,8 +51,22 @@ const WEATHER := {
 	"heavy_snow": {"label": "Heavy snow", "overcast": 0.9, "fog": 0.02, "precip": "snow", "wet": -0.02, "snow": 0.04,
 		"flakes": 10000, "slant": 0.22},
 	"rainbow": {"label": "Rainbow", "overcast": 0.2, "fog": 0.0, "precip": "", "rainbow": true, "wet": -0.003, "snow": -0.0017},
-	"aurora": {"label": "Aurora (at night)", "overcast": 0.0, "fog": 0.0, "precip": "", "aurora": true, "wet": -0.006, "snow": -0.0017},
+	"aurora": {"label": "Aurora", "overcast": 0.0, "fog": 0.0, "precip": "", "aurora": true, "wet": -0.006, "snow": -0.0017},
 }
+
+## Special sky effects and the times of day (TimeOfDay preset names) they can
+## be chosen at: a rainbow needs daylight (dawn through sunset) and the aurora
+## needs a dark sky (dusk, and night when it is at its best). Any other weather
+## is allowed at any time. The sky menu greys out a special at the wrong time
+## and drops it when the time moves somewhere it can't be seen.
+const SPECIAL_TIMES := {
+	"rainbow": ["dawn", "sunrise", "day", "sunset"],
+	"aurora": ["dusk", "night"],
+}
+
+## True if `weather` can be shown at time-of-day preset `preset_name`.
+static func allowed_at(weather: String, preset_name: String) -> bool:
+	return not SPECIAL_TIMES.has(weather) or preset_name in SPECIAL_TIMES[weather]
 
 ## The rainbow's arch lies in a north-south plane (+x east, -z north),
 ## RAINBOW_DISTANCE east of the camera and RAINBOW_RADIUS high, so it stands
