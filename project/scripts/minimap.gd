@@ -102,6 +102,8 @@ func _process(_delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_map"):
+		if get_tree().paused and not is_open():
+			return  # the sky menu has the game paused
 		set_open(not is_open())
 		get_viewport().set_input_as_handled()
 		return
@@ -252,9 +254,13 @@ func _build_minimap() -> void:
 	_minimap_box.add_theme_constant_override("separation", 6)
 	add_child(_minimap_box)
 
+	var hint_row := HBoxContainer.new()
+	hint_row.add_theme_constant_override("separation", 16)
+	_minimap_box.add_child(hint_row)
 	var hint := _outlined_label("M — Map", FONT_SIZE - 2)
 	hint.add_theme_color_override("font_color", KEY_COLOR)
-	_minimap_box.add_child(hint)
+	hint_row.add_child(hint)
+	hint_row.add_child(_build_sky_button())
 	_minimap_info = _outlined_label("", FONT_SIZE - 4)
 	_minimap_box.add_child(_minimap_info)
 
@@ -280,6 +286,47 @@ func _build_minimap() -> void:
 	north.offset_top = 2
 	_minimap.add_child(north)
 	_ignore_mouse(_minimap_box)
+
+## The sun-and-cloud icon (and "G") that opens the sky menu (D-110). It needs a
+## free mouse to click (Esc), so the key is the main way in.
+func _build_sky_button() -> Button:
+	var button := Button.new()
+	button.flat = true
+	button.focus_mode = Control.FOCUS_NONE
+	button.text = "G — Sky"
+	button.add_theme_font_size_override("font_size", FONT_SIZE - 2)
+	button.add_theme_color_override("font_color", KEY_COLOR)
+	button.add_theme_color_override("font_hover_color", Color(1, 1, 1))
+	button.icon = _sky_icon()
+	button.tooltip_text = "Pick the time of day and the weather"
+	button.pressed.connect(func() -> void: get_tree().call_group("sky_menu", "set_open", true))
+	return button
+
+## A small sun peeking out from behind a cloud, drawn into a texture so there
+## is no icon file to ship.
+static func _sky_icon() -> ImageTexture:
+	var size := 40
+	var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
+	var sun := Vector2(14, 14)
+	var puffs := [Vector2(14, 28), Vector2(22, 24), Vector2(30, 28)]
+	var radii := [7.0, 9.0, 6.5]
+	for y in size:
+		for x in size:
+			var p := Vector2(x + 0.5, y + 0.5)
+			var d := p.distance_to(sun)
+			var color := Color(0, 0, 0, 0)
+			if d < 7.5:
+				color = Color(1.0, 0.82, 0.25)
+			elif d < 11.5 and fposmod(rad_to_deg((p - sun).angle()) + 11.25, 45.0) < 22.5:
+				color = Color(1.0, 0.82, 0.25)
+			var in_cloud := p.y > 24.0 and p.y < 34.0 and p.x > 8.0 and p.x < 36.0
+			for i in puffs.size():
+				if p.distance_to(puffs[i]) < radii[i]:
+					in_cloud = true
+			if in_cloud:
+				color = Color(0.92, 0.95, 1.0)
+			img.set_pixel(x, y, color)
+	return ImageTexture.create_from_image(img)
 
 func _build_full_map() -> void:
 	_full_layer = CanvasLayer.new()

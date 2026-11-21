@@ -45,7 +45,7 @@ const DRIVE_LOOK_LIMIT := deg_to_rad(120.0)
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
-var third_person := false
+var third_person := true
 var model_yaw := 0.0
 ## The car being driven (vehicle.gd), or null on foot. While set, this node is
 ## carried to the seat every physics frame and walking is off.

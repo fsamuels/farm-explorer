@@ -30,6 +30,7 @@ extends Node
 
 const SkyMath := preload("res://scripts/sky_math.gd")
 const StarMap := preload("res://scripts/star_map.gd")
+const ConstellationNames := preload("res://scripts/constellation_names.gd")
 const SKY_SHADER := preload("res://shaders/night_sky.gdshader")
 
 signal lighting_changed(p: Dictionary)
@@ -166,6 +167,7 @@ var _tween: Tween
 var _toast: Label
 var _toast_tween: Tween
 var _clock_label: Label
+var _name_labels: Array[Label] = []
 
 ## The preset after `preset_name` in ORDER, wrapping Sunrise back to Day. Unknown names
 ## restart the cycle at Day.
@@ -288,9 +290,11 @@ func _ready() -> void:
 	_build_toast()
 	_build_sky()
 	_build_clock_label()
+	_build_name_labels()
 	set_preset(start_preset, true)
 
 func _process(delta: float) -> void:
+	_update_name_labels()
 	if _aurora_shown > 0.001 and _sky_material:
 		_aurora_time += delta
 		_sky_material.set_shader_parameter("aurora_time", _aurora_time)
@@ -313,11 +317,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		set_clock_running(not clock_running)
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("toggle_constellations"):
-		show_constellations = not show_constellations
-		if not _shown.is_empty():
-			_apply(_shown)
+		set_show_constellations(not show_constellations)
 		show_toast("Constellation lines " + ("on" if show_constellations else "off"))
 		get_viewport().set_input_as_handled()
+
+## Show or hide the constellation lines and names.
+func set_show_constellations(on: bool) -> void:
+	show_constellations = on
+	if not _shown.is_empty():
+		_apply(_shown)
 
 ## Start or stop the running clock. Starting continues from the hour set by the
 ## last preset picked; stopping holds whatever the clock reached.
@@ -488,6 +496,52 @@ func _refresh_clock_label() -> void:
 	var text := clock_estimate(hour)
 	if _clock_label.text != text:
 		_clock_label.text = text
+
+## One label per constellation (D-110), repositioned each frame by
+## _update_name_labels(). They share the toast's CanvasLayer and never take the
+## mouse.
+func _build_name_labels() -> void:
+	for entry in ConstellationNames.ENTRIES:
+		var label := Label.new()
+		label.text = entry[0]
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		label.add_theme_font_size_override("font_size", 20)
+		label.add_theme_color_override("font_color", Color(0.78, 0.88, 1.0))
+		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+		label.add_theme_constant_override("outline_size", 4)
+		label.visible = false
+		_toast.get_parent().add_child(label)
+		_name_labels.append(label)
+
+## Put each constellation's name where it sits in the sky as seen by the
+## current camera, fading with the stars and the clouds. Hidden by day, under
+## cloud, with the lines off (N), or when the spot is below the horizon,
+## behind the camera or off screen.
+func _update_name_labels() -> void:
+	if _name_labels.is_empty():
+		return
+	var cam := get_viewport().get_camera_3d()
+	var alpha := 0.0
+	if show_constellations and not _shown.is_empty():
+		alpha = ConstellationNames.label_alpha(_shown.stars, overcast)
+	if cam == null or alpha < 0.02:
+		for label in _name_labels:
+			label.visible = false
+		return
+	var lst := SkyMath.sidereal_degrees(_sky_days, sky_hour)
+	var view := get_viewport().get_visible_rect().size
+	for i in _name_labels.size():
+		var label := _name_labels[i]
+		var dir := ConstellationNames.direction(i, lst)
+		var at := cam.global_position + dir * 1000.0
+		var on_screen := ConstellationNames.above_horizon(dir) and not cam.is_position_behind(at)
+		var pos := cam.unproject_position(at) if on_screen else Vector2.ZERO
+		if on_screen and not Rect2(Vector2.ZERO, view).grow(-minf(40.0, view.x * 0.05)).has_point(pos):
+			on_screen = false
+		label.visible = on_screen
+		if on_screen:
+			label.position = pos - label.size * 0.5
+			label.modulate.a = alpha
 
 ## Briefly name something at the top of the screen (also used by weather.gd).
 func show_toast(text: String) -> void:
