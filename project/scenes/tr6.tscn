@@ -14,6 +14,11 @@ max_speed = 22.0
 eye_offset = Vector3(-0.38, 1.05, 0.1)
 half_width = 0.9
 half_length = 2.15
+wheel_meshes = PackedStringArray("pneu_1_pneus_0", "Cylinder_3_3_2_jante_0", "Array_Mat_21_0", "Cylinder_1_2_Mat_1_0", "Boole_1_Mat_25_0")
+cylinders = 6
+idle_rpm = 800.0
+redline_rpm = 5500.0
+gear_tops = PackedFloat32Array(5.0, 9.5, 15.0, 22.0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)

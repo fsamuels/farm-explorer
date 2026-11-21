@@ -6,7 +6,7 @@ extends RefCounted
 ## reversing). `throttle` is -1..1 (W is +1, S is -1), `steer` is -1..1 with
 ## +1 turning left.
 
-const KMH_PER_MS := 3.6
+const MPH_PER_MS := 2.2369362920544
 ## Below this speed the throttle counts as "from rest" and picks the direction.
 const REST_SPEED := 0.05
 ## You can only get out at or below this speed (m/s), about a brisk walk.
@@ -39,8 +39,8 @@ static func yaw_rate(speed: float, steer: float, wheelbase: float, max_steer: fl
 		rate = clampf(rate, -cap, cap)
 	return rate
 
-static func to_kmh(speed: float) -> float:
-	return absf(speed) * KMH_PER_MS
+static func to_mph(speed: float) -> float:
+	return absf(speed) * MPH_PER_MS
 
 ## Where to try putting the player when they get out, as offsets in the car's
 ## local frame (x right, z back) on the ground: the driver's side first, then

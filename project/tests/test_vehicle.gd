@@ -5,11 +5,14 @@ extends SceneTree
 ##   godot --headless -s res://tests/test_vehicle.gd
 
 const VehicleMath := preload("res://scripts/vehicle_math.gd")
+const EngineSound := preload("res://scripts/engine_sound.gd")
+const WheelBuilder := preload("res://scripts/wheel_builder.gd")
 
 var _failures := 0
 
 func _init() -> void:
 	_test_math()
+	_test_engine_sound()
 	_run.call_deferred()
 
 func _check(cond: bool, what: String) -> void:
@@ -43,13 +46,84 @@ func _test_math() -> void:
 	_check(is_equal_approx(VehicleMath.yaw_rate(5.0, 0.0, 2.5, max_steer, 8.0), 0.0), "straight with no steer")
 	var fast := VehicleMath.yaw_rate(30.0, 1.0, 2.5, max_steer, 8.0)
 	_check(is_equal_approx(fast * 30.0, 8.0), "sideways acceleration capped at speed: %s" % (fast * 30.0))
-	_check(is_equal_approx(VehicleMath.to_kmh(-10.0), 36.0), "km/h of reverse speed")
+	_check(is_equal_approx(VehicleMath.to_mph(-10.0), 22.369362920544), "mph of reverse speed: %s" % VehicleMath.to_mph(-10.0))
+	_check(absf(VehicleMath.to_mph(26.8224) - 60.0) < 0.001, "26.82 m/s is 60 mph")
 
 	var offsets := VehicleMath.exit_offsets(-0.4, 0.1, 0.95, 2.3, 0.7)
 	_check(offsets.size() == 8, "four sides and four corners")
 	_check(offsets[0].x < -1.5 and offsets[1].x > 1.5, "driver's side (left) first, then right")
 	_check(offsets[2].z > 2.9 and offsets[3].z < -2.9, "then behind, then in front")
 	_check(absf(offsets[4].x) > 1.5 and absf(offsets[4].z) > 2.9, "then the corners")
+
+func _test_engine_sound() -> void:
+	var tops := PackedFloat32Array([6.0, 11.0, 17.0, 24.0])
+	_check(EngineSound.gear_for_speed(0.0, tops) == 0, "gear 1 at rest")
+	_check(EngineSound.gear_for_speed(-8.0, tops) == 1, "reverse speed picks a gear by magnitude")
+	_check(EngineSound.gear_for_speed(99.0, tops) == 3, "top gear is the last")
+	_check(is_equal_approx(EngineSound.rpm_for_speed(0.0, tops, 900.0, 6000.0), 900.0), "idle at rest")
+	_check(is_equal_approx(EngineSound.rpm_for_speed(24.0, tops, 900.0, 6000.0), 6000.0), "redline at top speed")
+	var before := EngineSound.rpm_for_speed(5.99, tops, 900.0, 6000.0)
+	var after := EngineSound.rpm_for_speed(6.01, tops, 900.0, 6000.0)
+	_check(after < before - 1500.0, "revs drop at the 1-2 shift: %s -> %s" % [before, after])
+	_check(EngineSound.rpm_for_speed(9.0, tops, 900.0, 6000.0) > EngineSound.rpm_for_speed(7.0, tops, 900.0, 6000.0), "revs climb within a gear")
+	_check(is_equal_approx(EngineSound.firing_hz(6000.0, 4), 200.0), "4 cylinders at 6000 rpm fire 200 times a second")
+	_check(is_equal_approx(EngineSound.firing_hz(6000.0, 6), 300.0), "6 cylinders fire 300 times a second")
+
+	var synth := EngineSound.new(4)
+	var buf := synth.render(4000, 3000.0, 1.0)
+	var peak := 0.0
+	var energy := 0.0
+	for v in buf:
+		peak = maxf(peak, absf(v.x))
+		energy += v.x * v.x
+	_check(buf.size() == 4000, "render returns the frames asked for")
+	_check(peak <= 1.0 and peak > 0.1, "audio is audible and never clips: peak %s" % peak)
+	_check(energy / 4000.0 > 0.005, "audio is not silent")
+	# The note repeats every two firing periods (half-order burble): the signal
+	# should match itself at that lag and not at an unrelated one.
+	var period := EngineSound.MIX_RATE / EngineSound.firing_hz(3000.0, 4)
+	_check(_autocorr(buf, int(round(period * 2.0))) > 0.8, "pitch matches the firing frequency (%s)" % _autocorr(buf, int(round(period * 2.0))))
+	_check(_autocorr(buf, int(round(period * 1.37))) < 0.6, "and not an unrelated lag (%s)" % _autocorr(buf, int(round(period * 1.37))))
+	var quiet_buf := EngineSound.new(4).render(4000, 3000.0, 0.0)
+	var quiet := 0.0
+	for v in quiet_buf:
+		quiet += v.x * v.x
+	_check(quiet < energy, "less throttle is quieter")
+
+func _autocorr(buf: PackedVector2Array, lag: int) -> float:
+	var num := 0.0
+	var den := 0.0
+	for i in range(1000, buf.size() - lag):
+		num += buf[i].x * buf[i + lag].x
+		den += buf[i].x * buf[i].x
+	return num / maxf(den, 0.0001)
+
+func _test_wheel_builder() -> void:
+	# A car with a "wheel" triangle at each corner, all in one mesh.
+	var car := Node3D.new()
+	root.add_child(car)
+	var mesh := ArrayMesh.new()
+	var verts := PackedVector3Array()
+	var centers := [Vector3(-0.7, 0.3, -1.2), Vector3(0.7, 0.3, -1.2), Vector3(-0.7, 0.3, 1.0), Vector3(0.7, 0.3, 1.0)]
+	for c: Vector3 in centers:
+		verts.append_array([c + Vector3(0, 0.3, 0), c + Vector3(0, -0.3, 0.3), c + Vector3(0, -0.3, -0.3)])
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	var mi := MeshInstance3D.new()
+	mi.mesh = mesh
+	car.add_child(mi)
+	var wheels := WheelBuilder.build([mi], car)
+	_check(wheels.size() == 4, "four wheels from one mesh: %d" % wheels.size())
+	for w in wheels:
+		var want: Vector3 = centers[w.quadrant]
+		_check((w.center as Vector3).distance_to(want + Vector3(0, 0, 0)) < 0.01, "wheel %d centre %s vs %s" % [w.quadrant, w.center, want])
+		_check(w.front == (want.z < 0.0), "wheel %d front flag" % w.quadrant)
+		_check(absf(w.radius - 0.3) < 0.01, "wheel %d radius %s" % [w.quadrant, w.radius])
+		var arr: Array = (w.meshes[0] as ArrayMesh).surface_get_arrays(0)
+		_check((arr[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() == 3, "wheel %d keeps just its own triangle" % w.quadrant)
+	car.queue_free()
 
 func _step(frames: int) -> void:
 	for i in frames:
@@ -65,6 +139,7 @@ func _run() -> void:
 	var player := main.get_node("Player")
 	var space := main.get_viewport().world_3d.direct_space_state
 
+	_test_wheel_builder()
 	var names := ["BMW2002tii", "TR6"]
 	var homes := {}
 	for car_name in names:
@@ -103,9 +178,37 @@ func _drive(main: Node, player: CharacterBody3D, car: CharacterBody3D, nm: Strin
 			"%s camera at the driver's eye height" % nm)
 	_check(absf(car.global_position.y - start.origin.y) < 0.03, "%s rests on the ground (y %s)" % [nm, car.global_position.y])
 
+	_check(car.wheels.size() == 4, "%s has four wheels (%d)" % [nm, car.wheels.size()])
+	var front := 0
+	for w in car.wheels:
+		front += 1 if w.front else 0
+		_check(w.radius > 0.25 and w.radius < 0.45, "%s wheel radius %s" % [nm, w.radius])
+	_check(front == 2, "%s two front wheels" % nm)
+	var leftovers := 0
+	for w in car.wheels:
+		leftovers += (w.spin as Node3D).get_child_count()
+	_check(leftovers >= 8, "%s wheels carry their meshes (%d)" % [nm, leftovers])
+	var wheel0: Dictionary = car.wheels[0]
+	var spin_total := 0.0
+	var last_angle: float = (wheel0.spin as Node3D).rotation.x
+	var travelled := 0.0
+	var last_pos := car.global_position
+
+	_check(car._audio.playing, "%s engine sound starts when seated" % nm)
 	# Throttle: moves along its own -Z, not sideways, and the player comes with it.
 	Input.action_press("move_forward")
-	await _step(60)
+	for i in 60:
+		await physics_frame
+		var angle: float = (wheel0.spin as Node3D).rotation.x
+		spin_total += angle_difference(last_angle, angle)
+		last_angle = angle
+		travelled += _flat_dist(car.global_position, last_pos)
+		last_pos = car.global_position
+	_check(spin_total < -1.0, "%s wheel rolls forward (%s rad)" % [nm, spin_total])
+	_check(absf(absf(spin_total) * wheel0.radius - travelled) < travelled * 0.15,
+			"%s wheel roll matches distance: %s m rolled vs %s m driven" % [nm, absf(spin_total) * wheel0.radius, travelled])
+	_check(car.engine_rpm > car.idle_rpm + 500.0, "%s revs rise with speed (%s rpm)" % [nm, car.engine_rpm])
+	_check(car.frames_pushed > 0, "%s engine audio was generated (%d frames)" % [nm, car.frames_pushed])
 	var heading := -start.basis.z
 	var moved := car.global_position - start.origin
 	_check(car.speed > 3.0, "%s accelerates (%s m/s)" % [nm, car.speed])
@@ -125,6 +228,11 @@ func _drive(main: Node, player: CharacterBody3D, car: CharacterBody3D, nm: Strin
 	Input.action_release("move_left")
 	var left_turn := angle_difference(yaw0, car.rotation.y)
 	_check(left_turn > 0.15, "%s turns left: %s" % [nm, left_turn])
+	for w in car.wheels:
+		if w.front:
+			_check((w.steer as Node3D).rotation.y > 0.2, "%s front wheel turned left (%s)" % [nm, (w.steer as Node3D).rotation.y])
+		else:
+			_check(absf((w.steer as Node3D).rotation.y) < 0.001, "%s rear wheel stays straight" % nm)
 	Input.action_press("move_right")
 	await _step(80)
 	Input.action_release("move_right")
@@ -191,6 +299,8 @@ func _drive(main: Node, player: CharacterBody3D, car: CharacterBody3D, nm: Strin
 	player.leave_vehicle()
 	await _step(5)
 	_check(player.vehicle == null and car.driver == null, "%s left" % nm)
+	await _step(3)
+	_check(not car._audio.playing, "%s engine stops when you get out" % nm)
 	_check(player.model.visible, "%s player body back" % nm)
 	_check(not player.collision_shape.disabled, "%s player collision back" % nm)
 	var local := car.to_local(player.global_position)
