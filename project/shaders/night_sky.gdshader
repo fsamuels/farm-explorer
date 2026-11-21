@@ -196,7 +196,7 @@ vec3 starlink_train(vec3 d, float t) {
 	vec3 e2 = normalize(b - a * dot(a, b));
 	vec3 n = cross(a, e2);
 	float side = dot(d, n);
-	if (abs(side) > 0.01 || d.y < 0.0) {
+	if (abs(side) > 0.03 || d.y < 0.0) {
 		return vec3(0.0);
 	}
 	float ang = atan(dot(d, e2), dot(d, a));
@@ -206,7 +206,8 @@ vec3 starlink_train(vec3 d, float t) {
 		float at = lead - float(k) * SPACING;
 		float inside = smoothstep(0.0, 0.15, at / arc) * (1.0 - smoothstep(0.85, 1.0, at / arc));
 		float dist = length(vec2(ang - at, side));
-		sum += exp(-pow(dist / 0.0016, 2.0)) * inside * (1.0 - 0.012 * float(k));
+		// About 0.2 degrees across: wide enough to stay visible on a 1080p screen.
+		sum += (exp(-pow(dist / 0.0032, 2.0)) + 0.25 * exp(-pow(dist / 0.009, 2.0))) * inside * (1.0 - 0.012 * float(k));
 	}
 	return vec3(0.95, 0.96, 1.0) * sum * 1.4;
 }

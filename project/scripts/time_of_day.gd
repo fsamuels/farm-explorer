@@ -403,7 +403,11 @@ func set_meteor_level(level: int) -> void:
 ## True if a Starlink train could be seen now: the sky is dark enough, with
 ## the weather taken into account.
 func starlink_visible() -> bool:
-	return not _shown.is_empty() and shown().stars >= STARLINK_MIN_STARS
+	if _shown.is_empty():
+		return false
+	# The same star level the sky shader gets, with a high moon's glare taken off.
+	var visible_stars: float = shown().stars * (1.0 - moon_glare(_shown.get("stars", 0.0), sky_hour, moon_enabled))
+	return visible_stars >= STARLINK_MIN_STARS
 
 ## Send a Starlink train across the sky. Returns false (and does nothing) when
 ## the sky is too bright or too cloudy to see one.

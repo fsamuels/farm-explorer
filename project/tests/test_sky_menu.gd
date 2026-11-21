@@ -71,6 +71,17 @@ func _test_overlay_keys() -> void:
 		e.physical_keycode = k
 		e.pressed = true
 		_check(not ControlsOverlay.is_action_key(e), "key %s does not minimize the help" % k)
+	for k in [KEY_CTRL, KEY_ALT, KEY_META, KEY_CAPSLOCK]:
+		var e := InputEventKey.new()
+		e.physical_keycode = k
+		e.keycode = k
+		e.pressed = true
+		_check(not ControlsOverlay.is_action_key(e), "modifier key %s does not minimize the help" % k)
+	var cmd_c := InputEventKey.new()
+	cmd_c.physical_keycode = KEY_C
+	cmd_c.meta_pressed = true
+	cmd_c.pressed = true
+	_check(not ControlsOverlay.is_action_key(cmd_c), "an OS shortcut does not minimize the help")
 	for k in [KEY_T, KEY_G, KEY_M, KEY_N, KEY_E, KEY_ESCAPE]:
 		var e := InputEventKey.new()
 		e.physical_keycode = k
@@ -226,6 +237,11 @@ func _test_scene() -> void:
 	_type(menu, "starlink")
 	_check(not tod.is_starlink_running() and menu.is_open() and menu._hint.text != "", "no Starlink train by day, and the menu says why")
 	menu.choose_time("night")
+	_type(menu, "starli")
+	menu.set_open(false)
+	menu.set_open(true)
+	_type(menu, "nk")
+	_check(not tod.is_starlink_running(), "a half-typed code does not carry over to the next visit")
 	_type(menu, "starlnk")
 	_check(not tod.is_starlink_running(), "a typo does not start it")
 	_type(menu, "starlink")

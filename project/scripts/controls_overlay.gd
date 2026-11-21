@@ -52,6 +52,9 @@ static func is_action_key(event: InputEvent) -> bool:
 		return false
 	if event.is_action("toggle_help"):
 		return false
+	# Bare modifiers and OS shortcuts (Cmd+Tab, Ctrl+C) aren't game controls.
+	if event.keycode in [KEY_CTRL, KEY_ALT, KEY_META, KEY_CAPSLOCK, KEY_SHIFT] or event.physical_keycode in [KEY_CTRL, KEY_ALT, KEY_META, KEY_CAPSLOCK] or event.ctrl_pressed or event.meta_pressed or event.alt_pressed:
+		return false
 	for action in MOVE_ACTIONS:
 		if event.is_action(action):
 			return false

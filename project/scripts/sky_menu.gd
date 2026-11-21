@@ -79,7 +79,7 @@ static func push_typed(typed: String, letter: String) -> String:
 	return (typed + letter.to_lower()).right(STARLINK_CODE.length())
 
 func _input(event: InputEvent) -> void:
-	if is_open() and event is InputEventKey and event.pressed and not event.echo:
+	if is_open() and event is InputEventKey and event.pressed and not event.echo and not (event.ctrl_pressed or event.alt_pressed or event.meta_pressed):
 		var letter := OS.get_keycode_string(event.keycode)
 		if letter.length() == 1:
 			_typed = push_typed(_typed, letter)
@@ -103,6 +103,7 @@ func set_open(open: bool) -> void:
 	if open and get_tree().paused:
 		return
 	_panel.visible = open
+	_typed = ""  # a half-typed code doesn't carry over to the next visit
 	get_tree().paused = open
 	if open:
 		_mouse_before = Input.mouse_mode
