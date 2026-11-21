@@ -35,6 +35,13 @@ func _run() -> void:
 	_press_m()
 	await process_frame
 	_check(map.is_open() and paused, "M opens the map and pauses")
+	for i in 2:
+		_press(KEY_1)
+		_press(KEY_2)
+	await process_frame
+	_check(map._full.show_labels and map._full.show_fences, "1/2 twice turns layers back on")
+	_check(not map._minimap.show_labels, "names never turn on in the minimap")
+	_check(map._minimap.show_fences, "fences follow the full map's toggle")
 	_press_m()
 	await process_frame
 	_check(not map.is_open() and not paused, "M again closes it and unpauses")
@@ -43,8 +50,11 @@ func _run() -> void:
 	quit(1 if _failures else 0)
 
 func _press_m() -> void:
+	_press(KEY_M)
+
+func _press(keycode: Key) -> void:
 	var event := InputEventKey.new()
-	event.physical_keycode = KEY_M
+	event.physical_keycode = keycode
 	event.pressed = true
 	Input.parse_input_event(event)
 	Input.flush_buffered_events()

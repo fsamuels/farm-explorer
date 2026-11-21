@@ -191,7 +191,9 @@ func _toggle_layer(index: int) -> void:
 	var property: String = LAYERS[index][1]
 	var on: bool = not _full.get(property)
 	_full.set(property, on)
-	_minimap.set(property, on)
+	# Names stay off the minimap; it's too small for them.
+	if property != "show_labels":
+		_minimap.set(property, on)
 	_refresh_layer_labels()
 
 func _update_full_map(here: Vector2) -> void:
