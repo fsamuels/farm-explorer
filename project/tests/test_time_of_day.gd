@@ -47,7 +47,13 @@ func _test_blend() -> void:
 	_check(TimeOfDay.blend(a, b, 1.0).sky_color.is_equal_approx(b.sky_color), "t=1 is b")
 	var mid := TimeOfDay.blend(a, b, 0.5)
 	_check(is_equal_approx(mid.sun_energy, (a.sun_energy + b.sun_energy) / 2.0), "energy midpoint")
-	_check(mid.sun_rotation.is_equal_approx((a.sun_rotation + b.sun_rotation) / 2.0), "rotation midpoint")
+	# The sun rotation is slerped (constant angular speed), not lerped per Euler angle.
+	var dusk: Dictionary = TimeOfDay.PRESETS.dusk
+	var fa := _forward(dusk.sun_rotation)
+	var fb := _forward(b.sun_rotation)
+	var fm := _forward(TimeOfDay.blend(dusk, b, 0.5).sun_rotation)
+	_check(absf(fa.angle_to(fm) - fm.angle_to(fb)) < 0.01, "sun rotation slerps: midpoint is equally far from both ends")
+	_check(_forward(TimeOfDay.blend(a, b, 1.0).sun_rotation).is_equal_approx(fb), "rotation t=1 is b")
 	_check(mid.label == b.label, "label comes from the target")
 
 func _test_scene() -> void:
@@ -80,7 +86,15 @@ func _test_scene() -> void:
 	_press(KEY_T)
 	await process_frame
 	_check(tod.current == "sunset", "T again goes to sunset")
+	paused = true
+	_press(KEY_T)
+	await process_frame
+	_check(tod.current == "sunset", "T is ignored while the map has the game paused")
+	paused = false
 	main.queue_free()
+
+func _forward(euler_deg: Vector3) -> Vector3:
+	return -Basis.from_euler(euler_deg * (PI / 180.0)).z
 
 func _press(keycode: Key) -> void:
 	var event := InputEventKey.new()

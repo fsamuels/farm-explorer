@@ -51,7 +51,7 @@
 [ext_resource type="Texture2D" path="res://textures/roofs/house_south_wing_north.png" id="52_roof_hsw_n"]
 [ext_resource type="Texture2D" path="res://textures/roofs/back_barn_south.png" id="53_roof_bb_s"]
 [ext_resource type="Texture2D" path="res://textures/roofs/back_barn_north.png" id="54_roof_bb_n"]
-[ext_resource type="Script" path="res://scripts/time_of_day.gd" id="55_time_of_day"]
+[ext_resource type="Script" uid="uid://chj2456j84ouy" path="res://scripts/time_of_day.gd" id="55_time_of_day"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1

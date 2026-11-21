@@ -69,42 +69,54 @@ var _tween: Tween
 var _toast: Label
 var _toast_tween: Tween
 
-## The preset after `name` in ORDER, wrapping Night back to Day. Unknown names
+## The preset after `preset_name` in ORDER, wrapping Night back to Day. Unknown names
 ## restart the cycle at Day.
-static func next_preset(name: String) -> String:
-	var i := ORDER.find(name)
+static func next_preset(preset_name: String) -> String:
+	var i := ORDER.find(preset_name)
 	return ORDER[0] if i == -1 else ORDER[(i + 1) % ORDER.size()]
 
 ## Lerp every numeric field of two presets; t = 0 gives `a`, 1 gives `b`.
-## Non-numeric fields (the label) come from `b`.
+## Non-numeric fields (the label) come from `b`. The sun's rotation is
+## slerped, so it moves along the shortest arc at a steady rate rather than
+## sweeping each Euler angle independently.
 static func blend(a: Dictionary, b: Dictionary, t: float) -> Dictionary:
 	var out := {}
 	for key in b:
 		var va = a.get(key, b[key])
 		var vb = b[key]
-		if vb is float or vb is Color or vb is Vector3:
+		if key == "sun_rotation":
+			out[key] = slerp_rotation(va, vb, t)
+		elif vb is float or vb is Color or vb is Vector3:
 			out[key] = lerp(va, vb, t)
 		else:
 			out[key] = vb
 	return out
+
+## Spherical blend between two rotations given as Euler degrees.
+static func slerp_rotation(a: Vector3, b: Vector3, t: float) -> Vector3:
+	var qa := Quaternion.from_euler(a * (PI / 180.0))
+	var qb := Quaternion.from_euler(b * (PI / 180.0))
+	return qa.slerp(qb, t).get_euler() * (180.0 / PI)
 
 func _ready() -> void:
 	_build_toast()
 	set_preset(start_preset, true)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("cycle_time_of_day"):
+	# The full map pauses the tree (D-93), which would freeze a blend and its
+	# label mid-way, so T only works while the game is running.
+	if event.is_action_pressed("cycle_time_of_day") and not get_tree().paused:
 		set_preset(next_preset(current))
 		get_viewport().set_input_as_handled()
 
-## Switch to preset `name`, blending from whatever is on screen now (so a
+## Switch to preset `preset_name`, blending from whatever is on screen now (so a
 ## second press mid-transition starts from the half-blended state).
-func set_preset(name: String, instant := false) -> void:
-	if not PRESETS.has(name):
-		push_warning("Unknown time-of-day preset '%s'" % name)
+func set_preset(preset_name: String, instant := false) -> void:
+	if not PRESETS.has(preset_name):
+		push_warning("Unknown time-of-day preset '%s'" % preset_name)
 		return
-	current = name
-	var target: Dictionary = PRESETS[name]
+	current = preset_name
+	var target: Dictionary = PRESETS[preset_name]
 	if _tween:
 		_tween.kill()
 		_tween = null
