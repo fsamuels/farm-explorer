@@ -52,6 +52,9 @@ float fbm(vec3 p) {
 vec3 milky_way(vec3 d) {
 	vec3 gy = cross(GAL_POLE, GAL_CENTRE);
 	float b = asin(clamp(dot(d, GAL_POLE), -1.0, 1.0));   // galactic latitude
+	if (abs(b) > 0.7) {
+		return vec3(0.0);  // the band is ~e^-12 here: skip the noise
+	}
 	float l = atan(dot(d, gy), dot(d, GAL_CENTRE));        // galactic longitude
 	float band = exp(-pow(b / 0.2, 2.0));
 	float core = exp(-pow(b / 0.07, 2.0));

@@ -288,6 +288,7 @@ func set_clock_running(on: bool) -> void:
 		if _tween:
 			_tween.kill()
 			_tween = null
+		sky_hour = hour  # don't leave the stars part-way through a blend
 	show_toast("Clock running" if on else "Clock paused at " + format_hour(hour))
 
 ## Switch to preset `preset_name`, blending from whatever is on screen now (so a
@@ -375,8 +376,10 @@ func _build_sky() -> void:
 	_sky_material.set_shader_parameter("line_map", ImageTexture.create_from_image(StarMap.bake_lines(w, w / 2)))
 	var sky := Sky.new()
 	sky.sky_material = _sky_material
-	# Reflections only need a rough sky; keep its cubemap small.
+	# Reflections only need a rough sky, and the shader changes every frame
+	# while the clock runs: keep the cubemap small and update it gradually.
 	sky.radiance_size = Sky.RADIANCE_SIZE_32
+	sky.process_mode = Sky.PROCESS_MODE_INCREMENTAL
 	var env := world.environment
 	env.sky = sky
 	env.background_mode = Environment.BG_SKY

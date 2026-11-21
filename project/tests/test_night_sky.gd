@@ -183,6 +183,16 @@ func _test_scene() -> void:
 	tod.set_preset("night", false)
 	await create_timer(0.3).timeout
 	_check(is_equal_approx(tod.sky_hour, 23.0), "a preset change ends with the sky at the preset's hour: %s" % tod.sky_hour)
+	# Starting the clock mid-blend snaps the sky to the clock's hour.
+	tod.transition_seconds = 5.0
+	tod.set_preset("day", false)
+	await process_frame
+	tod.set_clock_running(true)
+	_check(is_equal_approx(tod.sky_hour, tod.hour), "starting the clock leaves no sky-hour offset: %s vs %s" % [tod.sky_hour, tod.hour])
+	tod.set_clock_running(false)
+	tod.transition_seconds = 0.05
+	tod.set_preset("night", true)
+	_check(env.sky.process_mode == Sky.PROCESS_MODE_INCREMENTAL, "the sky updates incrementally")
 	# N toggles the constellation lines.
 	_check(mat.get_shader_parameter("line_strength") > 0.0 and tod.show_constellations, "lines start on")
 	_press(KEY_N)
