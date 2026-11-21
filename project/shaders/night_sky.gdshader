@@ -14,6 +14,11 @@ uniform mat3 sky_to_celestial = mat3(1.0);
 uniform float star_strength = 0.0;
 uniform float line_strength = 0.0;
 uniform float milky_way_strength = 1.0;
+// Northern lights (D-105): 0 = none .. 1 = strong. They hang in the northern
+// sky (-z in the world), not on the turning star map, so they use the world
+// view direction. `aurora_time` is advanced by time_of_day.gd.
+uniform float aurora_strength = 0.0;
+uniform float aurora_time = 0.0;
 
 // J2000 equatorial unit vectors of the north galactic pole and the galactic
 // centre (Sagittarius). The third axis completes the galactic frame.
@@ -68,6 +73,31 @@ vec3 milky_way(vec3 d) {
 	return tint * v * 0.22;
 }
 
+// Curtains of light over the northern horizon: a sharp, bright green lower
+// edge fading up into pink, broken into vertical rays that drift and sway.
+vec3 aurora(vec3 d, float t) {
+	float az = atan(d.x, -d.z);                       // 0 = due north, + = east
+	float alt = asin(clamp(d.y, -1.0, 1.0));
+	if (alt < 0.0 || abs(az) > 1.6) {
+		return vec3(0.0);
+	}
+	// The curtain's lower edge ripples along the horizon.
+	float wave = 0.10 * sin(az * 3.0 + t * 0.15) + 0.05 * sin(az * 7.0 - t * 0.22) + 0.03 * sin(az * 13.0 + t * 0.4);
+	float h = (alt - 0.14 - wave) / 0.6;              // 0 at the lower edge, 1 at the top
+	float rays = smoothstep(0.25, 0.85, fbm(vec3(az * 20.0, alt * 1.5, t * 0.1)));
+	float body = smoothstep(0.0, 0.07, h) * (1.0 - smoothstep(0.55, 1.2, h));
+	float drift = 0.55 + 0.45 * sin(az * 2.3 + t * 0.3);
+	float ends = 1.0 - smoothstep(0.8, 1.6, abs(az));
+	float low = smoothstep(0.0, 0.08, alt);
+	float a = body * (0.3 + 0.7 * rays) * drift * ends * low;
+	// Green below, pink above; slow patches of pink reach lower down.
+	float pink_patch = fbm(vec3(az * 2.5, 3.0, t * 0.05));
+	float pink = smoothstep(0.2, 0.75, h + (pink_patch - 0.5) * 0.9);
+	vec3 col = mix(vec3(0.12, 1.0, 0.42), vec3(1.0, 0.3, 0.7), pink);
+	// Pink glows a little brighter than the green it sits above.
+	return col * a * mix(0.5, 0.85, pink);
+}
+
 void sky() {
 	vec3 col = sky_color;
 	if (star_strength > 0.001) {
@@ -81,5 +111,6 @@ void sky() {
 		add += vec3(0.4, 0.55, 0.9) * texture(line_map, uv).r * line_strength;
 		col += add * star_strength * horizon;
 	}
+	col += aurora(EYEDIR, aurora_time) * aurora_strength;
 	COLOR = col;
 }

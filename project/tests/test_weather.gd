@@ -25,6 +25,8 @@ func _run() -> void:
 	_test_overcast_preset()
 	_test_particle_brightness()
 	_test_rainbow()
+	_test_surfaces()
+	_test_aurora_presets()
 	_test_lightning()
 	_test_fog_and_flash_presets()
 	await _test_scene()
@@ -56,9 +58,55 @@ func _test_next_weather() -> void:
 	_check(Weather.WEATHER.heavy_fog.fog > Weather.WEATHER.light_fog.fog and Weather.WEATHER.light_fog.fog > 0.0, "heavy fog is thicker than light fog")
 	_check(Weather.WEATHER.thunderstorm.get("lightning", false) and not Weather.WEATHER.downpour.get("lightning", false), "only thunderstorms have lightning")
 
+func _test_surfaces() -> void:
+	for name in Weather.ORDER:
+		_check(Weather.WEATHER[name].has("wet") and Weather.WEATHER[name].has("snow"), "%s has surface rates" % name)
+	# Rain wets the ground, faster the harder it falls; snow settles, heavy snow faster.
+	var drizzle := Weather.surface_step(0.0, 0.0, "drizzle", 10.0)
+	var rain := Weather.surface_step(0.0, 0.0, "rain", 10.0)
+	var downpour := Weather.surface_step(0.0, 0.0, "downpour", 10.0)
+	_check(drizzle.x > 0.0 and rain.x > drizzle.x and downpour.x > rain.x, "harder rain wets faster: %s %s %s" % [drizzle.x, rain.x, downpour.x])
+	var snow := Weather.surface_step(0.0, 0.0, "snow", 10.0)
+	var heavy := Weather.surface_step(0.0, 0.0, "heavy_snow", 10.0)
+	_check(snow.y > 0.0 and heavy.y > snow.y and snow.x == 0.0, "heavy snow settles faster than snow, and snow doesn't wet")
+	# Clear weather dries the ground and melts snow slowly.
+	var clear := Weather.surface_step(1.0, 1.0, "clear", 10.0)
+	_check(clear.y < 1.0 and clear.y > 0.9, "snow melts slowly in clear weather: %s" % clear.y)
+	_check(Weather.surface_step(1.0, 0.0, "clear", 10.0).x < 1.0, "wet ground dries")
+	_check(Weather.surface_step(0.0, 0.0, "clear", 100.0) == Vector2.ZERO, "dry ground stays dry")
+	# Rain melts snow, and what melts wets the ground.
+	var melt := Weather.surface_step(0.0, 0.5, "rain", 10.0)
+	_check(melt.y < 0.5 and melt.x > rain.x, "rain melts snow into extra wetness: %s %s" % [melt.x, rain.x])
+	# Snow dries the ground.
+	_check(Weather.surface_step(0.5, 0.0, "snow", 10.0).x < 0.5, "falling snow dries wet ground")
+	# Levels stay within 0..1 however long it goes on.
+	var level := Vector2.ZERO
+	for i in 100:
+		level = Weather.surface_step(level.x, level.y, "downpour", 60.0)
+	_check(level.x == 1.0 and level.y == 0.0, "levels clamp: %s" % level)
+	for i in 100:
+		level = Weather.surface_step(level.x, level.y, "heavy_snow", 60.0)
+	_check(level.y == 1.0 and level.x == 0.0, "snow clamps at full cover: %s" % level)
+	_check(Weather.surface_step(0.3, 0.3, "hail", 5.0).is_finite(), "unknown weather falls back to clear rates")
+	_check(Weather.is_roof("Shop_Roof_North") and Weather.is_roof("GarageRoof_East") and not Weather.is_roof("Shop_Wall_East"), "roof meshes are picked by name")
+
+func _test_aurora_presets() -> void:
+	var night := TimeOfDay.PRESETS.night
+	_check(TimeOfDay.overcast_preset(night, 0.0, 0.0, 0.0, 0.0) == night, "no aurora leaves the preset alone")
+	_check(is_equal_approx(TimeOfDay.overcast_preset(night, 0.0, 0.0, 0.0, 1.0).aurora, 1.0), "full aurora at night")
+	_check(TimeOfDay.overcast_preset(TimeOfDay.PRESETS.day, 0.0, 0.0, 0.0, 1.0).aurora == 0.0, "no aurora by day")
+	var dusk: float = TimeOfDay.overcast_preset(TimeOfDay.PRESETS.dusk, 0.0, 0.0, 0.0, 1.0).aurora
+	_check(dusk > 0.0 and dusk < 1.0, "a faint aurora at dusk: %s" % dusk)
+	_check(TimeOfDay.overcast_preset(night, 1.0, 0.0, 0.0, 1.0).aurora == 0.0, "cloud hides the aurora")
+	_check(TimeOfDay.overcast_preset(night, 0.0, 0.045, 0.0, 1.0).aurora == 0.0, "heavy fog hides the aurora")
+	_check(TimeOfDay.overcast_preset(night, 0.0, 0.0, 0.0, 1.0).keys() == night.keys(), "same keys with the aurora")
+	for name in TimeOfDay.ORDER:
+		_check(TimeOfDay.PRESETS[name].aurora == 0.0, "%s preset has no aurora of its own" % name)
+
 func _test_rainbow() -> void:
 	_check(Weather.WEATHER.rainbow.get("rainbow", false) and Weather.WEATHER.rainbow.precip == "", "rainbow is dry and flagged")
-	_check(Weather.next_weather("snow") == "rainbow" and Weather.next_weather("rainbow") == "clear", "snow -> rainbow -> clear")
+	_check(Weather.next_weather("snow") == "heavy_snow" and Weather.next_weather("heavy_snow") == "rainbow", "snow -> heavy snow -> rainbow")
+	_check(Weather.next_weather("rainbow") == "aurora" and Weather.next_weather("aurora") == "clear", "rainbow -> aurora -> clear")
 	var south := Weather.arch_point(90.0, 0.0)
 	var top := Weather.arch_point(90.0, 0.5)
 	var north := Weather.arch_point(90.0, 1.0)
@@ -215,6 +263,11 @@ func _test_scene() -> void:
 	_press(KEY_R)
 	await process_frame
 	await create_timer(0.2).timeout
+	_check(weather.current == "heavy_snow" and snow.emitting and snow.amount_ratio > 0.99 and not rain.emitting, "R after snow is heavy snow, with the full flake count: %s" % snow.amount_ratio)
+	_check(tod.overcast > 0.8 and tod.fog_extra > 0.0, "heavy snow clouds over and thickens the air")
+	_press(KEY_R)
+	await process_frame
+	await create_timer(0.2).timeout
 	_check(weather.current == "rainbow" and rainbow.visible and not snow.emitting and not rain.emitting, "R after snow shows the rainbow")
 	var rainbow_mat := rainbow.material_override as StandardMaterial3D
 	_check(rainbow_mat.albedo_color.a > 0.15, "the rainbow fades in: %s" % rainbow_mat.albedo_color.a)
@@ -228,7 +281,12 @@ func _test_scene() -> void:
 	_press(KEY_R)
 	await process_frame
 	await create_timer(0.2).timeout
-	_check(weather.current == "clear" and not rainbow.visible, "R again clears and hides the rainbow")
+	_check(weather.current == "aurora" and not rainbow.visible and not snow.emitting and not rain.emitting, "R after the rainbow is the aurora")
+	_check(is_equal_approx(tod.aurora_level, 1.0), "the aurora is switched on: %s" % tod.aurora_level)
+	_press(KEY_R)
+	await process_frame
+	await create_timer(0.2).timeout
+	_check(weather.current == "clear" and not rainbow.visible and is_zero_approx(tod.aurora_level), "R again clears, hides the rainbow and ends the aurora")
 	_check(not snow.emitting, "no snow after the rainbow")
 	var snow_mat: StandardMaterial3D = snow.draw_pass_1.surface_get_material(0)
 	_check(snow_mat.albedo_color.a < 0.01, "leftover snow fades out with the sky: %s" % snow_mat.albedo_color.a)
@@ -237,6 +295,35 @@ func _test_scene() -> void:
 	_check(weather.current == "clear" and not rain.emitting, "unknown weather falls back to clear")
 	weather.set_weather("snow", true)
 	_check(snow.emitting and snow_mat.albedo_color.a > 0.5, "snow comes back visible after fading out")
+	# Wet and snowy surfaces: the overlay goes on the ground and the roofs only while there is something to show.
+	var ground: MeshInstance3D = main.get_node("Ground/MeshInstance3D")
+	var roof: MeshInstance3D = main.get_node("Buildings/Shop_Roof_North")
+	weather.set_surfaces(0.0, 0.0)
+	_check(ground.material_overlay == null and roof.material_overlay == null, "no overlay on dry, snow-free surfaces")
+	weather.set_surfaces(0.5, 0.0)
+	_check(ground.material_overlay is ShaderMaterial and roof.material_overlay == ground.material_overlay, "wet ground and roofs share the overlay")
+	var wall_like := main.get_node_or_null("Buildings/Shop_Wall_North")
+	_check(wall_like == null or wall_like.material_overlay == null, "walls get no overlay")
+	var overlay: ShaderMaterial = ground.material_overlay
+	_check(is_equal_approx(overlay.get_shader_parameter("wet"), 0.5) and is_zero_approx(overlay.get_shader_parameter("snow")), "the overlay carries the wet level")
+	weather.set_surfaces(0.0, 1.5)
+	_check(is_equal_approx(overlay.get_shader_parameter("snow"), 1.0), "levels clamp to 1")
+	weather.set_surfaces(0.0, 0.0)
+	_check(ground.material_overlay == null and roof.material_overlay == null, "the overlay comes off when everything has dried and melted")
+	# Snow settles while it falls, then outlasts it.
+	weather.set_weather("heavy_snow", true)
+	weather.set_surfaces(0.0, 0.0)
+	for i in 5:
+		await process_frame
+	_check(weather.surface_snow > 0.0, "snow settles while it falls: %s" % weather.surface_snow)
+	weather._process(10.0)  # ten seconds of heavy snow
+	_check(weather.surface_snow > 0.3 and ground.material_overlay != null, "ten seconds of heavy snow whitens the ground: %s" % weather.surface_snow)
+	var settled: float = weather.surface_snow
+	weather.set_weather("clear", true)
+	for i in 3:
+		await process_frame
+	_check(weather.surface_snow > 0.0 and weather.surface_snow <= settled, "snow outlasts the weather and melts only slowly: %s" % weather.surface_snow)
+	weather.set_surfaces(0.0, 0.0)
 	main.queue_free()
 
 func _press(keycode: Key) -> void:
