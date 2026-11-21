@@ -56,6 +56,7 @@ var _concrete_material: StandardMaterial3D
 var _glass_material: StandardMaterial3D
 
 func _ready() -> void:
+	add_to_group("front_door_spot")
 	var shop := get_node("../Shop") as Node3D
 	var b := shop.global_transform.basis
 	width = b.x.length()
@@ -74,6 +75,15 @@ func _ready() -> void:
 	# The gable triangles are built by their own scripts in _ready, which runs
 	# after this node's; re-skin them once they exist.
 	_skin_gables.call_deferred()
+
+## The building this shell belongs to, for the map's teleport (D-118).
+func spot_building() -> String:
+	return "Shop"
+
+## World position `clearance` metres outside the main (east) door.
+func front_door_spot(clearance: float) -> Variant:
+	var along := to_local(Vector3(main_door_world.x, 0, main_door_world.y)).z
+	return to_global(Vector3(width / 2.0 + clearance, 0.0, along))
 
 func _skin_gables() -> void:
 	for gable_name in ["Shop_Gable_West", "Shop_Gable_East"]:

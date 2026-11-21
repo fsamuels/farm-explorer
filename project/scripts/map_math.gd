@@ -47,6 +47,32 @@ static func polygon_center(poly: PackedVector2Array) -> Vector2:
 		sum += p
 	return sum / maxf(poly.size(), 1)
 
+## Where to stand just outside a building with no door of its own to go by
+## (D-118): `clearance` metres out from the middle of its southernmost wall,
+## the side the farm's lanes and the player's start run along. `poly` is the
+## footprint from box_footprint().
+static func front_spot(poly: PackedVector2Array, clearance: float) -> Vector2:
+	var center := polygon_center(poly)
+	var best := center
+	var best_z := -INF
+	for i in poly.size():
+		var a := poly[i]
+		var b := poly[(i + 1) % poly.size()]
+		var mid := (a + b) * 0.5
+		var normal := (b - a).orthogonal().normalized()
+		if normal.dot(mid - center) < 0.0:
+			normal = -normal
+		if normal.y > best_z:
+			best_z = normal.y
+			best = mid + normal * clearance
+	return best
+
+## The Y rotation that makes a node (which faces -Z) look from `from` toward
+## `to`, both flattened world positions.
+static func yaw_facing(from: Vector2, to: Vector2) -> float:
+	var d := to - from
+	return atan2(-d.x, -d.y)
+
 static func bounds_of(points: PackedVector2Array) -> Rect2:
 	if points.is_empty():
 		return Rect2()

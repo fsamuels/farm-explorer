@@ -70,6 +70,7 @@ func _ready() -> void:
 	if box == null:
 		push_warning("building_shell: no building named '%s'" % building_name)
 		return
+	add_to_group("front_door_spot")
 	var b := box.global_transform.basis
 	width = b.x.length()
 	depth = b.z.length()
@@ -114,6 +115,27 @@ func _material(color: Color, both_sides: bool) -> StandardMaterial3D:
 	if both_sides:
 		m.cull_mode = BaseMaterial3D.CULL_DISABLED
 	return m
+
+## The building this shell belongs to, for the map's teleport (D-118).
+func spot_building() -> String:
+	return building_name
+
+## World position `clearance` metres outside the building's front door: the
+## door labelled "front door" if there is one, else the first. Null with no doors.
+func front_door_spot(clearance: float) -> Variant:
+	if doors.is_empty():
+		return null
+	var d: Dictionary = doors[0]
+	for candidate: Dictionary in doors:
+		if candidate.get("label", "") == "front door":
+			d = candidate
+			break
+	var spec: Dictionary = WALLS[d.wall]
+	var out: Vector3 = spec.out
+	var along := _door_along(d)
+	var half: float = (depth if spec.along_x else width) / 2.0 + clearance
+	var local := Vector3(along, 0.0, out.z * half) if spec.along_x else Vector3(out.x * half, 0.0, along)
+	return to_global(local)
 
 func _wall_length(wall: String) -> float:
 	return width if WALLS[wall].along_x else depth
