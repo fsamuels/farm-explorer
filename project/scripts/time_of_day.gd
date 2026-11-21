@@ -152,6 +152,8 @@ var flash := 0.0
 var aurora_level := 0.0
 ## Wildfire smoke, 0..1 (set by weather.gd).
 var smoke_level := 0.0
+var _meteor_time := 0.0
+var _meteor_shown := 0.0
 var _aurora_time := 0.0
 var _aurora_shown := 0.0
 ## The clock hour (0..24) the lighting is at, and whether it's advancing.
@@ -321,6 +323,9 @@ func _process(delta: float) -> void:
 	if _aurora_shown > 0.001 and _sky_material:
 		_aurora_time += delta
 		_sky_material.set_shader_parameter("aurora_time", _aurora_time)
+	if _meteor_shown > 0.01 and _sky_material:
+		_meteor_time += delta
+		_sky_material.set_shader_parameter("meteor_time", _meteor_time)
 	if clock_running:
 		hour = fposmod(hour + delta * 24.0 / maxf(day_seconds, 1.0), 24.0)
 		current = keyframe_before(hour)
@@ -460,6 +465,8 @@ func _build_sky() -> void:
 	_sky_material.shader = SKY_SHADER
 	_sky_material.set_shader_parameter("star_map", ImageTexture.create_from_image(StarMap.bake_stars(w, w / 2)))
 	_sky_material.set_shader_parameter("line_map", ImageTexture.create_from_image(StarMap.bake_lines(w, w / 2)))
+	_sky_material.set_shader_parameter("planet_dir", planet_directions(_sky_days + 0.5))
+	_sky_material.set_shader_parameter("planet_col", planet_colors())
 	var sky := Sky.new()
 	sky.sky_material = _sky_material
 	# Reflections only need a rough sky, and the shader changes every frame
@@ -483,6 +490,51 @@ func _apply_sky(p: Dictionary) -> void:
 	_sky_material.set_shader_parameter("line_strength", 0.14 if show_constellations else 0.0)
 	var lst := SkyMath.sidereal_degrees(_sky_days, sky_hour)
 	_sky_material.set_shader_parameter("sky_to_celestial", SkyMath.celestial_to_world(SkyMath.LATITUDE, lst).transposed())
+	# The sun by day, the moon at night: the scene's one directional light.
+	var body := body_look(p, _shown.get("stars", 0.0), overcast, fog_extra, smoke_level)
+	_sky_material.set_shader_parameter("body_dir", body.dir)
+	_sky_material.set_shader_parameter("body_color", body.color)
+	_sky_material.set_shader_parameter("body_strength", body.strength)
+	_sky_material.set_shader_parameter("body_glow", body.glow)
+	_sky_material.set_shader_parameter("body_moon", body.moon)
+	# Shooting stars only streak across a dark, clear sky.
+	_meteor_shown = smoothstep(0.7, 1.0, p.stars)
+	_sky_material.set_shader_parameter("meteor_strength", _meteor_shown)
+
+## How the sun or moon disc is drawn under lighting `p`: where (the direction
+## the light comes from), its colour, how visible it is (hidden below the
+## horizon, by cloud and fog, and dulled by smoke), the size of its glow
+## (bigger in smoke and near the horizon) and `moon` 0..1 (the preset's own
+## `stars`: by night the light is the moon's, so the disc turns pale and
+## mottled). `base_stars` is the preset's star level before weather.
+static func body_look(p: Dictionary, base_stars: float, cloud: float, fog: float, smoke: float) -> Dictionary:
+	var dir: Vector3 = Basis.from_euler(p.sun_rotation * (PI / 180.0)).z
+	var moon := smoothstep(0.3, 0.8, base_stars)
+	var sun_c: Color = p.sun_color
+	# The sun's disc is nearly white, but only a dull orange through smoke.
+	var white := sun_c.lerp(Color.WHITE, 0.55 * (1.0 - smoke))
+	var color := Vector3(white.r, white.g, white.b).lerp(Vector3(0.86, 0.9, 1.0), moon)
+	var strength := smoothstep(-0.03, 0.06, dir.y) * pow(1.0 - clampf(cloud, 0.0, 1.0), 2.0)
+	strength *= 1.0 - clampf(fog / 0.02, 0.0, 1.0)
+	strength *= 1.0 - 0.35 * smoke
+	var glow := 0.25 + 0.6 * smoke + 0.3 * (1.0 - clampf(dir.y * 3.0, 0.0, 1.0))
+	return {"dir": dir, "color": color, "strength": strength, "glow": clampf(glow, 0.0, 1.0), "moon": moon}
+
+## The planets' unit vectors in celestial axes (for the shader's `planet_dir`).
+static func planet_directions(days: float) -> PackedVector3Array:
+	var out := PackedVector3Array()
+	for i in SkyMath.PLANETS.size():
+		out.append(SkyMath.planet_vector(i, days))
+	return out
+
+## Each planet's colour in rgb and brightness in alpha (from its magnitude).
+static func planet_colors() -> PackedColorArray:
+	var out := PackedColorArray()
+	for planet in SkyMath.PLANETS:
+		var c: Color = planet.color
+		c.a = clampf(0.5 * pow(2.512, -0.5 * planet.mag), 0.35, 1.6)
+		out.append(c)
+	return out
 
 func _build_toast() -> void:
 	var layer := CanvasLayer.new()

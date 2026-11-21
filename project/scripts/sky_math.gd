@@ -81,3 +81,81 @@ static func map_pixel(v: Vector3, width: int, height: int) -> Vector2:
 	var lon := atan2(v.y, v.x)
 	var lat := asin(clampf(v.z, -1.0, 1.0))
 	return Vector2((lon / TAU + 0.5) * width, (0.5 - lat / PI) * height)
+
+## --- Planets -------------------------------------------------------------
+## Low-precision orbital elements (Paul Schlyter's, good to about a degree for
+## a few decades around 2000): per planet [N, i, w, a, e, M] each as
+## [value at d=0, change per day], d being days since 1999-12-31 0h UT.
+## Enough to put Venus, Mars, Jupiter and Saturn in the right part of the sky.
+const PLANETS := [
+	{"name": "Venus", "color": Color(1.0, 0.97, 0.88), "mag": -4.0, "elements": [
+		[76.6799, 2.46590e-5], [3.3946, 2.75e-8], [54.8910, 1.38374e-5],
+		[0.723330, 0.0], [0.006773, -1.302e-9], [48.0052, 1.6021302244]]},
+	{"name": "Mars", "color": Color(1.0, 0.55, 0.38), "mag": 0.2, "elements": [
+		[49.5574, 2.11081e-5], [1.8497, -1.78e-8], [286.5016, 2.92961e-5],
+		[1.523688, 0.0], [0.093405, 2.516e-9], [18.6021, 0.5240207766]]},
+	{"name": "Jupiter", "color": Color(1.0, 0.93, 0.8), "mag": -2.3, "elements": [
+		[100.4542, 2.76854e-5], [1.3030, -1.557e-7], [273.8777, 1.64505e-5],
+		[5.20256, 0.0], [0.048498, 4.469e-9], [19.8950, 0.0830853001]]},
+	{"name": "Saturn", "color": Color(1.0, 0.9, 0.7), "mag": 0.7, "elements": [
+		[113.6634, 2.38980e-5], [2.4886, -1.081e-7], [339.3939, 2.97661e-5],
+		[9.55475, 0.0], [0.055546, -9.499e-9], [316.9670, 0.0334442282]]},
+]
+
+static func _elem(pair: Array, d: float) -> float:
+	return pair[0] + pair[1] * d
+
+## Eccentric anomaly (radians) for mean anomaly `m_deg` and eccentricity `e`.
+static func _kepler(m_deg: float, e: float) -> float:
+	var m := deg_to_rad(m_deg)
+	var big_e := m + e * sin(m) * (1.0 + e * cos(m))
+	for i in 4:
+		big_e -= (big_e - e * sin(big_e) - m) / (1.0 - e * cos(big_e))
+	return big_e
+
+## Heliocentric ecliptic position (AU) of a body with Schlyter elements.
+static func _helio(el: Array, d: float) -> Vector3:
+	var n := deg_to_rad(_elem(el[0], d))
+	var inc := deg_to_rad(_elem(el[1], d))
+	var w := deg_to_rad(_elem(el[2], d))
+	var a: float = el[3][0]
+	var e := _elem(el[4], d)
+	var big_e := _kepler(fposmod(_elem(el[5], d), 360.0), e)
+	var xv := a * (cos(big_e) - e)
+	var yv := a * sqrt(1.0 - e * e) * sin(big_e)
+	var v := atan2(yv, xv)
+	var r := sqrt(xv * xv + yv * yv)
+	var vw := v + w
+	return Vector3(
+		r * (cos(n) * cos(vw) - sin(n) * sin(vw) * cos(inc)),
+		r * (sin(n) * cos(vw) + cos(n) * sin(vw) * cos(inc)),
+		r * sin(vw) * sin(inc))
+
+## The sun's geocentric ecliptic position (AU) on day `d` since 1999-12-31 0h.
+static func _sun_ecliptic(d: float) -> Vector3:
+	var w := 282.9404 + 4.70935e-5 * d
+	var e := 0.016709 - 1.151e-9 * d
+	var big_e := _kepler(fposmod(356.0470 + 0.9856002585 * d, 360.0), e)
+	var xv := cos(big_e) - e
+	var yv := sqrt(1.0 - e * e) * sin(big_e)
+	var lon := atan2(yv, xv) + deg_to_rad(w)
+	var r := sqrt(xv * xv + yv * yv)
+	return Vector3(r * cos(lon), r * sin(lon), 0.0)
+
+## Ecliptic (x toward the equinox) to equatorial axes, same frame as
+## radec_to_vector.
+static func _ecliptic_to_equatorial(v: Vector3, d: float) -> Vector3:
+	var ecl := deg_to_rad(23.4393 - 3.563e-7 * d)
+	return Vector3(v.x, v.y * cos(ecl) - v.z * sin(ecl), v.y * sin(ecl) + v.z * cos(ecl))
+
+## Unit vector, in celestial axes, towards planet `index` of PLANETS on `days`
+## after J2000 noon.
+static func planet_vector(index: int, days: float) -> Vector3:
+	var d := days + 1.5  # J2000 noon is 1.5 days after 1999-12-31 0h
+	var geo := _helio(PLANETS[index].elements, d) + _sun_ecliptic(d)
+	return _ecliptic_to_equatorial(geo, d).normalized()
+
+## Unit vector, in celestial axes, towards the sun on `days` after J2000 noon.
+static func sun_vector(days: float) -> Vector3:
+	var d := days + 1.5
+	return _ecliptic_to_equatorial(_sun_ecliptic(d), d).normalized()

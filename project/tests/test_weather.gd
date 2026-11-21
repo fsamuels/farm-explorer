@@ -106,7 +106,9 @@ func _test_aurora_presets() -> void:
 
 func _test_smoke() -> void:
 	_check(Weather.WEATHER.haze.smoke > 0.0 and Weather.WEATHER.heavy_smoke.smoke > Weather.WEATHER.haze.smoke, "heavy smoke is thicker than haze")
-	_check(Weather.WEATHER.haze.precip == "" and Weather.WEATHER.heavy_smoke.precip == "", "smoke is dry")
+	_check(Weather.WEATHER.haze.precip == "ash" and Weather.WEATHER.heavy_smoke.precip == "ash", "smoke carries falling ash")
+	_check(Weather.WEATHER.haze.flecks > 0 and Weather.WEATHER.heavy_smoke.flecks > Weather.WEATHER.haze.flecks, "more ash in heavy smoke")
+	_check(Weather.WEATHER.heavy_smoke.flecks <= Weather.ASH_MAX_FLECKS and Weather.WEATHER.heavy_smoke.flecks < Weather.WEATHER.heavy_snow.flakes / 4, "ash is a small amount, far fewer than snow")
 	_check(Weather.WEATHER.heavy_smoke.wet < 0.0, "smoke dries the ground")
 	_check(Weather.next_weather("heavy_fog") == "haze" and Weather.next_weather("haze") == "heavy_smoke" and Weather.next_weather("heavy_smoke") == "snow", "heavy fog -> haze -> heavy smoke -> snow")
 	for name in TimeOfDay.ORDER:
@@ -269,6 +271,17 @@ func _test_scene() -> void:
 	_check(env.fog_density > 0.01 and env.fog_density < heavy_density, "light fog is thinner than heavy fog: %s" % env.fog_density)
 	weather.set_weather("clear", true)
 	_check(not env.fog_enabled and is_equal_approx(sun.light_energy, 1.0), "clear removes the fog and restores the sun")
+	var ash: GPUParticles3D = weather.get_node("Ash")
+	_check(not ash.emitting, "no ash under a clear sky")
+	weather.set_weather("haze", true)
+	_check(ash.emitting and not rain.emitting and not weather.get_node("Snow").emitting, "smoke haze drops ash, not rain or snow")
+	var haze_ratio := ash.amount_ratio
+	weather.set_weather("heavy_smoke", true)
+	_check(ash.emitting and ash.amount_ratio > haze_ratio and ash.amount_ratio < 0.6, "heavy smoke drops more ash, still a small amount: %s" % ash.amount_ratio)
+	_check(env.fog_enabled and tod.smoke_level == 1.0 and sun.light_energy < 0.6, "heavy smoke tints and dims the light")
+	weather.set_weather("snow", true)
+	_check(not ash.emitting, "ash stops when the smoke clears")
+	weather.set_weather("clear", true)
 	weather.set_weather("snow", true)
 	weather.set_weather("rain", true)
 	_check(rain.emitting and not snow.emitting, "snow -> rain switches the emitter")
