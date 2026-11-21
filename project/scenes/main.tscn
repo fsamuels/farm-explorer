@@ -51,6 +51,7 @@
 [ext_resource type="Texture2D" path="res://textures/roofs/house_south_wing_north.png" id="52_roof_hsw_n"]
 [ext_resource type="Texture2D" path="res://textures/roofs/back_barn_south.png" id="53_roof_bb_s"]
 [ext_resource type="Texture2D" path="res://textures/roofs/back_barn_north.png" id="54_roof_bb_n"]
+[ext_resource type="Script" path="res://scripts/time_of_day.gd" id="55_time_of_day"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -562,6 +563,9 @@ environment = SubResource("Environment_main")
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1646410852]
 transform = Transform3D(0.8660254, 0.35355338, -0.35355338, 0, 0.70710677, 0.70710677, 0.5, -0.6123724, 0.6123724, 0, 10, 0)
 shadow_enabled = true
+
+[node name="TimeOfDay" type="Node" parent="."]
+script = ExtResource("55_time_of_day")
 
 [node name="Ground" type="StaticBody3D" parent="." unique_id=1019721883]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.4, 0, -33.7)

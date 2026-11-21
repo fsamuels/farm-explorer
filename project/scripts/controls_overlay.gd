@@ -12,6 +12,7 @@ const CONTROLS := [
 	["F", "Switch first- / third-person view"],
 	["Mouse wheel", "Zoom the camera out into third person, or in to first person"],
 	["M", "Open / close the map (pauses the game)"],
+	["T", "Change the time of day: day, sunset, dusk, night"],
 	["Esc", "Release the mouse (click to recapture)"],
 	["F1", "Show / hide this help"],
 ]
