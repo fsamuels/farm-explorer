@@ -23,6 +23,8 @@ const LABEL_COLOR := Color(1, 1, 1)
 const OUTLINE_COLOR := Color(0, 0, 0)
 ## Half-angle of the view cone drawn in front of the player arrow.
 const VIEW_CONE_HALF_ANGLE := deg_to_rad(35.0)
+## How far outside a building's front door a teleport puts you, metres.
+const FRONT_CLEARANCE := 2.5
 ## Horse names only appear once zoomed in this far (px per metre).
 const HORSE_LABEL_MIN_SCALE := 4.0
 
@@ -73,10 +75,23 @@ static func collect(tree: SceneTree) -> Dictionary:
 		imagery.append({"texture": material.albedo_texture, "xform": xform, "size": plane.size})
 		bounds_points.append_array(MapMath.box_footprint(xform.scaled_local(Vector3(plane.size.x, 1, plane.size.y))))
 
+	# Walk-in buildings know where their front door is (D-118); the rest get
+	# a spot outside the south wall.
+	var door_spots := {}
+	for shell in tree.get_nodes_in_group("front_door_spot"):
+		var at: Variant = shell.front_door_spot(FRONT_CLEARANCE)
+		if at != null:
+			door_spots[shell.spot_building()] = MapMath.flatten(at)
 	var buildings := []
 	for node in tree.get_nodes_in_group("map_building"):
 		var poly := MapMath.box_footprint((node as Node3D).global_transform)
-		buildings.append({"name": String(node.name), "poly": poly, "center": MapMath.polygon_center(poly)})
+		var building_name := String(node.name)
+		buildings.append({
+			"name": building_name,
+			"poly": poly,
+			"center": MapMath.polygon_center(poly),
+			"front": door_spots.get(building_name, MapMath.front_spot(poly, FRONT_CLEARANCE)),
+		})
 
 	var fences := []
 	for node in tree.get_nodes_in_group("map_fence"):
