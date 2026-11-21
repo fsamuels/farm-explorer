@@ -1,6 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" uid="uid://7bmhp2guvx81" path="res://scripts/player.gd" id="1_player"]
+[ext_resource type="PackedScene" path="res://models/player.glb" id="2_player_model"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 radius = 0.4
@@ -13,14 +14,29 @@ script = ExtResource("1_player")
 position = Vector3(0, 0.9, 0)
 shape = SubResource("CapsuleShape3D_player")
 
+[node name="Model" parent="." instance=ExtResource("2_player_model")]
+transform = Transform3D(-0.969, 0, 0, 0, 0.969, 0, 0, 0, -0.969, 0, 0, 0)
+
 [node name="Head" type="Node3D" parent="."]
 position = Vector3(0, 1.6, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Head"]
+cull_mask = 1048573
 current = true
 
 [node name="InteractRay" type="RayCast3D" parent="Head/Camera3D"]
 target_position = Vector3(0, 0, -2.5)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="Head"]
+position = Vector3(0.45, 0.15, 0)
+spring_length = 3.2
+margin = 0.2
+
+[node name="ThirdPersonCamera" type="Camera3D" parent="Head/SpringArm3D"]
+
+[node name="InteractRay" type="RayCast3D" parent="Head/SpringArm3D/ThirdPersonCamera"]
+enabled = false
+target_position = Vector3(0, 0, -5.7)
 
 [node name="HUD" type="CanvasLayer" parent="."]
 

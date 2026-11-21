@@ -7,7 +7,8 @@ and light gameplay — in that order.
 ## Status
 
 Engine chosen: Godot 4 (see [docs/engine-decision.md](docs/engine-decision.md)).
-Project skeleton is in [`project/`](project) — a walkable first-person controller,
+Project skeleton is in [`project/`](project) — a walkable first-person controller
+(V toggles a third-person view of the player character, D-89),
 the real parcel boundary and (approximate) building footprints, and a ground
 plane textured with public NAIP aerial imagery as a stand-in for the real
 drone-derived orthomosaic (Phase 1). See
