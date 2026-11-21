@@ -80,7 +80,9 @@ func _ready() -> void:
 func spot_building() -> String:
 	return "Shop"
 
-## World position `clearance` metres outside the main (east) door.
+## World position `clearance` metres outside the main door. The main door is
+## on the east wall (see main_door_world and _build), so the offset is along +X;
+## test_map_scene.gd pins the result to the door.
 func front_door_spot(clearance: float) -> Variant:
 	var along := to_local(Vector3(main_door_world.x, 0, main_door_world.y)).z
 	return to_global(Vector3(width / 2.0 + clearance, 0.0, along))
