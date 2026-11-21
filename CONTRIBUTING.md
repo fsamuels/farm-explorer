@@ -9,7 +9,9 @@ Wired via `.claude/settings.json` (`extraKnownMarketplaces` + `enabledPlugins`),
 `scripts/ensure-sdlc-plugin.sh` vendored as a `SessionStart` self-heal in case the
 plugin doesn't auto-install (see
 [`docs/packaging.md`](https://github.com/fsamuels/sdlc-standards/blob/main/docs/packaging.md#known-gap-intermittent-auto-install-failure)
-in that repo).
+in that repo). When the plugin is already installed, the same script also runs
+`claude plugin marketplace update` and `claude plugin update`, so every session start
+pulls the latest `sdlc` version (applied on the next restart or `/reload-plugins`).
 
 ## What's local to this project
 
