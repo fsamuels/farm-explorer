@@ -11,9 +11,10 @@ extends Node3D
 ## when they hit a roof, a tree or the ground, so it doesn't rain indoors. The
 ## sky clouds over through TimeOfDay.set_overcast(), and the particles are
 ## tinted by the scene's brightness so they don't glow at night.
-## The rainbow is a fixed seven-band arch standing in the eastern sky, with its
-## feet north and south of the arena, so it's seen facing east and spans the
-## arena from the west. It fades in and out with the weather changes.
+## The rainbow is a faint seven-band arch that always stands in the eastern sky
+## and moves with the active camera, like a real rainbow (you can't walk up to
+## it), so it's seen facing east from anywhere. It fades in and out with the
+## weather changes.
 ##
 ## Not done yet: puddles / a wet look, snow settling on the ground, sound.
 
@@ -38,16 +39,16 @@ const WEATHER := {
 	"rainbow": {"label": "Rainbow", "overcast": 0.2, "fog": 0.0, "precip": "", "rainbow": true},
 }
 
-## The rainbow's arch lies in a north-south plane (+x east, -z north) east of
-## the arena. The centre is the arena's centre at ground level, so the arch
-## spans RAINBOW_RADIUS to either side of it in z, and RAINBOW_DISTANCE further
-## east in x. From the arena it then stands ~31 degrees high and ~60 degrees wide.
-const RAINBOW_CENTER := Vector3(166.0, 0.0, -11.0)
+## The rainbow's arch lies in a north-south plane (+x east, -z north),
+## RAINBOW_DISTANCE east of the camera and RAINBOW_RADIUS high, so it stands
+## ~31 degrees high and ~60 degrees wide.
 const RAINBOW_DISTANCE := 150.0
 const RAINBOW_RADIUS := 90.0
 const RAINBOW_BAND_WIDTH := 3.0
 const RAINBOW_STEPS := 48
-const RAINBOW_ALPHA := 0.55
+const RAINBOW_ALPHA := 0.22
+## How opaque each band is (outermost first), so the arch's edges are soft.
+const RAINBOW_BAND_ALPHA := [0.45, 0.75, 1.0, 1.0, 1.0, 0.75, 0.45]
 ## Outermost band first, as a real rainbow has red on the outside.
 const RAINBOW_COLORS := [
 	Color(0.95, 0.15, 0.15), Color(1.0, 0.55, 0.1), Color(1.0, 0.92, 0.2),
@@ -111,6 +112,11 @@ static func flash_level(t: float) -> float:
 		return lerpf(0.25, 0.8, (t - 0.12) / 0.05)
 	return 0.8 * (1.0 - (t - 0.17) / (FLASH_SECONDS - 0.17))
 
+## Where the rainbow stands for a camera at `camera`: due east of it, on the
+## ground, so the arch looks the same from wherever you are.
+static func rainbow_position(camera: Vector3) -> Vector3:
+	return Vector3(camera.x + RAINBOW_DISTANCE, 0.0, camera.z)
+
 ## A point on a rainbow arch of `radius` in its own plane: `t` 0..1 runs from
 ## the south foot (on the ground) over the top to the north foot. Local x is 0
 ## (the arch's plane), y up and z south, so -z is north.
@@ -131,7 +137,7 @@ static func build_rainbow_mesh(radius: float, band_width: float, steps: int) -> 
 		for i in steps + 1:
 			var t := float(i) / steps
 			var c: Color = RAINBOW_COLORS[band]
-			c.a = sin(PI * t)  # 0 at both feet, 1 at the top
+			c.a = pow(sin(PI * t), 1.5) * RAINBOW_BAND_ALPHA[band]  # 0 at the feet, strongest at the top
 			verts.append(arch_point(outer, t))
 			verts.append(arch_point(inner, t))
 			colors.append(c)
@@ -181,6 +187,7 @@ func _process(delta: float) -> void:
 		var at := cam.global_position
 		_rain.global_position = at + Vector3(0, RAIN_HEIGHT, 0)
 		_snow.global_position = at + Vector3(0, SNOW_HEIGHT, 0)
+		_rainbow.global_position = rainbow_position(at)
 
 func _update_lightning(delta: float) -> void:
 	var tod := _time_of_day()
@@ -294,7 +301,7 @@ func _build_rainbow() -> MeshInstance3D:
 	node.mesh = build_rainbow_mesh(RAINBOW_RADIUS, RAINBOW_BAND_WIDTH, RAINBOW_STEPS)
 	node.material_override = mat
 	node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	node.position = RAINBOW_CENTER + Vector3(RAINBOW_DISTANCE, 0, 0)
+	node.position = rainbow_position(Vector3.ZERO)
 	node.visible = false
 	add_child(node)
 	return node
