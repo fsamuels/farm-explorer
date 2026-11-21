@@ -42,7 +42,7 @@ farm-sim/
 │                                    `db` capabilities, which only exist when the same file
 │                                    is opened as a published Artifact, not a local file)
 └── project/                      # Godot project (chosen 2026-09-14, see engine-decision.md)
-    ├── project.godot             # engine config, input map (WASD + mouse look)
+    ├── project.godot             # engine config, input map (WASD + mouse look, M map, …)
     ├── export_presets.cfg        # export target config — currently one "Web" preset, for itch.io (docs/distribution.md)
     ├── icon.svg
     ├── scenes/
@@ -61,7 +61,7 @@ farm-sim/
     │   ├── rooster.tscn           # wraps models/rooster.glb with wander.gd, instanced once inside flock.tscn
     │   ├── flock.tscn             # 6 hens + 1 rooster around a shared, slower-wandering center
     │   ├── coyote.tscn            # wraps models/coyote.glb with wander.gd, instanced once
-    │   ├── minimap.tscn           # corner HUD: NAIP texture + rotating player marker — see D-13
+    │   ├── minimap.tscn           # map HUD (process_mode Always): player-following minimap + full-screen map on M, built in minimap.gd — see D-13, D-93
     │   ├── duck_mallard.tscn      # wraps models/mallard_duck.glb with wander.gd, instanced once
     │   ├── duck_poly.tscn         # wraps models/duck_poly.glb with wander.gd, instanced once
     │   ├── duck_madtroll.tscn     # wraps models/duck_madtroll.glb with wander.gd, instanced once
@@ -77,7 +77,12 @@ farm-sim/
     │   ├── fence_path.gd          # @tool script: builds posts+wire strands from a Path3D/Curve3D's points instead of a length, closing the loop back to the first point (optional `solid` collision, D-76) — see D-67/D-69
     │   ├── gate.gd                # @tool script: builds the gate and swings its AnimatableBody3D hinge on interact() — see D-76
     │   ├── tree_line_segment.gd   # @tool script: scatters trees + one invisible collision wall from an exported length — see D-11
-    │   └── minimap.gd             # maps player world position onto the NAIP texture — see D-13
+    │   ├── minimap.gd             # map controller: minimap, full-screen map (M, pauses the game), zoom/pan, waypoint, trail, layer toggles — see D-93
+    │   ├── map_canvas.gd          # draws one map view (imagery, footprints + names, fences, horses, trail, waypoint, player) from scene groups — see D-93
+    │   └── map_math.gd            # pure map helpers (projection, zoom, bearings, footprints, trail), covered by tests/ — see D-93
+    ├── tests/                    # headless test scripts (extends SceneTree), excluded from export — see CONTRIBUTING.md
+    │   ├── test_map_math.gd       # unit tests for map_math.gd
+    │   └── test_map_scene.gd      # loads main.tscn, checks the map's collected data and M pause toggle
     ├── models/
     │   ├── horse.glb              # CC0 rigged/animated horse (Quaternius) — see D-9; scale fixed in D-18
     │   ├── hen.glb                 # CC-BY static mesh (Poly by Google) — see D-10, credits.md

@@ -20,10 +20,18 @@ in that repo).
 - **No link checker yet** — docs don't meaningfully cross-reference each other yet.
   Add one (per `documentation.md#link-integrity-is-enforced-not-hoped-for`) once they do.
 - **Engine is Godot 4** — see [`docs/engine-decision.md`](docs/engine-decision.md).
-  No build/lint/test tooling is wired up yet (no CI, no headless-export check); the
-  standard's skills (`/sdlc:new-branch`, `/sdlc:create-pr`) still don't know this
-  project's commands, so `create-pr`'s Checks section will keep saying "Skipped —
-  no build tooling yet" until that's added.
+  No build/lint tooling or CI is wired up yet (no headless-export check). There are
+  headless test scripts under `project/tests/` (D-93); run them from `project/`
+  after the editor has imported assets once (`godot --headless --import`):
+
+  ```
+  godot --headless -s res://tests/test_map_math.gd
+  godot --headless -s res://tests/test_map_scene.gd
+  ```
+
+  Each prints `OK` and exits 0, or prints the failures and exits 1. The scene test
+  also logs a pre-existing `Animation not found: Jump_Loop` error from player.gd
+  under the headless renderer; it doesn't affect the result.
 
 ## Where the process differs from this repo's day-to-day
 
