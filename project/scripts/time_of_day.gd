@@ -1,12 +1,20 @@
 extends Node
-## Time-of-day presets (D-94): Day, Sunset, Dusk and Night. T (`cycle_time_of_day`)
+## Time-of-day presets (D-94, Dawn added in D-95): Day, Sunset, Dusk, Night and
+## Dawn. T (`cycle_time_of_day`)
 ## steps to the next one, blending the sun, sky colour, ambient light and fog
 ## over `transition_seconds` and briefly naming the new time at the top of the
 ## screen. A lighting change only: no clock runs, and nothing else in the scene
 ## reacts to the time.
 ##
 ## The world is laid out with +x east and -z north (see map_math.gd), so the
-## sunset sun sits low in the west and the moon rises in the southeast.
+## sunset sun sits low in the west, the moon rises in the southeast and the
+## dawn sun comes up in the east.
+##
+## Weather (weather.gd, D-95) dims the scene through `set_overcast()`: the
+## preset stays as chosen and `overcast_preset()` greys it on the way to the
+## screen, so time of day and weather can change independently.
+
+signal lighting_changed(p: Dictionary)
 
 ## Each preset holds the same keys; `blend()` lerps between any two of them.
 ## "day" reproduces the lighting main.tscn had before this script existed.
@@ -55,8 +63,19 @@ const PRESETS := {
 		"fog_color": Color(0.04, 0.05, 0.1),
 		"fog_density": 0.006,
 	},
+	"dawn": {
+		"label": "Dawn",
+		"sun_rotation": Vector3(-6, 90, 0),
+		"sun_color": Color(1.0, 0.75, 0.6),
+		"sun_energy": 0.8,
+		"sky_color": Color(0.85, 0.72, 0.75),
+		"ambient_color": Color(0.6, 0.6, 0.72),
+		"ambient_energy": 0.7,
+		"fog_color": Color(0.88, 0.78, 0.8),
+		"fog_density": 0.004,
+	},
 }
-const ORDER := ["day", "sunset", "dusk", "night"]
+const ORDER := ["day", "sunset", "dusk", "night", "dawn"]
 
 @export var environment_path: NodePath = ^"../WorldEnvironment"
 @export var sun_path: NodePath = ^"../DirectionalLight3D"
@@ -64,12 +83,14 @@ const ORDER := ["day", "sunset", "dusk", "night"]
 @export var start_preset := "day"
 
 var current := ""
+## 0 = clear sky, 1 = fully overcast (set by weather.gd).
+var overcast := 0.0
 var _shown: Dictionary = {}
 var _tween: Tween
 var _toast: Label
 var _toast_tween: Tween
 
-## The preset after `preset_name` in ORDER, wrapping Night back to Day. Unknown names
+## The preset after `preset_name` in ORDER, wrapping Dawn back to Day. Unknown names
 ## restart the cycle at Day.
 static func next_preset(preset_name: String) -> String:
 	var i := ORDER.find(preset_name)
@@ -91,6 +112,25 @@ static func blend(a: Dictionary, b: Dictionary, t: float) -> Dictionary:
 		else:
 			out[key] = vb
 	return out
+
+## `p` under cloud cover `amount` (0..1): the sun dims, the sky, ambient
+## light and fog go grey at their own brightness, and fog thickens. Always
+## returns a fresh, writable copy (never one of the read-only PRESETS).
+static func overcast_preset(p: Dictionary, amount: float) -> Dictionary:
+	var out := p.duplicate()
+	if amount <= 0.0:
+		return out
+	var grey := _grey(p.sky_color)
+	out.sky_color = p.sky_color.lerp(grey, 0.8 * amount)
+	out.fog_color = p.fog_color.lerp(grey, amount)
+	out.ambient_color = p.ambient_color.lerp(_grey(p.ambient_color), 0.6 * amount)
+	out.sun_energy = p.sun_energy * (1.0 - 0.75 * amount)
+	out.fog_density = p.fog_density + 0.008 * amount
+	return out
+
+static func _grey(c: Color) -> Color:
+	var l := c.get_luminance() * 0.85
+	return Color(l, l, l * 1.05)
 
 ## Spherical blend between two rotations given as Euler degrees.
 static func slerp_rotation(a: Vector3, b: Vector3, t: float) -> Vector3:
@@ -126,10 +166,22 @@ func set_preset(preset_name: String, instant := false) -> void:
 	var from := _shown.duplicate()
 	_tween = create_tween()
 	_tween.tween_method(func(t: float): _apply(blend(from, target, t)), 0.0, 1.0, transition_seconds)
-	_show_toast(target.label)
+	show_toast(target.label)
 
-func _apply(p: Dictionary) -> void:
-	_shown = p
+## Change the cloud cover (0..1) and redraw the current lighting under it.
+func set_overcast(amount: float) -> void:
+	overcast = clampf(amount, 0.0, 1.0)
+	if not _shown.is_empty():
+		_apply(_shown)
+
+## What's on screen now: the (possibly mid-blend) preset under the current
+## overcast.
+func shown() -> Dictionary:
+	return overcast_preset(_shown, overcast)
+
+func _apply(preset: Dictionary) -> void:
+	_shown = preset
+	var p := overcast_preset(preset, overcast)
 	var sun := get_node_or_null(sun_path) as DirectionalLight3D
 	if sun:
 		sun.rotation_degrees = p.sun_rotation
@@ -144,6 +196,7 @@ func _apply(p: Dictionary) -> void:
 		env.fog_enabled = p.fog_density > 0.0
 		env.fog_light_color = p.fog_color
 		env.fog_density = p.fog_density
+	lighting_changed.emit(p)
 
 func _build_toast() -> void:
 	var layer := CanvasLayer.new()
@@ -160,7 +213,8 @@ func _build_toast() -> void:
 	_toast.modulate.a = 0.0
 	layer.add_child(_toast)
 
-func _show_toast(text: String) -> void:
+## Briefly name something at the top of the screen (also used by weather.gd).
+func show_toast(text: String) -> void:
 	_toast.text = text
 	if _toast_tween:
 		_toast_tween.kill()

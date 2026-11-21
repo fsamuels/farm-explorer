@@ -26,10 +26,12 @@ func _run() -> void:
 	quit(1 if _failures else 0)
 
 func _test_next_preset() -> void:
+	_check((load("res://scripts/time_of_day.gd") as GDScript).can_instantiate(), "time_of_day.gd compiles")
 	_check(TimeOfDay.next_preset("day") == "sunset", "day -> sunset")
 	_check(TimeOfDay.next_preset("sunset") == "dusk", "sunset -> dusk")
 	_check(TimeOfDay.next_preset("dusk") == "night", "dusk -> night")
-	_check(TimeOfDay.next_preset("night") == "day", "night wraps to day")
+	_check(TimeOfDay.next_preset("night") == "dawn", "night -> dawn")
+	_check(TimeOfDay.next_preset("dawn") == "day", "dawn wraps to day")
 	_check(TimeOfDay.next_preset("bogus") == "day", "unknown restarts at day")
 
 func _test_presets_share_keys() -> void:
@@ -80,9 +82,12 @@ func _test_scene() -> void:
 	tod.transition_seconds = 0.05
 	_press(KEY_T)
 	await process_frame
-	_check(tod.current == "day", "T after night goes to day")
+	_check(tod.current == "dawn", "T after night goes to dawn")
 	await create_timer(0.2).timeout
-	_check(is_equal_approx(sun.light_energy, 1.0), "transition finishes at day energy: %s" % sun.light_energy)
+	_check(is_equal_approx(sun.light_energy, 0.8), "transition finishes at dawn energy: %s" % sun.light_energy)
+	_press(KEY_T)
+	await process_frame
+	_check(tod.current == "day", "T after dawn goes back to day")
 	_press(KEY_T)
 	await process_frame
 	_check(tod.current == "sunset", "T again goes to sunset")
