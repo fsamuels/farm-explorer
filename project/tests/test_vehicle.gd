@@ -1,5 +1,5 @@
 extends SceneTree
-## Tests for the drivable cars (D-105): the pure math in scripts/vehicle_math.gd,
+## Tests for the drivable cars (D-106): the pure math in scripts/vehicle_math.gd,
 ## then both cars in main.tscn driven with simulated key presses. Run headless
 ## from project/ (after the editor has imported assets once):
 ##   godot --headless -s res://tests/test_vehicle.gd

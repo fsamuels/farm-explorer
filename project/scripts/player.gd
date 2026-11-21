@@ -29,7 +29,7 @@ const TP_ZOOM_STEP := 0.5
 ## are still limited to 2.5m from the eyes in _interact_target().
 const TP_RAY_EXTRA := 3.0
 
-## While driving (D-105) you can turn your head this far either side of
+## While driving (D-106) you can turn your head this far either side of
 ## straight ahead.
 const DRIVE_LOOK_LIMIT := deg_to_rad(120.0)
 

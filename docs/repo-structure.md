@@ -69,10 +69,11 @@ farm-sim/
     │   ├── duck_madtroll.tscn     # wraps models/duck_madtroll.glb with wander.gd, instanced once
     │   ├── goose.tscn             # wraps models/goose.glb with wander.gd, instanced 10x
     │   ├── quail.tscn             # wraps models/quail.glb with wander.gd, instanced 6x
-    │   ├── tr6.tscn               # drivable car: models/tr6.glb under a CharacterBody3D with vehicle.gd and a box collider, instanced once — see D-105
-    │   └── bmw_2002_tii.tscn      # drivable car, same setup as tr6.tscn, instanced once — see D-105
+    │   ├── tr6.tscn               # drivable car: models/tr6.glb under a CharacterBody3D with vehicle.gd and a box collider, instanced once — see D-106
+    │   └── bmw_2002_tii.tscn      # drivable car, same setup as tr6.tscn, instanced once — see D-106
     ├── shaders/
-    │   └── night_sky.gdshader     # sky shader: flat sky colour + stars, Milky Way, constellation lines — see D-104
+    │   ├── night_sky.gdshader     # sky shader: flat sky colour + stars, Milky Way, constellation lines, northern lights — see D-104, D-105
+    │   └── weather_surface.gdshader # overlay for the ground and roofs: wet darkening, puddles, settled snow — see D-105
     ├── scripts/
     │   ├── controls_overlay.gd    # read-only controls help panel in the player HUD, F1 toggles — see D-90/D-91
     │   ├── player.gd             # walking controller (hold Shift to walk, D-90), F or the mouse wheel switches 1st/3rd person (D-91), drives the body's animations (D-89) + look-at-and-press-E interaction ray and prompt (D-76)
@@ -83,8 +84,8 @@ farm-sim/
     │   ├── gate.gd                # @tool script: builds the gate and swings its AnimatableBody3D hinge on interact() — see D-76
     │   ├── shop_shell.gd          # builds the walk-in Shop (hollow corrugated walls, windows, floor, ceiling, lights, pad) over the placeholder box's footprint and places its three doors — see D-98
     │   ├── shop_door.gd           # interactive door: swinging, sliding or roll-up leaf with collision, E to open — see D-98
-    │   ├── vehicle.gd             # drivable car: E to get in/out, W/S/A/D/Space to drive, collides with the world — see D-105
-    │   ├── vehicle_math.gd        # pure driving maths (speed, turn rate, exit spots), covered by tests/ — see D-105
+    │   ├── vehicle.gd             # drivable car: E to get in/out, W/S/A/D/Space to drive, collides with the world — see D-106
+    │   ├── vehicle_math.gd        # pure driving maths (speed, turn rate, exit spots), covered by tests/ — see D-106
     │   ├── wall_layout.gd         # pure helper that cuts a wall into boxes around openings, covered by tests/ — see D-98
     │   ├── corrugated.gd          # the shared blue corrugated-metal material (triplanar, mipmapped) — see D-98
     │   ├── tree_line_segment.gd   # @tool script: scatters trees + one invisible collision wall from an exported length — see D-11

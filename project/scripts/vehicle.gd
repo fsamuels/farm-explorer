@@ -1,5 +1,5 @@
 extends CharacterBody3D
-## A car the player can get into and drive (D-105). Put the car's model under a
+## A car the player can get into and drive (D-106). Put the car's model under a
 ## Model child and a box CollisionShape3D on this node; the car faces local -Z.
 ##
 ## E on the car (gate.gd-style `interact`) seats the player; E again gets them

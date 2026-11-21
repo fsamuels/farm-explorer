@@ -1,6 +1,6 @@
 extends Node3D
-## Weather (D-95, D-99, D-101): Clear, Drizzle, Rain, Downpour, Thunderstorm,
-## Light fog, Heavy fog, Snow and Rainbow. R (`cycle_weather`) steps to the
+## Weather (D-95, D-99, D-101, D-105): Clear, Drizzle, Rain, Downpour,
+## Thunderstorm, Light fog, Heavy fog, Snow, Heavy snow, Rainbow and Aurora. R (`cycle_weather`) steps to the
 ## next one. Rain and snow are GPU particles emitted from a box that follows the
 ## active camera, so they're everywhere you go without filling the whole farm.
 ## The rain weathers share one emitter and differ in drop count, streak length, speed
@@ -15,28 +15,43 @@ extends Node3D
 ## and moves with the active camera, like a real rainbow (you can't walk up to
 ## it), so it's seen facing east from anywhere. It fades in and out with the
 ## weather changes.
+## The aurora is a sky effect: curtains of green and pink light in the northern
+## sky, visible only once it's dark (the clear sky is otherwise unchanged).
 ##
-## Not done yet: puddles / a wet look, snow settling on the ground, sound.
+## The ground and the roofs carry a `wet` and a `snow` level that rise and fall
+## with the weather and persist after it changes (see `surface_step()`): rain
+## wets them and opens puddles, snow settles in patches on anything facing up,
+## and clear weather slowly dries and melts them. A shader overlay
+## (shaders/weather_surface.gdshader) draws both.
+##
+## Not done yet: sound.
 
-const ORDER := ["clear", "drizzle", "rain", "downpour", "thunderstorm", "light_fog", "heavy_fog", "snow", "rainbow"]
+const ORDER := ["clear", "drizzle", "rain", "downpour", "thunderstorm", "light_fog", "heavy_fog", "snow", "heavy_snow", "rainbow", "aurora"]
 ## Per weather: the label shown on screen, the cloud cover it puts on the sky
 ## (see TimeOfDay.overcast_preset), `fog` (extra fog density on top of that),
 ## `precip` ("rain", "snow" or "" for none) and, for rain, the drop count,
-## streak size, wind slant (x per unit fall) and fall speed range.
+## streak size, wind slant (x per unit fall) and fall speed range; for snow,
+## the flake count and wind slant. `wet` and `snow` are how fast (per second,
+## 1 = fully) the ground and roofs get wetter or snowier, negative while they
+## dry out or melt.
 const WEATHER := {
-	"clear": {"label": "Clear", "overcast": 0.0, "fog": 0.0, "precip": ""},
+	"clear": {"label": "Clear", "overcast": 0.0, "fog": 0.0, "precip": "", "wet": -0.006, "snow": -0.0017},
 	"drizzle": {"label": "Drizzle", "overcast": 0.55, "fog": 0.0, "precip": "rain",
-		"drops": 2500, "width": 0.012, "length": 0.3, "slant": 0.03, "speed": Vector2(9.0, 12.0)},
+		"drops": 2500, "width": 0.012, "length": 0.3, "slant": 0.03, "speed": Vector2(9.0, 12.0), "wet": 0.02, "snow": -0.01},
 	"rain": {"label": "Rain", "overcast": 1.0, "fog": 0.0, "precip": "rain",
-		"drops": 9000, "width": 0.018, "length": 0.55, "slant": 0.08, "speed": Vector2(17.0, 21.0)},
+		"drops": 9000, "width": 0.018, "length": 0.55, "slant": 0.08, "speed": Vector2(17.0, 21.0), "wet": 0.05, "snow": -0.02},
 	"downpour": {"label": "Downpour", "overcast": 1.0, "fog": 0.004, "precip": "rain",
-		"drops": 14000, "width": 0.022, "length": 0.75, "slant": 0.18, "speed": Vector2(20.0, 25.0)},
+		"drops": 14000, "width": 0.022, "length": 0.75, "slant": 0.18, "speed": Vector2(20.0, 25.0), "wet": 0.12, "snow": -0.03},
 	"thunderstorm": {"label": "Thunderstorm", "overcast": 1.0, "fog": 0.006, "precip": "rain", "lightning": true,
-		"drops": 14000, "width": 0.022, "length": 0.75, "slant": 0.25, "speed": Vector2(20.0, 25.0)},
-	"light_fog": {"label": "Light fog", "overcast": 0.3, "fog": 0.012, "precip": ""},
-	"heavy_fog": {"label": "Heavy fog", "overcast": 0.5, "fog": 0.045, "precip": ""},
-	"snow": {"label": "Snow", "overcast": 0.7, "fog": 0.0, "precip": "snow"},
-	"rainbow": {"label": "Rainbow", "overcast": 0.2, "fog": 0.0, "precip": "", "rainbow": true},
+		"drops": 14000, "width": 0.022, "length": 0.75, "slant": 0.25, "speed": Vector2(20.0, 25.0), "wet": 0.12, "snow": -0.03},
+	"light_fog": {"label": "Light fog", "overcast": 0.3, "fog": 0.012, "precip": "", "wet": -0.002, "snow": -0.001},
+	"heavy_fog": {"label": "Heavy fog", "overcast": 0.5, "fog": 0.045, "precip": "", "wet": 0.0, "snow": -0.0005},
+	"snow": {"label": "Snow", "overcast": 0.7, "fog": 0.0, "precip": "snow", "wet": -0.02, "snow": 0.012,
+		"flakes": 4000, "slant": 0.0},
+	"heavy_snow": {"label": "Heavy snow", "overcast": 0.9, "fog": 0.02, "precip": "snow", "wet": -0.02, "snow": 0.04,
+		"flakes": 10000, "slant": 0.22},
+	"rainbow": {"label": "Rainbow", "overcast": 0.2, "fog": 0.0, "precip": "", "rainbow": true, "wet": -0.003, "snow": -0.0017},
+	"aurora": {"label": "Aurora (at night)", "overcast": 0.0, "fog": 0.0, "precip": "", "aurora": true, "wet": -0.006, "snow": -0.0017},
 }
 
 ## The rainbow's arch lies in a north-south plane (+x east, -z north),
@@ -68,10 +83,24 @@ const COLLIDER_SIZE := 100.0
 ## The rain emitter is built for the heaviest rain; lighter weathers show a
 ## fraction of its drops (`amount_ratio`).
 const RAIN_MAX_DROPS := 14000
+## Likewise for snow: the emitter is built for heavy snow.
+const SNOW_MAX_FLAKES := 10000
+
+## Meshes that carry the wet / snow overlay: the ground imagery (group) and any
+## mesh under the buildings node with this in its name.
+const SURFACE_GROUP := "map_imagery"
+const ROOF_NAME := "Roof"
+## While snow melts, this fraction of what melts turns into wetness.
+const MELT_TO_WET := 1.0
+const SURFACE_SHADER := preload("res://shaders/weather_surface.gdshader")
 
 @export var time_of_day_path: NodePath = ^"../TimeOfDay"
 @export var transition_seconds := 2.0
 @export var start_weather := "clear"
+@export var buildings_path: NodePath = ^"../Buildings"
+## Start the ground off wet or snowy (0..1), e.g. for screenshots.
+@export_range(0.0, 1.0) var start_wet := 0.0
+@export_range(0.0, 1.0) var start_snow := 0.0
 
 var current := ""
 var _rain: GPUParticles3D
@@ -81,18 +110,41 @@ var _tween: Tween
 var _brightness := 1.0
 var _rain_mesh: QuadMesh
 var _rain_process: ParticleProcessMaterial
+var _snow_process: ParticleProcessMaterial
 var _rainbow: MeshInstance3D
 var _rainbow_fade := 0.0
 ## Seconds until the next lightning strike, and how long the current flash
 ## has lasted (-1 = none).
 var _strike_in := 0.0
 var _flash_t := -1.0
+## How wet (puddles, gloss) and how snowy (settled snow) the ground and roofs
+## are, 0..1. They change slowly with the weather and outlast it.
+var surface_wet := 0.0
+var surface_snow := 0.0
+var _surface_material: ShaderMaterial
+var _surface_meshes: Array[MeshInstance3D] = []
+var _overlay_on := false
 
 ## The weather after `weather` in ORDER, wrapping Snow back to Clear. Unknown
 ## names restart at Clear.
 static func next_weather(weather: String) -> String:
 	var i := ORDER.find(weather)
 	return ORDER[0] if i == -1 else ORDER[(i + 1) % ORDER.size()]
+
+## The wet and snow levels after `delta` seconds of `weather`: each moves at
+## the weather's `wet` / `snow` rate, snow that melts leaves the ground wetter,
+## and both stay within 0..1.
+static func surface_step(wet: float, snow: float, weather: String, delta: float) -> Vector2:
+	var look: Dictionary = WEATHER.get(weather, WEATHER.clear)
+	var snow_change: float = look.snow * delta
+	var new_snow := clampf(snow + snow_change, 0.0, 1.0)
+	var melted := snow - new_snow  # > 0 only while snow is going
+	var new_wet := clampf(wet + look.wet * delta + maxf(melted, 0.0) * MELT_TO_WET, 0.0, 1.0)
+	return Vector2(new_wet, new_snow)
+
+## Whether a mesh named `node_name` under the buildings node gets the overlay.
+static func is_roof(node_name: String) -> bool:
+	return node_name.contains(ROOF_NAME)
 
 ## Seconds to wait before the next lightning strike: `r` (0..1, from a random
 ## number) picks a point between LIGHTNING_MIN and LIGHTNING_MAX.
@@ -164,6 +216,7 @@ func _ready() -> void:
 	_rain = _build_rain()
 	_snow = _build_snow()
 	_rainbow = _build_rainbow()
+	_build_surfaces()
 	_collider = GPUParticlesCollisionHeightField3D.new()
 	# Wider than the emitter box plus drift: snow lives ~9 s in world space,
 	# so flakes left behind as you walk still need something to land on.
@@ -182,6 +235,11 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_update_lightning(delta)
+	var level := surface_step(surface_wet, surface_snow, current, delta)
+	# Not is_equal_approx: a slow rate moves a level by less than its 1e-5
+	# tolerance in one frame, and the change would be dropped every frame.
+	if level.x != surface_wet or level.y != surface_snow:
+		set_surfaces(level.x, level.y)
 	var cam := get_viewport().get_camera_3d()
 	if cam:
 		var at := cam.global_position
@@ -223,6 +281,8 @@ func set_weather(weather: String, instant := false) -> void:
 	_strike_in = lightning_delay(randf()) * 0.4  # first strike comes sooner
 	if precip == "rain":
 		_configure_rain(look)
+	elif precip == "snow":
+		_configure_snow(look)
 	if _tween:
 		_tween.kill()
 		_tween = null
@@ -251,12 +311,15 @@ func set_weather(weather: String, instant := false) -> void:
 	var tod := _time_of_day()
 	if not tod:
 		return
+	var aurora_target := 1.0 if look.get("aurora", false) else 0.0
 	if not fade:
 		tod.set_flash(0.0)
 		tod.set_fog_extra(look.fog)
 		tod.set_overcast(look.overcast)
+		tod.set_aurora(aurora_target)
 		return
 	tod.set_flash(0.0)
+	_tween.tween_method(tod.set_aurora, tod.aurora_level, aurora_target, transition_seconds)
 	_tween.tween_method(tod.set_overcast, tod.overcast, look.overcast, transition_seconds)
 	_tween.tween_method(tod.set_fog_extra, tod.fog_extra, look.fog, transition_seconds)
 	tod.show_toast(look.label)
@@ -269,6 +332,41 @@ func _configure_rain(look: Dictionary) -> void:
 	_rain_process.direction = Vector3(look.slant, -1, 0)
 	_rain_process.initial_velocity_min = look.speed.x
 	_rain_process.initial_velocity_max = look.speed.y
+
+## Point the snow emitter at a weather's flake count and wind slant.
+func _configure_snow(look: Dictionary) -> void:
+	_snow.amount_ratio = float(look.flakes) / SNOW_MAX_FLAKES
+	_snow_process.direction = Vector3(look.slant, -1, 0)
+
+## Find the ground and roof meshes and give them the shared overlay material.
+func _build_surfaces() -> void:
+	_surface_material = ShaderMaterial.new()
+	_surface_material.shader = SURFACE_SHADER
+	for node in get_tree().get_nodes_in_group(SURFACE_GROUP):
+		if node is MeshInstance3D:
+			_surface_meshes.append(node)
+	var buildings := get_node_or_null(buildings_path)
+	if buildings:
+		for node in buildings.find_children("*", "MeshInstance3D", true, false):
+			if is_roof(node.name):
+				_surface_meshes.append(node)
+	set_surfaces(start_wet, start_snow)
+
+## Set how wet and snowy the ground and roofs are (0..1). The overlay is only
+## attached to the meshes while there is something to show.
+func set_surfaces(wet: float, snow: float) -> void:
+	surface_wet = clampf(wet, 0.0, 1.0)
+	surface_snow = clampf(snow, 0.0, 1.0)
+	if not _surface_material:
+		return
+	_surface_material.set_shader_parameter("wet", surface_wet)
+	_surface_material.set_shader_parameter("snow", surface_snow)
+	var on := surface_wet > 0.003 or surface_snow > 0.003
+	if on == _overlay_on:
+		return
+	_overlay_on = on
+	for mesh in _surface_meshes:
+		mesh.material_overlay = _surface_material if on else null
 
 func _time_of_day() -> Node:
 	return get_node_or_null(time_of_day_path)
@@ -335,6 +433,7 @@ func _build_snow() -> GPUParticles3D:
 	process.turbulence_noise_strength = 0.6
 	process.turbulence_influence_min = 0.03
 	process.turbulence_influence_max = 0.08
+	_snow_process = process
 	var mat := _particle_material(Color(1, 1, 1, 0.9), BaseMaterial3D.BILLBOARD_ENABLED)
 	var dot := GradientTexture2D.new()
 	dot.fill = GradientTexture2D.FILL_RADIAL
@@ -348,7 +447,7 @@ func _build_snow() -> GPUParticles3D:
 	var mesh := QuadMesh.new()
 	mesh.size = Vector2(0.07, 0.07)
 	mesh.material = mat
-	return _particles("Snow", 4000, 9.0, process, mesh, Color(1, 1, 1, 0.9))
+	return _particles("Snow", SNOW_MAX_FLAKES, 9.0, process, mesh, Color(1, 1, 1, 0.9))
 
 func _process_material(direction: Vector3, spread: float, v_min: float, v_max: float) -> ParticleProcessMaterial:
 	var process := ParticleProcessMaterial.new()

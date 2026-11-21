@@ -16,7 +16,7 @@ const CONTROLS := [
 	["T", "Change the time of day: day, sunset, dusk, night, dawn, sunrise"],
 	["Y", "Start / stop the clock (time shown top right)"],
 	["N", "Show / hide constellation lines in the night sky"],
-	["R", "Change the weather: rain, storm, fog, snow, rainbow, clear"],
+	["R", "Change the weather: rain, storm, fog, snow, rainbow, aurora, clear"],
 	["Esc", "Release the mouse (click to recapture)"],
 	["F1", "Show / hide this help"],
 ]

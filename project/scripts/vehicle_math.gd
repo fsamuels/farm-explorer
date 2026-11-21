@@ -1,5 +1,5 @@
 extends RefCounted
-## Pure driving helpers for vehicle.gd (D-105), kept free of scene access so
+## Pure driving helpers for vehicle.gd (D-106), kept free of scene access so
 ## tests/test_vehicle.gd can cover them headless.
 ##
 ## Speed is signed metres per second along the car's forward axis (negative is
