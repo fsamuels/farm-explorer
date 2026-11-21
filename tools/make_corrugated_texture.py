@@ -25,7 +25,7 @@ Image.fromarray(((normal * 0.5 + 0.5) * 255).astype(np.uint8)).save(
 
 # Albedo: base blue, lighter crowns / darker valleys, vertical weathering
 # streaks and a little grain. All periodic in both axes so it tiles.
-base = np.array([0.17, 0.37, 0.66])
+base = np.array([0.42, 0.54, 0.68])
 shade = 0.82 + 0.28 * row
 streak = rng.normal(0, 1, N)
 streak = np.convolve(np.r_[streak[-8:], streak, streak[:8]], np.ones(9) / 9, "same")[8:-8]
