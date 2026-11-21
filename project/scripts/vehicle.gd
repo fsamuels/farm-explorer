@@ -67,6 +67,7 @@ var _throttle := 0.0
 ## How dark the scene is as a 0..1 headlight demand, and the fade actually shown.
 var _headlight_demand := 0.0
 var headlight_level := 0.0
+var _headlight_applied := -1.0
 var _lamps: Array[SpotLight3D] = []
 var _lenses: Array[MeshInstance3D] = []
 var _lens_material: StandardMaterial3D
@@ -80,7 +81,8 @@ func _ready() -> void:
 	_build_wheels()
 	_build_engine_sound()
 	_build_headlights()
-	_watch_time_of_day()
+	# Deferred so every node in the scene is in the tree whatever the order.
+	_watch_time_of_day.call_deferred()
 
 func _build_wheels() -> void:
 	var sources: Array = []
@@ -162,6 +164,8 @@ func _build_headlights() -> void:
 func _watch_time_of_day() -> void:
 	var tod := get_tree().root.find_child("TimeOfDay", true, false)
 	if tod == null or not tod.has_signal("lighting_changed"):
+		if not headlight_positions.is_empty():
+			push_warning("%s: no TimeOfDay node found, so its headlights will never come on" % name)
 		return
 	tod.lighting_changed.connect(_on_lighting_changed)
 	var now: Dictionary = tod.shown()
@@ -169,12 +173,15 @@ func _watch_time_of_day() -> void:
 		_on_lighting_changed(now)
 
 func _on_lighting_changed(p: Dictionary) -> void:
-	_headlight_demand = VehicleMath.headlight_level(p.sun_energy)
+	_headlight_demand = VehicleMath.headlight_demand(p.sun_energy)
 
 func _update_headlights(delta: float) -> void:
 	var lit := driver != null or headlights_when_parked
 	var target := _headlight_demand if lit else 0.0
 	headlight_level = move_toward(headlight_level, target, HEADLIGHT_FADE_RATE * delta)
+	if headlight_level == _headlight_applied:
+		return  # nothing changed since the lamps were last set
+	_headlight_applied = headlight_level
 	var on := headlight_level > 0.001
 	for lamp in _lamps:
 		lamp.visible = on

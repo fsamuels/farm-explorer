@@ -51,12 +51,12 @@ func _test_math() -> void:
 
 	# Headlights: off in daylight (sun 1.0, dawn 0.8), full at dusk / night
 	# (0.25-0.3), fading in between, never outside 0..1.
-	_check(VehicleMath.headlight_level(1.0) == 0.0, "headlights off at noon")
-	_check(VehicleMath.headlight_level(0.8) == 0.0, "headlights off at dawn")
-	_check(VehicleMath.headlight_level(0.3) == 1.0, "headlights full at night")
-	_check(VehicleMath.headlight_level(0.25) == 1.0, "headlights full at dusk")
-	_check(is_equal_approx(VehicleMath.headlight_level(0.55), 0.5), "headlights half on at 0.55")
-	_check(VehicleMath.headlight_level(0.0) == 1.0 and VehicleMath.headlight_level(5.0) == 0.0, "headlight level is clamped")
+	_check(VehicleMath.headlight_demand(1.0) == 0.0, "headlights off at noon")
+	_check(VehicleMath.headlight_demand(0.8) == 0.0, "headlights off at dawn")
+	_check(VehicleMath.headlight_demand(0.3) == 1.0, "headlights full at night")
+	_check(VehicleMath.headlight_demand(0.25) == 1.0, "headlights full at dusk")
+	_check(is_equal_approx(VehicleMath.headlight_demand(0.55), 0.5), "headlights half on at 0.55")
+	_check(VehicleMath.headlight_demand(0.0) == 1.0 and VehicleMath.headlight_demand(5.0) == 0.0, "headlight level is clamped")
 
 	var offsets := VehicleMath.exit_offsets(-0.4, 0.1, 0.95, 2.3, 0.7)
 	_check(offsets.size() == 8, "four sides and four corners")
@@ -361,6 +361,15 @@ func _drive(main: Node, player: CharacterBody3D, car: CharacterBody3D, nm: Strin
 	_check(not car._audio.playing, "%s engine stops when you get out" % nm)
 	await _step(60)
 	_check(car.headlight_level == 0.0 and not car._lamps[0].visible, "%s parked car's lamps go off at night" % nm)
+	# The parked-lights option lights an empty car at night too, lens glow included.
+	car.headlights_when_parked = true
+	main.get_node("TimeOfDay").set_preset("night", true)
+	await _step(60)
+	_check(is_equal_approx(car.headlight_level, 1.0) and car._lamps[0].visible, "%s parked lamps light with headlights_when_parked" % nm)
+	_check(car._lens_material.emission_energy_multiplier > 1.0, "%s lens glows with the lamps" % nm)
+	car.headlights_when_parked = false
+	await _step(60)
+	_check(car.headlight_level == 0.0 and car._lens_material.emission_energy_multiplier == 0.0, "%s lamps and lens go dark again" % nm)
 	main.get_node("TimeOfDay").set_preset("day", true)
 	_check(player.model.visible, "%s player body back" % nm)
 	_check(not player.collision_shape.disabled, "%s player collision back" % nm)
