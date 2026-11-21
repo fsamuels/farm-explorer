@@ -18,6 +18,7 @@ const WALK_ANIM_SPEED := 1.0
 const SPRINT_ANIM_SPEED := 8.9
 const LOOPING_ANIMS := ["Idle", "Walk", "Jog", "Sprint", "Jump_Loop"]
 const MODEL_TURN_RATE := 10.0
+const DriveHud := preload("res://scripts/drive_hud.gd")
 
 ## Mouse-wheel camera distance (D-91). Scrolling back from first person drops
 ## into third person at the closest distance; scrolling forward past it returns
@@ -29,6 +30,9 @@ const TP_ZOOM_STEP := 0.5
 ## are still limited to 2.5m from the eyes in _interact_target().
 const TP_RAY_EXTRA := 3.0
 
+## Boom length for the third-person view while driving: long enough to sit
+## behind the whole car instead of inside the seat.
+const DRIVE_TP_DISTANCE := 6.0
 ## While driving (D-106) you can turn your head this far either side of
 ## straight ahead.
 const DRIVE_LOOK_LIMIT := deg_to_rad(120.0)
@@ -52,11 +56,17 @@ var model_yaw := 0.0
 var vehicle: Node3D
 var drive_look_yaw := 0.0
 var _walk_head_height := 0.0
+var drive_hud: Control
+## The view and boom length to go back to after getting out of a car (D-113).
+var _view_before_car := false
+var _boom_before_car := 0.0
 var _prompt_flash := ""
 var _prompt_flash_left := 0.0
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	drive_hud = DriveHud.new()
+	$HUD.add_child(drive_hud)
 	_set_body_layer(model)
 	# Neither the spring arm nor the third-person ray (which starts behind the
 	# player) should hit the player's own capsule.
@@ -101,6 +111,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if event.is_action_pressed("toggle_view"):
 		third_person = not third_person
+		if vehicle and third_person:
+			_set_tp_distance(DRIVE_TP_DISTANCE)
 		_apply_view()
 	elif Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		pass  # mouse released (Esc): the wheel shouldn't move the camera
@@ -108,7 +120,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		if third_person:
 			_set_tp_distance(spring_arm.spring_length + TP_ZOOM_STEP)
 		else:
-			_set_tp_distance(TP_MIN_DISTANCE)
+			_set_tp_distance(DRIVE_TP_DISTANCE if vehicle else TP_MIN_DISTANCE)
 			third_person = true
 			_apply_view()
 	elif event.is_action_pressed("camera_zoom_in") and third_person:
@@ -142,14 +154,12 @@ func _flash_prompt(text: String) -> void:
 
 func _process(delta: float) -> void:
 	if vehicle:
-		interact_prompt.visible = true
+		# Driving: the big yellow prompt gives way to a quiet readout (D-113).
+		interact_prompt.visible = false
 		_prompt_flash_left -= delta
-		var speed_text := "%d mph" % roundi(vehicle.speed_mph())
-		if _prompt_flash_left > 0.0:
-			interact_prompt.text = "%s  ·  %s" % [_prompt_flash, speed_text]
-		else:
-			interact_prompt.text = "E — Get out  ·  " + speed_text
+		drive_hud.show_drive(vehicle.speed_mph(), vehicle.engine_rpm, _prompt_flash if _prompt_flash_left > 0.0 else "")
 		return
+	drive_hud.hide_drive()
 	var target := _interact_target()
 	interact_prompt.visible = target != null
 	if target:
@@ -163,14 +173,26 @@ func _process(delta: float) -> void:
 func _interact_target() -> Node:
 	if vehicle:
 		return null
-	var ray := tp_interact_ray if third_person else interact_ray
-	if not ray.is_colliding():
-		return null
-	if third_person:
-		var to_hit := ray.get_collision_point() - head.global_position
-		if to_hit.length() > 2.5 or to_hit.dot(-head.global_basis.z) <= 0.0:
-			return null
-	var node: Node = ray.get_collider()
+	if not third_person:
+		return _interactable_at(interact_ray)
+	# Third person: what the camera's crosshair is on, if it is within reach of
+	# the player's eyes; failing that, whatever the player's own eyes look at.
+	# The camera sits behind the player, so its ray often passes over a low car
+	# or skims past a gate the player is standing right beside.
+	if tp_interact_ray.is_colliding():
+		var to_hit := tp_interact_ray.get_collision_point() - head.global_position
+		if to_hit.length() <= 2.5 and to_hit.dot(-head.global_basis.z) > 0.0:
+			var found := _interactable_of(tp_interact_ray.get_collider())
+			if found:
+				return found
+	interact_ray.force_raycast_update()
+	return _interactable_at(interact_ray)
+
+func _interactable_at(ray: RayCast3D) -> Node:
+	return _interactable_of(ray.get_collider()) if ray.is_colliding() else null
+
+func _interactable_of(collider: Object) -> Node:
+	var node := collider as Node
 	while node and not node.has_method("interact"):
 		node = node.get_parent()
 	return node
@@ -186,6 +208,12 @@ func enter_vehicle(car: Node3D) -> void:
 	model.visible = false
 	_walk_head_height = head.position.y
 	head.position.y = car.eye_offset.y
+	# Sit at the wheel: the driver's eye, not a boom hanging behind the seat
+	# (which looked at the headrest). F still gives a chase view.
+	_view_before_car = third_person
+	_boom_before_car = spring_arm.spring_length
+	third_person = false
+	_apply_view()
 	# The third-person camera boom starts inside the car, so ignore its body.
 	spring_arm.add_excluded_object(car.get_rid())
 	global_transform = car.seat_transform(0.0)
@@ -207,6 +235,9 @@ func leave_vehicle() -> void:
 	global_transform = Transform3D(Basis(Vector3.UP, car.global_rotation.y), spot)
 	head.position.y = _walk_head_height
 	head.rotation = Vector3.ZERO
+	_set_tp_distance(_boom_before_car)
+	third_person = _view_before_car
+	_apply_view()
 	model.visible = true
 	model_yaw = 0.0
 	collision_shape.set_deferred("disabled", false)
