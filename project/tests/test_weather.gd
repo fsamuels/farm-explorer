@@ -24,6 +24,7 @@ func _run() -> void:
 	_test_next_weather()
 	_test_overcast_preset()
 	_test_particle_brightness()
+	_test_rainbow()
 	_test_lightning()
 	_test_fog_and_flash_presets()
 	await _test_scene()
@@ -54,6 +55,28 @@ func _test_next_weather() -> void:
 	_check(order_drops[0] < order_drops[1] and order_drops[1] < order_drops[2], "drizzle < rain < downpour")
 	_check(Weather.WEATHER.heavy_fog.fog > Weather.WEATHER.light_fog.fog and Weather.WEATHER.light_fog.fog > 0.0, "heavy fog is thicker than light fog")
 	_check(Weather.WEATHER.thunderstorm.get("lightning", false) and not Weather.WEATHER.downpour.get("lightning", false), "only thunderstorms have lightning")
+
+func _test_rainbow() -> void:
+	_check(Weather.WEATHER.rainbow.get("rainbow", false) and Weather.WEATHER.rainbow.precip == "", "rainbow is dry and flagged")
+	_check(Weather.next_weather("snow") == "rainbow" and Weather.next_weather("rainbow") == "clear", "snow -> rainbow -> clear")
+	var south := Weather.arch_point(90.0, 0.0)
+	var top := Weather.arch_point(90.0, 0.5)
+	var north := Weather.arch_point(90.0, 1.0)
+	_check(south.y < 0.001 and north.y < 0.001, "both feet are on the ground")
+	_check(is_equal_approx(top.y, 90.0) and absf(top.z) < 0.001, "the top is one radius high, midway")
+	_check(south.z > 89.9 and north.z < -89.9 and south.x == 0.0, "feet are south and north in a single plane")
+	var mesh := Weather.build_rainbow_mesh(90.0, 3.0, 8)
+	var arrays := mesh.surface_get_arrays(0)
+	var bands := Weather.RAINBOW_COLORS.size()
+	_check(arrays[Mesh.ARRAY_VERTEX].size() == bands * 9 * 2, "two vertices per step per band: %s" % arrays[Mesh.ARRAY_VERTEX].size())
+	_check(arrays[Mesh.ARRAY_INDEX].size() == bands * 8 * 6, "two triangles per step per band")
+	var inner_edge := 90.0 - bands * 3.0
+	_check(inner_edge > 0.0, "the innermost band stays outside the centre")
+	var top_i := 4 * 2  # outer vertex of band 0 at the top
+	_check(is_equal_approx(arrays[Mesh.ARRAY_VERTEX][top_i].y, 90.0), "the outer band's top is at the radius")
+	_check(arrays[Mesh.ARRAY_COLOR][0].a < 0.001 and is_equal_approx(arrays[Mesh.ARRAY_COLOR][top_i].a, 1.0), "feet fade out, top is opaque")
+	var c: Vector3 = Weather.RAINBOW_CENTER
+	_check(c.x > 141.0 and c.x < 191.0 and c.z > -43.0 and c.z < 21.0, "the rainbow is centred on the arena")
 
 func _test_lightning() -> void:
 	_check(is_equal_approx(Weather.lightning_delay(0.0), Weather.LIGHTNING_MIN), "shortest wait")
@@ -178,6 +201,8 @@ func _test_scene() -> void:
 	_check(rain.emitting and not snow.emitting, "snow -> rain switches the emitter")
 	weather.set_weather("snow", true)
 	_check(weather.current == "snow" and snow.emitting and not rain.emitting, "snow")
+	var rainbow: MeshInstance3D = weather.get_node("Rainbow")
+	_check(not rainbow.visible, "no rainbow in snow")
 	paused = true
 	_press(KEY_R)
 	await process_frame
@@ -186,7 +211,19 @@ func _test_scene() -> void:
 	_press(KEY_R)
 	await process_frame
 	await create_timer(0.2).timeout
-	_check(weather.current == "clear" and not snow.emitting, "R again clears")
+	_check(weather.current == "rainbow" and rainbow.visible and not snow.emitting and not rain.emitting, "R after snow shows the rainbow")
+	var rainbow_mat := rainbow.material_override as StandardMaterial3D
+	_check(rainbow_mat.albedo_color.a > 0.5, "the rainbow fades in: %s" % rainbow_mat.albedo_color.a)
+	_check(rainbow.global_position.x > Weather.RAINBOW_CENTER.x, "the rainbow stands east of the arena")
+	_check(tod.overcast > 0.0 and tod.overcast < 0.5, "a rainbow sky is only lightly clouded: %s" % tod.overcast)
+	tod.set_preset("night", true)
+	_check(rainbow_mat.albedo_color.v < 0.5, "the rainbow is dimmed at night: %s" % rainbow_mat.albedo_color)
+	tod.set_preset("day", true)
+	_press(KEY_R)
+	await process_frame
+	await create_timer(0.2).timeout
+	_check(weather.current == "clear" and not rainbow.visible, "R again clears and hides the rainbow")
+	_check(not snow.emitting, "no snow after the rainbow")
 	var snow_mat: StandardMaterial3D = snow.draw_pass_1.surface_get_material(0)
 	_check(snow_mat.albedo_color.a < 0.01, "leftover snow fades out with the sky: %s" % snow_mat.albedo_color.a)
 	_check(is_equal_approx(sun.light_energy, 1.0), "clearing restores the sun: %s" % sun.light_energy)
