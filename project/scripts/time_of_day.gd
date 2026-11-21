@@ -540,7 +540,8 @@ func _update_name_labels() -> void:
 			on_screen = false
 		label.visible = on_screen
 		if on_screen:
-			label.position = pos - label.size * 0.5
+			# size is stale on the first frame a label shows; the minimum is not.
+			label.position = pos - label.get_combined_minimum_size() * 0.5
 			label.modulate.a = alpha
 
 ## Briefly name something at the top of the screen (also used by weather.gd).

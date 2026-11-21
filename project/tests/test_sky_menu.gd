@@ -70,6 +70,15 @@ func _test_scene() -> void:
 		_check(menu._weather_buttons.has(key), "a button for weather '%s'" % key)
 
 	var minimap: Node = main.get_node("Minimap/Root")
+	var icon: Button = minimap.sky_button
+	_check(icon != null and icon.mouse_filter == Control.MOUSE_FILTER_STOP, "the minimap's sky icon takes clicks")
+	icon.pressed.emit()
+	_check(menu.is_open(), "the sky icon opens the menu")
+	menu.set_open(false)
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	menu.set_open(true)
+	menu.set_open(false)
+	_check(Input.mouse_mode == Input.MOUSE_MODE_VISIBLE, "closing the menu leaves a freed mouse free")
 	paused = true
 	menu.set_open(true)
 	_check(not menu.is_open(), "the menu won't open over something else that paused the game")

@@ -22,6 +22,7 @@ var _weather_buttons := {}
 var _clock_button: Button
 var _names_button: Button
 var _panel: PanelContainer
+var _mouse_before := Input.MOUSE_MODE_CAPTURED
 
 func _ready() -> void:
 	layer = 11
@@ -37,6 +38,8 @@ func is_open() -> bool:
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("open_sky_menu"):
+		if get_tree().paused and not is_open():
+			return  # the full map has the game paused; leave G alone
 		set_open(not is_open())
 		get_viewport().set_input_as_handled()
 	elif is_open() and event.is_action_pressed("ui_cancel"):
@@ -52,7 +55,12 @@ func set_open(open: bool) -> void:
 		return
 	_panel.visible = open
 	get_tree().paused = open
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if open else Input.MOUSE_MODE_CAPTURED
+	if open:
+		_mouse_before = Input.mouse_mode
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	else:
+		# Give the mouse back the way it was (Esc may have freed it before).
+		Input.mouse_mode = _mouse_before
 	if open:
 		refresh()
 

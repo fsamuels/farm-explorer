@@ -51,6 +51,8 @@ const CONTROLS := [
 
 @onready var player: Node3D = get_node(player_path)
 
+## The "G — Sky" icon button under the minimap (D-110).
+var sky_button: Button
 var trail := PackedVector2Array()
 ## Vector2 world position, or null when no waypoint is set.
 var waypoint = null
@@ -260,7 +262,8 @@ func _build_minimap() -> void:
 	var hint := _outlined_label("M — Map", FONT_SIZE - 2)
 	hint.add_theme_color_override("font_color", KEY_COLOR)
 	hint_row.add_child(hint)
-	hint_row.add_child(_build_sky_button())
+	sky_button = _build_sky_button()
+	hint_row.add_child(sky_button)
 	_minimap_info = _outlined_label("", FONT_SIZE - 4)
 	_minimap_box.add_child(_minimap_info)
 
@@ -286,6 +289,8 @@ func _build_minimap() -> void:
 	north.offset_top = 2
 	_minimap.add_child(north)
 	_ignore_mouse(_minimap_box)
+	# The icon is the one clickable thing here (with a free mouse).
+	sky_button.mouse_filter = Control.MOUSE_FILTER_STOP
 
 ## The sun-and-cloud icon (and "G") that opens the sky menu (D-110). It needs a
 ## free mouse to click (Esc), so the key is the main way in.
