@@ -51,6 +51,9 @@ func _ready() -> void:
 	spring_arm.add_excluded_object(get_rid())
 	tp_interact_ray.add_exception(self)
 	interact_ray.add_exception(self)
+	# Interact-only door bodies (shop_door.gd) live on layer 8.
+	interact_ray.collision_mask |= 1 << 7
+	tp_interact_ray.collision_mask |= 1 << 7
 	for anim_name in LOOPING_ANIMS:
 		if anim_player.has_animation(anim_name):
 			anim_player.get_animation(anim_name).loop_mode = Animation.LOOP_LINEAR
