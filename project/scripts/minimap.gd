@@ -42,6 +42,7 @@ const CONTROLS := [
 	["Mouse wheel", "Zoom"],
 	["Drag", "Pan"],
 	["Right-click", "Set / remove waypoint"],
+	["Double-click building", "Teleport to its front door"],
 	["C", "Center on you"],
 	["Backspace", "Clear waypoint"],
 	["M / Esc", "Close map"],
@@ -154,6 +155,8 @@ func _on_full_map_input(event: InputEvent) -> void:
 				_zoom_to(_full.scale_px / ZOOM_STEP, button.position)
 			MOUSE_BUTTON_LEFT:
 				_dragging = button.pressed
+				if button.pressed and button.double_click:
+					_teleport_to(MapMath.footprint_at(_full.to_world(button.position), _data.footprints))
 			MOUSE_BUTTON_RIGHT when button.pressed:
 				_toggle_waypoint(button.position)
 	elif event is InputEventMouseMotion and _dragging:
@@ -185,6 +188,21 @@ func _clamp_center() -> void:
 	var bounds: Rect2 = _data.get("bounds", Rect2())
 	if bounds.has_area():
 		_full.center = _full.center.clamp(bounds.position, bounds.end)
+
+## Moves the player to just outside a building's front door, facing it, and
+## closes the map (D-118). Not while driving: the car would be left behind.
+func _teleport_to(index: int) -> void:
+	if index == -1 or player.get("vehicle") != null:
+		return
+	var building: Dictionary = _data.buildings[index]
+	var spot: Vector2 = building.front
+	var yaw := MapMath.yaw_facing(spot, building.center)
+	player.global_transform = Transform3D(Basis(Vector3.UP, yaw), Vector3(spot.x, player.global_position.y, spot.y))
+	player.velocity = Vector3.ZERO
+	player.model_yaw = 0.0
+	# The trail is where you've walked; a jump would draw a line across the farm.
+	trail.clear()
+	set_open(false)
 
 func _toggle_waypoint(screen: Vector2) -> void:
 	if waypoint != null and _full.to_screen(waypoint).distance_to(screen) <= WAYPOINT_PICK_RADIUS:
@@ -218,7 +236,8 @@ func _update_full_map(here: Vector2) -> void:
 		MapMath.cardinal(MapMath.bearing_between(here, cursor)),
 	]
 	if hovered != -1:
-		cursor_text = _data.buildings[hovered].name + "   ·   " + cursor_text
+		var hint := "get out of the car to teleport" if player.get("vehicle") != null else "double-click to teleport"
+		cursor_text = "%s  (%s)   ·   %s" % [_data.buildings[hovered].name, hint, cursor_text]
 	_cursor_label.text = cursor_text
 
 func _minimap_text(here: Vector2) -> String:

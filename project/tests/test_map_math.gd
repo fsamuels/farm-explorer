@@ -18,6 +18,7 @@ func _init() -> void:
 	_test_footprint_lookup()
 	_test_clamp_to_rect_edge()
 	_test_grid()
+	_test_front_spot()
 	print("map_math: %s" % ("OK" if _failures == 0 else "%d FAILED" % _failures))
 	quit(1 if _failures else 0)
 
@@ -130,3 +131,16 @@ func _test_grid() -> void:
 	_check(MapMath.grid_values(1.0, 9.0, 10.0).is_empty(), "no line in range")
 	_check(MapMath.grid_values(-INF, 10.0, 10.0).is_empty(), "non-finite range draws nothing instead of looping forever")
 	_check(MapMath.grid_values(0.0, 10.0, 0.0).is_empty(), "zero step draws nothing")
+
+func _test_front_spot() -> void:
+	# An unrotated 10 x 4 box centred on (100, -50): south is +z.
+	var box := MapMath.box_footprint(Transform3D(Basis.from_scale(Vector3(10, 1, 4)), Vector3(100, 0, -50)))
+	_near(MapMath.front_spot(box, 2.5), Vector2(100, -50 + 2.0 + 2.5), "outside the middle of the south wall")
+	# Turned 90 degrees, the same box's southernmost wall is its short end.
+	var turned := MapMath.box_footprint(Transform3D(Basis(Vector3.UP, PI / 2.0) * Basis.from_scale(Vector3(10, 1, 4)), Vector3(0, 0, 0)))
+	_near(MapMath.front_spot(turned, 1.0), Vector2(0, 5.0 + 1.0), "follows a rotated footprint")
+	_check(MapMath.footprint_at(MapMath.front_spot(box, 2.5), [box]) == -1, "the spot is outside the footprint")
+	# Facing: -Z is north, +X is east.
+	_near(MapMath.yaw_facing(Vector2.ZERO, Vector2(0, -5)), 0.0, "facing north needs no turn")
+	_near(MapMath.yaw_facing(Vector2.ZERO, Vector2(5, 0)), -PI / 2.0, "facing east")
+	_near(MapMath.yaw_to_bearing(MapMath.yaw_facing(Vector2(3, 3), Vector2(3, 13))), 180.0, "facing south reads 180 degrees")

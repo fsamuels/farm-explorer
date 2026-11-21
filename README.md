@@ -9,9 +9,9 @@ and light gameplay — in that order.
 Engine chosen: Godot 4 (see [docs/engine-decision.md](docs/engine-decision.md)).
 Project skeleton is in [`project/`](project) — a walkable first-person controller
 (F or the mouse wheel switches to a third-person view of the player character, D-89/D-91;
-M opens a full-screen map with labeled buildings, a waypoint, your trail and an X / Z coordinate grid, D-93/D-97;
+M opens a full-screen map with labeled buildings, a waypoint, your trail and an X / Z coordinate grid, D-93/D-97, and a double-click on a building teleports you to just outside its front door, D-118;
 T cycles the time of day through day, sunset, dusk, night, dawn and sunrise, D-94–D-96,
-and Y runs a clock that advances it on its own, with a small top-right time estimate, D-99/D-103, under a night sky of real stars, a Milky Way and constellation lines and names (N), D-104/D-110, and a sky menu (G, or the icon under the minimap) that picks the time of day and weather directly, D-110;
+and Y runs a clock that advances it on its own, with a small top-right time estimate, D-99/D-103, under a sky with a sun and moon disc, real stars, a Milky Way, constellation lines and names (N), the planets and shooting stars, D-104/D-110/D-120, and a sky menu (G, or the icon under the minimap) that picks the time of day and weather directly, D-110;
 R cycles the weather through clear, drizzle, rain, downpour, thunderstorm, light and heavy fog, smoke haze and heavy smoke, snow, heavy snow, a rainbow and the northern lights, with wet ground, puddles and settling snow, D-95/D-99/D-101/D-102/D-105;
 the Shop is walk-in — blue corrugated walls, windows, and an entry door, roll-up garage door and sliding barn door you open with E, D-98 — and so are Sally's House and the Front Barn, each one big room for now, D-115;
 the Triumph TR6 and BMW 2002 tii can be driven — E to get in or out, W/S gas and brake, A/D steer, Space handbrake, D-106),

@@ -98,7 +98,8 @@ recognizable, shareable version.
 - [~] Dynamic lighting / time-of-day — **partly done:** T switches between Day, Sunset, Dusk, Night, Dawn and Sunrise lighting presets with a short blend (D-94, D-95, D-96), and Y starts a running clock that advances the lighting through them on its own (24 h in 20 real minutes, D-99), showing an estimated time in the top-right corner that changes every 25 real seconds (D-103). Still to do: lamps and windows lighting up at night, and tying animals and chores to the hour (Phase 6)
 - [~] Weather — **partly done:** R cycles Clear, Drizzle, Rain, Downpour, Thunderstorm (random lightning), Light fog, Heavy fog, Snow, Heavy snow, Rainbow (a faint arch that stays in the eastern sky as you move, D-101, D-102) and Aurora (pink and green curtains in the northern sky, at night, D-105); camera-following particles hidden under roofs and trees, overcast sky (D-95, D-99, D-101). Still to do:
   - [x] Rain variants as separate weather states: drizzle, downpour and a thunderstorm with lightning flashes (D-99) — thunder sound is under the sound item below
-  - [x] Wildfire smoke: smoke haze and heavy smoke, warm-tinted light and a thin distance haze (D-118)
+  - [x] Sky bodies and ash (D-120): a sun disc by day and a moon at night, Venus / Mars / Jupiter / Saturn at their real positions, occasional shooting stars on dark clear skies, and a small amount of falling ash in smoke
+  - [x] Wildfire smoke: smoke haze and heavy smoke, warm-tinted light and a thin distance haze (D-119)
   - [x] Fog as weather states: light fog and heavy fog (D-99)
   - [x] Wet ground / puddles, snow settling on the ground and roofs, melting and drying afterwards (D-105)
   - [ ] Rain, wind and thunder sound — needs CC0 audio assets (add to `docs/credits.md` if CC-BY)
