@@ -58,6 +58,7 @@ var _walls_body: StaticBody3D
 var _liner: StandardMaterial3D
 var _skin: StandardMaterial3D
 var _floor: StandardMaterial3D
+var _lights: Array[OmniLight3D] = []
 
 ## Where a door's centre sits along a wall's axis (local x or z, from the
 ## footprint centre), for fraction `u` left to right seen from outside.
@@ -91,6 +92,20 @@ func _ready() -> void:
 	_walls_body.name = "Walls"
 	add_child(_walls_body)
 	_build()
+
+## The room's lights are on only while the camera is inside (or at the door):
+## unshadowed omnis would otherwise shine through the walls and roof at night.
+func _process(_delta: float) -> void:
+	if _lights.is_empty():
+		return
+	var cam := get_viewport().get_camera_3d()
+	var on := false
+	if cam:
+		var p := to_local(cam.global_position)
+		on = absf(p.x) < width / 2.0 + 1.0 and absf(p.z) < depth / 2.0 + 1.0 and p.y < height + rise + 2.0
+	if _lights[0].visible != on:
+		for light in _lights:
+			light.visible = on
 
 func _material(color: Color, both_sides: bool) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
@@ -160,7 +175,7 @@ func _add_door(d: Dictionary, c: float, w: float, h: float) -> void:
 	var spec: Dictionary = WALLS[d.wall]
 	var door := DoorScript.new()
 	door.kind = d.get("kind", DoorScript.Kind.SWING)
-	door.width = w
+	door.width = w + 0.04
 	door.height = h - 0.02
 	door.label = d.get("label", "door")
 	door.ribbed = d.get("ribbed", false)
@@ -194,12 +209,15 @@ func _cut_hole(d: Dictionary, c: float, w: float, h: float) -> void:
 	var plane := get_node("../" + String(d.plane)) as MeshInstance3D
 	var material := plane.get_surface_override_material(0) as StandardMaterial3D
 	if material == null or material.albedo_texture == null:
+		push_warning("building_shell: %s has no textured material to cut a doorway in" % d.plane)
 		return
 	var image := material.albedo_texture.get_image()
 	if image == null:
+		push_warning("building_shell: could not read the texture of %s" % d.plane)
 		return
-	if image.is_compressed():
-		image.decompress()
+	if image.is_compressed() and image.decompress() != OK:
+		push_warning("building_shell: could not decompress the texture of %s, so its doorway is not cut" % d.plane)
+		return
 	image.convert(Image.FORMAT_RGBA8)
 	var size := (plane.mesh as PlaneMesh).size
 	var spec: Dictionary = WALLS[d.wall]
@@ -219,9 +237,7 @@ func _cut_hole(d: Dictionary, c: float, w: float, h: float) -> void:
 	var px := Rect2i(Vector2i(floori(lo.x * image.get_width()), floori(lo.y * image.get_height())),
 			Vector2i(ceili((hi.x - lo.x) * image.get_width()), image.get_height()))
 	px = px.intersection(Rect2i(Vector2i.ZERO, image.get_size()))
-	for y in range(px.position.y, px.end.y):
-		for x in range(px.position.x, px.end.x):
-			image.set_pixel(x, y, Color(0, 0, 0, 0))
+	image.fill_rect(px, Color(0, 0, 0, 0))
 	image.generate_mipmaps()
 	var cut := material.duplicate() as StandardMaterial3D
 	cut.albedo_texture = ImageTexture.create_from_image(image)
@@ -246,8 +262,8 @@ func _build_ceiling() -> void:
 		# and the inside of the two end walls up to the ridge. Built with the
 		# ridge along x (cross axis z), then turned if the ridge runs along z.
 		var r := rise - 0.04
-		_quad(st, Vector3(-half_len, h, -half_cross), Vector3(half_len, h, -half_cross), Vector3(half_len, h + r, 0), Vector3(-half_len, h + r, 0), Vector3(0, -half_cross, -r).normalized() * -1.0)
-		_quad(st, Vector3(-half_len, h + r, 0), Vector3(half_len, h + r, 0), Vector3(half_len, h, half_cross), Vector3(-half_len, h, half_cross), Vector3(0, -half_cross, r).normalized() * -1.0)
+		_quad(st, Vector3(-half_len, h, -half_cross), Vector3(half_len, h, -half_cross), Vector3(half_len, h + r, 0), Vector3(-half_len, h + r, 0), Vector3(0, -half_cross, r).normalized())
+		_quad(st, Vector3(-half_len, h + r, 0), Vector3(half_len, h + r, 0), Vector3(half_len, h, half_cross), Vector3(-half_len, h, half_cross), Vector3(0, -half_cross, -r).normalized())
 		for sx in [-1.0, 1.0]:
 			var n := Vector3(sx, 0, 0)
 			st.set_normal(n); st.add_vertex(Vector3(sx * half_len, h, -half_cross))
@@ -277,7 +293,9 @@ func _build_lights() -> void:
 		light.light_energy = 1.0
 		light.light_color = Color(1.0, 0.95, 0.85)
 		light.shadow_enabled = false
+		light.visible = false
 		add_child(light)
+		_lights.append(light)
 
 func _add_box(pos: Vector3, size: Vector3, material: Material, collide: bool) -> void:
 	var mesh := BoxMesh.new()

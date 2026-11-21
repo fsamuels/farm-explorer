@@ -31,10 +31,10 @@ func _run() -> void:
 	var barn: Node3D = main.get_node("Buildings/FrontBarnShell")
 	_test_built(main, house, "Sally's House")
 	_test_built(main, barn, "Front Barn")
-	await _walk_tests(player, house, "south", "Sally's House south door", false)
-	await _walk_tests(player, house, "east", "Sally's House front door", false)
-	await _walk_tests(player, barn, "south", "barn south door", true)
-	await _walk_tests(player, barn, "east", "barn side door", false)
+	await _walk_tests(player, house, "south", "Sally's House south door")
+	await _walk_tests(player, house, "east", "Sally's House front door")
+	await _walk_tests(player, barn, "south", "barn south door")
+	await _walk_tests(player, barn, "east", "barn side door")
 	print("buildings: %s" % ("OK" if _failures == 0 else "%d FAILED" % _failures))
 	quit(1 if _failures else 0)
 
@@ -66,7 +66,7 @@ func _door(shell: Node3D, wall: String) -> Node3D:
 
 ## Stand 3 m outside the door, face in and walk: in through the doorway (after
 ## opening it when it is a slider), and, from 4 m to the side, not through the wall.
-func _walk_tests(player: CharacterBody3D, shell: Node3D, wall: String, nm: String, open_first: bool) -> void:
+func _walk_tests(player: CharacterBody3D, shell: Node3D, wall: String, nm: String) -> void:
 	var door := _door(shell, wall)
 	_check(door != null, "%s exists" % nm)
 	if door == null:
@@ -78,7 +78,15 @@ func _walk_tests(player: CharacterBody3D, shell: Node3D, wall: String, nm: Strin
 	# The doorway's centre on the wall line, from the door's own origin.
 	var centre: Vector3 = door.global_position + door.global_basis.x * (float(door.width) / 2.0)
 	centre.y = 0.0
-	# A closed door is solid; open it and the doorway must be clear.
+	# A closed door is solid: walking at it gets nowhere.
+	player.global_position = centre + out * 3.0 + Vector3(0, 0.1, 0)
+	player.velocity = Vector3.ZERO
+	player.global_basis = Basis.looking_at(-out, Vector3.UP)
+	Input.action_press("move_forward")
+	await _step(80)
+	Input.action_release("move_forward")
+	_check(not _inside(shell, player.global_position), "%s: closed, it blocks the player" % nm)
+	# Open it and the doorway must be clear.
 	door.set_open(true)
 	await _step(120)
 	# Through the wall first: offset sideways from the door.
