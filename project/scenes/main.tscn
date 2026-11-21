@@ -599,8 +599,8 @@ surface_material_override/0 = SubResource("StandardMaterial3D_middle_section")
 [node name="Boundary" type="Node3D" parent="." unique_id=1203940462]
 
 [node name="Fence_01" parent="Boundary" instance=ExtResource("3_fence_scene")]
-transform = Transform3D(0.003621551, 0, 0.9999934, 0, 1, 0, 0.9999934, 0, -0.003621551, -67.31959, 0, -142.0692)
-length = 174.0234
+transform = Transform3D(0.007832658, 0, 0.9999693, 0, 1, 0, -0.9999693, 0, 0.007832658, -67.45, 0, -112.55)
+length = 114.9035
 
 [node name="Fence_02" parent="Boundary" instance=ExtResource("3_fence_scene")]
 transform = Transform3D(0.9999519, 0, -0.009809674, 0, 1, 0, -0.009809674, 0, -0.9999519, 37.51909, 0, -56.08345)
@@ -631,16 +631,16 @@ transform = Transform3D(-0.970386, 0, 0.2415594, 0, 1, 0, 0.2415594, 0, 0.970386
 length = 123.6567
 
 [node name="Fence_11" parent="Boundary" instance=ExtResource("3_fence_scene")]
-transform = Transform3D(-0.999994, 0, 0.003454873, 0, 1, 0, 0.003454873, 0, 0.999994, -124.3785, 0, 183.9873)
-length = 79.11143
+transform = Transform3D(-0.7257109, 0, -0.6879997, 0, 1, 0, 0.6879997, 0, -0.7257109, -124.25, 0, 146.5)
+length = 108.721
 
 [node name="Fence_12" parent="Boundary" instance=ExtResource("3_fence_scene")]
-transform = Transform3D(-0.003637647, 0, -0.9999934, 0, 1, 0, -0.9999934, 0, 0.003637647, -164.7264, 0, -33.72131)
-length = 435.6934
+transform = Transform3D(-0.003736387, 0, -0.999993, 0, 1, 0, 0.999993, 0, -0.003736387, -164.25, 0, -38.1)
+length = 294.4021
 
 [node name="Fence_13" parent="Boundary" instance=ExtResource("3_fence_scene")]
-transform = Transform3D(0.974614, 0, 0.2238918, 0, 1, 0, 0.2238918, 0, -0.974614, -116.5768, 0, -240.3234)
-length = 100.4337
+transform = Transform3D(0.987763, 0, 0.1559626, 0, 1, 0, -0.1559626, 0, 0.987763, -116.35, 0, -177.65)
+length = 98.10046
 
 [node name="PastureFences" type="Node3D" parent="."]
 
@@ -869,8 +869,8 @@ closed = false
 [node name="TreeLine" type="Node3D" parent="."]
 
 [node name="TreeLine_01" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(0.003621551, 0, 0.9999934, 0, 1, 0, 0.9999934, 0, -0.003621551, -47.31973, 0, -142.1416)
-length = 174.0234
+transform = Transform3D(0.007832658, 0, 0.9999693, 0, 1, 0, -0.9999693, 0, 0.007832658, -47.595, 0, -131.2)
+length = 111.8226
 
 [node name="TreeLine_02" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
 transform = Transform3D(0.9999519, 0, -0.009809674, 0, 1, 0, -0.009809674, 0, -0.9999519, 37.32289, 0, -76.08249)
@@ -897,20 +897,20 @@ transform = Transform3D(0.002937905, 0, 0.9999957, 0, 1, 0, 0.9999957, 0, -0.002
 length = 82.04794
 
 [node name="TreeLine_10" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(-0.970386, 0, 0.2415594, 0, 1, 0, 0.2415594, 0, 0.970386, -19.9944, 0, 188.3231)
-length = 123.6567
+transform = Transform3D(-0.9703062, 0, 0.24188, 0, 1, 0, -0.24188, 0, -0.9703062, -25.301, 0, 189.68)
+length = 134.5998
 
 [node name="TreeLine_11" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(-0.999994, 0, 0.003454873, 0, 1, 0, 0.003454873, 0, 0.999994, -124.3094, 0, 203.9872)
-length = 79.11143
+transform = Transform3D(-0.7257109, 0, -0.6879997, 0, 1, 0, 0.6879997, 0, -0.7257109, -137.14, 0, 161.84)
+length = 128.2392
 
 [node name="TreeLine_12" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(-0.003637647, 0, -0.9999934, 0, 1, 0, -0.9999934, 0, 0.003637647, -184.7263, 0, -33.64856)
-length = 435.6934
+transform = Transform3D(-0.003736387, 0, -0.999993, 0, 1, 0, 0.999993, 0, -0.003736387, -184.28, 0, -45.495)
+length = 326.4507
 
 [node name="TreeLine_13" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(0.974614, 0, 0.2238918, 0, 1, 0, 0.2238918, 0, -0.974614, -112.0989, 0, -259.8157)
-length = 100.4337
+transform = Transform3D(0.987763, 0, 0.1559626, 0, 1, 0, -0.1559626, 0, 0.987763, -116.46, 0, -197.92)
+length = 138.5497
 
 [node name="Buildings" type="Node3D" parent="." unique_id=1610982085]
 
@@ -1224,6 +1224,16 @@ rise = 3.52291
 transform = Transform3D(0.264821, 0, -0.964298, 0, 1, 0, -0.964298, 0, -0.264821, 10.244, 4, -22.1183)
 width = 12.2037
 rise = 3.52291
+
+[node name="BackBarnShell" type="Node3D" parent="Buildings"]
+script = ExtResource("58_building_shell")
+building_name = "Back Barn"
+skin_walls = PackedStringArray("south", "north", "east", "west")
+corrugated_skin = true
+floor_color = Color(0.5, 0.45, 0.4, 1)
+rise = 3.52291
+light_count = 3
+doors = [{"wall": "east", "u": 0.5, "width": 3.0, "height": 3.2, "kind": 1, "label": "barn door", "ribbed": true, "color": Color(0.9, 0.93, 1, 1)}, {"wall": "west", "u": 0.5, "width": 3.0, "height": 3.2, "kind": 1, "label": "barn door", "ribbed": true, "color": Color(0.9, 0.93, 1, 1)}]
 
 [node name="Martha" parent="." instance=ExtResource("5_horse_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 185, 0, 53)
