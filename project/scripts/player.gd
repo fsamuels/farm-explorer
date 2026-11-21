@@ -85,14 +85,17 @@ func _process(_delta: float) -> void:
 
 ## The nearest node under the crosshair that can be interacted with: the active
 ## view's ray collider or its closest ancestor with an `interact(actor)` method
-## (e.g. gate.gd). In third person the ray starts at the camera, so it is only
-## accepted within reach (2.5m) of the player's eyes.
+## (e.g. gate.gd). In third person the ray starts at the camera behind the
+## player, so a hit only counts if it is in front of the player's eyes and
+## within reach (2.5m) of them.
 func _interact_target() -> Node:
 	var ray := tp_interact_ray if third_person else interact_ray
 	if not ray.is_colliding():
 		return null
-	if third_person and head.global_position.distance_to(ray.get_collision_point()) > 2.5:
-		return null
+	if third_person:
+		var to_hit := ray.get_collision_point() - head.global_position
+		if to_hit.length() > 2.5 or to_hit.dot(-head.global_basis.z) <= 0.0:
+			return null
 	var node: Node = ray.get_collider()
 	while node and not node.has_method("interact"):
 		node = node.get_parent()

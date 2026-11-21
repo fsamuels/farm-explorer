@@ -40,7 +40,23 @@ from mathutils import Vector
 from mathutils.kdtree import KDTree
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
-FONT = "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf"
+# Bold serif for the cap lettering; first one found wins, else Pillow's default.
+FONT_CANDIDATES = (
+    "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",   # Linux
+    "/Library/Fonts/Georgia Bold.ttf",                          # macOS
+    "/System/Library/Fonts/Supplemental/Georgia Bold.ttf",      # macOS
+    "C:/Windows/Fonts/georgiab.ttf",                            # Windows
+    "DejaVuSerif-Bold.ttf",                                     # Pillow search path
+)
+
+
+def cap_font(size):
+    for path in FONT_CANDIDATES:
+        try:
+            return ImageFont.truetype(path, size)
+        except OSError:
+            continue
+    return ImageFont.load_default(size)
 
 # Region heights (rest pose, metres, Blender Z-up, model faces -Y, ~1.81m tall).
 BOOT_TOP = 0.40      # muck boots come to mid-calf
@@ -473,7 +489,7 @@ def cap_front_texture():
     d = ImageDraw.Draw(im)
     cream = (236, 222, 190)
     for text, cy, size in (("FARM DADDY", 100, 50), ("FORREST", 168, 56)):
-        f = ImageFont.truetype(FONT, size)
+        f = cap_font(size)
         tw = d.textlength(text, font=f)
         d.text(((w - tw) / 2, cy - size / 2 - 6), text, font=f, fill=cream)
     img = bpy.data.images.new("T_Cap_Front", w, h)
