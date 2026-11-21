@@ -85,7 +85,9 @@ farm-sim/
     │   ├── shop_shell.gd          # builds the walk-in Shop (hollow corrugated walls, windows, floor, ceiling, lights, pad) over the placeholder box's footprint and places its three doors — see D-98
     │   ├── shop_door.gd           # interactive door: swinging, sliding or roll-up leaf with collision, E to open — see D-98
     │   ├── vehicle.gd             # drivable car: E to get in/out, W/S/A/D/Space to drive, collides with the world — see D-106
-    │   ├── vehicle_math.gd        # pure driving maths (speed, turn rate, exit spots), covered by tests/ — see D-106
+    │   ├── vehicle_math.gd        # pure driving maths (speed, mph, turn rate, exit spots), covered by tests/ — see D-106
+    │   ├── wheel_builder.gd       # splits a car model's wheel meshes into four wheels that spin and steer, covered by tests/ — see D-107
+    │   ├── engine_sound.gd        # synthesized engine note: gears, revs, harmonics; covered by tests/ — see D-107
     │   ├── wall_layout.gd         # pure helper that cuts a wall into boxes around openings, covered by tests/ — see D-98
     │   ├── corrugated.gd          # the shared blue corrugated-metal material (triplanar, mipmapped) — see D-98
     │   ├── tree_line_segment.gd   # @tool script: scatters trees + one invisible collision wall from an exported length — see D-11
