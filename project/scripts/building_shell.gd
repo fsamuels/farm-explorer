@@ -22,6 +22,9 @@ extends Node3D
 ##   kind    DoorScript.Kind (SWING default, SLIDE for big barn doors)
 ##   label   shown in the prompt ("Open <label>")
 ##   ribbed, color   optional leaf look
+##
+## `open_walls` names walls that are not there at all (a pole barn's open
+## sides, D-121): no liner, skin, collision or doors, just the roof above.
 
 const WallLayout := preload("res://scripts/wall_layout.gd")
 const DoorScript := preload("res://scripts/shop_door.gd")
@@ -42,6 +45,7 @@ const WALLS := {
 
 @export var building_name := ""
 @export var skin_walls := PackedStringArray()
+@export var open_walls := PackedStringArray()
 @export var skin_color := Color(0.6, 0.55, 0.5)
 @export var liner_color := Color(0.84, 0.82, 0.78)
 @export var floor_color := Color(0.45, 0.36, 0.29)
@@ -120,13 +124,20 @@ func _material(color: Color, both_sides: bool) -> StandardMaterial3D:
 func spot_building() -> String:
 	return building_name
 
+## The door entries that get built: those not on an open wall.
+func live_doors() -> Array:
+	return doors.filter(func(d: Dictionary) -> bool: return not open_walls.has(d.wall))
+
 ## World position `clearance` metres outside the building's front door: the
-## door labelled "front door" if there is one, else the first. Null with no doors.
+## door labelled "front door" if there is one, else the first. With no doors, the
+## middle of the first open wall; null with neither.
 func front_door_spot(clearance: float) -> Variant:
-	if doors.is_empty():
+	var live := live_doors()
+	if live.is_empty() and open_walls.is_empty():
 		return null
-	var d: Dictionary = doors[0]
-	for candidate: Dictionary in doors:
+	# With no doors, the middle of the first open side is the way in.
+	var d: Dictionary = {"wall": open_walls[0], "u": 0.5} if live.is_empty() else live[0]
+	for candidate: Dictionary in live:
 		if candidate.get("label", "") == "front door":
 			d = candidate
 			break
@@ -157,6 +168,9 @@ func _build() -> void:
 	for wall in WALLS:
 		by_wall[wall] = []
 	for d: Dictionary in doors:
+		if open_walls.has(d.wall):
+			push_warning("building_shell: a door on the open %s wall is skipped" % d.wall)
+			continue
 		var w := float(d.get("width", 0.9))
 		var h := float(d.get("height", 2.1))
 		var c := _door_along(d)
@@ -165,6 +179,8 @@ func _build() -> void:
 			_cut_hole(d, c, w, h)
 		_add_door(d, c, w, h)
 	for wall in WALLS:
+		if open_walls.has(wall):
+			continue
 		_build_wall(wall, by_wall[wall], skin_walls.has(wall))
 	_build_floor()
 	_build_ceiling()

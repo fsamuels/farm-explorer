@@ -1447,13 +1447,13 @@ doors = [{"wall": "south", "plane": "SallysHouse_Wall_South", "u": 0.42, "width"
 [node name="FrontBarnShell" type="Node3D" parent="Buildings"]
 script = ExtResource("58_building_shell")
 building_name = "Front Barn"
-skin_walls = PackedStringArray("north", "south", "east", "west")
+skin_walls = PackedStringArray("west")
+open_walls = PackedStringArray("south", "north", "east")
 skin_color = Color(0.6, 0.55, 0.5, 1)
 floor_color = Color(0.5, 0.45, 0.4, 1)
 rise = 4.7
 ridge_along_z = true
 light_count = 3
-doors = [{"wall": "south", "u": 0.5, "width": 3.6, "height": 3.4, "kind": 1, "label": "barn door", "ribbed": true, "color": Color(0.7, 0.65, 0.58, 1)}, {"wall": "north", "u": 0.5, "width": 3.6, "height": 3.4, "kind": 1, "label": "barn door", "ribbed": true, "color": Color(0.7, 0.65, 0.58, 1)}]
 
 [node name="FrontBarnInterior" type="Node3D" parent="Buildings"]
 script = ExtResource("59_barn_interior")
