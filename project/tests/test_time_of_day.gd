@@ -26,6 +26,7 @@ func _run() -> void:
 	quit(1 if _failures else 0)
 
 func _test_next_preset() -> void:
+	_check((load("res://scripts/time_of_day.gd") as GDScript).can_instantiate(), "time_of_day.gd compiles")
 	_check(TimeOfDay.next_preset("day") == "sunset", "day -> sunset")
 	_check(TimeOfDay.next_preset("sunset") == "dusk", "sunset -> dusk")
 	_check(TimeOfDay.next_preset("dusk") == "night", "dusk -> night")

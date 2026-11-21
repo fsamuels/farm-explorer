@@ -114,11 +114,12 @@ static func blend(a: Dictionary, b: Dictionary, t: float) -> Dictionary:
 	return out
 
 ## `p` under cloud cover `amount` (0..1): the sun dims, the sky, ambient
-## light and fog go grey at their own brightness, and fog thickens.
+## light and fog go grey at their own brightness, and fog thickens. Always
+## returns a fresh, writable copy (never one of the read-only PRESETS).
 static func overcast_preset(p: Dictionary, amount: float) -> Dictionary:
-	if amount <= 0.0:
-		return p
 	var out := p.duplicate()
+	if amount <= 0.0:
+		return out
 	var grey := _grey(p.sky_color)
 	out.sky_color = p.sky_color.lerp(grey, 0.8 * amount)
 	out.fog_color = p.fog_color.lerp(grey, amount)

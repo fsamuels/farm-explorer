@@ -28,6 +28,7 @@ func _run() -> void:
 	quit(1 if _failures else 0)
 
 func _test_next_weather() -> void:
+	_check((load("res://scripts/weather.gd") as GDScript).can_instantiate(), "weather.gd compiles")
 	_check(Weather.next_weather("clear") == "rain", "clear -> rain")
 	_check(Weather.next_weather("rain") == "snow", "rain -> snow")
 	_check(Weather.next_weather("snow") == "clear", "snow wraps to clear")
@@ -44,6 +45,7 @@ func _test_overcast_preset() -> void:
 		_check(o.fog_density > p.fog_density, "%s: overcast thickens fog" % name)
 		_check(o.sky_color.s < p.sky_color.s + 0.001, "%s: overcast greys the sky" % name)
 		_check(o.keys() == p.keys(), "%s: same keys" % name)
+		_check(not TimeOfDay.overcast_preset(p, 0.0).is_read_only(), "%s: result is always a writable copy" % name)
 
 func _test_particle_brightness() -> void:
 	var day := Weather.particle_brightness(TimeOfDay.PRESETS.day)
@@ -57,6 +59,11 @@ func _test_scene() -> void:
 	for i in 3:
 		await process_frame
 	var weather = main.get_node("Weather")
+	# A script that fails to compile still loads as a bare node, and every
+	# check below would then be skipped or fail confusingly; stop early.
+	if not weather.has_method("set_weather"):
+		_check(false, "weather.gd compiled and is attached")
+		return
 	var tod = main.get_node("TimeOfDay")
 	var sun: DirectionalLight3D = main.get_node("DirectionalLight3D")
 	var rain: GPUParticles3D = weather.get_node("Rain")
@@ -94,7 +101,13 @@ func _test_scene() -> void:
 	await process_frame
 	await create_timer(0.2).timeout
 	_check(weather.current == "clear" and not snow.emitting, "R again clears")
+	var snow_mat: StandardMaterial3D = snow.draw_pass_1.surface_get_material(0)
+	_check(snow_mat.albedo_color.a < 0.01, "leftover snow fades out with the sky: %s" % snow_mat.albedo_color.a)
 	_check(is_equal_approx(sun.light_energy, 1.0), "clearing restores the sun: %s" % sun.light_energy)
+	weather.set_weather("Rain", true)
+	_check(weather.current == "clear" and not rain.emitting, "unknown weather falls back to clear")
+	weather.set_weather("snow", true)
+	_check(snow.emitting and snow_mat.albedo_color.a > 0.5, "snow comes back visible after fading out")
 	main.queue_free()
 
 func _press(keycode: Key) -> void:
