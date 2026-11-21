@@ -77,6 +77,13 @@ func _test_scene() -> void:
 	var all_weather: Array = weather.ORDER.duplicate()
 	all_weather.sort()
 	_check(grouped == all_weather, "every weather is in exactly one column")
+	for key in weather.ORDER:
+		_check(menu.WEATHER_COLORS.has(key), "a gradient for weather '%s'" % key)
+	var times_sorted: Array = menu.TIME_ORDER.duplicate()
+	times_sorted.sort()
+	var tod_sorted: Array = tod.ORDER.duplicate()
+	tod_sorted.sort()
+	_check(times_sorted == tod_sorted, "the menu lists every time of day once")
 	_check(weather.current == "aurora", "the aurora can be picked at night")
 	menu.choose_weather("aurora")
 	_check(weather.current == "clear", "picking the aurora again turns it off: %s" % weather.current)

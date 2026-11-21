@@ -99,6 +99,7 @@ func choose_time(preset_name: String) -> void:
 		_tod.set_preset(preset_name, true)
 		if _weather and not Weather.allowed_at(_weather.current, preset_name):
 			_weather.set_weather("clear", true)
+	_hint.text = ""
 	refresh()
 
 ## Pick a weather. A special (rainbow, aurora) that doesn't suit the current
@@ -112,6 +113,7 @@ func choose_weather(weather_name: String) -> void:
 			_hint.text = Weather.restriction_text(weather_name)
 			return
 		_weather.set_weather(weather_name, true)
+	_hint.text = ""
 	refresh()
 
 ## True if `weather_name` can be chosen at the current time of day. The active
@@ -146,7 +148,6 @@ func refresh() -> void:
 			var b := _weather_buttons[key] as Button
 			b.set_pressed_no_signal(key == _weather.current)
 			b.modulate = Color.WHITE if is_available(key) else UNAVAILABLE_TINT
-	_hint.text = ""
 
 func _build() -> void:
 	_panel = PanelContainer.new()
@@ -209,16 +210,17 @@ func _build() -> void:
 		for key in group[1]:
 			_add_weather_button(column, key)
 
-	_names_button = _button("")
-	_names_button.pressed.connect(toggle_names)
-	box.add_child(_names_button)
-
-	# Says why a dimmed weather isn't available when you click it.
+	# Says why a dimmed weather isn't available when you click it; sits right
+	# under the columns and keeps its height when empty so nothing jumps.
 	_hint = Label.new()
 	_hint.custom_minimum_size = Vector2(0, 30)
 	_hint.add_theme_font_size_override("font_size", FONT_SIZE - 4)
 	_hint.add_theme_color_override("font_color", KEY_COLOR)
 	box.add_child(_hint)
+
+	_names_button = _button("")
+	_names_button.pressed.connect(toggle_names)
+	box.add_child(_names_button)
 
 	var close := _button("Close  (G or Esc)")
 	close.toggle_mode = false
