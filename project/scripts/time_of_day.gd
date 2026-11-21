@@ -150,6 +150,8 @@ var fog_extra := 0.0
 var flash := 0.0
 ## Northern lights, 0..1 (set by weather.gd); shown only when the sky is dark.
 var aurora_level := 0.0
+## Wildfire smoke, 0..1 (set by weather.gd).
+var smoke_level := 0.0
 var _aurora_time := 0.0
 var _aurora_shown := 0.0
 ## The clock hour (0..24) the lighting is at, and whether it's advancing.
@@ -198,7 +200,7 @@ static func blend(a: Dictionary, b: Dictionary, t: float) -> Dictionary:
 ## `flash` (0..1) is a lightning flash that brightens the sky and ambient
 ## light. Always returns a fresh, writable copy (never one of the read-only
 ## PRESETS).
-static func overcast_preset(p: Dictionary, amount: float, extra_fog := 0.0, flash_amount := 0.0, aurora_amount := 0.0) -> Dictionary:
+static func overcast_preset(p: Dictionary, amount: float, extra_fog := 0.0, flash_amount := 0.0, aurora_amount := 0.0, smoke_amount := 0.0) -> Dictionary:
 	var out := p.duplicate()
 	if amount > 0.0:
 		# Cloud hides the stars much faster than it dims the sun.
@@ -218,6 +220,22 @@ static func overcast_preset(p: Dictionary, amount: float, extra_fog := 0.0, flas
 		# the fog or the sky shows as a seam above the greyed-out distance.
 		out.sky_color = out.sky_color.lerp(out.fog_color, thick)
 		out.stars *= 1.0 - minf(1.0, extra_fog / 0.03)  # light fog dims them, heavy fog hides them
+	if smoke_amount > 0.0:
+		# Wildfire smoke (0..1): unlike fog it is warm. The light, the sky, the
+		# haze and the ambient all lean orange-brown at their own brightness
+		# (so a smoky night is still dark), the sun dims to a dull disc, and the
+		# haze is a thin distance veil rather than a wall. Smoke hides stars.
+		var s := clampf(smoke_amount, 0.0, 1.0)
+		out.fog_density += 0.014 * s
+		# Colour comes on faster than density (blue mixed half way with orange
+		# is grey, which is not what thin smoke looks like).
+		var tint := sqrt(s)
+		out.fog_color = out.fog_color.lerp(_smoke(out.fog_color), 0.85 * tint)
+		out.sky_color = out.sky_color.lerp(_smoke(out.sky_color).lerp(out.fog_color, 0.5), 0.9 * tint)
+		out.ambient_color = out.ambient_color.lerp(_smoke(out.ambient_color), 0.7 * tint)
+		out.sun_color = out.sun_color.lerp(Color(1.0, 0.5, 0.25), 0.75 * tint)
+		out.sun_energy *= 1.0 - 0.55 * s
+		out.stars *= pow(1.0 - s, 2.0)
 	if aurora_amount > 0.0:
 		# The northern lights show only against a dark sky, so they follow the
 		# stars: gone by day, and hidden by the same cloud and fog.
@@ -228,6 +246,11 @@ static func overcast_preset(p: Dictionary, amount: float, extra_fog := 0.0, flas
 		out.ambient_color = out.ambient_color.lerp(Color(0.8, 0.85, 1.0), f)
 		out.ambient_energy = p.ambient_energy + 1.5 * f
 	return out
+
+## `c` seen through wildfire smoke: the same brightness, tinted orange-brown.
+static func _smoke(c: Color) -> Color:
+	var l := c.get_luminance()
+	return Color(l * 1.25, l * 0.78, l * 0.45)
 
 static func _grey(c: Color) -> Color:
 	var l := c.get_luminance() * 0.85
@@ -386,6 +409,12 @@ func set_aurora(amount: float) -> void:
 	if not _shown.is_empty():
 		_apply(_shown)
 
+## Set the wildfire smoke (0..1) and redraw.
+func set_smoke(amount: float) -> void:
+	smoke_level = clampf(amount, 0.0, 1.0)
+	if not _shown.is_empty():
+		_apply(_shown)
+
 ## Set the lightning flash (0..1) and redraw.
 func set_flash(amount: float) -> void:
 	flash = clampf(amount, 0.0, 1.0)
@@ -395,11 +424,11 @@ func set_flash(amount: float) -> void:
 ## What's on screen now: the (possibly mid-blend) preset under the current
 ## weather.
 func shown() -> Dictionary:
-	return overcast_preset(_shown, overcast, fog_extra, flash, aurora_level)
+	return overcast_preset(_shown, overcast, fog_extra, flash, aurora_level, smoke_level)
 
 func _apply(preset: Dictionary) -> void:
 	_shown = preset
-	var p := overcast_preset(preset, overcast, fog_extra, flash, aurora_level)
+	var p := overcast_preset(preset, overcast, fog_extra, flash, aurora_level, smoke_level)
 	var sun := get_node_or_null(sun_path) as DirectionalLight3D
 	if sun:
 		sun.rotation_degrees = p.sun_rotation

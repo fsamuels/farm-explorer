@@ -26,7 +26,7 @@ extends Node3D
 ##
 ## Not done yet: sound.
 
-const ORDER := ["clear", "drizzle", "rain", "downpour", "thunderstorm", "light_fog", "heavy_fog", "snow", "heavy_snow", "rainbow", "aurora"]
+const ORDER := ["clear", "drizzle", "rain", "downpour", "thunderstorm", "light_fog", "heavy_fog", "haze", "heavy_smoke", "snow", "heavy_snow", "rainbow", "aurora"]
 ## Per weather: the label shown on screen, the cloud cover it puts on the sky
 ## (see TimeOfDay.overcast_preset), `fog` (extra fog density on top of that),
 ## `precip` ("rain", "snow" or "" for none) and, for rain, the drop count,
@@ -46,6 +46,8 @@ const WEATHER := {
 		"drops": 14000, "width": 0.022, "length": 0.75, "slant": 0.25, "speed": Vector2(20.0, 25.0), "wet": 0.12, "snow": -0.03},
 	"light_fog": {"label": "Light fog", "overcast": 0.3, "fog": 0.012, "precip": "", "wet": -0.002, "snow": -0.001},
 	"heavy_fog": {"label": "Heavy fog", "overcast": 0.5, "fog": 0.045, "precip": "", "wet": 0.0, "snow": -0.0005},
+	"haze": {"label": "Smoke haze", "overcast": 0.1, "fog": 0.0, "precip": "", "smoke": 0.5, "wet": -0.006, "snow": -0.0017},
+	"heavy_smoke": {"label": "Heavy smoke", "overcast": 0.2, "fog": 0.0, "precip": "", "smoke": 1.0, "wet": -0.006, "snow": -0.0017},
 	"snow": {"label": "Snow", "overcast": 0.7, "fog": 0.0, "precip": "snow", "wet": -0.02, "snow": 0.012,
 		"flakes": 4000, "slant": 0.0},
 	"heavy_snow": {"label": "Heavy snow", "overcast": 0.9, "fog": 0.02, "precip": "snow", "wet": -0.02, "snow": 0.04,
@@ -335,14 +337,17 @@ func set_weather(weather: String, instant := false) -> void:
 	if not tod:
 		return
 	var aurora_target := 1.0 if look.get("aurora", false) else 0.0
+	var smoke_target: float = look.get("smoke", 0.0)
 	if not fade:
 		tod.set_flash(0.0)
 		tod.set_fog_extra(look.fog)
 		tod.set_overcast(look.overcast)
 		tod.set_aurora(aurora_target)
+		tod.set_smoke(smoke_target)
 		return
 	tod.set_flash(0.0)
 	_tween.tween_method(tod.set_aurora, tod.aurora_level, aurora_target, transition_seconds)
+	_tween.tween_method(tod.set_smoke, tod.smoke_level, smoke_target, transition_seconds)
 	_tween.tween_method(tod.set_overcast, tod.overcast, look.overcast, transition_seconds)
 	_tween.tween_method(tod.set_fog_extra, tod.fog_extra, look.fog, transition_seconds)
 	tod.show_toast(look.label)
