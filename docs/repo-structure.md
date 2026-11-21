@@ -82,6 +82,7 @@ farm-sim/
     │   ├── fence_segment.gd       # @tool script: builds posts+wire strands from an exported length — see D-11
     │   ├── fence_path.gd          # @tool script: builds posts+wire strands from a Path3D/Curve3D's points instead of a length, closing the loop back to the first point (optional `solid` collision, D-76) — see D-67/D-69
     │   ├── gate.gd                # @tool script: builds the gate and swings its AnimatableBody3D hinge on interact() — see D-76
+    │   ├── barn_interior.gd       # Front Barn fittings: three stalls with gates, tack room, hay stack — see D-116
     │   ├── building_shell.gd      # data-driven walk-in shell (hollow room, doors) for Sally's House and the Front Barn — see D-115
     │   ├── shop_shell.gd          # builds the walk-in Shop (hollow corrugated walls, windows, floor, ceiling, lights, pad) over the placeholder box's footprint and places its three doors — see D-98
     │   ├── shop_door.gd           # interactive door: swinging, sliding or roll-up leaf with collision, E to open — see D-98
