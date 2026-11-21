@@ -19,7 +19,7 @@ uniform float milky_way_strength = 1.0;
 // view direction. `aurora_time` is advanced by time_of_day.gd.
 uniform float aurora_strength = 0.0;
 uniform float aurora_time = 0.0;
-// The sun by day and the moon by night (D-119): one disc where the scene's
+// The sun by day and the moon by night (D-120): one disc where the scene's
 // light comes from. `body_glow` is the halo size (big in smoke, near the
 // horizon) and `body_moon` 0..1 turns it into a pale, mottled moon.
 uniform vec3 body_dir = vec3(0.0, 1.0, 0.0);
@@ -125,7 +125,7 @@ vec3 sky_body(vec3 d) {
 	float r = mix(0.034, 0.028, body_moon);
 	float disc = 1.0 - smoothstep(r * 0.9, r, ang);
 	float h = 0.10 + 0.25 * body_glow;
-	float halo = exp(-(ang * ang) / (h * h)) * (0.25 + 0.5 * body_glow) * (1.0 - 0.9 * body_moon);
+	float halo = exp(-(ang * ang) / (h * h)) * (0.25 + 0.5 * body_glow) * (1.0 - 0.9 * body_moon) * smoothstep(0.9, 0.97, c);
 	vec3 t1 = normalize(cross(body_dir, abs(body_dir.y) > 0.95 ? vec3(1.0, 0.0, 0.0) : vec3(0.0, 1.0, 0.0)));
 	vec3 t2 = cross(body_dir, t1);
 	vec2 uv = vec2(dot(d, t1), dot(d, t2)) / r;

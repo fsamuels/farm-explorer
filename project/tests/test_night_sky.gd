@@ -213,7 +213,7 @@ func _test_scene() -> void:
 	_check(is_zero_approx(mat.get_shader_parameter("aurora_strength")), "no aurora by day, even when asked for")
 	tod.set_aurora(0.0)
 	tod.set_preset("night", true)
-	# The sun and moon disc, planets and shooting stars (D-119).
+	# The sun and moon disc, planets and shooting stars (D-120).
 	_check(mat.get_shader_parameter("body_moon") > 0.99 and mat.get_shader_parameter("body_strength") > 0.99, "a bright moon disc at night")
 	_check(mat.get_shader_parameter("planet_dir").size() == 4 and mat.get_shader_parameter("planet_col").size() == 4, "four planets reach the shader")
 	_check(is_equal_approx(mat.get_shader_parameter("meteor_strength"), 1.0), "shooting stars on a dark clear sky")

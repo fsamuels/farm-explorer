@@ -156,6 +156,8 @@ static func planet_vector(index: int, days: float) -> Vector3:
 	return _ecliptic_to_equatorial(geo, d).normalized()
 
 ## Unit vector, in celestial axes, towards the sun on `days` after J2000 noon.
+## Used by the tests (to check the planet maths); the game draws the sun disc
+## at the directional light's direction, not here (D-120).
 static func sun_vector(days: float) -> Vector3:
 	var d := days + 1.5
 	return _ecliptic_to_equatorial(_sun_ecliptic(d), d).normalized()
