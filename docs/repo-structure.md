@@ -69,7 +69,8 @@ farm-sim/
     │   ├── duck_madtroll.tscn     # wraps models/duck_madtroll.glb with wander.gd, instanced once
     │   ├── goose.tscn             # wraps models/goose.glb with wander.gd, instanced 10x
     │   ├── quail.tscn             # wraps models/quail.glb with wander.gd, instanced 6x
-    │   └── tr6.tscn               # wraps models/tr6.glb (no script — stationary prop), instanced once
+    │   ├── tr6.tscn               # drivable car: models/tr6.glb under a CharacterBody3D with vehicle.gd and a box collider, instanced once — see D-105
+    │   └── bmw_2002_tii.tscn      # drivable car, same setup as tr6.tscn, instanced once — see D-105
     ├── shaders/
     │   └── night_sky.gdshader     # sky shader: flat sky colour + stars, Milky Way, constellation lines — see D-104
     ├── scripts/
@@ -82,6 +83,8 @@ farm-sim/
     │   ├── gate.gd                # @tool script: builds the gate and swings its AnimatableBody3D hinge on interact() — see D-76
     │   ├── shop_shell.gd          # builds the walk-in Shop (hollow corrugated walls, windows, floor, ceiling, lights, pad) over the placeholder box's footprint and places its three doors — see D-98
     │   ├── shop_door.gd           # interactive door: swinging, sliding or roll-up leaf with collision, E to open — see D-98
+    │   ├── vehicle.gd             # drivable car: E to get in/out, W/S/A/D/Space to drive, collides with the world — see D-105
+    │   ├── vehicle_math.gd        # pure driving maths (speed, turn rate, exit spots), covered by tests/ — see D-105
     │   ├── wall_layout.gd         # pure helper that cuts a wall into boxes around openings, covered by tests/ — see D-98
     │   ├── corrugated.gd          # the shared blue corrugated-metal material (triplanar, mipmapped) — see D-98
     │   ├── tree_line_segment.gd   # @tool script: scatters trees + one invisible collision wall from an exported length — see D-11
@@ -100,7 +103,8 @@ farm-sim/
     │   ├── test_shop.gd           # loads main.tscn, checks the Shop's walls block and its three doors open and close
     │   ├── test_time_of_day.gd    # preset helpers + TimeOfDay driving main.tscn's sun/environment on T
     │   ├── test_weather.gd        # weather/overcast helpers + Weather switching rain/snow on R in main.tscn
-    │   └── test_night_sky.gd      # sky maths, star data + baked maps, and the sky shader driven by TimeOfDay
+    │   ├── test_night_sky.gd      # sky maths, star data + baked maps, and the sky shader driven by TimeOfDay
+    │   └── test_vehicle.gd        # driving maths, then both cars driven in main.tscn: board, throttle, steer, brake, reverse, wall, exit
     ├── models/
     │   ├── horse.glb              # CC0 rigged/animated horse (Quaternius) — see D-9; scale fixed in D-18
     │   ├── hen.glb                 # CC-BY static mesh (Poly by Google) — see D-10, credits.md

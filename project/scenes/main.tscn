@@ -1417,7 +1417,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 242.1, 0, -35)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 239.3, 0, -34.3)
 
 [node name="TR6" parent="." instance=ExtResource("27_tr6_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 215, 0, -52.205)
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 215, 0, -52.205)
 
 [node name="BMW2002tii" parent="." instance=ExtResource("30_bmw_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 218.8421, 0, -36.34435)

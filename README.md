@@ -13,7 +13,8 @@ M opens a full-screen map with labeled buildings, a waypoint, your trail and an 
 T cycles the time of day through day, sunset, dusk, night, dawn and sunrise, D-94–D-96,
 and Y runs a clock that advances it on its own, with a small top-right time estimate, D-99/D-103, under a night sky of real stars, a Milky Way and constellation lines (N), D-104;
 R cycles the weather through clear, drizzle, rain, downpour, thunderstorm, light and heavy fog, snow and a rainbow, D-95/D-99/D-101/D-102;
-the Shop is walk-in — blue corrugated walls, windows, and an entry door, roll-up garage door and sliding barn door you open with E, D-98),
+the Shop is walk-in — blue corrugated walls, windows, and an entry door, roll-up garage door and sliding barn door you open with E, D-98;
+the Triumph TR6 and BMW 2002 tii can be driven — E to get in or out, W/S gas and brake, A/D steer, Space handbrake, D-105),
 the real parcel boundary and (approximate) building footprints, and a ground
 plane textured with public NAIP aerial imagery as a stand-in for the real
 drone-derived orthomosaic (Phase 1). See

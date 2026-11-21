@@ -32,6 +32,7 @@ in that repo).
   godot --headless -s res://tests/test_night_sky.gd
   godot --headless -s res://tests/test_wall_layout.gd
   godot --headless -s res://tests/test_shop.gd
+  godot --headless -s res://tests/test_vehicle.gd
   ```
 
   Each prints `OK` and exits 0, or prints the failures and exits 1. The scene test
