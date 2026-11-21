@@ -13,7 +13,8 @@ const CONTROLS := [
 	["Mouse wheel", "Zoom the camera out into third person, or in to first person"],
 	["M", "Open / close the map (pauses the game)"],
 	["T", "Change the time of day: day, sunset, dusk, night, dawn, sunrise"],
-	["R", "Change the weather: clear, rain, snow"],
+	["Y", "Start / stop the clock: time of day then advances by itself"],
+	["R", "Change the weather: clear, drizzle, rain, downpour, thunderstorm, light fog, heavy fog, snow"],
 	["Esc", "Release the mouse (click to recapture)"],
 	["F1", "Show / hide this help"],
 ]

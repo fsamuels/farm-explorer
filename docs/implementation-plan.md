@@ -95,12 +95,12 @@ recognizable, shareable version.
 
 - [ ] Ground-level textures (grass, dirt, gravel) blended into terrain
 - [ ] Vegetation scatter (grass shader/tool) — ground-cover only (grass/dirt shading); see the separate discrete-tree/foliage item below
-- [ ] Dynamic lighting / time-of-day — **partly done:** T switches between Day, Sunset, Dusk, Night, Dawn and Sunrise lighting presets with a short blend (D-94, D-95, D-96); no running clock yet
-- [ ] Weather — **partly done:** R switches Clear / Rain / Snow; camera-following particles hidden under roofs and trees, overcast sky (D-95). Still to do:
-  - [ ] Rain variants as separate weather states: light rain / drizzle, hard rain / downpour, and possibly a thunderstorm (lightning flash + darker sky) — scale particle amount, streak length, wind slant and overcast; small
-  - [ ] Fog as weather states: light fog (haze) and heavy fog (short visibility) — overcast plus a much higher fog density, no particles; small
+- [~] Dynamic lighting / time-of-day — **partly done:** T switches between Day, Sunset, Dusk, Night, Dawn and Sunrise lighting presets with a short blend (D-94, D-95, D-96), and Y starts a running clock that advances the lighting through them on its own (24 h in 20 real minutes, D-98). Still to do: lamps and windows lighting up at night, and tying animals and chores to the hour (Phase 6)
+- [~] Weather — **partly done:** R cycles Clear, Drizzle, Rain, Downpour, Thunderstorm (random lightning), Light fog, Heavy fog and Snow; camera-following particles hidden under roofs and trees, overcast sky (D-95, D-98). Still to do:
+  - [x] Rain variants as separate weather states: drizzle, downpour and a thunderstorm with lightning flashes (D-98) — thunder sound is under the sound item below
+  - [x] Fog as weather states: light fog and heavy fog (D-98)
   - [ ] Wet ground / puddles, snow settling on the ground
-  - [ ] Rain and wind sound
+  - [ ] Rain, wind and thunder sound — needs CC0 audio assets (add to `docs/credits.md` if CC-BY)
   - [ ] Web export check (second-class, D-96): confirm roofs stop rain in the Compatibility renderer (fallback: stop emitting while under a roof), and profile the frame rate (fallback: fewer drops on Web only)
 - [x] Map coordinate grid (D-97): faint lines in world X / Z metres on the full map, labelled on the top and left edges, spacing 5–500 m by zoom; key 5 toggles it. Lets locations be given as "X 120, Z -40" when placing or moving things
 - [ ] HUD compass strip — a slim heading bar at the top of the screen while walking (the full map already has a compass rose, D-93); wish list
