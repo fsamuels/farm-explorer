@@ -50,6 +50,8 @@ See [docs/repo-structure.md](docs/repo-structure.md).
 | [docs/repo-structure.md](docs/repo-structure.md) | Repo layout reference | Rarely, when layout changes |
 | [docs/credits.md](docs/credits.md) | Attribution for third-party assets that require it (CC-BY etc.) | Whenever a non-CC0 asset is added |
 | [docs/distribution.md](docs/distribution.md) | How to export a Web build and publish it to itch.io | As export/publishing steps change |
+| [CHANGELOG.md](CHANGELOG.md) | Customer-facing "what's new" highlights, newest first | When a player-visible feature ships |
+| [docs/easter-eggs.md](docs/easter-eggs.md) | Hidden things in the game, found and planned | When an easter egg is found or added |
 | [docs/project/decisions.md](docs/project/decisions.md) | Append-only decision log | Every decision |
 
 ## Process
