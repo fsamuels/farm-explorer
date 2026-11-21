@@ -5,6 +5,6 @@
 [sub_resource type="Curve3D" id="Curve3D_empty"]
 resource_local_to_scene = true
 
-[node name="FencePath" type="Path3D"]
+[node name="FencePath" type="Path3D" groups=["map_fence"]]
 curve = SubResource("Curve3D_empty")
 script = ExtResource("1_fence_path_script")

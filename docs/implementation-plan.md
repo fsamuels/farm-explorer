@@ -86,6 +86,7 @@ listed together here since they're the immediate priority as a group:
 - [x] Add collision to terrain, buildings, fences — `StaticBody3D`/`CollisionShape3D` on the ground plane, every building, and every fence segment
 - [ ] Confirm free exploration of full property bounds — not yet walked end-to-end in-editor; the boundary itself has now been wrong twice (skewed collision shapes, then wrong edge directions entirely — see `parcel-data.md` and D-12) and caught both times by inspection rather than an actual walkthrough, so this is worth doing for real before trusting the boundary further
 - [x] Minimap overlay — corner HUD reusing the NAIP ground texture with a rotating position marker (see D-13), now also showing a live X/Z coordinate readout above the map to make repositioning other objects during development easier (D-27); debug window bumped from Godot's 1152x648 default to 1920x1080 (an initial bump to 1600x900 was later bumped again), not an item from the original plan, added at the user's request
+- [x] Full-screen map on M (D-93) — pauses the game; aerial imagery with labeled building footprints, fences, property line, named horses, a breadcrumb trail, a right-click waypoint, compass, scale bar, legend and layer toggles. The minimap now follows the player and shares the same renderer; both read the scene's groups, so new buildings appear automatically. Not an item from the original plan, added at the user's request
 
 **Milestone: first "show someone" build.** This is the target for the first
 recognizable, shareable version.
