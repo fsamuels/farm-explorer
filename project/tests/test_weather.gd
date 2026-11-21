@@ -310,6 +310,12 @@ func _test_scene() -> void:
 	_check(is_equal_approx(overlay.get_shader_parameter("snow"), 1.0), "levels clamp to 1")
 	weather.set_surfaces(0.0, 0.0)
 	_check(ground.material_overlay == null and roof.material_overlay == null, "the overlay comes off when everything has dried and melted")
+	# The slowest melt (heavy fog, 0.0005 a second) still moves the snow at 60 fps.
+	weather.set_weather("heavy_fog", true)
+	weather.set_surfaces(0.0, 0.5)
+	for i in 120:
+		weather._process(1.0 / 60.0)
+	_check(weather.surface_snow < 0.5, "snow melts even at the slowest rate and 60 fps: %s" % weather.surface_snow)
 	# Snow settles while it falls, then outlasts it.
 	weather.set_weather("heavy_snow", true)
 	weather.set_surfaces(0.0, 0.0)

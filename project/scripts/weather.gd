@@ -236,7 +236,9 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_update_lightning(delta)
 	var level := surface_step(surface_wet, surface_snow, current, delta)
-	if not is_equal_approx(level.x, surface_wet) or not is_equal_approx(level.y, surface_snow):
+	# Not is_equal_approx: a slow rate moves a level by less than its 1e-5
+	# tolerance in one frame, and the change would be dropped every frame.
+	if level.x != surface_wet or level.y != surface_snow:
 		set_surfaces(level.x, level.y)
 	var cam := get_viewport().get_camera_3d()
 	if cam:
