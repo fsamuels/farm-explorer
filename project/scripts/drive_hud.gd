@@ -1,5 +1,5 @@
 extends Control
-## The quiet driving readout (D-111): a large, soft-blue speed in the lower
+## The quiet driving readout (D-113): a large, soft-blue speed in the lower
 ## right, a small rev figure under it, and a dim "E  get out" hint. It
 ## deliberately avoids the action yellow and has no panel, so it doesn't fight
 ## with the view through the windscreen. player.gd owns one and updates it
@@ -8,6 +8,7 @@ extends Control
 
 const SPEED_COLOR := Color(0.62, 0.78, 0.92, 0.9)
 const SMALL_COLOR := Color(0.75, 0.82, 0.9, 0.55)
+const NOTICE_COLOR := Color(1.0, 0.86, 0.55, 0.85)
 const SPEED_SIZE := 64
 const SMALL_SIZE := 20
 
@@ -72,8 +73,19 @@ func show_drive(mph: float, rpm: float, notice: String) -> void:
 	visible = true
 	_speed.text = speed_text(mph)
 	_rpm.text = rpm_text(rpm)
-	_hint.text = notice if notice != "" else "E  get out"
-	_hint.add_theme_color_override("font_color", Color(1.0, 0.86, 0.55, 0.85) if notice != "" else SMALL_COLOR)
+	var text := notice if notice != "" else _get_out_hint()
+	if _hint.text != text:
+		_hint.text = text
+		_hint.add_theme_color_override("font_color", NOTICE_COLOR if notice != "" else SMALL_COLOR)
+
+## "E  get out", with whatever key `interact` is bound to.
+static func _get_out_hint() -> String:
+	var key := "E"
+	for event in InputMap.action_get_events("interact"):
+		if event is InputEventKey:
+			key = (event as InputEventKey).as_text_physical_keycode()
+			break
+	return "%s  get out" % key
 
 func hide_drive() -> void:
 	visible = false

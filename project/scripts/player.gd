@@ -30,11 +30,11 @@ const TP_ZOOM_STEP := 0.5
 ## are still limited to 2.5m from the eyes in _interact_target().
 const TP_RAY_EXTRA := 3.0
 
-## While driving (D-106) you can turn your head this far either side of
-## straight ahead.
 ## Boom length for the third-person view while driving: long enough to sit
 ## behind the whole car instead of inside the seat.
 const DRIVE_TP_DISTANCE := 6.0
+## While driving (D-106) you can turn your head this far either side of
+## straight ahead.
 const DRIVE_LOOK_LIMIT := deg_to_rad(120.0)
 
 @onready var head: Node3D = $Head
@@ -57,7 +57,7 @@ var vehicle: Node3D
 var drive_look_yaw := 0.0
 var _walk_head_height := 0.0
 var drive_hud: Control
-## The view and boom length to go back to after getting out of a car (D-111).
+## The view and boom length to go back to after getting out of a car (D-113).
 var _view_before_car := false
 var _boom_before_car := 0.0
 var _prompt_flash := ""
@@ -154,7 +154,7 @@ func _flash_prompt(text: String) -> void:
 
 func _process(delta: float) -> void:
 	if vehicle:
-		# Driving: the big yellow prompt gives way to a quiet readout (D-111).
+		# Driving: the big yellow prompt gives way to a quiet readout (D-113).
 		interact_prompt.visible = false
 		_prompt_flash_left -= delta
 		drive_hud.show_drive(vehicle.speed_mph(), vehicle.engine_rpm, _prompt_flash if _prompt_flash_left > 0.0 else "")
