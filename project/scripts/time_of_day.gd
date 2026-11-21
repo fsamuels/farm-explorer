@@ -97,7 +97,9 @@ const KEYFRAMES := [[5.5, "dawn"], [6.5, "sunrise"], [13.0, "day"], [18.5, "suns
 
 ## How coarsely the on-screen clock reads: it rounds to this many clock hours.
 ## Half an hour of a 20-minute day is 25 real seconds, so the text changes
-## about twice a minute rather than every frame.
+## about twice a minute rather than every frame. The cadence scales with
+## `day_seconds` (half a clock hour = day_seconds / 48 real seconds), so
+## retune this if the day length changes.
 const CLOCK_STEP_HOURS := 0.5
 
 @export var environment_path: NodePath = ^"../WorldEnvironment"
@@ -367,6 +369,8 @@ func _build_clock_label() -> void:
 ## Show or hide the readout, and rewrite its text only when the rounded time
 ## changes (not every frame).
 func _refresh_clock_label() -> void:
+	if _clock_label == null:
+		return  # called before _ready() built it
 	_clock_label.visible = clock_running
 	if not clock_running:
 		return
