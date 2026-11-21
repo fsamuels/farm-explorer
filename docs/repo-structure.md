@@ -80,11 +80,13 @@ farm-sim/
     │   ├── minimap.gd             # map controller: minimap, full-screen map (M, pauses the game), zoom/pan, waypoint, trail, layer toggles — see D-93
     │   ├── map_canvas.gd          # draws one map view (imagery, footprints + names, fences, horses, trail, waypoint, player) from scene groups — see D-93
     │   ├── map_math.gd            # pure map helpers (projection, zoom, bearings, footprints, trail), covered by tests/ — see D-93
-    │   └── time_of_day.gd         # Day / Sunset / Dusk / Night lighting presets, cycled with T — see D-94
+    │   ├── time_of_day.gd         # Day / Sunset / Dusk / Night / Dawn lighting presets, cycled with T; overcast hook for weather — see D-94, D-95
+    │   └── weather.gd             # Clear / Rain / Snow: camera-following particles, roof/tree occlusion, overcast sky, cycled with R — see D-95
     ├── tests/                    # headless test scripts (extends SceneTree), excluded from export — see CONTRIBUTING.md
     │   ├── test_map_math.gd       # unit tests for map_math.gd
     │   ├── test_map_scene.gd      # loads main.tscn, checks the map's collected data and M pause toggle
-    │   └── test_time_of_day.gd    # preset helpers + TimeOfDay driving main.tscn's sun/environment on T
+    │   ├── test_time_of_day.gd    # preset helpers + TimeOfDay driving main.tscn's sun/environment on T
+    │   └── test_weather.gd        # weather/overcast helpers + Weather switching rain/snow on R in main.tscn
     ├── models/
     │   ├── horse.glb              # CC0 rigged/animated horse (Quaternius) — see D-9; scale fixed in D-18
     │   ├── hen.glb                 # CC-BY static mesh (Poly by Google) — see D-10, credits.md

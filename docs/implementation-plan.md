@@ -95,8 +95,9 @@ recognizable, shareable version.
 
 - [ ] Ground-level textures (grass, dirt, gravel) blended into terrain
 - [ ] Vegetation scatter (grass shader/tool) — ground-cover only (grass/dirt shading); see the separate discrete-tree/foliage item below
-- [ ] Dynamic lighting / time-of-day — **partly done:** T switches between Day, Sunset, Dusk and Night lighting presets with a short blend (D-94); no running clock yet
-- [ ] Weather — rain and snow first (particles that follow the player, kept out from under roofs, wet/snow-covered ground look); not started, see D-94 for the effort estimate
+- [ ] Dynamic lighting / time-of-day — **partly done:** T switches between Day, Sunset, Dusk, Night and Dawn lighting presets with a short blend (D-94, D-95); no running clock yet
+- [ ] Weather — **partly done:** R switches Clear / Rain / Snow; camera-following particles hidden under roofs and trees, overcast sky (D-95). Still to do: wet ground / puddles, snow settling on the ground, rain and wind sound
+- [ ] Night sky — stars, the Milky Way and recognisable constellations as seen from Lowden, WA (~46.05° N); needs a sky shader replacing the flat background colour, see D-95 for the estimate
 - [ ] Hero building detail pass (start with barn) — hand-modeled or photogrammetry
 - [ ] Ambient effects (wind, sound) — cheap realism wins
 - [x] Higher-resolution ground patch over the front section (Front Barn/Shop/Sally's House area) from the first real drone capture, layered over the base NAIP ground plane (D-19) — not an item from the original plan, pulled forward once drone photos became available
