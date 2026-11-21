@@ -16,6 +16,7 @@
 [ext_resource type="PackedScene" path="res://scenes/quail.tscn" id="14_quail_scene"]
 [ext_resource type="Texture2D" path="res://textures/ground/orthomosaic-front-section.png" id="15_front_section_ortho"]
 [ext_resource type="Texture2D" path="res://textures/ground/orthomosaic-middle-section.png" id="46_middle_section_ortho"]
+[ext_resource type="Script" path="res://scripts/shop_shell.gd" id="99_shop_shell"]
 [ext_resource type="Texture2D" path="res://textures/roofs/shop_north.png" id="16_roof_shop_n"]
 [ext_resource type="Texture2D" path="res://textures/roofs/shop_south.png" id="17_roof_shop_s"]
 [ext_resource type="Texture2D" path="res://textures/roofs/sallys_house_north.png" id="18_roof_sh_n"]
@@ -921,6 +922,15 @@ transform = Transform3D(12.511, 0, -2.1478, 0, 2.7, 0, 4.5115, 0, 5.9561, 55.635
 
 [node name="Shop" parent="Buildings" unique_id=1803641495 instance=ExtResource("4_building_scene")]
 transform = Transform3D(14.87828, 0, 0.1571127, 0, 3.92, 0, -0.2265346, 0, 10.3188, 202.3329, 1.96, -52.5282)
+
+[node name="MeshInstance3D" parent="Buildings/Shop"]
+visible = false
+
+[node name="CollisionShape3D" parent="Buildings/Shop"]
+disabled = true
+
+[node name="ShopShell" type="Node3D" parent="Buildings"]
+script = ExtResource("99_shop_shell")
 
 [node name="Sally\'s House" parent="Buildings" unique_id=1054562146 instance=ExtResource("4_building_scene")]
 transform = Transform3D(15.404382, 0, 0.18371, 0, 4, 0, -0.308334, 0, 9.178162, 214.884391, 2, -27.168559)

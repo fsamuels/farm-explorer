@@ -26,6 +26,7 @@ farm-sim/
 ├── tools/
 │   ├── build_player_model.py     # Blender (bpy) script that builds project/models/player.glb
 │   │                              from Quaternius's CC0 base-character + animation packs (D-89)
+│   ├── make_corrugated_texture.py # generates the tileable blue corrugated-metal albedo + normal textures for the Shop walls (D-98)
 │   ├── ortho_fence_trace.py      # Python (Pillow + numpy) helpers to trace white fence
 │   │                              lines off the front-section orthomosaic and convert
 │   │                              pixels to scene meters via the ground plane's own
@@ -76,6 +77,10 @@ farm-sim/
     │   ├── fence_segment.gd       # @tool script: builds posts+wire strands from an exported length — see D-11
     │   ├── fence_path.gd          # @tool script: builds posts+wire strands from a Path3D/Curve3D's points instead of a length, closing the loop back to the first point (optional `solid` collision, D-76) — see D-67/D-69
     │   ├── gate.gd                # @tool script: builds the gate and swings its AnimatableBody3D hinge on interact() — see D-76
+    │   ├── shop_shell.gd          # builds the walk-in Shop (hollow corrugated walls, windows, floor, ceiling, lights, pad) over the placeholder box's footprint and places its three doors — see D-98
+    │   ├── shop_door.gd           # interactive door: swinging, sliding or roll-up leaf with collision, E to open — see D-98
+    │   ├── wall_layout.gd         # pure helper that cuts a wall into boxes around openings, covered by tests/ — see D-98
+    │   ├── corrugated.gd          # the shared blue corrugated-metal material (triplanar, mipmapped) — see D-98
     │   ├── tree_line_segment.gd   # @tool script: scatters trees + one invisible collision wall from an exported length — see D-11
     │   ├── minimap.gd             # map controller: minimap, full-screen map (M, pauses the game), zoom/pan, waypoint, trail, layer toggles — see D-93
     │   ├── map_canvas.gd          # draws one map view (imagery, footprints + names, fences, horses, trail, waypoint, player) from scene groups — see D-93
@@ -85,6 +90,8 @@ farm-sim/
     ├── tests/                    # headless test scripts (extends SceneTree), excluded from export — see CONTRIBUTING.md
     │   ├── test_map_math.gd       # unit tests for map_math.gd
     │   ├── test_map_scene.gd      # loads main.tscn, checks the map's collected data and M pause toggle
+    │   ├── test_wall_layout.gd    # unit tests for wall_layout.gd
+    │   ├── test_shop.gd           # loads main.tscn, checks the Shop's walls block and its three doors open and close
     │   ├── test_time_of_day.gd    # preset helpers + TimeOfDay driving main.tscn's sun/environment on T
     │   └── test_weather.gd        # weather/overcast helpers + Weather switching rain/snow on R in main.tscn
     ├── models/

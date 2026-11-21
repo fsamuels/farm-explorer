@@ -1,5 +1,5 @@
 extends SceneTree
-## Tests for scripts/weather.gd (D-95, D-98) and its overcast, fog and flash
+## Tests for scripts/weather.gd (D-95, D-99) and its overcast, fog and flash
 ## hooks in time_of_day.gd: the pure helpers, and that main.tscn's Weather node
 ## steps through the weathers on R, clouds the sky over through TimeOfDay,
 ## thickens fog, flashes lightning in a thunderstorm, and leaves time of day

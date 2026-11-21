@@ -2,7 +2,7 @@ extends SceneTree
 ## Tests for scripts/time_of_day.gd (D-94): the pure preset helpers, and that
 ## main.tscn's TimeOfDay node drives the real sun and environment, starts at the
 ## scene's original daytime lighting, steps through the cycle on T, and runs the
-## clock on Y (D-98). Run
+## clock on Y (D-99). Run
 ## headless from project/ (after the editor has imported assets once):
 ##   godot --headless -s res://tests/test_time_of_day.gd
 

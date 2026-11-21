@@ -1,5 +1,5 @@
 extends Node3D
-## Weather (D-95, D-98): Clear, Drizzle, Rain, Downpour, Thunderstorm, Light
+## Weather (D-95, D-99): Clear, Drizzle, Rain, Downpour, Thunderstorm, Light
 ## fog, Heavy fog and Snow. R (`cycle_weather`) steps to the next one. Rain and
 ## snow are GPU particles emitted from a box that follows the active camera,
 ## so they're everywhere you go without filling the whole farm. The rain

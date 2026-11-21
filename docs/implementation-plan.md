@@ -95,16 +95,20 @@ recognizable, shareable version.
 
 - [ ] Ground-level textures (grass, dirt, gravel) blended into terrain
 - [ ] Vegetation scatter (grass shader/tool) — ground-cover only (grass/dirt shading); see the separate discrete-tree/foliage item below
-- [~] Dynamic lighting / time-of-day — **partly done:** T switches between Day, Sunset, Dusk, Night, Dawn and Sunrise lighting presets with a short blend (D-94, D-95, D-96), and Y starts a running clock that advances the lighting through them on its own (24 h in 20 real minutes, D-98). Still to do: lamps and windows lighting up at night, and tying animals and chores to the hour (Phase 6)
-- [~] Weather — **partly done:** R cycles Clear, Drizzle, Rain, Downpour, Thunderstorm (random lightning), Light fog, Heavy fog and Snow; camera-following particles hidden under roofs and trees, overcast sky (D-95, D-98). Still to do:
-  - [x] Rain variants as separate weather states: drizzle, downpour and a thunderstorm with lightning flashes (D-98) — thunder sound is under the sound item below
-  - [x] Fog as weather states: light fog and heavy fog (D-98)
+- [~] Dynamic lighting / time-of-day — **partly done:** T switches between Day, Sunset, Dusk, Night, Dawn and Sunrise lighting presets with a short blend (D-94, D-95, D-96), and Y starts a running clock that advances the lighting through them on its own (24 h in 20 real minutes, D-99). Still to do: lamps and windows lighting up at night, and tying animals and chores to the hour (Phase 6)
+- [~] Weather — **partly done:** R cycles Clear, Drizzle, Rain, Downpour, Thunderstorm (random lightning), Light fog, Heavy fog and Snow; camera-following particles hidden under roofs and trees, overcast sky (D-95, D-99). Still to do:
+  - [x] Rain variants as separate weather states: drizzle, downpour and a thunderstorm with lightning flashes (D-99) — thunder sound is under the sound item below
+  - [x] Fog as weather states: light fog and heavy fog (D-99)
   - [ ] Wet ground / puddles, snow settling on the ground
   - [ ] Rain, wind and thunder sound — needs CC0 audio assets (add to `docs/credits.md` if CC-BY)
   - [ ] Web export check (second-class, D-96): confirm roofs stop rain in the Compatibility renderer (fallback: stop emitting while under a roof), and profile the frame rate (fallback: fewer drops on Web only)
 - [x] Map coordinate grid (D-97): faint lines in world X / Z metres on the full map, labelled on the top and left edges, spacing 5–500 m by zoom; key 5 toggles it. Lets locations be given as "X 120, Z -40" when placing or moving things
 - [ ] HUD compass strip — a slim heading bar at the top of the screen while walking (the full map already has a compass rose, D-93); wish list
 - [ ] Night sky — stars, the Milky Way and recognisable constellations as seen from Lowden, WA (~46.05° N); needs a sky shader replacing the flat background colour, see D-95 for the estimate
+- [x] Walk-in Shop (D-98): hollow blue corrugated walls, two east windows, an entry door, a roll-up garage door with a concrete pad and a sliding barn door, all opened with E. Still bare inside — no furniture, tools or workbenches yet
+- [ ] Get into the cars (the TR6 and the BMW 2002 tii) and maybe drive them — enter/exit with E, a simple driving model on the ground, camera from the driver's seat; the cars are static props today (D-26, D-40)
+- [ ] Farm equipment for the Shop: a tractor, brush hog, aerator and riding lawn mower, parked inside once the Shop works; likely downloaded models like the cars, later maybe drivable
+- [ ] Enterable Barn — the next building to get a real interior after the Shop; the user will photograph it so its walls, doors and inside can be made more realistic (same approach as the Shop: hollow shell, working doors, reusing `shop_door.gd` / `wall_layout.gd`)
 - [ ] Hero building detail pass (start with barn) — hand-modeled or photogrammetry
 - [ ] Ambient effects (wind, sound) — cheap realism wins
 - [x] Higher-resolution ground patch over the front section (Front Barn/Shop/Sally's House area) from the first real drone capture, layered over the base NAIP ground plane (D-19) — not an item from the original plan, pulled forward once drone photos became available
