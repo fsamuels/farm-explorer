@@ -150,6 +150,10 @@ var fog_extra := 0.0
 var flash := 0.0
 ## Northern lights, 0..1 (set by weather.gd); shown only when the sky is dark.
 var aurora_level := 0.0
+## Wildfire smoke, 0..1 (set by weather.gd).
+var smoke_level := 0.0
+var _meteor_time := 0.0
+var _meteor_shown := 0.0
 var _aurora_time := 0.0
 var _aurora_shown := 0.0
 ## The clock hour (0..24) the lighting is at, and whether it's advancing.
@@ -198,7 +202,7 @@ static func blend(a: Dictionary, b: Dictionary, t: float) -> Dictionary:
 ## `flash` (0..1) is a lightning flash that brightens the sky and ambient
 ## light. Always returns a fresh, writable copy (never one of the read-only
 ## PRESETS).
-static func overcast_preset(p: Dictionary, amount: float, extra_fog := 0.0, flash_amount := 0.0, aurora_amount := 0.0) -> Dictionary:
+static func overcast_preset(p: Dictionary, amount: float, extra_fog := 0.0, flash_amount := 0.0, aurora_amount := 0.0, smoke_amount := 0.0) -> Dictionary:
 	var out := p.duplicate()
 	if amount > 0.0:
 		# Cloud hides the stars much faster than it dims the sun.
@@ -218,6 +222,22 @@ static func overcast_preset(p: Dictionary, amount: float, extra_fog := 0.0, flas
 		# the fog or the sky shows as a seam above the greyed-out distance.
 		out.sky_color = out.sky_color.lerp(out.fog_color, thick)
 		out.stars *= 1.0 - minf(1.0, extra_fog / 0.03)  # light fog dims them, heavy fog hides them
+	if smoke_amount > 0.0:
+		# Wildfire smoke (0..1): unlike fog it is warm. The light, the sky, the
+		# haze and the ambient all lean orange-brown at their own brightness
+		# (so a smoky night is still dark), the sun dims to a dull disc, and the
+		# haze is a thin distance veil rather than a wall. Smoke hides stars.
+		var s := clampf(smoke_amount, 0.0, 1.0)
+		out.fog_density += 0.014 * s
+		# Colour comes on faster than density (blue mixed half way with orange
+		# is grey, which is not what thin smoke looks like).
+		var tint := sqrt(s)
+		out.fog_color = out.fog_color.lerp(_smoke(out.fog_color), 0.85 * tint)
+		out.sky_color = out.sky_color.lerp(_smoke(out.sky_color).lerp(out.fog_color, 0.5), 0.9 * tint)
+		out.ambient_color = out.ambient_color.lerp(_smoke(out.ambient_color), 0.7 * tint)
+		out.sun_color = out.sun_color.lerp(Color(1.0, 0.5, 0.25), 0.75 * tint)
+		out.sun_energy *= 1.0 - 0.55 * s
+		out.stars *= pow(1.0 - s, 2.0)
 	if aurora_amount > 0.0:
 		# The northern lights show only against a dark sky, so they follow the
 		# stars: gone by day, and hidden by the same cloud and fog.
@@ -228,6 +248,11 @@ static func overcast_preset(p: Dictionary, amount: float, extra_fog := 0.0, flas
 		out.ambient_color = out.ambient_color.lerp(Color(0.8, 0.85, 1.0), f)
 		out.ambient_energy = p.ambient_energy + 1.5 * f
 	return out
+
+## `c` seen through wildfire smoke: the same brightness, tinted orange-brown.
+static func _smoke(c: Color) -> Color:
+	var l := c.get_luminance()
+	return Color(l * 1.25, l * 0.78, l * 0.45)
 
 static func _grey(c: Color) -> Color:
 	var l := c.get_luminance() * 0.85
@@ -298,6 +323,9 @@ func _process(delta: float) -> void:
 	if _aurora_shown > 0.001 and _sky_material:
 		_aurora_time += delta
 		_sky_material.set_shader_parameter("aurora_time", _aurora_time)
+	if _meteor_shown > 0.01 and _sky_material:
+		_meteor_time += delta
+		_sky_material.set_shader_parameter("meteor_time", _meteor_time)
 	if clock_running:
 		hour = fposmod(hour + delta * 24.0 / maxf(day_seconds, 1.0), 24.0)
 		current = keyframe_before(hour)
@@ -386,6 +414,12 @@ func set_aurora(amount: float) -> void:
 	if not _shown.is_empty():
 		_apply(_shown)
 
+## Set the wildfire smoke (0..1) and redraw.
+func set_smoke(amount: float) -> void:
+	smoke_level = clampf(amount, 0.0, 1.0)
+	if not _shown.is_empty():
+		_apply(_shown)
+
 ## Set the lightning flash (0..1) and redraw.
 func set_flash(amount: float) -> void:
 	flash = clampf(amount, 0.0, 1.0)
@@ -395,11 +429,11 @@ func set_flash(amount: float) -> void:
 ## What's on screen now: the (possibly mid-blend) preset under the current
 ## weather.
 func shown() -> Dictionary:
-	return overcast_preset(_shown, overcast, fog_extra, flash, aurora_level)
+	return overcast_preset(_shown, overcast, fog_extra, flash, aurora_level, smoke_level)
 
 func _apply(preset: Dictionary) -> void:
 	_shown = preset
-	var p := overcast_preset(preset, overcast, fog_extra, flash, aurora_level)
+	var p := overcast_preset(preset, overcast, fog_extra, flash, aurora_level, smoke_level)
 	var sun := get_node_or_null(sun_path) as DirectionalLight3D
 	if sun:
 		sun.rotation_degrees = p.sun_rotation
@@ -431,6 +465,8 @@ func _build_sky() -> void:
 	_sky_material.shader = SKY_SHADER
 	_sky_material.set_shader_parameter("star_map", ImageTexture.create_from_image(StarMap.bake_stars(w, w / 2)))
 	_sky_material.set_shader_parameter("line_map", ImageTexture.create_from_image(StarMap.bake_lines(w, w / 2)))
+	_sky_material.set_shader_parameter("planet_dir", planet_directions(_sky_days + 0.5))
+	_sky_material.set_shader_parameter("planet_col", planet_colors())
 	var sky := Sky.new()
 	sky.sky_material = _sky_material
 	# Reflections only need a rough sky, and the shader changes every frame
@@ -454,6 +490,51 @@ func _apply_sky(p: Dictionary) -> void:
 	_sky_material.set_shader_parameter("line_strength", 0.14 if show_constellations else 0.0)
 	var lst := SkyMath.sidereal_degrees(_sky_days, sky_hour)
 	_sky_material.set_shader_parameter("sky_to_celestial", SkyMath.celestial_to_world(SkyMath.LATITUDE, lst).transposed())
+	# The sun by day, the moon at night: the scene's one directional light.
+	var body := body_look(p, _shown.get("stars", 0.0), overcast, fog_extra, smoke_level)
+	_sky_material.set_shader_parameter("body_dir", body.dir)
+	_sky_material.set_shader_parameter("body_color", body.color)
+	_sky_material.set_shader_parameter("body_strength", body.strength)
+	_sky_material.set_shader_parameter("body_glow", body.glow)
+	_sky_material.set_shader_parameter("body_moon", body.moon)
+	# Shooting stars only streak across a dark, clear sky.
+	_meteor_shown = smoothstep(0.7, 1.0, p.stars)
+	_sky_material.set_shader_parameter("meteor_strength", _meteor_shown)
+
+## How the sun or moon disc is drawn under lighting `p`: where (the direction
+## the light comes from), its colour, how visible it is (hidden below the
+## horizon, by cloud and fog, and dulled by smoke), the size of its glow
+## (bigger in smoke and near the horizon) and `moon` 0..1 (the preset's own
+## `stars`: by night the light is the moon's, so the disc turns pale and
+## mottled). `base_stars` is the preset's star level before weather.
+static func body_look(p: Dictionary, base_stars: float, cloud: float, fog: float, smoke: float) -> Dictionary:
+	var dir: Vector3 = Basis.from_euler(p.sun_rotation * (PI / 180.0)).z
+	var moon := smoothstep(0.3, 0.8, base_stars)
+	var sun_c: Color = p.sun_color
+	# The sun's disc is nearly white, but only a dull orange through smoke.
+	var white := sun_c.lerp(Color.WHITE, 0.55 * (1.0 - smoke))
+	var color := Vector3(white.r, white.g, white.b).lerp(Vector3(0.86, 0.9, 1.0), moon)
+	var strength := smoothstep(-0.03, 0.06, dir.y) * pow(1.0 - clampf(cloud, 0.0, 1.0), 2.0)
+	strength *= 1.0 - clampf(fog / 0.02, 0.0, 1.0)
+	strength *= 1.0 - 0.35 * smoke
+	var glow := 0.25 + 0.6 * smoke + 0.3 * (1.0 - clampf(dir.y * 3.0, 0.0, 1.0))
+	return {"dir": dir, "color": color, "strength": strength, "glow": clampf(glow, 0.0, 1.0), "moon": moon}
+
+## The planets' unit vectors in celestial axes (for the shader's `planet_dir`).
+static func planet_directions(days: float) -> PackedVector3Array:
+	var out := PackedVector3Array()
+	for i in SkyMath.PLANETS.size():
+		out.append(SkyMath.planet_vector(i, days))
+	return out
+
+## Each planet's colour in rgb and brightness in alpha (from its magnitude).
+static func planet_colors() -> PackedColorArray:
+	var out := PackedColorArray()
+	for planet in SkyMath.PLANETS:
+		var c: Color = planet.color
+		c.a = clampf(0.5 * pow(2.512, -0.5 * planet.mag), 0.35, 1.6)
+		out.append(c)
+	return out
 
 func _build_toast() -> void:
 	var layer := CanvasLayer.new()

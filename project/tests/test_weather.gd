@@ -24,6 +24,7 @@ func _run() -> void:
 	_test_next_weather()
 	_test_overcast_preset()
 	_test_particle_brightness()
+	_test_smoke()
 	_test_rainbow()
 	_test_surfaces()
 	_test_aurora_presets()
@@ -102,6 +103,28 @@ func _test_aurora_presets() -> void:
 	_check(TimeOfDay.overcast_preset(night, 0.0, 0.0, 0.0, 1.0).keys() == night.keys(), "same keys with the aurora")
 	for name in TimeOfDay.ORDER:
 		_check(TimeOfDay.PRESETS[name].aurora == 0.0, "%s preset has no aurora of its own" % name)
+
+func _test_smoke() -> void:
+	_check(Weather.WEATHER.haze.smoke > 0.0 and Weather.WEATHER.heavy_smoke.smoke > Weather.WEATHER.haze.smoke, "heavy smoke is thicker than haze")
+	_check(Weather.WEATHER.haze.precip == "ash" and Weather.WEATHER.heavy_smoke.precip == "ash", "smoke carries falling ash")
+	_check(Weather.WEATHER.haze.flecks > 0 and Weather.WEATHER.heavy_smoke.flecks > Weather.WEATHER.haze.flecks, "more ash in heavy smoke")
+	_check(Weather.WEATHER.heavy_smoke.flecks <= Weather.ASH_MAX_FLECKS and Weather.WEATHER.heavy_smoke.flecks < Weather.WEATHER.heavy_snow.flakes / 4, "ash is a small amount, far fewer than snow")
+	_check(Weather.WEATHER.heavy_smoke.wet < 0.0, "smoke dries the ground")
+	_check(Weather.next_weather("heavy_fog") == "haze" and Weather.next_weather("haze") == "heavy_smoke" and Weather.next_weather("heavy_smoke") == "snow", "heavy fog -> haze -> heavy smoke -> snow")
+	for name in TimeOfDay.ORDER:
+		var p: Dictionary = TimeOfDay.PRESETS[name]
+		_check(TimeOfDay.overcast_preset(p, 0.0, 0.0, 0.0, 0.0, 0.0) == p, "%s: no smoke leaves it alone" % name)
+		var haze := TimeOfDay.overcast_preset(p, 0.0, 0.0, 0.0, 0.0, 0.5)
+		var heavy := TimeOfDay.overcast_preset(p, 0.0, 0.0, 0.0, 0.0, 1.0)
+		_check(heavy.fog_density > haze.fog_density and haze.fog_density > p.fog_density, "%s: smoke thickens the haze" % name)
+		_check(heavy.fog_density < 0.03, "%s: smoke is a veil, thinner than heavy fog: %s" % [name, heavy.fog_density])
+		_check(heavy.fog_color.r > heavy.fog_color.b and heavy.sun_color.r > heavy.sun_color.b, "%s: smoke is warm" % name)
+		_check(heavy.sun_energy < p.sun_energy, "%s: smoke dims the sun" % name)
+		_check(heavy.keys() == p.keys(), "%s: same keys with smoke" % name)
+	var night: Dictionary = TimeOfDay.PRESETS.night
+	_check(TimeOfDay.overcast_preset(night, 0.0, 0.0, 0.0, 0.0, 1.0).stars == 0.0, "heavy smoke hides the stars")
+	_check(TimeOfDay.overcast_preset(night, 0.0, 0.0, 0.0, 1.0, 1.0).aurora == 0.0, "smoke hides the aurora")
+	_check(TimeOfDay.overcast_preset(night, 0.0, 0.0, 0.0, 0.0, 1.0).fog_color.get_luminance() < 0.1, "a smoky night is still dark")
 
 func _test_rainbow() -> void:
 	_check(Weather.WEATHER.rainbow.get("rainbow", false) and Weather.WEATHER.rainbow.precip == "", "rainbow is dry and flagged")
@@ -248,6 +271,17 @@ func _test_scene() -> void:
 	_check(env.fog_density > 0.01 and env.fog_density < heavy_density, "light fog is thinner than heavy fog: %s" % env.fog_density)
 	weather.set_weather("clear", true)
 	_check(not env.fog_enabled and is_equal_approx(sun.light_energy, 1.0), "clear removes the fog and restores the sun")
+	var ash: GPUParticles3D = weather.get_node("Ash")
+	_check(not ash.emitting, "no ash under a clear sky")
+	weather.set_weather("haze", true)
+	_check(ash.emitting and not rain.emitting and not weather.get_node("Snow").emitting, "smoke haze drops ash, not rain or snow")
+	var haze_ratio := ash.amount_ratio
+	weather.set_weather("heavy_smoke", true)
+	_check(ash.emitting and ash.amount_ratio > haze_ratio and ash.amount_ratio < 0.6, "heavy smoke drops more ash, still a small amount: %s" % ash.amount_ratio)
+	_check(env.fog_enabled and tod.smoke_level == 1.0 and sun.light_energy < 0.6, "heavy smoke tints and dims the light")
+	weather.set_weather("snow", true)
+	_check(not ash.emitting, "ash stops when the smoke clears")
+	weather.set_weather("clear", true)
 	weather.set_weather("snow", true)
 	weather.set_weather("rain", true)
 	_check(rain.emitting and not snow.emitting, "snow -> rain switches the emitter")

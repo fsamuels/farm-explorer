@@ -24,6 +24,8 @@ func _check(cond: bool, what: String) -> void:
 
 func _run() -> void:
 	_test_sky_math()
+	_test_planets()
+	_test_bodies()
 	_test_star_look()
 	_test_data()
 	_test_bake()
@@ -31,6 +33,40 @@ func _run() -> void:
 	await _test_scene()
 	print("night_sky: %s" % ("OK" if _failures == 0 else "%d FAILED" % _failures))
 	quit(1 if _failures else 0)
+
+func _test_planets() -> void:
+	var d0 := SkyMath.days_since_j2000(2000, 1, 1)
+	# Where the planets stood on 2000-01-01 (an almanac): RA hours, Dec degrees.
+	var expected := {"Venus": [16.0, -18.5], "Mars": [22.0, -13.2], "Jupiter": [1.6, 8.6], "Saturn": [2.57, 12.5]}
+	for i in SkyMath.PLANETS.size():
+		var name: String = SkyMath.PLANETS[i].name
+		var v := SkyMath.planet_vector(i, d0)
+		_check(is_equal_approx(v.length(), 1.0), "%s is a unit vector" % name)
+		var ra := fposmod(rad_to_deg(atan2(v.y, v.x)), 360.0) / 15.0
+		_check(absf(ra - expected[name][0]) < 0.3 and absf(rad_to_deg(asin(v.z)) - expected[name][1]) < 3.0, "%s is where the almanac has it: RA %.2f h" % [name, ra])
+	var equinox := SkyMath.sun_vector(SkyMath.days_since_j2000(2000, 3, 20))
+	_check(absf(rad_to_deg(asin(equinox.z))) < 1.0, "the sun is on the celestial equator at the equinox")
+	var solstice := SkyMath.sun_vector(SkyMath.days_since_j2000(2000, 6, 21))
+	_check(absf(rad_to_deg(asin(solstice.z)) - 23.44) < 0.3, "the sun is 23.4 degrees north at the June solstice")
+	# Venus never strays far from the sun.
+	for k in 24:
+		var d := SkyMath.days_since_j2000(2026, 1, 1) + k * 30.0
+		var elongation := rad_to_deg(SkyMath.planet_vector(0, d).angle_to(SkyMath.sun_vector(d)))
+		_check(elongation < 48.5, "Venus stays within 48 degrees of the sun: %.1f" % elongation)
+
+func _test_bodies() -> void:
+	var day := TimeOfDay.body_look(TimeOfDay.PRESETS.day, 0.0, 0.0, 0.0, 0.0)
+	_check(day.dir.y > 0.5 and is_equal_approx(day.strength, 1.0) and is_zero_approx(day.moon), "the sun is up and bright by day")
+	var night := TimeOfDay.body_look(TimeOfDay.PRESETS.night, TimeOfDay.PRESETS.night.stars, 0.0, 0.0, 0.0)
+	_check(night.moon > 0.99 and night.dir.y > 0.0 and night.strength > 0.99, "a moon in the sky at night")
+	_check(TimeOfDay.body_look(TimeOfDay.PRESETS.day, 0.0, 1.0, 0.0, 0.0).strength == 0.0, "full cloud hides the sun")
+	_check(TimeOfDay.body_look(TimeOfDay.PRESETS.day, 0.0, 0.0, 0.045, 0.0).strength == 0.0, "heavy fog hides the sun")
+	var smoky := TimeOfDay.body_look(TimeOfDay.overcast_preset(TimeOfDay.PRESETS.day, 0.0, 0.0, 0.0, 0.0, 1.0), 0.0, 0.0, 0.0, 1.0)
+	_check(smoky.strength < day.strength and smoky.glow > day.glow, "smoke dulls the sun and spreads its glow")
+	_check(smoky.color.x > smoky.color.z and smoky.color.z < day.color.z, "the smoky sun is orange")
+	var sunset := TimeOfDay.body_look(TimeOfDay.PRESETS.sunset, 0.0, 0.0, 0.0, 0.0)
+	_check(sunset.dir.y < day.dir.y and sunset.glow > day.glow, "the sunset sun is low with a wider glow")
+	_check(TimeOfDay.planet_directions(0.0).size() == 4 and TimeOfDay.planet_colors()[0].a > TimeOfDay.planet_colors()[3].a, "Venus is brighter than Saturn")
 
 func _test_sky_math() -> void:
 	_check((load("res://scripts/sky_math.gd") as GDScript).can_instantiate(), "sky_math.gd compiles")
@@ -176,6 +212,20 @@ func _test_scene() -> void:
 	tod.set_preset("day", true)
 	_check(is_zero_approx(mat.get_shader_parameter("aurora_strength")), "no aurora by day, even when asked for")
 	tod.set_aurora(0.0)
+	tod.set_preset("night", true)
+	# The sun and moon disc, planets and shooting stars (D-120).
+	_check(mat.get_shader_parameter("body_moon") > 0.99 and mat.get_shader_parameter("body_strength") > 0.99, "a bright moon disc at night")
+	_check(mat.get_shader_parameter("planet_dir").size() == 4 and mat.get_shader_parameter("planet_col").size() == 4, "four planets reach the shader")
+	_check(is_equal_approx(mat.get_shader_parameter("meteor_strength"), 1.0), "shooting stars on a dark clear sky")
+	tod.set_overcast(1.0)
+	_check(is_zero_approx(mat.get_shader_parameter("meteor_strength")) and is_zero_approx(mat.get_shader_parameter("body_strength")), "cloud hides the shooting stars and the moon")
+	tod.set_overcast(0.0)
+	tod.set_preset("day", true)
+	_check(is_zero_approx(mat.get_shader_parameter("body_moon")) and mat.get_shader_parameter("body_strength") > 0.99, "the sun disc by day")
+	_check(is_zero_approx(mat.get_shader_parameter("meteor_strength")), "no shooting stars by day")
+	tod.set_smoke(1.0)
+	_check(mat.get_shader_parameter("body_strength") < 0.7 and mat.get_shader_parameter("body_glow") > 0.7, "smoke dulls the sun and widens its glow")
+	tod.set_smoke(0.0)
 	tod.set_preset("night", true)
 	# The sky turns with the clock.
 	tod.hour = 23.0

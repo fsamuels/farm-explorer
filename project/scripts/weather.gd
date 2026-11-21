@@ -26,7 +26,7 @@ extends Node3D
 ##
 ## Not done yet: sound.
 
-const ORDER := ["clear", "drizzle", "rain", "downpour", "thunderstorm", "light_fog", "heavy_fog", "snow", "heavy_snow", "rainbow", "aurora"]
+const ORDER := ["clear", "drizzle", "rain", "downpour", "thunderstorm", "light_fog", "heavy_fog", "haze", "heavy_smoke", "snow", "heavy_snow", "rainbow", "aurora"]
 ## Per weather: the label shown on screen, the cloud cover it puts on the sky
 ## (see TimeOfDay.overcast_preset), `fog` (extra fog density on top of that),
 ## `precip` ("rain", "snow" or "" for none) and, for rain, the drop count,
@@ -46,6 +46,8 @@ const WEATHER := {
 		"drops": 14000, "width": 0.022, "length": 0.75, "slant": 0.25, "speed": Vector2(20.0, 25.0), "wet": 0.12, "snow": -0.03},
 	"light_fog": {"label": "Light fog", "overcast": 0.3, "fog": 0.012, "precip": "", "wet": -0.002, "snow": -0.001},
 	"heavy_fog": {"label": "Heavy fog", "overcast": 0.5, "fog": 0.045, "precip": "", "wet": 0.0, "snow": -0.0005},
+	"haze": {"label": "Smoke haze", "overcast": 0.1, "fog": 0.0, "precip": "ash", "flecks": 400, "slant": 0.05, "smoke": 0.5, "wet": -0.006, "snow": -0.0017},
+	"heavy_smoke": {"label": "Heavy smoke", "overcast": 0.2, "fog": 0.0, "precip": "ash", "flecks": 1500, "slant": 0.1, "smoke": 1.0, "wet": -0.006, "snow": -0.0017},
 	"snow": {"label": "Snow", "overcast": 0.7, "fog": 0.0, "precip": "snow", "wet": -0.02, "snow": 0.012,
 		"flakes": 4000, "slant": 0.0},
 	"heavy_snow": {"label": "Heavy snow", "overcast": 0.9, "fog": 0.02, "precip": "snow", "wet": -0.02, "snow": 0.04,
@@ -108,6 +110,8 @@ const COLLIDER_SIZE := 100.0
 const RAIN_MAX_DROPS := 14000
 ## Likewise for snow: the emitter is built for heavy snow.
 const SNOW_MAX_FLAKES := 10000
+## Falling ash in smoke: the emitter is built for this many flecks.
+const ASH_MAX_FLECKS := 3000
 
 ## Meshes that carry the wet / snow overlay: the ground imagery (group) and any
 ## mesh under the buildings node with this in its name.
@@ -134,6 +138,8 @@ var _brightness := 1.0
 var _rain_mesh: QuadMesh
 var _rain_process: ParticleProcessMaterial
 var _snow_process: ParticleProcessMaterial
+var _ash: GPUParticles3D
+var _ash_process: ParticleProcessMaterial
 var _rainbow: MeshInstance3D
 var _rainbow_fade := 0.0
 ## Seconds until the next lightning strike, and how long the current flash
@@ -238,6 +244,7 @@ static func particle_brightness(p: Dictionary) -> float:
 func _ready() -> void:
 	_rain = _build_rain()
 	_snow = _build_snow()
+	_ash = _build_ash()
 	_rainbow = _build_rainbow()
 	_build_surfaces()
 	_collider = GPUParticlesCollisionHeightField3D.new()
@@ -268,6 +275,7 @@ func _process(delta: float) -> void:
 		var at := cam.global_position
 		_rain.global_position = at + Vector3(0, RAIN_HEIGHT, 0)
 		_snow.global_position = at + Vector3(0, SNOW_HEIGHT, 0)
+		_ash.global_position = at + Vector3(0, SNOW_HEIGHT, 0)
 		_rainbow.global_position = rainbow_position(at)
 
 func _update_lightning(delta: float) -> void:
@@ -306,13 +314,15 @@ func set_weather(weather: String, instant := false) -> void:
 		_configure_rain(look)
 	elif precip == "snow":
 		_configure_snow(look)
+	elif precip == "ash":
+		_configure_ash(look)
 	if _tween:
 		_tween.kill()
 		_tween = null
 	var fade := not instant and transition_seconds > 0.0
 	if fade:
 		_tween = create_tween().set_parallel()
-	for particles: GPUParticles3D in [_rain, _snow]:
+	for particles: GPUParticles3D in [_rain, _snow, _ash]:
 		var on := particles.name.to_lower() == precip
 		if on and not (previous_precip == precip and particles.emitting):
 			particles.restart()  # drop any faded-out leftovers
@@ -335,14 +345,17 @@ func set_weather(weather: String, instant := false) -> void:
 	if not tod:
 		return
 	var aurora_target := 1.0 if look.get("aurora", false) else 0.0
+	var smoke_target: float = look.get("smoke", 0.0)
 	if not fade:
 		tod.set_flash(0.0)
 		tod.set_fog_extra(look.fog)
 		tod.set_overcast(look.overcast)
 		tod.set_aurora(aurora_target)
+		tod.set_smoke(smoke_target)
 		return
 	tod.set_flash(0.0)
 	_tween.tween_method(tod.set_aurora, tod.aurora_level, aurora_target, transition_seconds)
+	_tween.tween_method(tod.set_smoke, tod.smoke_level, smoke_target, transition_seconds)
 	_tween.tween_method(tod.set_overcast, tod.overcast, look.overcast, transition_seconds)
 	_tween.tween_method(tod.set_fog_extra, tod.fog_extra, look.fog, transition_seconds)
 	tod.show_toast(look.label)
@@ -360,6 +373,11 @@ func _configure_rain(look: Dictionary) -> void:
 func _configure_snow(look: Dictionary) -> void:
 	_snow.amount_ratio = float(look.flakes) / SNOW_MAX_FLAKES
 	_snow_process.direction = Vector3(look.slant, -1, 0)
+
+## Point the ash emitter at a weather's fleck count and wind slant.
+func _configure_ash(look: Dictionary) -> void:
+	_ash.amount_ratio = float(look.flecks) / ASH_MAX_FLECKS
+	_ash_process.direction = Vector3(look.slant, -1, 0)
 
 ## Find the ground and roof meshes and give them the shared overlay material.
 func _build_surfaces() -> void:
@@ -399,7 +417,7 @@ func _time_of_day() -> Node:
 
 func _on_lighting_changed(p: Dictionary) -> void:
 	_brightness = particle_brightness(p)
-	for particles in [_rain, _snow]:
+	for particles in [_rain, _snow, _ash]:
 		_tint(particles)
 	_tint_rainbow()
 
@@ -474,6 +492,31 @@ func _build_snow() -> GPUParticles3D:
 	mesh.size = Vector2(0.07, 0.07)
 	mesh.material = mat
 	return _particles("Snow", SNOW_MAX_FLAKES, 9.0, process, mesh, Color(1, 1, 1, 0.9))
+
+## Ash from distant fires: small dark flecks, like snow but fewer, smaller,
+## slower and tumbling about more in the air.
+func _build_ash() -> GPUParticles3D:
+	var process := _process_material(Vector3(0.05, -1, 0), 30.0, 0.5, 0.9)
+	process.gravity = Vector3(0, -0.15, 0)
+	process.turbulence_enabled = true
+	process.turbulence_noise_strength = 0.9
+	process.turbulence_influence_min = 0.05
+	process.turbulence_influence_max = 0.12
+	_ash_process = process
+	var mat := _particle_material(Color(0.3, 0.27, 0.25, 0.85), BaseMaterial3D.BILLBOARD_ENABLED)
+	var dot := GradientTexture2D.new()
+	dot.fill = GradientTexture2D.FILL_RADIAL
+	dot.fill_from = Vector2(0.5, 0.5)
+	dot.fill_to = Vector2(0.5, 0.0)
+	dot.gradient = Gradient.new()
+	dot.gradient.colors = PackedColorArray([Color(1, 1, 1, 1), Color(1, 1, 1, 0)])
+	dot.width = 16
+	dot.height = 16
+	mat.albedo_texture = dot
+	var mesh := QuadMesh.new()
+	mesh.size = Vector2(0.07, 0.07)
+	mesh.material = mat
+	return _particles("Ash", ASH_MAX_FLECKS, 12.0, process, mesh, Color(0.3, 0.27, 0.25, 0.85))
 
 func _process_material(direction: Vector3, spread: float, v_min: float, v_max: float) -> ParticleProcessMaterial:
 	var process := ParticleProcessMaterial.new()

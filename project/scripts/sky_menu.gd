@@ -17,7 +17,7 @@ const TIME_ORDER := ["dawn", "sunrise", "day", "sunset", "dusk", "night"]
 
 ## The weather columns: a heading and the weathers under it, top to bottom.
 const WEATHER_GROUPS := [
-	["Clear & fog", ["clear", "light_fog", "heavy_fog"]],
+	["Clear & haze", ["clear", "light_fog", "heavy_fog", "haze", "heavy_smoke"]],
 	["Rain", ["drizzle", "rain", "downpour", "thunderstorm"]],
 	["Snow", ["snow", "heavy_snow"]],
 	["Special", ["rainbow", "aurora"]],
@@ -29,6 +29,8 @@ const WEATHER_COLORS := {
 	"clear": [Color(0.35, 0.6, 0.9), Color(0.7, 0.85, 0.97)],
 	"light_fog": [Color(0.62, 0.65, 0.68), Color(0.78, 0.8, 0.82)],
 	"heavy_fog": [Color(0.45, 0.47, 0.5), Color(0.65, 0.67, 0.7)],
+	"haze": [Color(0.6, 0.45, 0.3), Color(0.82, 0.62, 0.42)],
+	"heavy_smoke": [Color(0.4, 0.26, 0.17), Color(0.66, 0.42, 0.26)],
 	"drizzle": [Color(0.5, 0.6, 0.7), Color(0.62, 0.7, 0.78)],
 	"rain": [Color(0.33, 0.42, 0.55), Color(0.5, 0.58, 0.68)],
 	"downpour": [Color(0.22, 0.3, 0.45), Color(0.36, 0.45, 0.58)],

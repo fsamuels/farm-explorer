@@ -19,6 +19,22 @@ uniform float milky_way_strength = 1.0;
 // view direction. `aurora_time` is advanced by time_of_day.gd.
 uniform float aurora_strength = 0.0;
 uniform float aurora_time = 0.0;
+// The sun by day and the moon by night (D-120): one disc where the scene's
+// light comes from. `body_glow` is the halo size (big in smoke, near the
+// horizon) and `body_moon` 0..1 turns it into a pale, mottled moon.
+uniform vec3 body_dir = vec3(0.0, 1.0, 0.0);
+uniform vec3 body_color = vec3(1.0, 0.95, 0.85);
+uniform float body_strength = 0.0;
+uniform float body_glow = 0.25;
+uniform float body_moon = 0.0;
+// Planets: unit vectors in the same celestial frame as the stars, colour in
+// rgb and brightness in alpha.
+uniform vec3 planet_dir[4];
+uniform vec4 planet_col[4];
+// Shooting stars (world directions), one every few seconds on a dark clear
+// sky. `meteor_time` is advanced by time_of_day.gd.
+uniform float meteor_strength = 0.0;
+uniform float meteor_time = 0.0;
 
 // J2000 equatorial unit vectors of the north galactic pole and the galactic
 // centre (Sagittarius). The third axis completes the galactic frame.
@@ -98,6 +114,68 @@ vec3 aurora(vec3 d, float t) {
 	return col * a * mix(0.5, 0.85, pink);
 }
 
+// The sun or moon: a disc with a soft halo. The moon is a little smaller and
+// mottled with dark patches.
+vec3 sky_body(vec3 d) {
+	float c = dot(d, body_dir);
+	if (c < 0.9) {
+		return vec3(0.0);
+	}
+	float ang = acos(clamp(c, -1.0, 1.0));
+	float r = mix(0.034, 0.028, body_moon);
+	float disc = 1.0 - smoothstep(r * 0.9, r, ang);
+	float h = 0.10 + 0.25 * body_glow;
+	float halo = exp(-(ang * ang) / (h * h)) * (0.25 + 0.5 * body_glow) * (1.0 - 0.9 * body_moon) * smoothstep(0.9, 0.97, c);
+	vec3 t1 = normalize(cross(body_dir, abs(body_dir.y) > 0.95 ? vec3(1.0, 0.0, 0.0) : vec3(0.0, 1.0, 0.0)));
+	vec3 t2 = cross(body_dir, t1);
+	vec2 uv = vec2(dot(d, t1), dot(d, t2)) / r;
+	float mottle = 0.7 + 0.5 * fbm(vec3(uv * 2.5, 1.7));
+	vec3 sun_disc = body_color * 1.6;
+	vec3 moon_disc = body_color * mottle * 0.85;
+	vec3 disc_col = mix(sun_disc, moon_disc, body_moon);
+	return (disc_col * disc + body_color * halo) * body_strength;
+}
+
+// Each planet is a small bright point with a faint halo, brightest for Venus.
+vec3 planets(vec3 c) {
+	vec3 sum = vec3(0.0);
+	for (int i = 0; i < 4; i++) {
+		float a = length(c - planet_dir[i]);   // ~ the angle, in radians
+		float core = exp(-pow(a / 0.0022, 2.0));
+		float halo = exp(-pow(a / 0.008, 2.0)) * 0.3;
+		sum += planet_col[i].rgb * (core + halo) * planet_col[i].a;
+	}
+	return sum;
+}
+
+// One shooting star at a time: every PERIOD seconds a hashed slot may fire a
+// short bright streak along a great circle from a random high spot.
+vec3 meteor(vec3 d, float t) {
+	const float PERIOD = 11.0;
+	const float DURATION = 0.9;
+	float id = floor(t / PERIOD);
+	float local = t - id * PERIOD;
+	if (local > DURATION || hash(vec3(id, 1.7, 3.1)) < 0.3) {
+		return vec3(0.0);
+	}
+	float prog = local / DURATION;
+	float az = hash(vec3(id, 7.3, 0.5)) * TAU;
+	float alt = 0.6 + 0.7 * hash(vec3(id, 2.2, 9.1));
+	vec3 p = vec3(sin(az) * cos(alt), sin(alt), -cos(az) * cos(alt));
+	vec3 e1 = normalize(cross(p, abs(p.y) > 0.95 ? vec3(1.0, 0.0, 0.0) : vec3(0.0, 1.0, 0.0)));
+	vec3 e2 = cross(p, e1);
+	float th = hash(vec3(id, 5.5, 4.4)) * TAU;
+	vec3 u = e1 * cos(th) + e2 * sin(th);
+	float along_angle = atan(dot(d, u), dot(d, p));
+	float side = dot(d, cross(p, u));
+	float head = prog * 0.5;
+	float tail = 0.2;
+	float along = (along_angle - (head - tail)) / tail;   // 0 at the tail tip .. 1 at the head
+	float inside = step(0.0, along) * (1.0 - step(1.0, along));
+	float line = exp(-pow(side / 0.0022, 2.0));
+	return vec3(0.85, 0.92, 1.0) * inside * along * along * line * sin(prog * PI) * 2.2;
+}
+
 void sky() {
 	vec3 col = sky_color;
 	if (star_strength > 0.001) {
@@ -107,10 +185,14 @@ void sky() {
 		float horizon = smoothstep(-0.05, 0.25, EYEDIR.y);
 		vec3 stars = texture(star_map, uv).rgb;
 		// The Milky Way is faint: it only shows once the sky is properly dark.
-		vec3 add = stars + milky_way(c) * milky_way_strength * star_strength;
+		vec3 add = stars + milky_way(c) * milky_way_strength * star_strength + planets(c);
 		add += vec3(0.4, 0.55, 0.9) * texture(line_map, uv).r * line_strength;
 		col += add * star_strength * horizon;
 	}
 	col += aurora(EYEDIR, aurora_time) * aurora_strength;
+	if (meteor_strength > 0.001) {
+		col += meteor(EYEDIR, meteor_time) * meteor_strength * smoothstep(0.0, 0.2, EYEDIR.y);
+	}
+	col += sky_body(EYEDIR);
 	COLOR = col;
 }
