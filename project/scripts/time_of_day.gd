@@ -158,7 +158,11 @@ static func overcast_preset(p: Dictionary, amount: float, extra_fog := 0.0, flas
 	if extra_fog > 0.0:
 		out.fog_density += extra_fog
 		# Thick fog is the same grey whatever the hour, but keeps its own brightness.
-		out.fog_color = out.fog_color.lerp(_grey(out.fog_color), minf(1.0, extra_fog / 0.012))
+		var thick := minf(1.0, extra_fog / 0.012)
+		out.fog_color = out.fog_color.lerp(_grey(out.fog_color), thick)
+		# The background is a flat colour that fog doesn't touch, so match it to
+		# the fog or the sky shows as a seam above the greyed-out distance.
+		out.sky_color = out.sky_color.lerp(out.fog_color, thick)
 	if flash_amount > 0.0:
 		var f := clampf(flash_amount, 0.0, 1.0)
 		out.sky_color = out.sky_color.lerp(Color(0.85, 0.9, 1.0), 0.7 * f)

@@ -73,6 +73,7 @@ func _test_fog_and_flash_presets() -> void:
 		_check(TimeOfDay.overcast_preset(p, 0.0, 0.0, 0.0) == p, "%s: no weather leaves it alone" % name)
 		var fog := TimeOfDay.overcast_preset(p, 0.0, 0.045)
 		_check(is_equal_approx(fog.fog_density, p.fog_density + 0.045), "%s: extra fog adds density" % name)
+		_check(fog.sky_color.is_equal_approx(fog.fog_color), "%s: heavy fog turns the sky to the fog colour" % name)
 		_check(fog.sun_energy == p.sun_energy, "%s: fog alone doesn't dim the sun" % name)
 		var heavy := TimeOfDay.overcast_preset(p, 0.5, 0.045)
 		_check(heavy.fog_density > TimeOfDay.overcast_preset(p, 0.5).fog_density, "%s: fog stacks on cloud cover" % name)
