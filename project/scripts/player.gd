@@ -1,6 +1,8 @@
 extends CharacterBody3D
 
 const SPEED := 9.0
+## Holding Shift (`walk`) slows to a real walking pace (D-90).
+const WALK_SPEED := 1.5
 const JUMP_VELOCITY := 4.5
 const MOUSE_SENSITIVITY := 0.003
 
@@ -110,9 +112,10 @@ func _physics_process(delta: float) -> void:
 
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	var speed := WALK_SPEED if Input.is_action_pressed("walk") else SPEED
 	if direction:
-		velocity.x = direction.x * SPEED
-		velocity.z = direction.z * SPEED
+		velocity.x = direction.x * speed
+		velocity.z = direction.z * speed
 	else:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
 		velocity.z = move_toward(velocity.z, 0, SPEED)
