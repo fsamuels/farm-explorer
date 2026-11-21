@@ -10,7 +10,7 @@ const Weather := preload("res://scripts/weather.gd")
 
 const FONT_SIZE := 22
 const KEY_COLOR := Color(1.0, 0.86, 0.55)
-const WEATHER_COLUMNS := 2
+const WEATHER_COLUMNS := 3
 
 @export var time_of_day_path: NodePath = ^"../TimeOfDay"
 @export var weather_path: NodePath = ^"../Weather"
@@ -114,7 +114,7 @@ func refresh() -> void:
 func _build() -> void:
 	_panel = PanelContainer.new()
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.04, 0.06, 0.1, 0.88)
+	style.bg_color = Color(0.04, 0.06, 0.1, 0.97)
 	style.set_corner_radius_all(14)
 	style.set_content_margin_all(22)
 	style.border_color = KEY_COLOR
@@ -217,4 +217,12 @@ func _button(text: String) -> Button:
 	b.custom_minimum_size = Vector2(0, 44)
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	b.add_theme_font_size_override("font_size", FONT_SIZE - 2)
+	# The chosen one stands out: lighter fill and the menu's gold border.
+	for state in ["pressed", "hover_pressed"]:
+		var s := StyleBoxFlat.new()
+		s.bg_color = Color(0.2, 0.26, 0.38)
+		s.set_corner_radius_all(6)
+		s.set_border_width_all(3)
+		s.border_color = KEY_COLOR
+		b.add_theme_stylebox_override(state, s)
 	return b
