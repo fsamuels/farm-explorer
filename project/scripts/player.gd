@@ -19,6 +19,16 @@ const SPRINT_ANIM_SPEED := 8.9
 const LOOPING_ANIMS := ["Idle", "Walk", "Jog", "Sprint", "Jump_Loop"]
 const MODEL_TURN_RATE := 10.0
 
+## Mouse-wheel camera distance (D-91). Scrolling back from first person drops
+## into third person at the closest distance; scrolling forward past it returns
+## to first person. F (`toggle_view`) jumps straight between the two.
+const TP_MIN_DISTANCE := 1.5
+const TP_MAX_DISTANCE := 8.0
+const TP_ZOOM_STEP := 0.5
+## How far past the player's eyes the third-person interact ray reaches; hits
+## are still limited to 2.5m from the eyes in _interact_target().
+const TP_RAY_EXTRA := 3.0
+
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera3D
 @onready var interact_ray: RayCast3D = $Head/Camera3D/InteractRay
@@ -45,6 +55,7 @@ func _ready() -> void:
 		if anim_player.has_animation(anim_name):
 			anim_player.get_animation(anim_name).loop_mode = Animation.LOOP_LINEAR
 	anim_player.play("Idle")
+	_set_tp_distance(spring_arm.spring_length)
 	_apply_view()
 
 func _set_body_layer(node: Node) -> void:
@@ -52,6 +63,10 @@ func _set_body_layer(node: Node) -> void:
 		(node as VisualInstance3D).layers = 1 << (BODY_LAYER - 1)
 	for child in node.get_children():
 		_set_body_layer(child)
+
+func _set_tp_distance(distance: float) -> void:
+	spring_arm.spring_length = clamp(distance, TP_MIN_DISTANCE, TP_MAX_DISTANCE)
+	tp_interact_ray.target_position = Vector3(0, 0, -(spring_arm.spring_length + TP_RAY_EXTRA))
 
 func _apply_view() -> void:
 	camera.current = not third_person
@@ -68,6 +83,19 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_view"):
 		third_person = not third_person
 		_apply_view()
+	elif event.is_action_pressed("camera_zoom_out"):
+		if third_person:
+			_set_tp_distance(spring_arm.spring_length + TP_ZOOM_STEP)
+		else:
+			_set_tp_distance(TP_MIN_DISTANCE)
+			third_person = true
+			_apply_view()
+	elif event.is_action_pressed("camera_zoom_in") and third_person:
+		if spring_arm.spring_length - TP_ZOOM_STEP < TP_MIN_DISTANCE - 0.01:
+			third_person = false
+			_apply_view()
+		else:
+			_set_tp_distance(spring_arm.spring_length - TP_ZOOM_STEP)
 
 	if event.is_action_pressed("interact"):
 		var target := _interact_target()

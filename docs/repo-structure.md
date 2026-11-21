@@ -69,8 +69,8 @@ farm-sim/
     │   ├── quail.tscn             # wraps models/quail.glb with wander.gd, instanced 6x
     │   └── tr6.tscn               # wraps models/tr6.glb (no script — stationary prop), instanced once
     ├── scripts/
-    │   ├── controls_overlay.gd    # read-only controls help panel in the player HUD, H toggles — see D-90
-    │   ├── player.gd             # walking controller (hold Shift to walk, D-90), V toggles 1st/3rd person, drives the body's animations (D-89) + look-at-and-press-E interaction ray and prompt (D-76)
+    │   ├── controls_overlay.gd    # read-only controls help panel in the player HUD, F1 toggles — see D-90/D-91
+    │   ├── player.gd             # walking controller (hold Shift to walk, D-90), F or the mouse wheel switches 1st/3rd person (D-91), drives the body's animations (D-89) + look-at-and-press-E interaction ray and prompt (D-76)
     │   ├── horse.gd               # horse-specific wander AI (drives its own AnimationPlayer)
     │   ├── wander.gd              # generic no-animation wander AI, reused by hen/rooster/flock/coyote/ducks/geese/quail
     │   ├── fence_segment.gd       # @tool script: builds posts+wire strands from an exported length — see D-11
