@@ -40,6 +40,9 @@ var show_labels := true
 var show_fences := true
 var show_horses := true
 var show_trail := true
+## Coordinate grid in world X / Z metres, labelled on the top and left edges
+## (D-97). Matches the X / Z readouts under the cursor and on the HUD.
+var show_grid := true
 var show_compass := false
 var show_scale_bar := false
 ## Pin the waypoint to the canvas border when it's out of view (minimap).
@@ -113,6 +116,8 @@ func _draw() -> void:
 		return
 	for image in data.imagery:
 		_draw_imagery(image)
+	if show_grid:
+		_draw_grid()
 	if show_fences:
 		for line in data.fences:
 			draw_polyline(_screen_points(line), FENCE_COLOR, 1.5 * marker_scale, true)
@@ -138,6 +143,8 @@ func _draw() -> void:
 		_draw_compass(Vector2(size.x - 90, 90))
 	if show_scale_bar:
 		_draw_scale_bar(Vector2(32, size.y - 40))
+	if show_grid:
+		_draw_grid_labels()
 
 func _screen_points(world_points: PackedVector2Array) -> PackedVector2Array:
 	var out := PackedVector2Array()
@@ -271,3 +278,48 @@ func _draw_scale_bar(at: Vector2) -> void:
 	draw_line(at + Vector2(0, -8), at + Vector2(0, 4), LABEL_COLOR, 3.0)
 	draw_line(at + Vector2(length, -8), at + Vector2(length, 4), LABEL_COLOR, 3.0)
 	_draw_label(get_theme_default_font(), MapMath.format_distance(meters), at + Vector2(length * 0.5, -20), font_size - 2, LABEL_COLOR)
+
+const GRID_MIN_PX := 80.0
+const GRID_COLOR := Color(1, 1, 1, 0.14)
+const GRID_MAJOR_COLOR := Color(1, 1, 1, 0.3)
+const GRID_LABEL_COLOR := Color(1, 1, 1, 0.8)
+
+## Faint lines every grid_step() metres, every fifth one a little stronger.
+## Drawn under everything else; the labels go on top in _draw_grid_labels().
+func _draw_grid() -> void:
+	var step := MapMath.grid_step(scale_px, GRID_MIN_PX)
+	var lo := to_world(Vector2.ZERO)
+	var hi := to_world(size)
+	for x in MapMath.grid_values(lo.x, hi.x, step):
+		var sx := to_screen(Vector2(x, 0)).x
+		draw_line(Vector2(sx, 0), Vector2(sx, size.y), _grid_color(x, step), 1.0)
+	for z in MapMath.grid_values(lo.y, hi.y, step):
+		var sy := to_screen(Vector2(0, z)).y
+		draw_line(Vector2(0, sy), Vector2(size.x, sy), _grid_color(z, step), 1.0)
+
+## Each line's coordinate along the top (X) and left (Z) edges, drawn last so
+## nothing covers them. Labels that would collide in the top-left corner are
+## skipped.
+func _draw_grid_labels() -> void:
+	var step := MapMath.grid_step(scale_px, GRID_MIN_PX)
+	var lo := to_world(Vector2.ZERO)
+	var hi := to_world(size)
+	var font := get_theme_default_font()
+	var label_size := font_size - 4
+	var corner := Vector2(font.get_string_size("Z -000", HORIZONTAL_ALIGNMENT_LEFT, -1, label_size).x + 8, font.get_height(label_size) + 6)
+	for x in MapMath.grid_values(lo.x, hi.x, step):
+		var sx := to_screen(Vector2(x, 0)).x
+		if sx >= corner.x:
+			_grid_label(font, "X %d" % int(x), Vector2(sx + 4, 4), label_size)
+	for z in MapMath.grid_values(lo.y, hi.y, step):
+		var sy := to_screen(Vector2(0, z)).y
+		if sy >= corner.y:
+			_grid_label(font, "Z %d" % int(z), Vector2(4, sy + 2), label_size)
+
+func _grid_color(v: float, step: float) -> Color:
+	return GRID_MAJOR_COLOR if is_zero_approx(fmod(v, step * 5.0)) else GRID_COLOR
+
+func _grid_label(font: Font, text: String, at: Vector2, label_size: int) -> void:
+	var baseline := at + Vector2(0, font.get_ascent(label_size))
+	draw_string_outline(font, baseline, text, HORIZONTAL_ALIGNMENT_LEFT, -1, label_size, 4, OUTLINE_COLOR)
+	draw_string(font, baseline, text, HORIZONTAL_ALIGNMENT_LEFT, -1, label_size, GRID_LABEL_COLOR)

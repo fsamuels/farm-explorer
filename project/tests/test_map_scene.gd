@@ -41,6 +41,13 @@ func _run() -> void:
 	await process_frame
 	_check(map._full.show_labels and map._full.show_fences, "1/2 twice turns layers back on")
 	_check(not map._minimap.show_labels, "names never turn on in the minimap")
+	_check(map._full.show_grid and not map._minimap.show_grid, "grid on in the full map only")
+	_press(KEY_5)
+	await process_frame
+	_check(not map._full.show_grid and not map._minimap.show_grid, "5 hides the grid")
+	_press(KEY_5)
+	await process_frame
+	_check(map._full.show_grid and not map._minimap.show_grid, "5 again shows it, still not on the minimap")
 	_check(map._minimap.show_fences, "fences follow the full map's toggle")
 	_press_m()
 	await process_frame

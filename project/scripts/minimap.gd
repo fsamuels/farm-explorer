@@ -36,6 +36,7 @@ const LAYERS := [
 	[KEY_2, "show_fences", "Fences"],
 	[KEY_3, "show_horses", "Horses"],
 	[KEY_4, "show_trail", "Your trail"],
+	[KEY_5, "show_grid", "Grid (X / Z metres)"],
 ]
 const CONTROLS := [
 	["Mouse wheel", "Zoom"],
@@ -191,8 +192,8 @@ func _toggle_layer(index: int) -> void:
 	var property: String = LAYERS[index][1]
 	var on: bool = not _full.get(property)
 	_full.set(property, on)
-	# Names stay off the minimap; it's too small for them.
-	if property != "show_labels":
+	# Names and the grid stay off the minimap; it's too small for them.
+	if property not in ["show_labels", "show_grid"]:
 		_minimap.set(property, on)
 	_refresh_layer_labels()
 
@@ -265,6 +266,7 @@ func _build_minimap() -> void:
 	_minimap.clip_contents = true
 	_minimap.scale_px = MINIMAP_SCALE
 	_minimap.show_labels = false
+	_minimap.show_grid = false
 	_minimap.pin_waypoint_to_edge = true
 	_minimap.marker_scale = 0.8
 	_minimap.font_size = FONT_SIZE - 6
