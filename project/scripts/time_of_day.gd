@@ -3,8 +3,12 @@ extends Node
 ## Night, Dawn and Sunrise. T (`cycle_time_of_day`)
 ## steps to the next one, blending the sun, sky colour, ambient light and fog
 ## over `transition_seconds` and briefly naming the new time at the top of the
-## screen. A lighting change only: no clock runs, and nothing else in the scene
-## reacts to the time.
+## screen. A lighting change only: nothing else in the scene reacts to the time.
+##
+## A running clock (Y, `toggle_clock`) can instead advance the time on its own:
+## `hour` moves through the day and the lighting is blended between the presets
+## placed on it by KEYFRAMES. T stops the clock and jumps to the next preset;
+## Y starts it again from there. The clock starts stopped.
 ##
 ## The world is laid out with +x east and -z north (see map_math.gd), so the
 ## sunset sun sits low in the west, the moon rises in the southeast and the
@@ -87,15 +91,27 @@ const PRESETS := {
 	},
 }
 const ORDER := ["day", "sunset", "dusk", "night", "dawn", "sunrise"]
+## Where each preset sits on the 24 h clock, in clock order. Night is a long
+## stretch (23:00 to 05:30) so the clock spends real time in the dark.
+const KEYFRAMES := [[5.5, "dawn"], [6.5, "sunrise"], [13.0, "day"], [18.5, "sunset"], [19.5, "dusk"], [23.0, "night"]]
 
 @export var environment_path: NodePath = ^"../WorldEnvironment"
 @export var sun_path: NodePath = ^"../DirectionalLight3D"
 @export var transition_seconds := 1.5
 @export var start_preset := "day"
+## Real seconds one 24 h clock day takes while the clock runs.
+@export var day_seconds := 1200.0
 
 var current := ""
 ## 0 = clear sky, 1 = fully overcast (set by weather.gd).
 var overcast := 0.0
+## Fog added on top of the preset's (set by weather.gd for the fog weathers).
+var fog_extra := 0.0
+## Lightning flash brightness, 0..1 (set by weather.gd during thunderstorms).
+var flash := 0.0
+## The clock hour (0..24) the lighting is at, and whether it's advancing.
+var hour := 13.0
+var clock_running := false
 var _shown: Dictionary = {}
 var _tween: Tween
 var _toast: Label
@@ -125,23 +141,75 @@ static func blend(a: Dictionary, b: Dictionary, t: float) -> Dictionary:
 	return out
 
 ## `p` under cloud cover `amount` (0..1): the sun dims, the sky, ambient
-## light and fog go grey at their own brightness, and fog thickens. Always
-## returns a fresh, writable copy (never one of the read-only PRESETS).
-static func overcast_preset(p: Dictionary, amount: float) -> Dictionary:
+## light and fog go grey at their own brightness, and fog thickens. `extra_fog`
+## adds fog density on top (the fog weathers) and greys the fog colour, and
+## `flash` (0..1) is a lightning flash that brightens the sky and ambient
+## light. Always returns a fresh, writable copy (never one of the read-only
+## PRESETS).
+static func overcast_preset(p: Dictionary, amount: float, extra_fog := 0.0, flash_amount := 0.0) -> Dictionary:
 	var out := p.duplicate()
-	if amount <= 0.0:
-		return out
-	var grey := _grey(p.sky_color)
-	out.sky_color = p.sky_color.lerp(grey, 0.8 * amount)
-	out.fog_color = p.fog_color.lerp(grey, amount)
-	out.ambient_color = p.ambient_color.lerp(_grey(p.ambient_color), 0.6 * amount)
-	out.sun_energy = p.sun_energy * (1.0 - 0.75 * amount)
-	out.fog_density = p.fog_density + 0.008 * amount
+	if amount > 0.0:
+		var grey := _grey(p.sky_color)
+		out.sky_color = p.sky_color.lerp(grey, 0.8 * amount)
+		out.fog_color = p.fog_color.lerp(grey, amount)
+		out.ambient_color = p.ambient_color.lerp(_grey(p.ambient_color), 0.6 * amount)
+		out.sun_energy = p.sun_energy * (1.0 - 0.75 * amount)
+		out.fog_density = p.fog_density + 0.008 * amount
+	if extra_fog > 0.0:
+		out.fog_density += extra_fog
+		# Thick fog is the same grey whatever the hour, but keeps its own brightness.
+		var thick := minf(1.0, extra_fog / 0.012)
+		out.fog_color = out.fog_color.lerp(_grey(out.fog_color), thick)
+		# The background is a flat colour that fog doesn't touch, so match it to
+		# the fog or the sky shows as a seam above the greyed-out distance.
+		out.sky_color = out.sky_color.lerp(out.fog_color, thick)
+	if flash_amount > 0.0:
+		var f := clampf(flash_amount, 0.0, 1.0)
+		out.sky_color = out.sky_color.lerp(Color(0.85, 0.9, 1.0), 0.7 * f)
+		out.ambient_color = out.ambient_color.lerp(Color(0.8, 0.85, 1.0), f)
+		out.ambient_energy = p.ambient_energy + 1.5 * f
 	return out
 
 static func _grey(c: Color) -> Color:
 	var l := c.get_luminance() * 0.85
 	return Color(l, l, l * 1.05)
+
+## The lighting at clock `h` (hours, wrapping at 24): the blend between the two
+## KEYFRAMES presets it falls between.
+static func preset_at_hour(h: float) -> Dictionary:
+	var n := KEYFRAMES.size()
+	h = fposmod(h, 24.0)
+	for i in n:
+		var a: Array = KEYFRAMES[i]
+		var b: Array = KEYFRAMES[(i + 1) % n]
+		var span := fposmod(b[0] - a[0], 24.0)
+		var into := fposmod(h - a[0], 24.0)
+		if into < span:
+			return blend(PRESETS[a[1]], PRESETS[b[1]], into / span)
+	return PRESETS.day.duplicate()  # unreachable: the spans cover the whole day
+
+## The name of the last preset the clock has passed at hour `h`.
+static func keyframe_before(h: float) -> String:
+	var n := KEYFRAMES.size()
+	h = fposmod(h, 24.0)
+	for i in n:
+		var a: Array = KEYFRAMES[i]
+		var b: Array = KEYFRAMES[(i + 1) % n]
+		if fposmod(h - a[0], 24.0) < fposmod(b[0] - a[0], 24.0):
+			return a[1]
+	return "day"
+
+## The clock hour a preset sits at.
+static func hour_of(preset_name: String) -> float:
+	for k in KEYFRAMES:
+		if k[1] == preset_name:
+			return k[0]
+	return 13.0
+
+## Hour 13.5 as "13:30".
+static func format_hour(h: float) -> String:
+	var minutes := int(floorf(fposmod(h, 24.0) * 60.0))
+	return "%02d:%02d" % [minutes / 60, minutes % 60]
 
 ## Spherical blend between two rotations given as Euler degrees.
 static func slerp_rotation(a: Vector3, b: Vector3, t: float) -> Vector3:
@@ -153,12 +221,35 @@ func _ready() -> void:
 	_build_toast()
 	set_preset(start_preset, true)
 
+func _process(delta: float) -> void:
+	if clock_running:
+		hour = fposmod(hour + delta * 24.0 / maxf(day_seconds, 1.0), 24.0)
+		current = keyframe_before(hour)
+		_apply(preset_at_hour(hour))
+
 func _unhandled_input(event: InputEvent) -> void:
 	# The full map pauses the tree (D-93), which would freeze a blend and its
-	# label mid-way, so T only works while the game is running.
-	if event.is_action_pressed("cycle_time_of_day") and not get_tree().paused:
+	# label mid-way, so T and Y only work while the game is running.
+	if get_tree().paused:
+		return
+	if event.is_action_pressed("cycle_time_of_day"):
 		set_preset(next_preset(current))
 		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("toggle_clock"):
+		set_clock_running(not clock_running)
+		get_viewport().set_input_as_handled()
+
+## Start or stop the running clock. Starting continues from the hour set by the
+## last preset picked; stopping holds whatever the clock reached.
+func set_clock_running(on: bool) -> void:
+	if on == clock_running:
+		return
+	clock_running = on
+	if on:
+		if _tween:
+			_tween.kill()
+			_tween = null
+	show_toast("Clock running" if on else "Clock paused at " + format_hour(hour))
 
 ## Switch to preset `preset_name`, blending from whatever is on screen now (so a
 ## second press mid-transition starts from the half-blended state).
@@ -167,6 +258,8 @@ func set_preset(preset_name: String, instant := false) -> void:
 		push_warning("Unknown time-of-day preset '%s'" % preset_name)
 		return
 	current = preset_name
+	hour = hour_of(preset_name)
+	clock_running = false  # picking a preset stops the clock
 	var target: Dictionary = PRESETS[preset_name]
 	if _tween:
 		_tween.kill()
@@ -185,14 +278,26 @@ func set_overcast(amount: float) -> void:
 	if not _shown.is_empty():
 		_apply(_shown)
 
+## Change the extra fog density (0 = the preset's own) and redraw.
+func set_fog_extra(amount: float) -> void:
+	fog_extra = maxf(amount, 0.0)
+	if not _shown.is_empty():
+		_apply(_shown)
+
+## Set the lightning flash (0..1) and redraw.
+func set_flash(amount: float) -> void:
+	flash = clampf(amount, 0.0, 1.0)
+	if not _shown.is_empty():
+		_apply(_shown)
+
 ## What's on screen now: the (possibly mid-blend) preset under the current
-## overcast.
+## weather.
 func shown() -> Dictionary:
-	return overcast_preset(_shown, overcast)
+	return overcast_preset(_shown, overcast, fog_extra, flash)
 
 func _apply(preset: Dictionary) -> void:
 	_shown = preset
-	var p := overcast_preset(preset, overcast)
+	var p := overcast_preset(preset, overcast, fog_extra, flash)
 	var sun := get_node_or_null(sun_path) as DirectionalLight3D
 	if sun:
 		sun.rotation_degrees = p.sun_rotation

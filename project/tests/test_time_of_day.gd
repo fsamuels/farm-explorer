@@ -1,7 +1,8 @@
 extends SceneTree
 ## Tests for scripts/time_of_day.gd (D-94): the pure preset helpers, and that
 ## main.tscn's TimeOfDay node drives the real sun and environment, starts at the
-## scene's original daytime lighting, and steps through the cycle on T. Run
+## scene's original daytime lighting, steps through the cycle on T, and runs the
+## clock on Y (D-99). Run
 ## headless from project/ (after the editor has imported assets once):
 ##   godot --headless -s res://tests/test_time_of_day.gd
 
@@ -21,6 +22,7 @@ func _run() -> void:
 	_test_next_preset()
 	_test_presets_share_keys()
 	_test_blend()
+	_test_clock_math()
 	await _test_scene()
 	print("time_of_day: %s" % ("OK" if _failures == 0 else "%d FAILED" % _failures))
 	quit(1 if _failures else 0)
@@ -58,6 +60,32 @@ func _test_blend() -> void:
 	_check(absf(fa.angle_to(fm) - fm.angle_to(fb)) < 0.01, "sun rotation slerps: midpoint is equally far from both ends")
 	_check(_forward(TimeOfDay.blend(a, b, 1.0).sun_rotation).is_equal_approx(fb), "rotation t=1 is b")
 	_check(mid.label == b.label, "label comes from the target")
+
+func _test_clock_math() -> void:
+	_check(TimeOfDay.KEYFRAMES.size() == TimeOfDay.ORDER.size(), "every preset has a clock hour")
+	var last := -1.0
+	for k in TimeOfDay.KEYFRAMES:
+		_check(TimeOfDay.PRESETS.has(k[1]) and TimeOfDay.ORDER.has(k[1]), "%s is a preset" % k[1])
+		_check(k[0] > last and k[0] < 24.0, "keyframes are in clock order: %s" % k[0])
+		last = k[0]
+		var at := TimeOfDay.preset_at_hour(k[0])
+		var p: Dictionary = TimeOfDay.PRESETS[k[1]]
+		_check(is_equal_approx(at.sun_energy, p.sun_energy) and at.sky_color.is_equal_approx(p.sky_color), "%s: exact at its own hour" % k[1])
+		_check(TimeOfDay.keyframe_before(k[0]) == k[1], "%s: is the keyframe at its own hour" % k[1])
+		_check(TimeOfDay.hour_of(k[1]) == k[0], "%s: hour_of matches" % k[1])
+	var noon := TimeOfDay.preset_at_hour(13.0)
+	var sunset := TimeOfDay.preset_at_hour(18.5)
+	var mid := TimeOfDay.preset_at_hour(15.75)
+	_check(is_equal_approx(mid.sun_energy, (noon.sun_energy + sunset.sun_energy) / 2.0), "halfway between day and sunset is the midpoint")
+	# The night -> dawn span crosses midnight.
+	var night := TimeOfDay.PRESETS.night
+	var dawn := TimeOfDay.PRESETS.dawn
+	var past_midnight := TimeOfDay.preset_at_hour(26.25)  # 02:15, halfway through 23:00 -> 05:30
+	_check(is_equal_approx(past_midnight.sun_energy, (night.sun_energy + dawn.sun_energy) / 2.0), "midnight wrap blends night into dawn")
+	_check(TimeOfDay.keyframe_before(2.0) == "night" and TimeOfDay.keyframe_before(-1.0) == "night", "after midnight is still night")
+	_check(TimeOfDay.keyframe_before(5.0) == "night" and TimeOfDay.keyframe_before(6.0) == "dawn", "dawn begins at 05:30")
+	_check(TimeOfDay.format_hour(13.5) == "13:30" and TimeOfDay.format_hour(0.0) == "00:00" and TimeOfDay.format_hour(25.0) == "01:00", "format_hour")
+	_check(not TimeOfDay.preset_at_hour(10.0).is_read_only(), "clock presets are writable copies")
 
 func _test_scene() -> void:
 	var main: Node = load("res://scenes/main.tscn").instantiate()
@@ -100,6 +128,37 @@ func _test_scene() -> void:
 	await process_frame
 	_check(tod.current == "sunset", "T is ignored while the map has the game paused")
 	paused = false
+
+	# The clock: starts stopped, Y runs it, time advances, T stops it.
+	tod.set_preset("day", true)
+	_check(not tod.clock_running and is_equal_approx(tod.hour, 13.0), "clock starts stopped at 13:00")
+	tod.day_seconds = 24.0  # one clock hour per second
+	_press(KEY_Y)
+	await process_frame
+	_check(tod.clock_running, "Y starts the clock")
+	await create_timer(0.5).timeout
+	_check(tod.hour > 13.2 and tod.hour < 14.5, "the hour advances: %s" % tod.hour)
+	_press(KEY_Y)
+	await process_frame
+	var held: float = tod.hour
+	_check(not tod.clock_running, "Y again stops the clock")
+	await create_timer(0.2).timeout
+	_check(is_equal_approx(tod.hour, held), "a stopped clock holds its hour")
+	paused = true
+	_press(KEY_Y)
+	await process_frame
+	_check(not tod.clock_running, "Y is ignored while the map has the game paused")
+	paused = false
+	tod.hour = 20.0
+	_press(KEY_Y)
+	await process_frame
+	tod.hour = 23.0
+	await process_frame
+	_check(tod.current == "night" and sun.light_energy < 0.35, "the clock drives the lighting: %s %s" % [tod.current, sun.light_energy])
+	tod.transition_seconds = 0.05
+	_press(KEY_T)
+	await process_frame
+	_check(not tod.clock_running and tod.current == "dawn" and is_equal_approx(tod.hour, 5.5), "T stops the clock and jumps to the next preset")
 	main.queue_free()
 
 func _forward(euler_deg: Vector3) -> Vector3:
