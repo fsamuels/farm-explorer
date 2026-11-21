@@ -6,7 +6,7 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_horse"]
 size = Vector3(0.7, 1.4, 2.0)
 
-[node name="Horse" type="CharacterBody3D"]
+[node name="Horse" type="CharacterBody3D" groups=["map_horse"]]
 script = ExtResource("2_horse_script")
 
 [node name="Model" parent="." instance=ExtResource("1_horse_model")]

@@ -566,7 +566,7 @@ shadow_enabled = true
 [node name="Ground" type="StaticBody3D" parent="." unique_id=1019721883]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.4, 0, -33.7)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=1769171611]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=1769171611 groups=["map_imagery"]]
 mesh = SubResource("PlaneMesh_ground")
 surface_material_override/0 = SubResource("StandardMaterial3D_ground")
 
@@ -574,12 +574,12 @@ surface_material_override/0 = SubResource("StandardMaterial3D_ground")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 shape = SubResource("BoxShape3D_ground")
 
-[node name="FrontSectionOrthomosaic" type="MeshInstance3D" parent="." unique_id=2847193061]
+[node name="FrontSectionOrthomosaic" type="MeshInstance3D" parent="." unique_id=2847193061 groups=["map_imagery"]]
 transform = Transform3D(0.9998, 0, 0.020012, 0, 1, 0, -0.020012, 0, 0.9998, 155.02, 0.03, -13.24)
 mesh = SubResource("PlaneMesh_front_section")
 surface_material_override/0 = SubResource("StandardMaterial3D_front_section")
 
-[node name="MiddleSectionOrthomosaic" type="MeshInstance3D" parent="." unique_id=1648302957]
+[node name="MiddleSectionOrthomosaic" type="MeshInstance3D" parent="." unique_id=1648302957 groups=["map_imagery"]]
 transform = Transform3D(0.9998, 0, 0.020012, 0, 1, 0, -0.020012, 0, 0.9998, -9.83, 0.04, 7.9)
 mesh = SubResource("PlaneMesh_middle_section")
 surface_material_override/0 = SubResource("StandardMaterial3D_middle_section")

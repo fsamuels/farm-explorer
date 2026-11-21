@@ -10,7 +10,7 @@ roughness = 0.9
 [sub_resource type="BoxShape3D" id="BoxShape3D_building_unit"]
 size = Vector3(1, 1, 1)
 
-[node name="Building" type="StaticBody3D"]
+[node name="Building" type="StaticBody3D" groups=["map_building"]]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("BoxMesh_building_unit")

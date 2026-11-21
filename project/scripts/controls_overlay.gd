@@ -11,6 +11,7 @@ const CONTROLS := [
 	["E", "Open / close a gate you're looking at"],
 	["F", "Switch first- / third-person view"],
 	["Mouse wheel", "Zoom the camera out into third person, or in to first person"],
+	["M", "Open / close the map (pauses the game)"],
 	["Esc", "Release the mouse (click to recapture)"],
 	["F1", "Show / hide this help"],
 ]
@@ -69,7 +70,7 @@ func _build_panel() -> PanelContainer:
 		grid.add_child(key)
 		grid.add_child(_outlined_label(row[1]))
 
-	var footer := _outlined_label("Explore the farm: walk up to gates and press E to open them.\nThe minimap (bottom left) shows where you are.")
+	var footer := _outlined_label("Explore the farm: walk up to gates and press E to open them.\nThe minimap (bottom left) shows where you are; press M for the full map.")
 	footer.add_theme_font_size_override("font_size", FONT_SIZE - 4)
 	footer.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85))
 	box.add_child(footer)
