@@ -24,7 +24,7 @@ extends Node3D
 ##   ribbed, color   optional leaf look
 ##
 ## `open_walls` names walls that are not there at all (a pole barn's open
-## sides, D-119): no liner, skin, collision or doors, just the roof above.
+## sides, D-121): no liner, skin, collision or doors, just the roof above.
 
 const WallLayout := preload("res://scripts/wall_layout.gd")
 const DoorScript := preload("res://scripts/shop_door.gd")
@@ -124,14 +124,20 @@ func _material(color: Color, both_sides: bool) -> StandardMaterial3D:
 func spot_building() -> String:
 	return building_name
 
+## The door entries that get built: those not on an open wall.
+func live_doors() -> Array:
+	return doors.filter(func(d: Dictionary) -> bool: return not open_walls.has(d.wall))
+
 ## World position `clearance` metres outside the building's front door: the
-## door labelled "front door" if there is one, else the first. Null with no doors.
+## door labelled "front door" if there is one, else the first. With no doors, the
+## middle of the first open wall; null with neither.
 func front_door_spot(clearance: float) -> Variant:
-	if doors.is_empty() and open_walls.is_empty():
+	var live := live_doors()
+	if live.is_empty() and open_walls.is_empty():
 		return null
 	# With no doors, the middle of the first open side is the way in.
-	var d: Dictionary = {"wall": open_walls[0], "u": 0.5} if doors.is_empty() else doors[0]
-	for candidate: Dictionary in doors:
+	var d: Dictionary = {"wall": open_walls[0], "u": 0.5} if live.is_empty() else live[0]
+	for candidate: Dictionary in live:
 		if candidate.get("label", "") == "front door":
 			d = candidate
 			break

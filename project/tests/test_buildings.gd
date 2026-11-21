@@ -50,13 +50,14 @@ func _test_built(main: Node, shell: Node3D, nm: String) -> void:
 	var box: Node3D = main.get_node("Buildings/" + shell.building_name)
 	_check(not (box.get_node("MeshInstance3D") as Node3D).visible, "%s: placeholder box hidden" % nm)
 	_check((box.get_node("CollisionShape3D") as CollisionShape3D).disabled, "%s: placeholder collision off" % nm)
-	var walls: int = 4 - shell.open_walls.size()
+	# Closed shells keep the old bar (liners cut around doors); an open one needs a collider per closed wall.
+	var walls: int = 8 if shell.open_walls.is_empty() else 4 - shell.open_walls.size()
 	_check(shell.get_node("Walls").get_child_count() >= walls, "%s: walls have collision (%d)" % [nm, shell.get_node("Walls").get_child_count()])
 	var door_count := 0
 	for c in shell.get_children():
 		if c.has_meta("wall"):
 			door_count += 1
-	_check(door_count == shell.doors.size() and (door_count > 0 or not shell.open_walls.is_empty()), "%s: a working door for each entry (%d)" % [nm, door_count])
+	_check(door_count == shell.live_doors().size() and (door_count > 0 or not shell.open_walls.is_empty()), "%s: a working door for each entry (%d)" % [nm, door_count])
 	_check(shell.front_door_spot(3.0) != null, "%s: the map has a way-in spot" % nm)
 	_check(shell.get_node("Ceiling") != null, "%s: has a ceiling" % nm)
 

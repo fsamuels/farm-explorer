@@ -1,5 +1,5 @@
 extends Node3D
-## The Front Barn's inside (D-116, D-119). It is a pole barn: the shell leaves
+## The Front Barn's inside (D-116, D-121). It is a pole barn: the shell leaves
 ## the north, south and east sides open, so this node adds a post at each
 ## corner and fills in the rest: three stalls along the east side (low board
 ## walls with a gate each), a tack room in the middle third of the west side
@@ -147,7 +147,7 @@ func _build_tack_room() -> void:
 func _build_cubbies() -> void:
 	var west_x := -width / 2.0 + wall_t
 	var front_x := west_x + side_depth
-	var end_z := depth / 2.0 - wall_t - WALL_T / 2.0
+	var end_z := depth / 2.0 - WALL_T / 2.0
 	for z in [-end_z, end_z]:
 		_add_box(Vector3((west_x + front_x) / 2.0, tack_height / 2.0, z), Vector3(side_depth, tack_height, WALL_T), _wood, true)
 
