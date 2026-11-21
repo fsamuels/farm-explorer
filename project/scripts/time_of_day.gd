@@ -95,6 +95,11 @@ const ORDER := ["day", "sunset", "dusk", "night", "dawn", "sunrise"]
 ## stretch (23:00 to 05:30) so the clock spends real time in the dark.
 const KEYFRAMES := [[5.5, "dawn"], [6.5, "sunrise"], [13.0, "day"], [18.5, "sunset"], [19.5, "dusk"], [23.0, "night"]]
 
+## How coarsely the on-screen clock reads: it rounds to this many clock hours.
+## Half an hour of a 20-minute day is 25 real seconds, so the text changes
+## about twice a minute rather than every frame.
+const CLOCK_STEP_HOURS := 0.5
+
 @export var environment_path: NodePath = ^"../WorldEnvironment"
 @export var sun_path: NodePath = ^"../DirectionalLight3D"
 @export var transition_seconds := 1.5
@@ -116,6 +121,7 @@ var _shown: Dictionary = {}
 var _tween: Tween
 var _toast: Label
 var _toast_tween: Tween
+var _clock_label: Label
 
 ## The preset after `preset_name` in ORDER, wrapping Sunrise back to Day. Unknown names
 ## restart the cycle at Day.
@@ -211,6 +217,16 @@ static func format_hour(h: float) -> String:
 	var minutes := int(floorf(fposmod(h, 24.0) * 60.0))
 	return "%02d:%02d" % [minutes / 60, minutes % 60]
 
+## The on-screen clock's estimate of hour `h`: rounded to the nearest half hour,
+## 12-hour style, so 18.4 reads "~6:30 PM". It only changes once per
+## CLOCK_STEP_HOURS, which at the default day length is every 25 real seconds.
+static func clock_estimate(h: float) -> String:
+	var steps := int(roundf(fposmod(h, 24.0) / CLOCK_STEP_HOURS)) % int(24.0 / CLOCK_STEP_HOURS)
+	var minutes := int(steps * CLOCK_STEP_HOURS * 60.0)
+	var h24 := minutes / 60
+	var h12 := h24 % 12
+	return "~%d:%02d %s" % [12 if h12 == 0 else h12, minutes % 60, "AM" if h24 < 12 else "PM"]
+
 ## Spherical blend between two rotations given as Euler degrees.
 static func slerp_rotation(a: Vector3, b: Vector3, t: float) -> Vector3:
 	var qa := Quaternion.from_euler(a * (PI / 180.0))
@@ -219,6 +235,7 @@ static func slerp_rotation(a: Vector3, b: Vector3, t: float) -> Vector3:
 
 func _ready() -> void:
 	_build_toast()
+	_build_clock_label()
 	set_preset(start_preset, true)
 
 func _process(delta: float) -> void:
@@ -226,6 +243,7 @@ func _process(delta: float) -> void:
 		hour = fposmod(hour + delta * 24.0 / maxf(day_seconds, 1.0), 24.0)
 		current = keyframe_before(hour)
 		_apply(preset_at_hour(hour))
+		_refresh_clock_label()
 
 func _unhandled_input(event: InputEvent) -> void:
 	# The full map pauses the tree (D-93), which would freeze a blend and its
@@ -249,6 +267,7 @@ func set_clock_running(on: bool) -> void:
 		if _tween:
 			_tween.kill()
 			_tween = null
+	_refresh_clock_label()
 	show_toast("Clock running" if on else "Clock paused at " + format_hour(hour))
 
 ## Switch to preset `preset_name`, blending from whatever is on screen now (so a
@@ -260,6 +279,7 @@ func set_preset(preset_name: String, instant := false) -> void:
 	current = preset_name
 	hour = hour_of(preset_name)
 	clock_running = false  # picking a preset stops the clock
+	_refresh_clock_label()
 	var target: Dictionary = PRESETS[preset_name]
 	if _tween:
 		_tween.kill()
@@ -328,6 +348,31 @@ func _build_toast() -> void:
 	_toast.add_theme_constant_override("outline_size", 6)
 	_toast.modulate.a = 0.0
 	layer.add_child(_toast)
+
+## Small top-right readout of the running clock's estimated time. It lives in
+## the toast's CanvasLayer and is only visible while the clock runs.
+func _build_clock_label() -> void:
+	_clock_label = Label.new()
+	_clock_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_clock_label.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	_clock_label.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_clock_label.offset_right = -20
+	_clock_label.offset_top = 16
+	_clock_label.add_theme_font_size_override("font_size", 22)
+	_clock_label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
+	_clock_label.add_theme_constant_override("outline_size", 4)
+	_clock_label.visible = false
+	_toast.get_parent().add_child(_clock_label)
+
+## Show or hide the readout, and rewrite its text only when the rounded time
+## changes (not every frame).
+func _refresh_clock_label() -> void:
+	_clock_label.visible = clock_running
+	if not clock_running:
+		return
+	var text := clock_estimate(hour)
+	if _clock_label.text != text:
+		_clock_label.text = text
 
 ## Briefly name something at the top of the screen (also used by weather.gd).
 func show_toast(text: String) -> void:

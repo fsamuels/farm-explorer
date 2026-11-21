@@ -95,7 +95,7 @@ recognizable, shareable version.
 
 - [ ] Ground-level textures (grass, dirt, gravel) blended into terrain
 - [ ] Vegetation scatter (grass shader/tool) — ground-cover only (grass/dirt shading); see the separate discrete-tree/foliage item below
-- [~] Dynamic lighting / time-of-day — **partly done:** T switches between Day, Sunset, Dusk, Night, Dawn and Sunrise lighting presets with a short blend (D-94, D-95, D-96), and Y starts a running clock that advances the lighting through them on its own (24 h in 20 real minutes, D-99). Still to do: lamps and windows lighting up at night, and tying animals and chores to the hour (Phase 6)
+- [~] Dynamic lighting / time-of-day — **partly done:** T switches between Day, Sunset, Dusk, Night, Dawn and Sunrise lighting presets with a short blend (D-94, D-95, D-96), and Y starts a running clock that advances the lighting through them on its own (24 h in 20 real minutes, D-99), showing an estimated time in the top-right corner that changes every 25 real seconds (D-103). Still to do: lamps and windows lighting up at night, and tying animals and chores to the hour (Phase 6)
 - [~] Weather — **partly done:** R cycles Clear, Drizzle, Rain, Downpour, Thunderstorm (random lightning), Light fog, Heavy fog, Snow and Rainbow (a faint arch that stays in the eastern sky as you move, D-101, D-102); camera-following particles hidden under roofs and trees, overcast sky (D-95, D-99, D-101). Still to do:
   - [x] Rain variants as separate weather states: drizzle, downpour and a thunderstorm with lightning flashes (D-99) — thunder sound is under the sound item below
   - [x] Fog as weather states: light fog and heavy fog (D-99)

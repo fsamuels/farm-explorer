@@ -85,6 +85,10 @@ func _test_clock_math() -> void:
 	_check(TimeOfDay.keyframe_before(2.0) == "night" and TimeOfDay.keyframe_before(-1.0) == "night", "after midnight is still night")
 	_check(TimeOfDay.keyframe_before(5.0) == "night" and TimeOfDay.keyframe_before(6.0) == "dawn", "dawn begins at 05:30")
 	_check(TimeOfDay.format_hour(13.5) == "13:30" and TimeOfDay.format_hour(0.0) == "00:00" and TimeOfDay.format_hour(25.0) == "01:00", "format_hour")
+	_check(TimeOfDay.clock_estimate(18.4) == "~6:30 PM", "clock_estimate rounds to the half hour: %s" % TimeOfDay.clock_estimate(18.4))
+	_check(TimeOfDay.clock_estimate(0.0) == "~12:00 AM" and TimeOfDay.clock_estimate(23.8) == "~12:00 AM", "clock_estimate wraps midnight")
+	_check(TimeOfDay.clock_estimate(12.2) == "~12:00 PM" and TimeOfDay.clock_estimate(5.5) == "~5:30 AM", "clock_estimate noon and morning")
+	_check(TimeOfDay.clock_estimate(13.24) == TimeOfDay.clock_estimate(13.0), "clock_estimate holds steady within a half hour")
 	_check(not TimeOfDay.preset_at_hour(10.0).is_read_only(), "clock presets are writable copies")
 
 func _test_scene() -> void:
@@ -136,12 +140,15 @@ func _test_scene() -> void:
 	_press(KEY_Y)
 	await process_frame
 	_check(tod.clock_running, "Y starts the clock")
+	var clock_label: Label = tod._clock_label
+	_check(clock_label.visible and clock_label.text.begins_with("~"), "the clock readout shows while running: %s" % clock_label.text)
 	await create_timer(0.5).timeout
 	_check(tod.hour > 13.2 and tod.hour < 14.5, "the hour advances: %s" % tod.hour)
 	_press(KEY_Y)
 	await process_frame
 	var held: float = tod.hour
 	_check(not tod.clock_running, "Y again stops the clock")
+	_check(not clock_label.visible, "the clock readout hides when the clock stops")
 	await create_timer(0.2).timeout
 	_check(is_equal_approx(tod.hour, held), "a stopped clock holds its hour")
 	paused = true
