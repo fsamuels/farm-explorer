@@ -42,3 +42,7 @@ first attempt, before assuming the itch.io page is broken:
   console error mentioning `SharedArrayBuffer`, double check the itch.io
   embed setting above; it's the most common cause of an otherwise-correct
   Godot Web export failing only when hosted.
+
+## Platform priority
+
+Web is a second-class target for now (D-96): desktop is primary. Keep the Web build working where it's cheap, using Web-only fallbacks if needed, but never cut a desktop feature to suit Web. Known open Web questions are tracked in [implementation-plan.md](implementation-plan.md) under Weather.

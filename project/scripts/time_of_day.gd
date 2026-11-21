@@ -1,6 +1,6 @@
 extends Node
-## Time-of-day presets (D-94, Dawn added in D-95): Day, Sunset, Dusk, Night and
-## Dawn. T (`cycle_time_of_day`)
+## Time-of-day presets (D-94; Dawn D-95, Sunrise D-96): Day, Sunset, Dusk,
+## Night, Dawn and Sunrise. T (`cycle_time_of_day`)
 ## steps to the next one, blending the sun, sky colour, ambient light and fog
 ## over `transition_seconds` and briefly naming the new time at the top of the
 ## screen. A lighting change only: no clock runs, and nothing else in the scene
@@ -74,8 +74,19 @@ const PRESETS := {
 		"fog_color": Color(0.88, 0.78, 0.8),
 		"fog_density": 0.004,
 	},
+	"sunrise": {
+		"label": "Sunrise",
+		"sun_rotation": Vector3(-12, 85, 0),
+		"sun_color": Color(1.0, 0.72, 0.48),
+		"sun_energy": 1.0,
+		"sky_color": Color(0.95, 0.76, 0.58),
+		"ambient_color": Color(0.7, 0.63, 0.56),
+		"ambient_energy": 0.85,
+		"fog_color": Color(0.95, 0.8, 0.66),
+		"fog_density": 0.002,
+	},
 }
-const ORDER := ["day", "sunset", "dusk", "night", "dawn"]
+const ORDER := ["day", "sunset", "dusk", "night", "dawn", "sunrise"]
 
 @export var environment_path: NodePath = ^"../WorldEnvironment"
 @export var sun_path: NodePath = ^"../DirectionalLight3D"
@@ -90,7 +101,7 @@ var _tween: Tween
 var _toast: Label
 var _toast_tween: Tween
 
-## The preset after `preset_name` in ORDER, wrapping Dawn back to Day. Unknown names
+## The preset after `preset_name` in ORDER, wrapping Sunrise back to Day. Unknown names
 ## restart the cycle at Day.
 static func next_preset(preset_name: String) -> String:
 	var i := ORDER.find(preset_name)

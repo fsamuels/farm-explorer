@@ -31,7 +31,8 @@ func _test_next_preset() -> void:
 	_check(TimeOfDay.next_preset("sunset") == "dusk", "sunset -> dusk")
 	_check(TimeOfDay.next_preset("dusk") == "night", "dusk -> night")
 	_check(TimeOfDay.next_preset("night") == "dawn", "night -> dawn")
-	_check(TimeOfDay.next_preset("dawn") == "day", "dawn wraps to day")
+	_check(TimeOfDay.next_preset("dawn") == "sunrise", "dawn -> sunrise")
+	_check(TimeOfDay.next_preset("sunrise") == "day", "sunrise wraps to day")
 	_check(TimeOfDay.next_preset("bogus") == "day", "unknown restarts at day")
 
 func _test_presets_share_keys() -> void:
@@ -87,7 +88,10 @@ func _test_scene() -> void:
 	_check(is_equal_approx(sun.light_energy, 0.8), "transition finishes at dawn energy: %s" % sun.light_energy)
 	_press(KEY_T)
 	await process_frame
-	_check(tod.current == "day", "T after dawn goes back to day")
+	_check(tod.current == "sunrise", "T after dawn goes to sunrise")
+	_press(KEY_T)
+	await process_frame
+	_check(tod.current == "day", "T after sunrise goes back to day")
 	_press(KEY_T)
 	await process_frame
 	_check(tod.current == "sunset", "T again goes to sunset")

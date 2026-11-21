@@ -95,8 +95,13 @@ recognizable, shareable version.
 
 - [ ] Ground-level textures (grass, dirt, gravel) blended into terrain
 - [ ] Vegetation scatter (grass shader/tool) — ground-cover only (grass/dirt shading); see the separate discrete-tree/foliage item below
-- [ ] Dynamic lighting / time-of-day — **partly done:** T switches between Day, Sunset, Dusk, Night and Dawn lighting presets with a short blend (D-94, D-95); no running clock yet
-- [ ] Weather — **partly done:** R switches Clear / Rain / Snow; camera-following particles hidden under roofs and trees, overcast sky (D-95). Still to do: wet ground / puddles, snow settling on the ground, rain and wind sound
+- [ ] Dynamic lighting / time-of-day — **partly done:** T switches between Day, Sunset, Dusk, Night, Dawn and Sunrise lighting presets with a short blend (D-94, D-95, D-96); no running clock yet
+- [ ] Weather — **partly done:** R switches Clear / Rain / Snow; camera-following particles hidden under roofs and trees, overcast sky (D-95). Still to do:
+  - [ ] Light rain and hard rain as separate weather states (scale particle amount, streak length and overcast; small)
+  - [ ] Fog as a weather state (overcast plus a much higher fog density, no particles; small)
+  - [ ] Wet ground / puddles, snow settling on the ground
+  - [ ] Rain and wind sound
+  - [ ] Web export check (second-class, D-96): confirm roofs stop rain in the Compatibility renderer (fallback: stop emitting while under a roof), and profile the frame rate (fallback: fewer drops on Web only)
 - [ ] Night sky — stars, the Milky Way and recognisable constellations as seen from Lowden, WA (~46.05° N); needs a sky shader replacing the flat background colour, see D-95 for the estimate
 - [ ] Hero building detail pass (start with barn) — hand-modeled or photogrammetry
 - [ ] Ambient effects (wind, sound) — cheap realism wins
