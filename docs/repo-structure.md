@@ -94,6 +94,7 @@ farm-sim/
     │   ├── minimap.gd             # map controller: minimap, full-screen map (M, pauses the game), zoom/pan, waypoint, trail, layer toggles — see D-93
     │   ├── map_canvas.gd          # draws one map view (imagery, footprints + names, fences, horses, trail, waypoint, player) from scene groups — see D-93
     │   ├── map_math.gd            # pure map helpers (projection, zoom, bearings, footprints, trail), covered by tests/ — see D-93
+    │   ├── drive_hud.gd           # quiet driving readout: big soft-blue speed, rpm, dim "E  get out" — see D-111
     │   ├── sky_menu.gd            # sky & weather menu (G or the minimap icon): pick time of day, weather, constellation names; pauses the game — see D-110
     │   ├── constellation_names.gd # names and sky anchors for the constellation labels — see D-110
     │   ├── time_of_day.gd         # Day / Sunset / Dusk / Night / Dawn / Sunrise lighting presets, cycled with T; overcast hook for weather — see D-94, D-95

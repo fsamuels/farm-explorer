@@ -171,6 +171,7 @@ func _flat_dist(a: Vector3, b: Vector3) -> float:
 	return Vector2(a.x - b.x, a.z - b.z).length()
 
 func _run() -> void:
+	_test_drive_hud()
 	var main: Node = load("res://scenes/main.tscn").instantiate()
 	root.add_child(main)
 	await _step(10)
@@ -198,6 +199,11 @@ func _run() -> void:
 
 	_done()
 
+func _test_drive_hud() -> void:
+	var Hud := preload("res://scripts/drive_hud.gd")
+	_check(Hud.speed_text(37.4) == "37" and Hud.speed_text(-12.6) == "13" and Hud.speed_text(0.0) == "0", "speed text: %s %s" % [Hud.speed_text(37.4), Hud.speed_text(-12.6)])
+	_check(Hud.rpm_text(3240.0) == "3.2k rpm" and Hud.rpm_text(-5.0) == "0.0k rpm", "rpm text: %s" % Hud.rpm_text(3240.0))
+
 func _drive(main: Node, player: CharacterBody3D, car: CharacterBody3D, nm: String, space: PhysicsDirectSpaceState3D) -> void:
 	# Park the player beside the car and look at it: the prompt target is the car.
 	player.global_position = car.to_global(Vector3(-2.0, 0.2, 0.0))
@@ -206,9 +212,20 @@ func _drive(main: Node, player: CharacterBody3D, car: CharacterBody3D, nm: Strin
 	var start := car.global_transform
 	_check(car.driver == null and player.vehicle == null, "%s starts empty" % nm)
 
+	# Third person: the player faces the car and can target it just the same.
+	player.third_person = true
+	player._apply_view()
+	player.global_basis = Basis(Vector3.UP, atan2(-(car.global_position.x - player.global_position.x), -(car.global_position.z - player.global_position.z)))
+	player.head.rotation = Vector3(-0.3, 0, 0)
+	await _step(6)
+	_check(player._interact_target() == car, "%s can be targeted from third person" % nm)
+	player.head.rotation = Vector3.ZERO
 	car.interact(player)
 	await _step(3)
 	_check(player.vehicle == car and car.driver == player, "%s boarded" % nm)
+	_check(not player.third_person and player.camera.current, "%s boarding from third person puts you at the wheel" % nm)
+	player.drive_hud.show_drive(30.0, 3000.0, "")
+	_check(player.drive_hud.visible and not player.interact_prompt.visible, "%s shows the quiet readout, not the big prompt" % nm)
 	_check(not player.model.visible, "%s player body hidden while seated" % nm)
 
 	# Headlights: dark by day, on at night while driven, off again by day.
@@ -357,6 +374,7 @@ func _drive(main: Node, player: CharacterBody3D, car: CharacterBody3D, nm: Strin
 	player.leave_vehicle()
 	await _step(5)
 	_check(player.vehicle == null and car.driver == null, "%s left" % nm)
+	_check(player.third_person and player.tp_camera.current, "%s getting out restores the third-person view" % nm)
 	await _step(3)
 	_check(not car._audio.playing, "%s engine stops when you get out" % nm)
 	await _step(60)
