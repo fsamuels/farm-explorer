@@ -68,6 +68,15 @@ const SPECIAL_TIMES := {
 static func allowed_at(weather: String, preset_name: String) -> bool:
 	return not SPECIAL_TIMES.has(weather) or preset_name in SPECIAL_TIMES[weather]
 
+## Why a special can't be chosen at the wrong time, for the sky menu to show.
+static func restriction_text(weather: String) -> String:
+	match weather:
+		"rainbow":
+			return "A rainbow only appears from dawn to sunset."
+		"aurora":
+			return "The aurora only appears at dusk and at night."
+	return ""
+
 ## The rainbow's arch lies in a north-south plane (+x east, -z north),
 ## RAINBOW_DISTANCE east of the camera and RAINBOW_RADIUS high, so it stands
 ## ~31 degrees high and ~60 degrees wide.
