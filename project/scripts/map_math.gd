@@ -137,3 +137,21 @@ static func clamp_to_rect_edge(point: Vector2, rect: Rect2) -> Vector2:
 	if d.y != 0.0:
 		t = minf(t, half.y / absf(d.y))
 	return c + d * minf(t, 1.0)
+
+## Grid spacing in metres for the map grid (D-97): the smallest "nice" step
+## (5, 10, 25, 50, 100, 250 m) whose lines are at least `min_px` apart at
+## `scale_px` pixels per metre.
+static func grid_step(scale_px: float, min_px: float) -> float:
+	for step in [5.0, 10.0, 25.0, 50.0, 100.0, 250.0]:
+		if step * scale_px >= min_px:
+			return step
+	return 500.0
+
+## Every multiple of `step` from `lo` to `hi` inclusive, in ascending order.
+static func grid_values(lo: float, hi: float, step: float) -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	var v := ceilf(lo / step) * step
+	while v <= hi:
+		out.append(v)
+		v += step
+	return out

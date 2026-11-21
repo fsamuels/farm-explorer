@@ -9,7 +9,7 @@ and light gameplay — in that order.
 Engine chosen: Godot 4 (see [docs/engine-decision.md](docs/engine-decision.md)).
 Project skeleton is in [`project/`](project) — a walkable first-person controller
 (F or the mouse wheel switches to a third-person view of the player character, D-89/D-91;
-M opens a full-screen map with labeled buildings, a waypoint and your trail, D-93;
+M opens a full-screen map with labeled buildings, a waypoint, your trail and an X / Z coordinate grid, D-93/D-97;
 T cycles the time of day through day, sunset, dusk, night, dawn and sunrise, D-94–D-96;
 R cycles the weather through clear, rain and snow, D-95),
 the real parcel boundary and (approximate) building footprints, and a ground
