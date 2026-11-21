@@ -78,11 +78,17 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	elif event is InputEventMouseButton and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		# A click recaptures the mouse; scrolling over the window doesn't.
+		var button := (event as InputEventMouseButton).button_index
+		if button != MOUSE_BUTTON_WHEEL_UP and button != MOUSE_BUTTON_WHEEL_DOWN:
+			Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		return
 
 	if event.is_action_pressed("toggle_view"):
 		third_person = not third_person
 		_apply_view()
+	elif Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+		pass  # mouse released (Esc): the wheel shouldn't move the camera
 	elif event.is_action_pressed("camera_zoom_out"):
 		if third_person:
 			_set_tp_distance(spring_arm.spring_length + TP_ZOOM_STEP)
