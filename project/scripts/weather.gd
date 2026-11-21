@@ -1,9 +1,9 @@
 extends Node3D
 ## Weather (D-95, D-99, D-101): Clear, Drizzle, Rain, Downpour, Thunderstorm,
-## Light fog, Heavy fog, Snow and Rainbow. R (`cycle_weather`) steps to the next one. Rain and
-## snow are GPU particles emitted from a box that follows the active camera,
-## so they're everywhere you go without filling the whole farm. The rain
-## weathers share one emitter and differ in drop count, streak length, speed
+## Light fog, Heavy fog, Snow and Rainbow. R (`cycle_weather`) steps to the
+## next one. Rain and snow are GPU particles emitted from a box that follows the
+## active camera, so they're everywhere you go without filling the whole farm.
+## The rain weathers share one emitter and differ in drop count, streak length, speed
 ## and wind slant; the fog weathers have no particles, only thicker fog.
 ## Thunderstorms add random lightning flashes (a brief brightening of the sky
 ## and ambient light through TimeOfDay.set_flash()).

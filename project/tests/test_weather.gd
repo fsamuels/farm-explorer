@@ -70,7 +70,7 @@ func _test_rainbow() -> void:
 	var bands := Weather.RAINBOW_COLORS.size()
 	_check(arrays[Mesh.ARRAY_VERTEX].size() == bands * 9 * 2, "two vertices per step per band: %s" % arrays[Mesh.ARRAY_VERTEX].size())
 	_check(arrays[Mesh.ARRAY_INDEX].size() == bands * 8 * 6, "two triangles per step per band")
-	var inner_edge := 90.0 - bands * 3.0
+	var inner_edge: float = Weather.RAINBOW_RADIUS - bands * Weather.RAINBOW_BAND_WIDTH
 	_check(inner_edge > 0.0, "the innermost band stays outside the centre")
 	var top_i := 4 * 2  # outer vertex of band 0 at the top
 	_check(is_equal_approx(arrays[Mesh.ARRAY_VERTEX][top_i].y, 90.0), "the outer band's top is at the radius")
