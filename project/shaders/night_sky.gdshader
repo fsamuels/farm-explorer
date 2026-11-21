@@ -1,4 +1,4 @@
-// Night sky (D-101): the flat sky colour with, as it gets dark, the stars, a
+// Night sky (D-103): the flat sky colour with, as it gets dark, the stars, a
 // procedural Milky Way and (optionally) constellation lines on top. Stars and
 // lines come from equirectangular maps baked by scripts/star_map.gd in
 // celestial (right ascension / declination) coordinates; `sky_to_celestial`

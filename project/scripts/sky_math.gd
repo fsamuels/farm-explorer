@@ -1,5 +1,5 @@
 extends RefCounted
-## Pure maths for the night sky (D-101): where the stars are over the farm at a
+## Pure maths for the night sky (D-103): where the stars are over the farm at a
 ## given date and clock hour, and how a catalogue star is drawn. No scene
 ## access, so tests/test_night_sky.gd can check it directly.
 ##

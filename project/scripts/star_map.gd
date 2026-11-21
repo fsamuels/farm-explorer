@@ -1,6 +1,6 @@
 extends RefCounted
 ## Bakes the catalogue stars and constellation lines (star_data.gd) into two
-## equirectangular images for the night-sky shader (D-101): a colour image of
+## equirectangular images for the night-sky shader (D-103): a colour image of
 ## the stars and a one-channel image of the constellation lines. Every dot is
 ## drawn by angular distance, not pixel distance, so stars stay round near the
 ## celestial poles where an equirectangular map stretches (Polaris).

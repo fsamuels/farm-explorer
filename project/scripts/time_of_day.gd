@@ -14,7 +14,7 @@ extends Node
 ## sunset sun sits low in the west, the moon rises in the southeast and the
 ## dawn sun comes up in the east.
 ##
-## The sky itself is a shader (shaders/night_sky.gdshader, D-101): the flat sky
+## The sky itself is a shader (shaders/night_sky.gdshader, D-103): the flat sky
 ## colour of the preset, with the stars, a Milky Way and constellation lines
 ## fading in as the preset's `stars` level rises (dusk, dawn and night). The
 ## stars sit where they really are over Lowden for today's date and the clock

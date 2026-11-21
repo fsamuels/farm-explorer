@@ -1,9 +1,9 @@
 extends Node3D
-## Weather (D-95, D-99): Clear, Drizzle, Rain, Downpour, Thunderstorm, Light
-## fog, Heavy fog and Snow. R (`cycle_weather`) steps to the next one. Rain and
-## snow are GPU particles emitted from a box that follows the active camera,
-## so they're everywhere you go without filling the whole farm. The rain
-## weathers share one emitter and differ in drop count, streak length, speed
+## Weather (D-95, D-99, D-101): Clear, Drizzle, Rain, Downpour, Thunderstorm,
+## Light fog, Heavy fog, Snow and Rainbow. R (`cycle_weather`) steps to the
+## next one. Rain and snow are GPU particles emitted from a box that follows the
+## active camera, so they're everywhere you go without filling the whole farm.
+## The rain weathers share one emitter and differ in drop count, streak length, speed
 ## and wind slant; the fog weathers have no particles, only thicker fog.
 ## Thunderstorms add random lightning flashes (a brief brightening of the sky
 ## and ambient light through TimeOfDay.set_flash()).
@@ -11,10 +11,14 @@ extends Node3D
 ## when they hit a roof, a tree or the ground, so it doesn't rain indoors. The
 ## sky clouds over through TimeOfDay.set_overcast(), and the particles are
 ## tinted by the scene's brightness so they don't glow at night.
+## The rainbow is a faint seven-band arch that always stands in the eastern sky
+## and moves with the active camera, like a real rainbow (you can't walk up to
+## it), so it's seen facing east from anywhere. It fades in and out with the
+## weather changes.
 ##
 ## Not done yet: puddles / a wet look, snow settling on the ground, sound.
 
-const ORDER := ["clear", "drizzle", "rain", "downpour", "thunderstorm", "light_fog", "heavy_fog", "snow"]
+const ORDER := ["clear", "drizzle", "rain", "downpour", "thunderstorm", "light_fog", "heavy_fog", "snow", "rainbow"]
 ## Per weather: the label shown on screen, the cloud cover it puts on the sky
 ## (see TimeOfDay.overcast_preset), `fog` (extra fog density on top of that),
 ## `precip` ("rain", "snow" or "" for none) and, for rain, the drop count,
@@ -32,7 +36,24 @@ const WEATHER := {
 	"light_fog": {"label": "Light fog", "overcast": 0.3, "fog": 0.012, "precip": ""},
 	"heavy_fog": {"label": "Heavy fog", "overcast": 0.5, "fog": 0.045, "precip": ""},
 	"snow": {"label": "Snow", "overcast": 0.7, "fog": 0.0, "precip": "snow"},
+	"rainbow": {"label": "Rainbow", "overcast": 0.2, "fog": 0.0, "precip": "", "rainbow": true},
 }
+
+## The rainbow's arch lies in a north-south plane (+x east, -z north),
+## RAINBOW_DISTANCE east of the camera and RAINBOW_RADIUS high, so it stands
+## ~31 degrees high and ~60 degrees wide.
+const RAINBOW_DISTANCE := 150.0
+const RAINBOW_RADIUS := 90.0
+const RAINBOW_BAND_WIDTH := 3.0
+const RAINBOW_STEPS := 48
+const RAINBOW_ALPHA := 0.22
+## How opaque each band is (outermost first), so the arch's edges are soft.
+const RAINBOW_BAND_ALPHA := [0.45, 0.75, 1.0, 1.0, 1.0, 0.75, 0.45]
+## Outermost band first, as a real rainbow has red on the outside.
+const RAINBOW_COLORS := [
+	Color(0.95, 0.15, 0.15), Color(1.0, 0.55, 0.1), Color(1.0, 0.92, 0.2),
+	Color(0.25, 0.8, 0.3), Color(0.2, 0.55, 1.0), Color(0.3, 0.25, 0.8), Color(0.6, 0.3, 0.8),
+]
 
 ## Seconds between lightning strikes, and how long one flash lasts.
 const LIGHTNING_MIN := 4.0
@@ -60,6 +81,8 @@ var _tween: Tween
 var _brightness := 1.0
 var _rain_mesh: QuadMesh
 var _rain_process: ParticleProcessMaterial
+var _rainbow: MeshInstance3D
+var _rainbow_fade := 0.0
 ## Seconds until the next lightning strike, and how long the current flash
 ## has lasted (-1 = none).
 var _strike_in := 0.0
@@ -89,6 +112,48 @@ static func flash_level(t: float) -> float:
 		return lerpf(0.25, 0.8, (t - 0.12) / 0.05)
 	return 0.8 * (1.0 - (t - 0.17) / (FLASH_SECONDS - 0.17))
 
+## Where the rainbow stands for a camera at `camera`: due east of it, on the
+## ground, so the arch looks the same from wherever you are.
+static func rainbow_position(camera: Vector3) -> Vector3:
+	return Vector3(camera.x + RAINBOW_DISTANCE, 0.0, camera.z)
+
+## A point on a rainbow arch of `radius` in its own plane: `t` 0..1 runs from
+## the south foot (on the ground) over the top to the north foot. Local x is 0
+## (the arch's plane), y up and z south, so -z is north.
+static func arch_point(radius: float, t: float) -> Vector3:
+	var a := PI * clampf(t, 0.0, 1.0)
+	return Vector3(0.0, radius * sin(a), radius * cos(a))
+
+## The rainbow as a mesh of RAINBOW_COLORS.size() ribbons, each `band_width`
+## thick, outermost at `radius`. Vertex alpha fades to 0 at the feet.
+static func build_rainbow_mesh(radius: float, band_width: float, steps: int) -> ArrayMesh:
+	var verts := PackedVector3Array()
+	var colors := PackedColorArray()
+	var indices := PackedInt32Array()
+	for band in RAINBOW_COLORS.size():
+		var outer := radius - band * band_width
+		var inner := outer - band_width
+		var base := verts.size()
+		for i in steps + 1:
+			var t := float(i) / steps
+			var c: Color = RAINBOW_COLORS[band]
+			c.a = pow(sin(PI * t), 1.5) * RAINBOW_BAND_ALPHA[band]  # 0 at the feet, strongest at the top
+			verts.append(arch_point(outer, t))
+			verts.append(arch_point(inner, t))
+			colors.append(c)
+			colors.append(c)
+		for i in steps:
+			var v := base + i * 2
+			indices.append_array([v, v + 1, v + 2, v + 1, v + 3, v + 2])
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	arrays[Mesh.ARRAY_COLOR] = colors
+	arrays[Mesh.ARRAY_INDEX] = indices
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return mesh
+
 ## How bright (0.15..1) to draw rain and snow under lighting preset `p`, so
 ## they read as lit by the scene rather than glowing white at night.
 static func particle_brightness(p: Dictionary) -> float:
@@ -98,6 +163,7 @@ static func particle_brightness(p: Dictionary) -> float:
 func _ready() -> void:
 	_rain = _build_rain()
 	_snow = _build_snow()
+	_rainbow = _build_rainbow()
 	_collider = GPUParticlesCollisionHeightField3D.new()
 	# Wider than the emitter box plus drift: snow lives ~9 s in world space,
 	# so flakes left behind as you walk still need something to land on.
@@ -121,6 +187,7 @@ func _process(delta: float) -> void:
 		var at := cam.global_position
 		_rain.global_position = at + Vector3(0, RAIN_HEIGHT, 0)
 		_snow.global_position = at + Vector3(0, SNOW_HEIGHT, 0)
+		_rainbow.global_position = rainbow_position(at)
 
 func _update_lightning(delta: float) -> void:
 	var tod := _time_of_day()
@@ -176,6 +243,11 @@ func set_weather(weather: String, instant := false) -> void:
 			else:
 				_set_fade(0.0, particles)
 		particles.emitting = on
+	var rainbow_target := 1.0 if look.get("rainbow", false) else 0.0
+	if fade:
+		_tween.tween_method(_set_rainbow_fade, _rainbow_fade, rainbow_target, transition_seconds)
+	else:
+		_set_rainbow_fade(rainbow_target)
 	var tod := _time_of_day()
 	if not tod:
 		return
@@ -205,6 +277,34 @@ func _on_lighting_changed(p: Dictionary) -> void:
 	_brightness = particle_brightness(p)
 	for particles in [_rain, _snow]:
 		_tint(particles)
+	_tint_rainbow()
+
+func _set_rainbow_fade(amount: float) -> void:
+	_rainbow_fade = amount
+	_tint_rainbow()
+
+## Vertex colours give the bands and their faded feet; the material colour
+## dims the lot by the scene's brightness and by the fade (0 = hidden).
+func _tint_rainbow() -> void:
+	var mat := _rainbow.material_override as StandardMaterial3D
+	mat.albedo_color = Color(_brightness, _brightness, _brightness, RAINBOW_ALPHA * _rainbow_fade)
+	_rainbow.visible = _rainbow_fade > 0.001
+
+func _build_rainbow() -> MeshInstance3D:
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.vertex_color_use_as_albedo = true
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var node := MeshInstance3D.new()
+	node.name = "Rainbow"
+	node.mesh = build_rainbow_mesh(RAINBOW_RADIUS, RAINBOW_BAND_WIDTH, RAINBOW_STEPS)
+	node.material_override = mat
+	node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	node.position = rainbow_position(Vector3.ZERO)
+	node.visible = false
+	add_child(node)
+	return node
 
 func _set_fade(amount: float, particles: GPUParticles3D) -> void:
 	particles.set_meta("fade", amount)

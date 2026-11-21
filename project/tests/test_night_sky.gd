@@ -1,5 +1,5 @@
 extends SceneTree
-## Tests for the night sky (D-101): the sky maths (scripts/sky_math.gd), the
+## Tests for the night sky (D-103): the sky maths (scripts/sky_math.gd), the
 ## catalogue data and its baked star / line maps (scripts/star_data.gd,
 ## star_map.gd), and that main.tscn's TimeOfDay node puts the sky shader in the
 ## environment, fades the stars with the lighting and weather, turns the sky
