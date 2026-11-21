@@ -1225,16 +1225,6 @@ transform = Transform3D(0.264821, 0, -0.964298, 0, 1, 0, -0.964298, 0, -0.264821
 width = 12.2037
 rise = 3.52291
 
-[node name="BackBarnShell" type="Node3D" parent="Buildings"]
-script = ExtResource("58_building_shell")
-building_name = "Back Barn"
-skin_walls = PackedStringArray("south", "north", "east", "west")
-corrugated_skin = true
-floor_color = Color(0.5, 0.45, 0.4, 1)
-rise = 3.52291
-light_count = 3
-doors = [{"wall": "east", "u": 0.5, "width": 3.0, "height": 3.2, "kind": 1, "label": "barn door", "ribbed": true, "color": Color(0.9, 0.93, 1, 1)}, {"wall": "west", "u": 0.5, "width": 3.0, "height": 3.2, "kind": 1, "label": "barn door", "ribbed": true, "color": Color(0.9, 0.93, 1, 1)}]
-
 [node name="Martha" parent="." instance=ExtResource("5_horse_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 185, 0, 53)
 roam_min_x = 163.5
