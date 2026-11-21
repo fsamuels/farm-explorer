@@ -54,6 +54,7 @@
 [ext_resource type="Texture2D" path="res://textures/roofs/back_barn_north.png" id="54_roof_bb_n"]
 [ext_resource type="Script" uid="uid://chj2456j84ouy" path="res://scripts/time_of_day.gd" id="55_time_of_day"]
 [ext_resource type="Script" uid="uid://v4f6tjmojwcq" path="res://scripts/weather.gd" id="56_weather"]
+[ext_resource type="Script" path="res://scripts/sky_menu.gd" id="57_sky_menu"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -1423,9 +1424,12 @@ transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 215, 0, -52.205)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 218.8421, 0, -36.34435)
 
 [node name="Player" parent="." unique_id=1542815032 instance=ExtResource("2_player_scene")]
-transform = Transform3D(-0.838242, 0, -0.545298, 0, 1, 0, 0.545298, 0, -0.838242, 97, 1, -25)
+transform = Transform3D(-0.358368, 0, 0.933580, 0, 1, 0, -0.933580, 0, -0.358368, 232.6, 1, -48.4)
 
 [node name="Minimap" parent="." instance=ExtResource("9_minimap_scene")]
 
 [node name="Root" parent="Minimap"]
 player_path = NodePath("../../Player")
+
+[node name="SkyMenu" type="CanvasLayer" parent="."]
+script = ExtResource("57_sky_menu")
