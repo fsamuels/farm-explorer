@@ -16,8 +16,9 @@ const UNAVAILABLE_TINT := Color(1, 1, 1, 0.4)
 const TIME_ORDER := ["dawn", "sunrise", "day", "sunset", "dusk", "night"]
 
 ## The weather columns: a heading and the weathers under it, top to bottom.
+## Clear sits by itself at the top centre, above the columns.
 const WEATHER_GROUPS := [
-	["Clear & haze", ["clear", "light_fog", "heavy_fog", "haze", "heavy_smoke"]],
+	["Fog & smoke", ["light_fog", "heavy_fog", "haze", "heavy_smoke"]],
 	["Rain", ["drizzle", "rain", "downpour", "thunderstorm"]],
 	["Snow", ["snow", "heavy_snow"]],
 	["Special", ["rainbow", "aurora"]],
@@ -41,6 +42,10 @@ const WEATHER_COLORS := {
 	"aurora": [Color(0.04, 0.1, 0.18), Color(0.1, 0.55, 0.4)],
 }
 
+## Typing this while the menu is open (where the letters are not also commands)
+## sends a Starlink train across the sky.
+const STARLINK_CODE := "starlink"
+
 @export var time_of_day_path: NodePath = ^"../TimeOfDay"
 @export var weather_path: NodePath = ^"../Weather"
 
@@ -50,6 +55,9 @@ var _time_buttons := {}
 var _weather_buttons := {}
 var _clock_button: Button
 var _names_button: Button
+var _moon_button: Button
+var _meteor_button: Button
+var _typed := ""
 var _hint: Label
 var _panel: PanelContainer
 var _mouse_before := Input.MOUSE_MODE_CAPTURED
@@ -66,7 +74,18 @@ func _ready() -> void:
 func is_open() -> bool:
 	return _panel.visible
 
+## Add a typed letter to `typed`, keeping only as many as the code is long.
+static func push_typed(typed: String, letter: String) -> String:
+	return (typed + letter.to_lower()).right(STARLINK_CODE.length())
+
 func _input(event: InputEvent) -> void:
+	if is_open() and event is InputEventKey and event.pressed and not event.echo and not (event.ctrl_pressed or event.alt_pressed or event.meta_pressed):
+		var letter := OS.get_keycode_string(event.keycode)
+		if letter.length() == 1:
+			_typed = push_typed(_typed, letter)
+			if _typed == STARLINK_CODE:
+				_typed = ""
+				starlink()
 	if event.is_action_pressed("open_sky_menu"):
 		if get_tree().paused and not is_open():
 			return  # the full map has the game paused; leave G alone
@@ -84,6 +103,7 @@ func set_open(open: bool) -> void:
 	if open and get_tree().paused:
 		return
 	_panel.visible = open
+	_typed = ""  # a half-typed code doesn't carry over to the next visit
 	get_tree().paused = open
 	if open:
 		_mouse_before = Input.mouse_mode
@@ -131,10 +151,34 @@ func toggle_clock() -> void:
 		_tod.set_clock_running(not _tod.clock_running)
 	refresh()
 
+## Constellation lines and names together: the names themselves only appear
+## at night, but the one button owns both.
 func toggle_names() -> void:
 	if _tod:
 		_tod.set_show_constellations(not _tod.show_constellations)
 	refresh()
+
+func toggle_moon() -> void:
+	if _tod:
+		_tod.set_moon_enabled(not _tod.moon_enabled)
+	refresh()
+
+## Step the shooting stars through off, some and shower.
+func cycle_meteors() -> void:
+	if _tod:
+		_tod.set_meteor_level((_tod.meteor_level + 1) % TimeOfDay.METEOR_LEVELS.size())
+	refresh()
+
+## The Starlink easter egg: close the menu and send a train across the sky, or
+## say why not if the sky is too bright or cloudy to see one.
+func starlink() -> void:
+	if _tod == null:
+		return
+	if _tod.start_starlink():
+		_hint.text = ""
+		set_open(false)
+	else:
+		_hint.text = "A Starlink train needs a dark, clear sky: try dusk or night."
 
 ## Mark the current time, weather and toggles on the buttons.
 func refresh() -> void:
@@ -195,6 +239,14 @@ func _build() -> void:
 	box.add_child(_clock_button)
 
 	box.add_child(_heading("Weather"))
+	# Clear is the way back to plain weather, so it sits top centre on its own,
+	# which keeps the first column short.
+	var clear_row := HBoxContainer.new()
+	clear_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.add_child(clear_row)
+	_add_weather_button(clear_row, "clear")
+	(_weather_buttons["clear"] as Button).size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	(_weather_buttons["clear"] as Button).custom_minimum_size = Vector2(220, 44)
 	# Related weathers stack in vertical lists.
 	var columns := HBoxContainer.new()
 	columns.add_theme_constant_override("separation", 8)
@@ -220,9 +272,20 @@ func _build() -> void:
 	_hint.add_theme_color_override("font_color", KEY_COLOR)
 	box.add_child(_hint)
 
+	box.add_child(_heading("Night sky"))
+	var night := HBoxContainer.new()
+	night.add_theme_constant_override("separation", 8)
+	box.add_child(night)
 	_names_button = _button("")
 	_names_button.pressed.connect(toggle_names)
-	box.add_child(_names_button)
+	_moon_button = _button("")
+	_moon_button.pressed.connect(toggle_moon)
+	_meteor_button = _button("")
+	_meteor_button.toggle_mode = false
+	_meteor_button.pressed.connect(cycle_meteors)
+	for b in [_names_button, _moon_button, _meteor_button]:
+		b.custom_minimum_size = Vector2(0, 62)
+		night.add_child(b)
 
 	var close := _button("Close  (G or Esc)")
 	close.toggle_mode = false

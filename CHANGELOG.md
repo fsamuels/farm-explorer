@@ -4,6 +4,17 @@ The highlights of Farm Explorer, newest first. For the full technical history, s
 [docs/project/decisions.md](docs/project/decisions.md).
 
 ## November 21: Weather, sky, cars and open doors
+- **A better night.** A full moon now rises and sets, lights the night and washes
+  out the dimmer stars while it is high; the sky menu can turn it off for darker
+  skies. Shooting stars can be turned off or turned up to a shower, and
+  constellation names only show at night. The names button now controls both the
+  names and the lines.
+- **Look closely.** Something is hiding in the night sky. Try typing a word in the
+  sky menu.
+- **Tidier screen.** The controls panel tucks itself away when you press any key
+  other than a moving one, and the sky menu's Clear button now sits top centre.
+- **The Back Barn opens up.** It now has the Shop's blue metal walls and a big
+  sliding barn door on its east and west sides.
 - **Step inside.** Sally's House and the Front Barn are now enterable. The barn has
   three stalls, a tack room and a stack of hay, and the Shop has working doors.
 - **Tidier property lines.** The north-west edge now follows the road instead of

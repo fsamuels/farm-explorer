@@ -35,6 +35,11 @@ uniform vec4 planet_col[4];
 // sky. `meteor_time` is advanced by time_of_day.gd.
 uniform float meteor_strength = 0.0;
 uniform float meteor_time = 0.0;
+// Seconds between possible shooting stars (11 normally, 2.5 in a shower).
+uniform float meteor_period = 11.0;
+// A Starlink train (D-123): seconds since it came up in the west-north-west,
+// or -1 when there is none. It only shows on a dark sky.
+uniform float train_time = -1.0;
 
 // J2000 equatorial unit vectors of the north galactic pole and the galactic
 // centre (Sagittarius). The third axis completes the galactic frame.
@@ -151,7 +156,7 @@ vec3 planets(vec3 c) {
 // One shooting star at a time: every PERIOD seconds a hashed slot may fire a
 // short bright streak along a great circle from a random high spot.
 vec3 meteor(vec3 d, float t) {
-	const float PERIOD = 11.0;
+	float PERIOD = meteor_period;
 	const float DURATION = 0.9;
 	float id = floor(t / PERIOD);
 	float local = t - id * PERIOD;
@@ -176,6 +181,37 @@ vec3 meteor(vec3 d, float t) {
 	return vec3(0.85, 0.92, 1.0) * inside * along * along * line * sin(prog * PI) * 2.2;
 }
 
+// A Starlink train: a string of evenly spaced, steady points a few degrees
+// apart, one behind the other, crossing the sky from the west-north-west to the
+// south-east on a great circle. Each point fades in and out near the horizons
+// (as the satellites enter and leave the Earth's shadow), and unlike a shooting
+// star the train takes about a minute and does not flash.
+vec3 starlink_train(vec3 d, float t) {
+	const float SECONDS = 70.0;
+	const int BEADS = 24;
+	const float SPACING = 0.012;   // radians between satellites
+	vec3 a = normalize(vec3(-0.85, 0.30, -0.45));
+	vec3 b = normalize(vec3(0.80, 0.22, 0.55));
+	float arc = acos(dot(a, b));
+	vec3 e2 = normalize(b - a * dot(a, b));
+	vec3 n = cross(a, e2);
+	float side = dot(d, n);
+	if (abs(side) > 0.03 || d.y < 0.0) {
+		return vec3(0.0);
+	}
+	float ang = atan(dot(d, e2), dot(d, a));
+	float lead = t / SECONDS * (arc + float(BEADS) * SPACING);
+	float sum = 0.0;
+	for (int k = 0; k < BEADS; k++) {
+		float at = lead - float(k) * SPACING;
+		float inside = smoothstep(0.0, 0.15, at / arc) * (1.0 - smoothstep(0.85, 1.0, at / arc));
+		float dist = length(vec2(ang - at, side));
+		// About 0.2 degrees across: wide enough to stay visible on a 1080p screen.
+		sum += (exp(-pow(dist / 0.0032, 2.0)) + 0.25 * exp(-pow(dist / 0.009, 2.0))) * inside * (1.0 - 0.012 * float(k));
+	}
+	return vec3(0.95, 0.96, 1.0) * sum * 1.4;
+}
+
 void sky() {
 	vec3 col = sky_color;
 	if (star_strength > 0.001) {
@@ -192,6 +228,9 @@ void sky() {
 	col += aurora(EYEDIR, aurora_time) * aurora_strength;
 	if (meteor_strength > 0.001) {
 		col += meteor(EYEDIR, meteor_time) * meteor_strength * smoothstep(0.0, 0.2, EYEDIR.y);
+	}
+	if (train_time >= 0.0) {
+		col += starlink_train(EYEDIR, train_time) * smoothstep(0.2, 0.6, star_strength);
 	}
 	col += sky_body(EYEDIR);
 	COLOR = col;

@@ -26,6 +26,16 @@ list what has been seen working.
 > (weather goes back to clear), so the menu can't be used to get either egg. If we
 > want the eggs to be deliberate, keep the key path unrestricted.
 
+### Starlink train
+- **How:** open the sky menu (G) when the sky is dark and clear (dusk or night, no
+  cloud), then type **starlink**. The menu closes and a string of 24 satellites
+  crosses the sky from the west-north-west to the south-east over about a minute.
+- **Why this trigger:** the letters are not commands while the menu is open, so
+  typing can't change the time or weather by accident, and the mouse is free there.
+- **If it is too bright or cloudy:** the menu says a train needs a dark, clear sky.
+- **Status:** built (D-123), checked headless and for shader compile, not yet seen
+  in a running game by a person.
+
 ## Ideas (not built yet)
 
 Add ideas here as one-liners: what the player does, and what happens.
