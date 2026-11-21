@@ -1,6 +1,6 @@
 extends Control
-## Read-only controls help panel (D-90). Shown when the game starts; H
-## (`toggle_help`) hides/shows it. While hidden, a small "H — Controls" hint
+## Read-only controls help panel (D-90). Shown when the game starts; F1
+## (`toggle_help`) hides/shows it. While hidden, a small "F1 — Controls" hint
 ## stays in the corner. Purely informational: it never takes the mouse.
 
 const CONTROLS := [
@@ -9,9 +9,10 @@ const CONTROLS := [
 	["Mouse", "Look around"],
 	["Space", "Jump"],
 	["E", "Open / close a gate you're looking at"],
-	["V", "Switch first- / third-person view"],
+	["F", "Switch first- / third-person view"],
+	["Mouse wheel", "Zoom the camera out into third person, or in to first person"],
 	["Esc", "Release the mouse (click to recapture)"],
-	["H", "Show / hide this help"],
+	["F1", "Show / hide this help"],
 ]
 
 const FONT_SIZE := 22
@@ -25,7 +26,7 @@ func _ready() -> void:
 	set_anchors_preset(Control.PRESET_TOP_LEFT)
 	_panel = _build_panel()
 	add_child(_panel)
-	_hint = _outlined_label("H — Controls")
+	_hint = _outlined_label("F1 — Controls")
 	_hint.position = Vector2(16, 16)
 	add_child(_hint)
 	_set_open(true)
