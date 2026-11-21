@@ -52,6 +52,8 @@ var model_yaw := 0.0
 var vehicle: Node3D
 var drive_look_yaw := 0.0
 var _walk_head_height := 0.0
+var _prompt_flash := ""
+var _prompt_flash_left := 0.0
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -133,10 +135,20 @@ func _unhandled_input(event: InputEvent) -> void:
 		head.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
 		head.rotation.x = clamp(head.rotation.x, deg_to_rad(-89.0), deg_to_rad(89.0))
 
-func _process(_delta: float) -> void:
+## Shows `text` in the prompt for a moment while driving (why E did nothing).
+func _flash_prompt(text: String) -> void:
+	_prompt_flash = text
+	_prompt_flash_left = 1.5
+
+func _process(delta: float) -> void:
 	if vehicle:
 		interact_prompt.visible = true
-		interact_prompt.text = "E — Get out  ·  %d km/h" % roundi(vehicle.speed_kmh())
+		_prompt_flash_left -= delta
+		var speed_text := "%d km/h" % roundi(vehicle.speed_kmh())
+		if _prompt_flash_left > 0.0:
+			interact_prompt.text = "%s  ·  %s" % [_prompt_flash, speed_text]
+		else:
+			interact_prompt.text = "E — Get out  ·  " + speed_text
 		return
 	var target := _interact_target()
 	interact_prompt.visible = target != null
@@ -181,7 +193,15 @@ func enter_vehicle(car: Node3D) -> void:
 ## Get out on the side of the car that has room, facing the way it points.
 func leave_vehicle() -> void:
 	var car := vehicle
-	var spot: Vector3 = car.leave()
+	if not car.can_leave():
+		_flash_prompt("Slow down to get out")
+		return
+	var found: Variant = car.find_exit_spot()
+	if found == null:
+		_flash_prompt("No room to get out")
+		return
+	var spot: Vector3 = found
+	car.release()
 	vehicle = null
 	spring_arm.remove_excluded_object(car.get_rid())
 	global_transform = Transform3D(Basis(Vector3.UP, car.global_rotation.y), spot)

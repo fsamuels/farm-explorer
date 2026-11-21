@@ -9,6 +9,8 @@ extends RefCounted
 const KMH_PER_MS := 3.6
 ## Below this speed the throttle counts as "from rest" and picks the direction.
 const REST_SPEED := 0.05
+## You can only get out at or below this speed (m/s), about a brisk walk.
+const MAX_EXIT_SPEED := 2.0
 
 ## Next signed speed after `delta` seconds. Pushing the throttle the way the car
 ## is already moving accelerates (up to `max_speed` / `max_reverse`); pushing
@@ -42,7 +44,7 @@ static func to_kmh(speed: float) -> float:
 
 ## Where to try putting the player when they get out, as offsets in the car's
 ## local frame (x right, z back) on the ground: the driver's side first, then
-## the other side, behind and in front. `seat_x` is the seat's local x and
+## the other side, behind and in front, then the four corners. `seat_x` is the seat's local x and
 ## `half_width` / `half_length` the car body's half extents; `margin` is the
 ## clearance from the body to the player's centre.
 static func exit_offsets(seat_x: float, seat_z: float, half_width: float, half_length: float, margin: float) -> Array[Vector3]:
@@ -52,4 +54,7 @@ static func exit_offsets(seat_x: float, seat_z: float, half_width: float, half_l
 	out.append(Vector3(-side * (half_width + margin), 0.0, seat_z))
 	out.append(Vector3(0.0, 0.0, half_length + margin))
 	out.append(Vector3(0.0, 0.0, -(half_length + margin)))
+	for z in [half_length + margin, -(half_length + margin)]:
+		out.append(Vector3(side * (half_width + margin), 0.0, z))
+		out.append(Vector3(-side * (half_width + margin), 0.0, z))
 	return out

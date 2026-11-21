@@ -46,10 +46,13 @@ func interact(actor: Node3D) -> void:
 func board(actor: Node3D) -> void:
 	driver = actor
 
-## Frees the seat and returns a global spot on the ground to put the player:
-## the first of the sides / ends with room for them, else the driver's side.
-func leave() -> Vector3:
-	driver = null
+## True when the car is slow enough to step out of.
+func can_leave() -> bool:
+	return absf(speed) <= VehicleMath.MAX_EXIT_SPEED
+
+## A global spot on the ground with room for the player to stand, trying the
+## sides, ends and corners in turn, or null if the car is boxed in.
+func find_exit_spot() -> Variant:
 	var offsets := VehicleMath.exit_offsets(eye_offset.x, eye_offset.z, half_width, half_length, 0.7)
 	var space := get_world_3d().direct_space_state
 	var capsule := CapsuleShape3D.new()
@@ -64,7 +67,11 @@ func leave() -> Vector3:
 		query.exclude = [get_rid()]
 		if space.intersect_shape(query, 1).is_empty():
 			return spot
-	return to_global(offsets[0])
+	return null
+
+## Frees the seat once the player has been put at a spot from find_exit_spot().
+func release() -> void:
+	driver = null
 
 ## The player's transform while seated, `look_yaw` being how far they've turned
 ## their head left of straight ahead.
@@ -79,6 +86,8 @@ func _physics_process(delta: float) -> void:
 	var throttle := 0.0
 	var steer_input := 0.0
 	var handbrake := driver == null
+	if handbrake and speed == 0.0 and steer == 0.0 and is_on_floor():
+		return  # parked and settled: nothing to simulate
 	if driver != null:
 		throttle = Input.get_axis("move_back", "move_forward")
 		steer_input = Input.get_axis("move_right", "move_left")

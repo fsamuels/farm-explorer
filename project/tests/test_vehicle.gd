@@ -46,9 +46,10 @@ func _test_math() -> void:
 	_check(is_equal_approx(VehicleMath.to_kmh(-10.0), 36.0), "km/h of reverse speed")
 
 	var offsets := VehicleMath.exit_offsets(-0.4, 0.1, 0.95, 2.3, 0.7)
-	_check(offsets.size() == 4, "four exit spots")
+	_check(offsets.size() == 8, "four sides and four corners")
 	_check(offsets[0].x < -1.5 and offsets[1].x > 1.5, "driver's side (left) first, then right")
 	_check(offsets[2].z > 2.9 and offsets[3].z < -2.9, "then behind, then in front")
+	_check(absf(offsets[4].x) > 1.5 and absf(offsets[4].z) > 2.9, "then the corners")
 
 func _step(frames: int) -> void:
 	for i in frames:
@@ -100,7 +101,7 @@ func _drive(main: Node, player: CharacterBody3D, car: CharacterBody3D, nm: Strin
 	_check(_flat_dist(player.global_position, seat) < 0.05, "%s player rides at the seat" % nm)
 	_check(absf(player.head.global_position.y - (car.global_position.y + car.eye_offset.y)) < 0.05,
 			"%s camera at the driver's eye height" % nm)
-	_check(car.is_on_floor() or car.global_position.y < 0.5, "%s is on the ground" % nm)
+	_check(absf(car.global_position.y - start.origin.y) < 0.03, "%s rests on the ground (y %s)" % [nm, car.global_position.y])
 
 	# Throttle: moves along its own -Z, not sideways, and the player comes with it.
 	Input.action_press("move_forward")
@@ -111,6 +112,11 @@ func _drive(main: Node, player: CharacterBody3D, car: CharacterBody3D, nm: Strin
 	_check(moved.dot(heading) > 2.0 and absf(moved.cross(heading).y) < 0.3,
 			"%s drives forward along its nose: %s" % [nm, moved])
 	_check(_flat_dist(player.global_position, car.seat_transform(0.0).origin) < 0.05, "%s player carried along" % nm)
+
+	# Can't get out while moving.
+	_check(not car.can_leave(), "%s is too fast to leave (%s)" % [nm, car.speed])
+	player.leave_vehicle()
+	_check(player.vehicle == car and car.driver == player, "%s stays seated while moving" % nm)
 
 	# Steering left turns the car left (positive yaw).
 	var yaw0 := car.rotation.y
@@ -160,6 +166,26 @@ func _drive(main: Node, player: CharacterBody3D, car: CharacterBody3D, nm: Strin
 	Input.action_press("jump")
 	await _step(60)
 	Input.action_release("jump")
+
+	# Can't get out when boxed in.
+	var fence := StaticBody3D.new()
+	for off in VehicleMath.exit_offsets(car.eye_offset.x, car.eye_offset.z, car.half_width, car.half_length, 0.7):
+		var blocker := CollisionShape3D.new()
+		var blocker_shape := BoxShape3D.new()
+		blocker_shape.size = Vector3(1.4, 2.0, 1.4)
+		blocker.shape = blocker_shape
+		blocker.position = fence.to_local(car.to_global(off + Vector3(0, 1.0, 0)))
+		fence.add_child(blocker)
+	main.add_child(fence)
+	fence.global_transform = Transform3D.IDENTITY
+	for c in fence.get_children():
+		c.global_position = c.position  # positions were computed in world space
+	await _step(3)
+	_check(car.find_exit_spot() == null, "%s boxed in has no exit spot" % nm)
+	player.leave_vehicle()
+	_check(player.vehicle == car, "%s stays seated when boxed in" % nm)
+	fence.queue_free()
+	await _step(3)
 
 	# Getting out: beside the car, clear of it, walking again.
 	player.leave_vehicle()
