@@ -126,8 +126,10 @@ func _walk_local(player: CharacterBody3D, interior: Node3D, from: Vector3, towar
 func _interior_tests(main: Node, player: CharacterBody3D) -> void:
 	var interior: Node3D = main.get_node("Buildings/FrontBarnInterior")
 	var Interior := preload("res://scripts/barn_interior.gd")
-	var centres := Interior.bay_centres(21.0, 3)
-	_check(centres.size() == 3 and is_equal_approx(centres[1], 0.0) and is_equal_approx(centres[0], -7.0), "three equal bays: %s" % [centres])
+	var centres := Interior.bay_centres(interior.depth - 2.0 * interior.wall_t, 3)
+	_check(centres.size() == 3 and is_zero_approx(centres[1]) and is_equal_approx(centres[0], -centres[2]), "three equal bays: %s" % [centres])
+	for i in 3:
+		_check(absf(interior.to_local(interior.gates[i].global_position).z - (centres[i] + (interior.stall_gate_width + 0.04) / 2.0)) < 0.01, "gate %d sits in its bay" % i)
 	_check(interior.gates.size() == 3, "three stall gates (%d)" % interior.gates.size())
 	_check(interior.tack_door != null, "a tack room door")
 	_check(interior.hay_size.y > 3.0, "the hay stack is tall: %s" % interior.hay_size)
@@ -152,6 +154,9 @@ func _interior_tests(main: Node, player: CharacterBody3D) -> void:
 	var gate: Node3D = interior.gates[2]
 	gate.set_open(true)
 	await _step(80)
+	# The open leaf swings into the stall, not out across the aisle.
+	var leaf: Vector3 = interior.to_local(gate._shape.global_position)
+	_check(leaf.x > front_x + 0.1, "the open gate leaf lies inside the stall (x %s, front %s)" % [leaf.x, front_x])
 	at = await _walk_local(player, interior, Vector3(front_x - 2.0, 0, c), Vector3(8, 0, c), 100)
 	_check(at.x > front_x + 0.8, "the player walks into the stall through its gate (x %s)" % at.x)
 	gate.set_open(false)

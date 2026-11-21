@@ -56,7 +56,8 @@ func _ready() -> void:
 	width = shell.width
 	depth = shell.depth
 	wall_t = shell.WALL_T
-	global_transform = shell.global_transform
+	# Sit on the shell's visual floor (FLOOR_TOP), not in it.
+	global_transform = shell.global_transform.translated_local(Vector3(0, shell.FLOOR_TOP, 0))
 	_wood = _material(Color(0.42, 0.3, 0.19))
 	_tack = _material(Color(0.62, 0.52, 0.4))
 	_body = StaticBody3D.new()
