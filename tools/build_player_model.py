@@ -128,7 +128,21 @@ def main():
         export_yup=True,
         export_apply=False,
     )
+    fix_icc_chunk_numbers(out)
     print("WROTE", os.path.abspath(out))
+
+
+def fix_icc_chunk_numbers(path):
+    """Blender's JPEG export tags the sRGB textures' ICC profile as chunk 0 of 1.
+    Chunks are 1-based; Godot's libjpeg-turbo rejects chunk 0, fails the image,
+    then crashes the editor importing the scene. Same length, so offsets hold."""
+    with open(path, "rb") as f:
+        data = f.read()
+    bad, good = b"ICC_PROFILE\x00\x00\x01", b"ICC_PROFILE\x00\x01\x01"
+    if bad in data:
+        print(f"fixed {data.count(bad)} ICC chunk number(s)")
+        with open(path, "wb") as f:
+            f.write(data.replace(bad, good))
 
 
 # --------------------------------------------------------------------------- import
