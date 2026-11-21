@@ -33,7 +33,7 @@ func _run() -> void:
 	_test_built(main, barn, "Front Barn")
 	await _walk_tests(player, house, "south", "Sally's House south door")
 	await _walk_tests(player, house, "east", "Sally's House front door")
-	await _walk_tests(player, barn, "south", "barn south door")
+	await _open_side_tests(player, barn)
 	await _interior_tests(main, player)
 	print("buildings: %s" % ("OK" if _failures == 0 else "%d FAILED" % _failures))
 	quit(1 if _failures else 0)
@@ -50,12 +50,14 @@ func _test_built(main: Node, shell: Node3D, nm: String) -> void:
 	var box: Node3D = main.get_node("Buildings/" + shell.building_name)
 	_check(not (box.get_node("MeshInstance3D") as Node3D).visible, "%s: placeholder box hidden" % nm)
 	_check((box.get_node("CollisionShape3D") as CollisionShape3D).disabled, "%s: placeholder collision off" % nm)
-	_check(shell.get_node("Walls").get_child_count() >= 8, "%s: walls have collision (%d)" % [nm, shell.get_node("Walls").get_child_count()])
+	var walls: int = 4 - shell.open_walls.size()
+	_check(shell.get_node("Walls").get_child_count() >= walls, "%s: walls have collision (%d)" % [nm, shell.get_node("Walls").get_child_count()])
 	var door_count := 0
 	for c in shell.get_children():
 		if c.has_meta("wall"):
 			door_count += 1
-	_check(door_count == shell.doors.size() and door_count > 0, "%s: a working door for each entry (%d)" % [nm, door_count])
+	_check(door_count == shell.doors.size() and (door_count > 0 or not shell.open_walls.is_empty()), "%s: a working door for each entry (%d)" % [nm, door_count])
+	_check(shell.front_door_spot(3.0) != null, "%s: the map has a way-in spot" % nm)
 	_check(shell.get_node("Ceiling") != null, "%s: has a ceiling" % nm)
 
 func _door(shell: Node3D, wall: String) -> Node3D:
@@ -122,6 +124,24 @@ func _walk_local(player: CharacterBody3D, interior: Node3D, from: Vector3, towar
 	await _step(frames)
 	Input.action_release("move_forward")
 	return interior.to_local(player.global_position)
+
+## The pole barn: its south, north and east sides are open (walk straight in
+## from each, no door), and the west side is a wall.
+func _open_side_tests(player: CharacterBody3D, shell: Node3D) -> void:
+	_check(shell.open_walls.size() == 3 and not shell.open_walls.has("west"), "the barn is open on three sides")
+	# From 4 m outside the middle of each side, walk in. The south and north runs
+	# stop at the hay stack, the east run at a stall front; both are inside.
+	for wall in ["south", "north", "east", "west"]:
+		var spec: Dictionary = Shell.WALLS[wall]
+		var out: Vector3 = spec.out
+		var half: float = shell.depth / 2.0 if spec.along_x else shell.width / 2.0
+		var start := out * (half + 4.0)
+		var at: Vector3 = await _walk_local(player, shell, start, Vector3.ZERO, 120)
+		var inside: bool = absf(at.x) < shell.width / 2.0 - 0.3 and absf(at.z) < shell.depth / 2.0 - 0.3
+		if wall == "west":
+			_check(not inside, "the west wall stops the player (at %s)" % at)
+		else:
+			_check(inside, "the player walks in through the open %s side (at %s)" % [wall, at])
 
 func _interior_tests(main: Node, player: CharacterBody3D) -> void:
 	var interior: Node3D = main.get_node("Buildings/FrontBarnInterior")

@@ -6,6 +6,9 @@ The highlights of Farm Explorer, newest first. For the full technical history, s
 ## November 21: Weather, sky, cars and open doors
 - **Step inside.** Sally's House and the Front Barn are now enterable. The barn has
   three stalls, a tack room and a stack of hay, and the Shop has working doors.
+- **A real pole barn.** The Front Barn is now open on its north, south and east
+  sides, with posts at the corners, so you can walk straight in and see across the
+  farm from inside. The tack room has the only door, with a cubby on each side of it.
 - **Take the wheel.** Drive the Triumph TR6 and the BMW 2002 tii, with engine
   sound, a speedometer and a view from the driver's seat.
 - **A real night sky.** Stars, the Milky Way, constellation lines you can label,

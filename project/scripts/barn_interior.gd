@@ -1,8 +1,11 @@
 extends Node3D
-## The Front Barn's inside (D-116), kept simple: three stalls along the east
-## side (low board walls with a gate each), a tack room in the middle third of
-## the west side (walls, a door, a low ceiling) and a stack of hay bales in the
-## middle of the tall central part. It sits in the barn shell's frame (`shell`
+## The Front Barn's inside (D-116, D-119). It is a pole barn: the shell leaves
+## the north, south and east sides open, so this node adds a post at each
+## corner and fills in the rest: three stalls along the east side (low board
+## walls with a gate each), a tack room in the middle third of the west side
+## (walls, the barn's only door, a low ceiling), an open cubby on each side of
+## it (a wall at each end) and a stack of hay bales in the middle of the tall
+## central part. It sits in the barn shell's frame (`shell`
 ## is the FrontBarnShell node; +X east, +Z south, origin at the footprint
 ## centre on the ground) and reads the shell's width, depth and wall
 ## thickness, so it follows the footprint.
@@ -19,6 +22,7 @@ const DoorScript := preload("res://scripts/shop_door.gd")
 @export var tack_height := 2.6
 @export var tack_door_width := 0.9
 @export var tack_door_height := 2.1
+@export var post_size := 0.25
 ## The hay stack: bales across x and z, tiers high (a bale is 0.9 x 0.45 x 0.45).
 @export var hay_bales_x := 4
 @export var hay_bales_z := 6
@@ -65,6 +69,8 @@ func _ready() -> void:
 	add_child(_body)
 	_build_stalls()
 	_build_tack_room()
+	_build_cubbies()
+	_build_posts(shell.height)
 	_build_hay()
 
 func _material(color: Color) -> StandardMaterial3D:
@@ -135,6 +141,22 @@ func _build_tack_room() -> void:
 	door.name = "TackDoor"
 	add_child(door)
 	tack_door = door
+
+## The two open cubbies beside the tack room: each has the tack room's wall on
+## one end and a wall at the barn's end on the other, and is open to the aisle.
+func _build_cubbies() -> void:
+	var west_x := -width / 2.0 + wall_t
+	var front_x := west_x + side_depth
+	var end_z := depth / 2.0 - wall_t - WALL_T / 2.0
+	for z in [-end_z, end_z]:
+		_add_box(Vector3((west_x + front_x) / 2.0, tack_height / 2.0, z), Vector3(side_depth, tack_height, WALL_T), _wood, true)
+
+## A post at each corner of the footprint, eave high.
+func _build_posts(eave: float) -> void:
+	var half := post_size / 2.0
+	for sx in [-1.0, 1.0]:
+		for sz in [-1.0, 1.0]:
+			_add_box(Vector3(sx * (width / 2.0 - half), eave / 2.0, sz * (depth / 2.0 - half)), Vector3(post_size, eave, post_size), _wood, true)
 
 func _build_hay() -> void:
 	var mesh := BoxMesh.new()
