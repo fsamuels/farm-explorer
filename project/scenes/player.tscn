@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://7bmhp2guvx81" path="res://scripts/player.gd" id="1_player"]
 [ext_resource type="PackedScene" path="res://models/player.glb" id="2_player_model"]
+[ext_resource type="Script" path="res://scripts/controls_overlay.gd" id="3_controls_overlay"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 radius = 0.4
@@ -68,3 +69,7 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
+
+[node name="ControlsOverlay" type="Control" parent="HUD"]
+mouse_filter = 2
+script = ExtResource("3_controls_overlay")
