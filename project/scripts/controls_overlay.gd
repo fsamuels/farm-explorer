@@ -76,7 +76,7 @@ func _build_panel() -> PanelContainer:
 		grid.add_child(key)
 		grid.add_child(_outlined_label(row[1]))
 
-	var footer := _outlined_label("Explore the farm: walk up to gates and doors and press E to open them. You can go inside the Shop.\nThe minimap (bottom left) shows where you are; press M for the full map.")
+	var footer := _outlined_label("Explore the farm: walk up to gates and doors and press E to open them. You can go inside the Shop, Sally's House and the Front Barn.\nThe minimap (bottom left) shows where you are; press M for the full map.")
 	footer.add_theme_font_size_override("font_size", FONT_SIZE - 4)
 	footer.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85))
 	box.add_child(footer)

@@ -82,6 +82,7 @@ farm-sim/
     │   ├── fence_segment.gd       # @tool script: builds posts+wire strands from an exported length — see D-11
     │   ├── fence_path.gd          # @tool script: builds posts+wire strands from a Path3D/Curve3D's points instead of a length, closing the loop back to the first point (optional `solid` collision, D-76) — see D-67/D-69
     │   ├── gate.gd                # @tool script: builds the gate and swings its AnimatableBody3D hinge on interact() — see D-76
+    │   ├── building_shell.gd      # data-driven walk-in shell (hollow room, doors) for Sally's House and the Front Barn — see D-115
     │   ├── shop_shell.gd          # builds the walk-in Shop (hollow corrugated walls, windows, floor, ceiling, lights, pad) over the placeholder box's footprint and places its three doors — see D-98
     │   ├── shop_door.gd           # interactive door: swinging, sliding or roll-up leaf with collision, E to open — see D-98
     │   ├── vehicle.gd             # drivable car: E to get in/out, W/S/A/D/Space to drive, collides with the world — see D-106
@@ -108,6 +109,7 @@ farm-sim/
     │   ├── test_wall_layout.gd    # unit tests for wall_layout.gd
     │   ├── test_shop.gd           # loads main.tscn, checks the Shop's walls block and its three doors open and close
     │   ├── test_time_of_day.gd    # preset helpers + TimeOfDay driving main.tscn's sun/environment on T
+    │   ├── test_buildings.gd      # Sally's House and Front Barn shells: built, doors placed, the player walks in through doorways and not walls
     │   ├── test_sky_menu.gd       # start position / third person, constellation name labels, sky menu picks and pause
     │   ├── test_weather.gd        # weather/overcast helpers + Weather switching rain/snow on R in main.tscn
     │   ├── test_night_sky.gd      # sky maths, star data + baked maps, and the sky shader driven by TimeOfDay
