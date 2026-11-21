@@ -305,6 +305,7 @@ func _test_scene() -> void:
 	var wall_like := main.get_node_or_null("Buildings/Shop_Wall_North")
 	_check(wall_like == null or wall_like.material_overlay == null, "walls get no overlay")
 	var overlay: ShaderMaterial = ground.material_overlay
+	_check(overlay.render_priority > 0, "the overlay draws after the alpha-blended ground patches")
 	_check(is_equal_approx(overlay.get_shader_parameter("wet"), 0.5) and is_zero_approx(overlay.get_shader_parameter("snow")), "the overlay carries the wet level")
 	weather.set_surfaces(0.0, 1.5)
 	_check(is_equal_approx(overlay.get_shader_parameter("snow"), 1.0), "levels clamp to 1")

@@ -29,7 +29,7 @@ float value_noise(vec2 x) {
 float fbm(vec2 p) {
 	float v = 0.0;
 	float a = 0.5;
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 3; i++) {
 		v += a * value_noise(p);
 		p = p * 2.07 + vec2(5.2, 1.3);
 		a *= 0.5;
@@ -48,15 +48,22 @@ void fragment() {
 	vec2 p = world_pos.xz;
 
 	// Snow: settles on surfaces that face up, in patches that merge as it deepens.
-	float facing = smoothstep(0.35, 0.8, up);
-	float patch_noise = fbm(p * 0.45) * 0.75 + value_noise(p * 3.0) * 0.25;
-	float cover = snow * 1.16 - 0.04;
-	float snow_a = smoothstep(patch_noise - 0.08, patch_noise + 0.08, cover) * smoothstep(0.0, 0.04, snow) * facing;
+	// The noise is skipped while a term can't show: uniform branches, so cheap.
+	float snow_a = 0.0;
+	if (snow > 0.003) {
+		float facing = smoothstep(0.35, 0.8, up);
+		float patch_noise = fbm(p * 0.45) * 0.75 + value_noise(p * 3.0) * 0.25;
+		float cover = snow * 1.16 - 0.04;
+		snow_a = smoothstep(patch_noise - 0.08, patch_noise + 0.08, cover) * smoothstep(0.0, 0.04, snow) * facing;
+	}
 
 	// Wet: a general darkening, plus puddles in the low spots of flat ground.
 	float flat_ground = smoothstep(0.92, 0.99, up);
-	float low_spots = fbm(p * 0.13 + 7.0);
-	float puddle = (1.0 - smoothstep(wet * 0.34 - 0.06, wet * 0.34 + 0.02, low_spots)) * flat_ground * smoothstep(0.35, 0.8, wet);
+	float puddle = 0.0;
+	if (wet > 0.35) {
+		float low_spots = fbm(p * 0.13 + 7.0);
+		puddle = (1.0 - smoothstep(wet * 0.34 - 0.06, wet * 0.34 + 0.02, low_spots)) * flat_ground * smoothstep(0.35, 0.8, wet);
+	}
 	float damp_a = wet * 0.32;
 	float wet_a = mix(damp_a, 0.8, puddle) * (1.0 - snow_a);
 
