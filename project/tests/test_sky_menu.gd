@@ -80,6 +80,12 @@ func _test_scene() -> void:
 	_check(weather.current == "rainbow", "the rainbow stays through sunset")
 	menu.choose_time("dusk")
 	_check(weather.current == "clear", "dusk drops the rainbow: %s" % weather.current)
+	# A special left on at the wrong time (R, the clock) can still be switched off.
+	weather.set_weather("rainbow", true)
+	menu.refresh()
+	_check(not (menu._weather_buttons["rainbow"] as Button).disabled, "an active special is never locked")
+	menu.choose_weather("rainbow")
+	_check(weather.current == "clear", "it can be switched off: %s" % weather.current)
 	menu.choose_time("night")
 	menu.choose_weather("snow")
 	menu.toggle_clock()

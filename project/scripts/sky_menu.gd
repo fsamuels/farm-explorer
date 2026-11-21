@@ -77,10 +77,10 @@ func choose_time(preset_name: String) -> void:
 ## time of day is ignored; picking the special that is already on turns it off.
 func choose_weather(weather_name: String) -> void:
 	if _weather:
-		if _tod and not Weather.allowed_at(weather_name, _tod.current):
-			return
 		if Weather.SPECIAL_TIMES.has(weather_name) and _weather.current == weather_name:
 			weather_name = "clear"
+		elif _tod and not Weather.allowed_at(weather_name, _tod.current):
+			return
 		_weather.set_weather(weather_name, true)
 	refresh()
 
@@ -107,7 +107,9 @@ func refresh() -> void:
 		for key in _weather_buttons:
 			var b := _weather_buttons[key] as Button
 			b.set_pressed_no_signal(key == _weather.current)
-			b.disabled = _tod != null and not Weather.allowed_at(key, _tod.current)
+			# Never lock the active one: R or the clock can leave a special on
+			# at the wrong time, and it must still be possible to switch it off.
+			b.disabled = key != _weather.current and _tod != null and not Weather.allowed_at(key, _tod.current)
 
 func _build() -> void:
 	_panel = PanelContainer.new()
@@ -161,7 +163,7 @@ func _build() -> void:
 		if not Weather.SPECIAL_TIMES.has(key):
 			_add_weather_button(grid, key)
 
-	box.add_child(_heading("Special sky   (rainbow by day, aurora at night)"))
+	box.add_child(_heading("Special sky   (rainbow dawn to sunset, aurora dusk and night)"))
 	var specials := HBoxContainer.new()
 	specials.add_theme_constant_override("separation", 8)
 	box.add_child(specials)
