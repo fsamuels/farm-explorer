@@ -14,9 +14,19 @@ extends Node
 ## sunset sun sits low in the west, the moon rises in the southeast and the
 ## dawn sun comes up in the east.
 ##
+## The sky itself is a shader (shaders/night_sky.gdshader, D-104): the flat sky
+## colour of the preset, with the stars, a Milky Way and constellation lines
+## fading in as the preset's `stars` level rises (dusk, dawn and night). The
+## stars sit where they really are over Lowden for today's date and the clock
+## hour, so they turn with the running clock; N toggles the constellation lines.
+##
 ## Weather (weather.gd, D-95) dims the scene through `set_overcast()`: the
 ## preset stays as chosen and `overcast_preset()` greys it on the way to the
 ## screen, so time of day and weather can change independently.
+
+const SkyMath := preload("res://scripts/sky_math.gd")
+const StarMap := preload("res://scripts/star_map.gd")
+const SKY_SHADER := preload("res://shaders/night_sky.gdshader")
 
 signal lighting_changed(p: Dictionary)
 
@@ -33,6 +43,7 @@ const PRESETS := {
 		"ambient_energy": 1.0,
 		"fog_color": Color(0.55, 0.75, 0.95),
 		"fog_density": 0.0,
+		"stars": 0.0,
 	},
 	"sunset": {
 		"label": "Sunset",
@@ -44,6 +55,7 @@ const PRESETS := {
 		"ambient_energy": 0.8,
 		"fog_color": Color(0.95, 0.65, 0.45),
 		"fog_density": 0.003,
+		"stars": 0.0,
 	},
 	"dusk": {
 		"label": "Dusk",
@@ -55,6 +67,7 @@ const PRESETS := {
 		"ambient_energy": 0.55,
 		"fog_color": Color(0.35, 0.32, 0.5),
 		"fog_density": 0.004,
+		"stars": 0.45,
 	},
 	"night": {
 		"label": "Night",
@@ -66,6 +79,7 @@ const PRESETS := {
 		"ambient_energy": 0.45,
 		"fog_color": Color(0.04, 0.05, 0.1),
 		"fog_density": 0.006,
+		"stars": 1.0,
 	},
 	"dawn": {
 		"label": "Dawn",
@@ -77,6 +91,7 @@ const PRESETS := {
 		"ambient_energy": 0.7,
 		"fog_color": Color(0.88, 0.78, 0.8),
 		"fog_density": 0.004,
+		"stars": 0.35,
 	},
 	"sunrise": {
 		"label": "Sunrise",
@@ -88,6 +103,7 @@ const PRESETS := {
 		"ambient_energy": 0.85,
 		"fog_color": Color(0.95, 0.8, 0.66),
 		"fog_density": 0.002,
+		"stars": 0.0,
 	},
 }
 const ORDER := ["day", "sunset", "dusk", "night", "dawn", "sunrise"]
@@ -108,6 +124,11 @@ const CLOCK_STEP_HOURS := 0.5
 @export var start_preset := "day"
 ## Real seconds one 24 h clock day takes while the clock runs.
 @export var day_seconds := 1200.0
+## Width of the baked star map in pixels (the height is half). Lower it for a
+## cheaper start-up, e.g. on Web.
+@export var star_map_width := 4096
+## Draw faint constellation lines in the sky (N toggles).
+@export var show_constellations := true
 
 var current := ""
 ## 0 = clear sky, 1 = fully overcast (set by weather.gd).
@@ -119,6 +140,13 @@ var flash := 0.0
 ## The clock hour (0..24) the lighting is at, and whether it's advancing.
 var hour := 13.0
 var clock_running := false
+## The hour the stars are drawn for. It equals `hour` except while a preset
+## blend runs, when it turns forward from the old hour to the new one so the
+## stars don't jump.
+var sky_hour := 13.0
+var _sky_material: ShaderMaterial
+## Days from J2000 noon to noon today: which stars are up depends on the date.
+var _sky_days := 0.0
 var _shown: Dictionary = {}
 var _tween: Tween
 var _toast: Label
@@ -157,6 +185,8 @@ static func blend(a: Dictionary, b: Dictionary, t: float) -> Dictionary:
 static func overcast_preset(p: Dictionary, amount: float, extra_fog := 0.0, flash_amount := 0.0) -> Dictionary:
 	var out := p.duplicate()
 	if amount > 0.0:
+		# Cloud hides the stars much faster than it dims the sun.
+		out.stars = p.stars * pow(1.0 - clampf(amount, 0.0, 1.0), 2.0)
 		var grey := _grey(p.sky_color)
 		out.sky_color = p.sky_color.lerp(grey, 0.8 * amount)
 		out.fog_color = p.fog_color.lerp(grey, amount)
@@ -171,6 +201,7 @@ static func overcast_preset(p: Dictionary, amount: float, extra_fog := 0.0, flas
 		# The background is a flat colour that fog doesn't touch, so match it to
 		# the fog or the sky shows as a seam above the greyed-out distance.
 		out.sky_color = out.sky_color.lerp(out.fog_color, thick)
+		out.stars *= 1.0 - minf(1.0, extra_fog / 0.03)  # light fog dims them, heavy fog hides them
 	if flash_amount > 0.0:
 		var f := clampf(flash_amount, 0.0, 1.0)
 		out.sky_color = out.sky_color.lerp(Color(0.85, 0.9, 1.0), 0.7 * f)
@@ -237,6 +268,7 @@ static func slerp_rotation(a: Vector3, b: Vector3, t: float) -> Vector3:
 
 func _ready() -> void:
 	_build_toast()
+	_build_sky()
 	_build_clock_label()
 	set_preset(start_preset, true)
 
@@ -244,6 +276,7 @@ func _process(delta: float) -> void:
 	if clock_running:
 		hour = fposmod(hour + delta * 24.0 / maxf(day_seconds, 1.0), 24.0)
 		current = keyframe_before(hour)
+		sky_hour = hour
 		_apply(preset_at_hour(hour))
 		_refresh_clock_label()
 
@@ -258,6 +291,12 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed("toggle_clock"):
 		set_clock_running(not clock_running)
 		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("toggle_constellations"):
+		show_constellations = not show_constellations
+		if not _shown.is_empty():
+			_apply(_shown)
+		show_toast("Constellation lines " + ("on" if show_constellations else "off"))
+		get_viewport().set_input_as_handled()
 
 ## Start or stop the running clock. Starting continues from the hour set by the
 ## last preset picked; stopping holds whatever the clock reached.
@@ -269,6 +308,7 @@ func set_clock_running(on: bool) -> void:
 		if _tween:
 			_tween.kill()
 			_tween = null
+		sky_hour = hour  # don't leave the stars part-way through a blend
 	_refresh_clock_label()
 	show_toast("Clock running" if on else "Clock paused at " + format_hour(hour))
 
@@ -286,12 +326,17 @@ func set_preset(preset_name: String, instant := false) -> void:
 	if _tween:
 		_tween.kill()
 		_tween = null
+	var from_hour := sky_hour
 	if instant or _shown.is_empty() or transition_seconds <= 0.0:
+		sky_hour = hour
 		_apply(target)
 		return
 	var from := _shown.duplicate()
+	var turn := fposmod(hour - from_hour, 24.0)  # the sky only turns forward
 	_tween = create_tween()
-	_tween.tween_method(func(t: float): _apply(blend(from, target, t)), 0.0, 1.0, transition_seconds)
+	_tween.tween_method(func(t: float):
+		sky_hour = from_hour + turn * t
+		_apply(blend(from, target, t)), 0.0, 1.0, transition_seconds)
 	show_toast(target.label)
 
 ## Change the cloud cover (0..1) and redraw the current lighting under it.
@@ -334,7 +379,44 @@ func _apply(preset: Dictionary) -> void:
 		env.fog_enabled = p.fog_density > 0.0
 		env.fog_light_color = p.fog_color
 		env.fog_density = p.fog_density
+	_apply_sky(p)
 	lighting_changed.emit(p)
+
+## Create the sky shader, bake the star maps and put the sky in the
+## environment in place of its flat background colour. Skipped without an
+## environment (a test scene, say).
+func _build_sky() -> void:
+	var world := get_node_or_null(environment_path) as WorldEnvironment
+	if not world or not world.environment:
+		return
+	var date := Time.get_date_dict_from_system()
+	_sky_days = SkyMath.days_since_j2000(date.year, date.month, date.day)
+	var w := maxi(star_map_width, 64)
+	_sky_material = ShaderMaterial.new()
+	_sky_material.shader = SKY_SHADER
+	_sky_material.set_shader_parameter("star_map", ImageTexture.create_from_image(StarMap.bake_stars(w, w / 2)))
+	_sky_material.set_shader_parameter("line_map", ImageTexture.create_from_image(StarMap.bake_lines(w, w / 2)))
+	var sky := Sky.new()
+	sky.sky_material = _sky_material
+	# Reflections only need a rough sky, and the shader changes every frame
+	# while the clock runs: keep the cubemap small and update it gradually.
+	sky.radiance_size = Sky.RADIANCE_SIZE_32
+	sky.process_mode = Sky.PROCESS_MODE_INCREMENTAL
+	var env := world.environment
+	env.sky = sky
+	env.background_mode = Environment.BG_SKY
+	env.fog_sky_affect = 0.0  # fog would otherwise swallow the stars
+
+## Point the sky shader at lighting `p`: its colour, how many stars to show and
+## which way the celestial sphere is turned.
+func _apply_sky(p: Dictionary) -> void:
+	if not _sky_material:
+		return
+	_sky_material.set_shader_parameter("sky_color", p.sky_color)
+	_sky_material.set_shader_parameter("star_strength", p.stars)
+	_sky_material.set_shader_parameter("line_strength", 0.14 if show_constellations else 0.0)
+	var lst := SkyMath.sidereal_degrees(_sky_days, sky_hour)
+	_sky_material.set_shader_parameter("sky_to_celestial", SkyMath.celestial_to_world(SkyMath.LATITUDE, lst).transposed())
 
 func _build_toast() -> void:
 	var layer := CanvasLayer.new()
