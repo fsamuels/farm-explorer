@@ -16,7 +16,9 @@
 # wire it as a SessionStart hook in that project's own .claude/settings.json
 # — see docs/packaging.md in fsamuels/sdlc-standards for the exact hook JSON.
 #
-# Safe to run every session: each step is a no-op if already satisfied.
+# Safe to run every session: each step is a no-op if already satisfied. When
+# the plugin is already installed it also refreshes the marketplace and updates
+# the plugin, so each session start pulls the latest version.
 set -euo pipefail
 
 PLUGIN_ID="sdlc@sdlc-standards"
@@ -29,6 +31,10 @@ if ! command -v claude >/dev/null 2>&1; then
 fi
 
 if claude plugin list 2>/dev/null | grep -qF "$PLUGIN_ID"; then
+  # Already installed: pull the latest. Best-effort — never fail the session.
+  # The update is applied on the next restart (or /reload-plugins).
+  claude plugin marketplace update "$MARKETPLACE_NAME" >&2 || true
+  claude plugin update "$PLUGIN_ID" >&2 || true
   exit 0
 fi
 
