@@ -39,6 +39,13 @@ static func yaw_rate(speed: float, steer: float, wheelbase: float, max_steer: fl
 		rate = clampf(rate, -cap, cap)
 	return rate
 
+## How strongly the headlights are wanted (0..1) for a scene whose sun has
+## `sun_energy` (time_of_day.gd: about 1 by day, 0.25-0.3 at dusk and night,
+## and dimmed further under cloud). Off at 0.7 or above, fully on at 0.4 or
+## below, fading between so dusk and dawn don't snap.
+static func headlight_demand(sun_energy: float) -> float:
+	return clampf((0.7 - sun_energy) / 0.3, 0.0, 1.0)
+
 static func to_mph(speed: float) -> float:
 	return absf(speed) * MPH_PER_MS
 

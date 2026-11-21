@@ -17,6 +17,8 @@ const EngineSound := preload("res://scripts/engine_sound.gd")
 const STEER_RATE := 4.0
 ## Most engine audio frames synthesized in one _process call.
 const MAX_AUDIO_FRAMES_PER_UPDATE := 1024
+## Headlight fade speed, in full brightness per second.
+const HEADLIGHT_FADE_RATE := 2.0
 
 @export var label := "car"
 @export var wheelbase := 2.6
@@ -44,6 +46,14 @@ const MAX_AUDIO_FRAMES_PER_UPDATE := 1024
 @export var redline_rpm := 6000.0
 @export var gear_tops := PackedFloat32Array([6.0, 11.0, 17.0, 24.0])
 @export var engine_volume_db := -4.0
+## Headlamp positions in the car's local frame (x right, y up, z back; the car
+## faces -Z). Each gets a spot light and a glowing lens that fade in as the
+## scene gets dark (time_of_day.gd's sun_energy) while somebody is driving.
+@export var headlight_positions := PackedVector3Array()
+@export var headlight_range := 40.0
+@export var headlight_energy := 5.0
+## Also light the lamps on a parked, empty car when it's dark.
+@export var headlights_when_parked := false
 
 var driver: Node3D
 var speed := 0.0
@@ -54,6 +64,13 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 ## One entry per wheel: {steer: Node3D, spin: Node3D, radius: float, front: bool}.
 var wheels: Array[Dictionary] = []
 var _throttle := 0.0
+## How dark the scene is as a 0..1 headlight demand, and the fade actually shown.
+var _headlight_demand := 0.0
+var headlight_level := 0.0
+var _headlight_applied := -1.0
+var _lamps: Array[SpotLight3D] = []
+var _lenses: Array[MeshInstance3D] = []
+var _lens_material: StandardMaterial3D
 var _synth: RefCounted
 var _audio: AudioStreamPlayer3D
 var _playback: AudioStreamGeneratorPlayback
@@ -63,6 +80,9 @@ var frames_pushed := 0
 func _ready() -> void:
 	_build_wheels()
 	_build_engine_sound()
+	_build_headlights()
+	# Deferred so every node in the scene is in the tree whatever the order.
+	_watch_time_of_day.call_deferred()
 
 func _build_wheels() -> void:
 	var sources: Array = []
@@ -110,10 +130,71 @@ func _build_engine_sound() -> void:
 	_audio.volume_db = engine_volume_db
 	add_child(_audio)
 
+func _build_headlights() -> void:
+	_lens_material = StandardMaterial3D.new()
+	_lens_material.albedo_color = Color(1.0, 0.97, 0.85)
+	_lens_material.emission_enabled = true
+	_lens_material.emission = Color(1.0, 0.93, 0.7)
+	_lens_material.emission_energy_multiplier = 0.0
+	var lens_mesh := SphereMesh.new()
+	lens_mesh.radius = 0.07
+	lens_mesh.height = 0.14
+	lens_mesh.material = _lens_material
+	for pos in headlight_positions:
+		var lamp := SpotLight3D.new()
+		lamp.position = pos
+		lamp.rotation_degrees.x = -2.0
+		lamp.spot_range = headlight_range
+		lamp.spot_angle = 32.0
+		lamp.spot_attenuation = 0.8
+		lamp.light_color = Color(1.0, 0.94, 0.8)
+		lamp.light_energy = 0.0
+		lamp.visible = false
+		add_child(lamp)
+		_lamps.append(lamp)
+		var lens := MeshInstance3D.new()
+		lens.mesh = lens_mesh
+		lens.position = pos
+		lens.visible = false
+		add_child(lens)
+		_lenses.append(lens)
+
+## Follow the scene's darkness: time_of_day.gd announces every lighting change
+## (including the weather dimming the sun), and the lamps fade toward it.
+func _watch_time_of_day() -> void:
+	var tod := get_tree().root.find_child("TimeOfDay", true, false)
+	if tod == null or not tod.has_signal("lighting_changed"):
+		if not headlight_positions.is_empty():
+			push_warning("%s: no TimeOfDay node found, so its headlights will never come on" % name)
+		return
+	tod.lighting_changed.connect(_on_lighting_changed)
+	var now: Dictionary = tod.shown()
+	if not now.is_empty():
+		_on_lighting_changed(now)
+
+func _on_lighting_changed(p: Dictionary) -> void:
+	_headlight_demand = VehicleMath.headlight_demand(p.sun_energy)
+
+func _update_headlights(delta: float) -> void:
+	var lit := driver != null or headlights_when_parked
+	var target := _headlight_demand if lit else 0.0
+	headlight_level = move_toward(headlight_level, target, HEADLIGHT_FADE_RATE * delta)
+	if headlight_level == _headlight_applied:
+		return  # nothing changed since the lamps were last set
+	_headlight_applied = headlight_level
+	var on := headlight_level > 0.001
+	for lamp in _lamps:
+		lamp.visible = on
+		lamp.light_energy = headlight_energy * headlight_level
+	for lens in _lenses:
+		lens.visible = on
+	_lens_material.emission_energy_multiplier = 3.0 * headlight_level
+
 ## The engine runs while somebody is driving. Revs follow road speed through
 ## the gears (with a lag, and a blip on the throttle) and the generator is
 ## topped up with audio each frame.
 func _process(delta: float) -> void:
+	_update_headlights(delta)
 	if driver == null:
 		if _audio.playing:
 			_audio.stop()
