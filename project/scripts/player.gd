@@ -29,6 +29,10 @@ const TP_ZOOM_STEP := 0.5
 ## are still limited to 2.5m from the eyes in _interact_target().
 const TP_RAY_EXTRA := 3.0
 
+## While driving (D-106) you can turn your head this far either side of
+## straight ahead.
+const DRIVE_LOOK_LIMIT := deg_to_rad(120.0)
+
 @onready var head: Node3D = $Head
 @onready var camera: Camera3D = $Head/Camera3D
 @onready var interact_ray: RayCast3D = $Head/Camera3D/InteractRay
@@ -38,10 +42,18 @@ const TP_RAY_EXTRA := 3.0
 @onready var interact_prompt: Label = $HUD/InteractPrompt
 @onready var model: Node3D = $Model
 @onready var anim_player: AnimationPlayer = $Model/AnimationPlayer
+@onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var third_person := false
 var model_yaw := 0.0
+## The car being driven (vehicle.gd), or null on foot. While set, this node is
+## carried to the seat every physics frame and walking is off.
+var vehicle: Node3D
+var drive_look_yaw := 0.0
+var _walk_head_height := 0.0
+var _prompt_flash := ""
+var _prompt_flash_left := 0.0
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -107,16 +119,37 @@ func _unhandled_input(event: InputEvent) -> void:
 			_set_tp_distance(spring_arm.spring_length - TP_ZOOM_STEP)
 
 	if event.is_action_pressed("interact"):
-		var target := _interact_target()
-		if target:
-			target.interact(self)
+		if vehicle:
+			leave_vehicle()
+		else:
+			var target := _interact_target()
+			if target:
+				target.interact(self)
 
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
+		if vehicle:
+			drive_look_yaw = clamp(drive_look_yaw - event.relative.x * MOUSE_SENSITIVITY,
+					-DRIVE_LOOK_LIMIT, DRIVE_LOOK_LIMIT)
+		else:
+			rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
 		head.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
 		head.rotation.x = clamp(head.rotation.x, deg_to_rad(-89.0), deg_to_rad(89.0))
 
-func _process(_delta: float) -> void:
+## Shows `text` in the prompt for a moment while driving (why E did nothing).
+func _flash_prompt(text: String) -> void:
+	_prompt_flash = text
+	_prompt_flash_left = 1.5
+
+func _process(delta: float) -> void:
+	if vehicle:
+		interact_prompt.visible = true
+		_prompt_flash_left -= delta
+		var speed_text := "%d km/h" % roundi(vehicle.speed_kmh())
+		if _prompt_flash_left > 0.0:
+			interact_prompt.text = "%s  ·  %s" % [_prompt_flash, speed_text]
+		else:
+			interact_prompt.text = "E — Get out  ·  " + speed_text
+		return
 	var target := _interact_target()
 	interact_prompt.visible = target != null
 	if target:
@@ -128,6 +161,8 @@ func _process(_delta: float) -> void:
 ## player, so a hit only counts if it is in front of the player's eyes and
 ## within reach (2.5m) of them.
 func _interact_target() -> Node:
+	if vehicle:
+		return null
 	var ray := tp_interact_ray if third_person else interact_ray
 	if not ray.is_colliding():
 		return null
@@ -140,7 +175,46 @@ func _interact_target() -> Node:
 		node = node.get_parent()
 	return node
 
+## Get into a car (vehicle.gd calls this from its `interact`): the player's
+## capsule and body are switched off and the camera drops to the driver's eye.
+func enter_vehicle(car: Node3D) -> void:
+	vehicle = car
+	car.board(self)
+	velocity = Vector3.ZERO
+	drive_look_yaw = 0.0
+	collision_shape.set_deferred("disabled", true)
+	model.visible = false
+	_walk_head_height = head.position.y
+	head.position.y = car.eye_offset.y
+	# The third-person camera boom starts inside the car, so ignore its body.
+	spring_arm.add_excluded_object(car.get_rid())
+	global_transform = car.seat_transform(0.0)
+
+## Get out on the side of the car that has room, facing the way it points.
+func leave_vehicle() -> void:
+	var car := vehicle
+	if not car.can_leave():
+		_flash_prompt("Slow down to get out")
+		return
+	var found: Variant = car.find_exit_spot()
+	if found == null:
+		_flash_prompt("No room to get out")
+		return
+	var spot: Vector3 = found
+	car.release()
+	vehicle = null
+	spring_arm.remove_excluded_object(car.get_rid())
+	global_transform = Transform3D(Basis(Vector3.UP, car.global_rotation.y), spot)
+	head.position.y = _walk_head_height
+	head.rotation = Vector3.ZERO
+	model.visible = true
+	model_yaw = 0.0
+	collision_shape.set_deferred("disabled", false)
+
 func _physics_process(delta: float) -> void:
+	if vehicle:
+		global_transform = vehicle.seat_transform(drive_look_yaw)
+		return
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 

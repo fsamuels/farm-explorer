@@ -1,8 +1,24 @@
 [gd_scene format=3]
 
+[ext_resource type="Script" path="res://scripts/vehicle.gd" id="1_vehicle"]
 [ext_resource type="PackedScene" path="res://models/bmw_2002_tii.glb" id="1_bmw_model"]
 
-[node name="BMW2002tii" type="Node3D"]
+[sub_resource type="BoxShape3D" id="BoxShape3D_body"]
+size = Vector3(1.9, 1.4, 4.6)
+
+[node name="BMW2002tii" type="CharacterBody3D"]
+script = ExtResource("1_vehicle")
+label = "BMW 2002tii"
+wheelbase = 2.67
+max_speed = 24.0
+accel = 7.0
+eye_offset = Vector3(-0.38, 1.12, 0.05)
+half_width = 0.95
+half_length = 2.3
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, -0.17)
+shape = SubResource("BoxShape3D_body")
 
 [node name="Model" parent="." instance=ExtResource("1_bmw_model")]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0.77636, 0)
