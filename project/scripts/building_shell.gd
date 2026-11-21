@@ -11,7 +11,8 @@ extends Node3D
 ## Exteriors: the house keeps the photo-textured wall planes it already has;
 ## for a door in one of those, the hole is cut in the plane's texture (alpha)
 ## where the photographed door is. Walls with no plane are listed in
-## `skin_walls` and get a plain skin in `skin_color`.
+## `skin_walls` and get a plain skin in `skin_color`, or the Shop's blue
+## corrugated metal (corrugated.gd) when `corrugated_skin` is on.
 ##
 ## Each entry of `doors` is a Dictionary:
 ##   wall    "north" | "south" | "east" | "west"
@@ -28,6 +29,7 @@ extends Node3D
 
 const WallLayout := preload("res://scripts/wall_layout.gd")
 const DoorScript := preload("res://scripts/shop_door.gd")
+const Corrugated := preload("res://scripts/corrugated.gd")
 
 const WALL_T := 0.15
 const SKIN_T := 0.03
@@ -47,6 +49,7 @@ const WALLS := {
 @export var skin_walls := PackedStringArray()
 @export var open_walls := PackedStringArray()
 @export var skin_color := Color(0.6, 0.55, 0.5)
+@export var corrugated_skin := false
 @export var liner_color := Color(0.84, 0.82, 0.78)
 @export var floor_color := Color(0.45, 0.36, 0.29)
 @export var rise := 0.0
@@ -91,7 +94,7 @@ func _ready() -> void:
 	if box_shape:
 		box_shape.set_deferred("disabled", true)
 	_liner = _material(liner_color, true)
-	_skin = _material(skin_color, false)
+	_skin = Corrugated.material() if corrugated_skin else _material(skin_color, false)
 	_floor = _material(floor_color, false)
 	_walls_body = StaticBody3D.new()
 	_walls_body.name = "Walls"

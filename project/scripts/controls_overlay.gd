@@ -2,6 +2,10 @@ extends Control
 ## Read-only controls help panel (D-90). Shown when the game starts; F1
 ## (`toggle_help`) hides/shows it. While hidden, a small "F1 — Controls" hint
 ## stays in the corner. Purely informational: it never takes the mouse.
+##
+## Pressing any other key (anything but the movement keys, Space, Shift and F1
+## itself) tucks the panel away, so a key you use for something is also the
+## moment the screen clears. It watches input without consuming it.
 
 const CONTROLS := [
 	["W A S D", "Move (sprint by default)"],
@@ -13,14 +17,17 @@ const CONTROLS := [
 	["F", "Switch first- / third-person view"],
 	["Mouse wheel", "Zoom the camera out into third person, or in to first person"],
 	["M", "Open / close the map (pauses the game)"],
-	["G", "Sky menu: pick the time of day, weather and constellation names (pauses the game)"],
+	["G", "Sky menu: pick the time of day, weather, moon and shooting stars (pauses the game)"],
 	["T", "Change the time of day: day, sunset, dusk, night, dawn, sunrise"],
 	["Y", "Start / stop the clock (time shown top right)"],
-	["N", "Show / hide constellation lines and names in the night sky"],
+	["N", "Show / hide constellation lines (and, at night, their names)"],
 	["R", "Change the weather: rain, storm, fog, snow, rainbow, aurora, clear"],
 	["Esc", "Release the mouse (click to recapture)"],
-	["F1", "Show / hide this help"],
+	["F1", "Show / hide this help (any other key but moving also hides it)"],
 ]
+
+## Keys that only move you around: they never minimize the panel.
+const MOVE_ACTIONS := ["move_forward", "move_back", "move_left", "move_right", "jump", "walk"]
 
 const FONT_SIZE := 22
 const KEY_COLOR := Color(1.0, 0.86, 0.55)
@@ -37,6 +44,22 @@ func _ready() -> void:
 	_hint.position = Vector2(16, 16)
 	add_child(_hint)
 	_set_open(true)
+
+## True for a fresh key press that is something other than moving (or F1,
+## which toggles the panel itself). Echoes from a held key don't count.
+static func is_action_key(event: InputEvent) -> bool:
+	if not (event is InputEventKey) or not event.pressed or event.echo:
+		return false
+	if event.is_action("toggle_help"):
+		return false
+	for action in MOVE_ACTIONS:
+		if event.is_action(action):
+			return false
+	return true
+
+func _input(event: InputEvent) -> void:
+	if _panel.visible and is_action_key(event):
+		_set_open(false)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_help"):

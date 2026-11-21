@@ -22,10 +22,12 @@ const ENTRIES := [
 	["Corona Borealis", 235.0, 28.0],
 ]
 
-## Labels only show once the sky is dark enough for stars to, and fade with it.
-## `stars` is the preset's star level (0..1) and `overcast` the cloud cover.
+## Names are only readable against a properly dark sky, so they show at night
+## and not at dusk or dawn (the lines still do), fading in over the last stretch
+## of darkness and out with cloud. `stars` is the star level (0..1) and
+## `overcast` the cloud cover.
 static func label_alpha(stars: float, overcast: float) -> float:
-	return clampf(stars, 0.0, 1.0) * clampf(1.0 - overcast, 0.0, 1.0)
+	return smoothstep(0.75, 1.0, clampf(stars, 0.0, 1.0)) * clampf(1.0 - overcast, 0.0, 1.0)
 
 ## Unit world direction (+x east, +y up, -z north) of entry `i` at sidereal
 ## time `lst_deg`.

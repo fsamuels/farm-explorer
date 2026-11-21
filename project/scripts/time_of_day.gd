@@ -20,6 +20,13 @@ extends Node
 ## stars sit where they really are over Lowden for today's date and the clock
 ## hour, so they turn with the running clock; N toggles the constellation lines.
 ##
+## The moon (D-123) is a full moon that rises in the east and sets in the west
+## on the clock (`moon_direction()`), lights the night from where it hangs, and
+## washes out the fainter stars while it is high. It can be turned off for good
+## (`set_moon_enabled()`), leaving dark nights. Shooting stars have a rate
+## (`set_meteor_level()`: off, some, shower), and typing "starlink" in the sky
+## menu sends a train of satellites across a dark sky (`start_starlink()`).
+##
 ## The northern lights (D-105) are drawn by the same sky shader, in the north
 ## (-z) sky: weather.gd turns them on with set_aurora(), and they show only as
 ## far as the stars do, so they need a dark, clear sky.
@@ -118,6 +125,18 @@ const PRESETS := {
 	},
 }
 const ORDER := ["day", "sunset", "dusk", "night", "dawn", "sunrise"]
+
+## The full moon crosses due south at this clock hour, so it rises about six
+## hours earlier (18:30, as the sun sets) and sets six hours later (06:30).
+const MOON_TRANSIT_HOUR := 0.5
+## How much of the star light a high moon washes out (0..1).
+const MOON_GLARE := 0.5
+## Shooting stars: seconds between possible streaks for each level; 0 is off.
+const METEOR_LEVELS := [["off", 0.0], ["some", 11.0], ["shower", 2.5]]
+## A Starlink train takes this long to cross the sky, and needs the sky at least
+## this dark (the `stars` level, after cloud and fog) to be seen.
+const STARLINK_SECONDS := 70.0
+const STARLINK_MIN_STARS := 0.3
 ## Where each preset sits on the 24 h clock, in clock order. Night is a long
 ## stretch (23:00 to 05:30) so the clock spends real time in the dark.
 const KEYFRAMES := [[5.5, "dawn"], [6.5, "sunrise"], [13.0, "day"], [18.5, "sunset"], [19.5, "dusk"], [23.0, "night"]]
@@ -140,6 +159,10 @@ const CLOCK_STEP_HOURS := 0.5
 @export var star_map_width := 4096
 ## Draw faint constellation lines in the sky (N toggles).
 @export var show_constellations := true
+## The moon: on (rises and sets) or off for good.
+@export var moon_enabled := true
+## Index into METEOR_LEVELS: off, some (the default) or a shower.
+@export var meteor_level := 1
 
 var current := ""
 ## 0 = clear sky, 1 = fully overcast (set by weather.gd).
@@ -152,6 +175,8 @@ var flash := 0.0
 var aurora_level := 0.0
 ## Wildfire smoke, 0..1 (set by weather.gd).
 var smoke_level := 0.0
+## Seconds into a Starlink train's crossing, or -1 when none is on.
+var _train_time := -1.0
 var _meteor_time := 0.0
 var _meteor_shown := 0.0
 var _aurora_time := 0.0
@@ -320,6 +345,11 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_update_name_labels()
+	if _train_time >= 0.0 and _sky_material:
+		_train_time += delta
+		if _train_time > STARLINK_SECONDS:
+			_train_time = -1.0
+		_sky_material.set_shader_parameter("train_time", _train_time)
 	if _aurora_shown > 0.001 and _sky_material:
 		_aurora_time += delta
 		_sky_material.set_shader_parameter("aurora_time", _aurora_time)
@@ -354,6 +384,71 @@ func set_show_constellations(on: bool) -> void:
 	show_constellations = on
 	if not _shown.is_empty():
 		_apply(_shown)
+	# The names are moved in _process, which doesn't run while the sky menu has
+	# the game paused: update them now so the one button changes lines and names.
+	_update_name_labels()
+
+## Turn the moon on (it rises and sets) or off for good.
+func set_moon_enabled(on: bool) -> void:
+	moon_enabled = on
+	if not _shown.is_empty():
+		_apply(_shown)
+
+## Pick how many shooting stars: an index into METEOR_LEVELS.
+func set_meteor_level(level: int) -> void:
+	meteor_level = clampi(level, 0, METEOR_LEVELS.size() - 1)
+	if not _shown.is_empty():
+		_apply(_shown)
+
+## True if a Starlink train could be seen now: the sky is dark enough, with
+## the weather taken into account.
+func starlink_visible() -> bool:
+	return not _shown.is_empty() and shown().stars >= STARLINK_MIN_STARS
+
+## Send a Starlink train across the sky. Returns false (and does nothing) when
+## the sky is too bright or too cloudy to see one.
+func start_starlink() -> bool:
+	if not starlink_visible():
+		return false
+	_train_time = 0.0
+	if _sky_material:
+		_sky_material.set_shader_parameter("train_time", 0.0)
+	return true
+
+func is_starlink_running() -> bool:
+	return _train_time >= 0.0
+
+## The direction (unit, +x east, +y up, -z north) of the full moon at clock hour
+## `h`, as the sun's opposite number at an equinox: due east on the horizon at
+## 18:30, due south and highest at 00:30, due west on the horizon at 06:30.
+static func moon_direction(h: float) -> Vector3:
+	var hour_angle := deg_to_rad((fposmod(h, 24.0) - MOON_TRANSIT_HOUR) * 15.0)
+	var lat := deg_to_rad(SkyMath.LATITUDE)
+	return Vector3(-sin(hour_angle), cos(lat) * cos(hour_angle), sin(lat) * cos(hour_angle))
+
+## `p` with the night light turned into the moon's: the scene's one directional
+## light blends from the preset's sun to the moon (where it hangs at clock hour
+## `h`, as the preset gets dark: `base_stars` is its star level), and goes out
+## while the moon is below the horizon or turned off. By day it changes nothing.
+static func moon_adjust(p: Dictionary, base_stars: float, h: float, enabled: bool) -> Dictionary:
+	var out := p.duplicate()
+	var m := smoothstep(0.3, 0.8, base_stars)
+	if m <= 0.0:
+		return out
+	var dir := moon_direction(h)
+	var up := smoothstep(-0.05, 0.12, dir.y) if enabled else 0.0
+	var moon_rotation := Basis.looking_at(-dir, Vector3.UP).get_euler() * (180.0 / PI)
+	out.sun_rotation = slerp_rotation(p.sun_rotation, moon_rotation, m)
+	out.sun_energy = lerpf(p.sun_energy, p.sun_energy * up, m)
+	return out
+
+## How much of the stars' light the moon washes out at clock hour `h` (0..MOON_GLARE):
+## nothing when it is off, below the horizon or the sky is not dark, most when high.
+static func moon_glare(base_stars: float, h: float, enabled: bool) -> float:
+	if not enabled:
+		return 0.0
+	var alt := moon_direction(h).y
+	return MOON_GLARE * smoothstep(0.3, 0.8, base_stars) * smoothstep(0.0, 0.5, alt)
 
 ## Start or stop the running clock. Starting continues from the hour set by the
 ## last preset picked; stopping holds whatever the clock reached.
@@ -434,6 +529,7 @@ func shown() -> Dictionary:
 func _apply(preset: Dictionary) -> void:
 	_shown = preset
 	var p := overcast_preset(preset, overcast, fog_extra, flash, aurora_level, smoke_level)
+	p = moon_adjust(p, preset.get("stars", 0.0), sky_hour, moon_enabled)
 	var sun := get_node_or_null(sun_path) as DirectionalLight3D
 	if sun:
 		sun.rotation_degrees = p.sun_rotation
@@ -450,6 +546,8 @@ func _apply(preset: Dictionary) -> void:
 		env.fog_density = p.fog_density
 	_apply_sky(p)
 	lighting_changed.emit(p)
+	if get_tree() and get_tree().paused:
+		_update_name_labels()  # _process is not running to do it
 
 ## Create the sky shader, bake the star maps and put the sky in the
 ## environment in place of its flat background colour. Skipped without an
@@ -484,7 +582,8 @@ func _apply_sky(p: Dictionary) -> void:
 	if not _sky_material:
 		return
 	_sky_material.set_shader_parameter("sky_color", p.sky_color)
-	_sky_material.set_shader_parameter("star_strength", p.stars)
+	var glare := moon_glare(_shown.get("stars", 0.0), sky_hour, moon_enabled)
+	_sky_material.set_shader_parameter("star_strength", p.stars * (1.0 - glare))
 	_sky_material.set_shader_parameter("aurora_strength", p.aurora)
 	_aurora_shown = p.aurora
 	_sky_material.set_shader_parameter("line_strength", 0.14 if show_constellations else 0.0)
@@ -494,11 +593,14 @@ func _apply_sky(p: Dictionary) -> void:
 	var body := body_look(p, _shown.get("stars", 0.0), overcast, fog_extra, smoke_level)
 	_sky_material.set_shader_parameter("body_dir", body.dir)
 	_sky_material.set_shader_parameter("body_color", body.color)
-	_sky_material.set_shader_parameter("body_strength", body.strength)
+	# With the moon off its disc goes too (the sun's is untouched: moon is 0 by day).
+	_sky_material.set_shader_parameter("body_strength", body.strength * (1.0 if moon_enabled else 1.0 - body.moon))
 	_sky_material.set_shader_parameter("body_glow", body.glow)
 	_sky_material.set_shader_parameter("body_moon", body.moon)
 	# Shooting stars only streak across a dark, clear sky.
-	_meteor_shown = smoothstep(0.7, 1.0, p.stars)
+	var period: float = METEOR_LEVELS[meteor_level][1]
+	_meteor_shown = smoothstep(0.7, 1.0, p.stars) if period > 0.0 else 0.0
+	_sky_material.set_shader_parameter("meteor_period", maxf(period, 0.1))
 	_sky_material.set_shader_parameter("meteor_strength", _meteor_shown)
 
 ## How the sun or moon disc is drawn under lighting `p`: where (the direction

@@ -33,6 +33,11 @@ func _run() -> void:
 	_test_built(main, barn, "Front Barn")
 	await _walk_tests(player, house, "south", "Sally's House south door")
 	await _walk_tests(player, house, "east", "Sally's House front door")
+	var back: Node3D = main.get_node("Buildings/BackBarnShell")
+	_test_built(main, back, "Back Barn")
+	_test_back_barn(back)
+	await _walk_tests(player, back, "east", "Back Barn east door")
+	await _walk_tests(player, back, "west", "Back Barn west door")
 	await _open_side_tests(player, barn)
 	await _interior_tests(main, player)
 	print("buildings: %s" % ("OK" if _failures == 0 else "%d FAILED" % _failures))
@@ -60,6 +65,20 @@ func _test_built(main: Node, shell: Node3D, nm: String) -> void:
 	_check(door_count == shell.live_doors().size() and (door_count > 0 or not shell.open_walls.is_empty()), "%s: a working door for each entry (%d)" % [nm, door_count])
 	_check(shell.front_door_spot(3.0) != null, "%s: the map has a way-in spot" % nm)
 	_check(shell.get_node("Ceiling") != null, "%s: has a ceiling" % nm)
+
+## The Back Barn: Shop-style corrugated walls and a big sliding door on each end.
+func _test_back_barn(shell: Node3D) -> void:
+	var Corr := preload("res://scripts/corrugated.gd")
+	_check(shell.corrugated_skin and shell._skin.albedo_texture != null, "Back Barn: corrugated skin")
+	_check(shell._skin.albedo_texture == Corr.material().albedo_texture, "Back Barn: same texture as the Shop")
+	_check(shell.live_doors().size() == 2, "Back Barn: two doors")
+	for wall in ["east", "west"]:
+		var door := _door(shell, wall)
+		_check(door != null and door.kind == preload("res://scripts/shop_door.gd").Kind.SLIDE, "Back Barn: %s door slides" % wall)
+		var spec: Dictionary = Shell.WALLS[wall]
+		var out: Vector3 = shell.global_basis * (spec.out as Vector3)
+		_check(out.x * (1.0 if wall == "east" else -1.0) > 0.9, "Back Barn: %s door faces world %s (%s)" % [wall, wall, out])
+		_check(door.width <= shell.depth - 1.0 and door.height < shell.height, "Back Barn: %s opening fits the wall" % wall)
 
 func _door(shell: Node3D, wall: String) -> Node3D:
 	for c in shell.get_children():

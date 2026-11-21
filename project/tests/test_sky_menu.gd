@@ -6,6 +6,8 @@ extends SceneTree
 const CN := preload("res://scripts/constellation_names.gd")
 const SkyMath := preload("res://scripts/sky_math.gd")
 const Weather := preload("res://scripts/weather.gd")
+const TimeOfDay := preload("res://scripts/time_of_day.gd")
+const ControlsOverlay := preload("res://scripts/controls_overlay.gd")
 
 var _failures := 0
 
@@ -19,6 +21,8 @@ func _check(cond: bool, what: String) -> void:
 
 func _run() -> void:
 	_test_names()
+	_test_moon()
+	_test_overlay_keys()
 	await _test_scene()
 	print("sky menu: %s" % ("OK" if _failures == 0 else "%d FAILED" % _failures))
 	quit(1 if _failures else 0)
@@ -34,6 +38,46 @@ func _test_names() -> void:
 	_check(is_equal_approx(CN.direction(0, 33.0).length(), 1.0), "directions are unit vectors")
 	var minor := CN.direction(1, 10.0)
 	_check(absf(rad_to_deg(asin(minor.y)) - SkyMath.LATITUDE) < 15.0, "Ursa Minor is near the pole altitude")
+
+func _test_moon() -> void:
+	# Names are for the dark of night only, not dusk or dawn.
+	_check(is_zero_approx(CN.label_alpha(0.45, 0.0)) and is_zero_approx(CN.label_alpha(0.35, 0.0)), "no names at dusk or dawn")
+	# The full moon rises in the east at 18:30, is due south and highest at 00:30, sets in the west at 06:30.
+	var rise := TimeOfDay.moon_direction(18.5)
+	var high := TimeOfDay.moon_direction(0.5)
+	var set_ := TimeOfDay.moon_direction(6.5)
+	_check(absf(rise.y) < 0.01 and rise.x > 0.9, "the moon rises in the east: %s" % rise)
+	_check(set_.y < 0.01 and absf(set_.y) < 0.01 and set_.x < -0.9, "the moon sets in the west: %s" % set_)
+	_check(high.y > 0.6 and high.z > 0.5 and absf(high.x) < 0.01, "the moon is high in the south at 00:30: %s" % high)
+	_check(TimeOfDay.moon_direction(13.0).y < -0.5, "the moon is down at midday")
+	var night: Dictionary = TimeOfDay.PRESETS.night
+	var lit := TimeOfDay.moon_adjust(night, 1.0, 0.5, true)
+	_check(lit.sun_energy > 0.25, "a high moon lights the night: %s" % lit.sun_energy)
+	_check(is_zero_approx(TimeOfDay.moon_adjust(night, 1.0, 0.5, false).sun_energy), "no moon, no moonlight")
+	_check(is_zero_approx(TimeOfDay.moon_adjust(night, 1.0, 13.0, true).sun_energy), "no moonlight while the moon is down")
+	_check(is_equal_approx(TimeOfDay.moon_adjust(TimeOfDay.PRESETS.day, 0.0, 13.0, true).sun_energy, 1.0), "the moon changes nothing by day")
+	var dir: Vector3 = Basis.from_euler(lit.sun_rotation * (PI / 180.0)).z
+	_check(dir.distance_to(high) < 0.01, "the night light comes from where the moon is: %s vs %s" % [dir, high])
+	_check(TimeOfDay.moon_glare(1.0, 0.5, true) > 0.4 and is_zero_approx(TimeOfDay.moon_glare(1.0, 0.5, false)), "a high moon washes out stars, off it does not")
+	_check(is_zero_approx(TimeOfDay.moon_glare(1.0, 13.0, true)) and is_zero_approx(TimeOfDay.moon_glare(0.0, 0.5, true)), "no glare while down or by day")
+
+func _test_overlay_keys() -> void:
+	var move := InputEventKey.new()
+	move.physical_keycode = KEY_W
+	move.pressed = true
+	_check(not ControlsOverlay.is_action_key(move), "W is a moving key")
+	for k in [KEY_A, KEY_S, KEY_D, KEY_SPACE, KEY_SHIFT, KEY_F1]:
+		var e := InputEventKey.new()
+		e.physical_keycode = k
+		e.pressed = true
+		_check(not ControlsOverlay.is_action_key(e), "key %s does not minimize the help" % k)
+	for k in [KEY_T, KEY_G, KEY_M, KEY_N, KEY_E, KEY_ESCAPE]:
+		var e := InputEventKey.new()
+		e.physical_keycode = k
+		e.pressed = true
+		_check(ControlsOverlay.is_action_key(e), "key %s minimizes the help" % k)
+		e.echo = true
+		_check(not ControlsOverlay.is_action_key(e), "a held key's echo does not")
 
 func _test_scene() -> void:
 	var main: Node = (load("res://scenes/main.tscn") as PackedScene).instantiate()
@@ -70,7 +114,7 @@ func _test_scene() -> void:
 	menu.choose_weather("aurora")
 	_check(menu._hint.text == "", "the hint clears after a real pick")
 	_check(menu.TIME_ORDER == ["dawn", "sunrise", "day", "sunset", "dusk", "night"], "times run dawn to night")
-	var grouped := []
+	var grouped := ["clear"]  # Clear sits on its own, top centre, above the columns
 	for group in menu.WEATHER_GROUPS:
 		grouped.append_array(group[1])
 	grouped.sort()
@@ -153,8 +197,54 @@ func _test_scene() -> void:
 	tod.set_show_constellations(false)
 	await process_frame
 	_check(_visible_names(tod) == 0, "N hides the names with the lines")
+	# The menu's button owns both, even though the paused game isn't running _process.
+	menu.set_open(true)
+	menu.toggle_names()
+	_check(tod.show_constellations and _visible_names(tod) >= 1, "the menu button brings the names back while paused")
+	menu.toggle_names()
+	_check(not tod.show_constellations and _visible_names(tod) == 0, "the menu button hides the names while paused")
+	menu.toggle_names()
+	# Dusk: lines yes, names no.
+	menu.choose_time("dusk")
+	_check(_visible_names(tod) == 0, "no names at dusk")
+	menu.choose_time("night")
+	# Moon and shooting stars.
+	var mat: ShaderMaterial = tod._sky_material
+	var star_before: float = mat.get_shader_parameter("star_strength")
+	menu.toggle_moon()
+	_check(not tod.moon_enabled and mat.get_shader_parameter("star_strength") > star_before - 0.0001, "the menu turns the moon off")
+	_check(is_zero_approx(mat.get_shader_parameter("body_strength")), "no moon disc with the moon off")
+	menu.toggle_moon()
+	menu.cycle_meteors()
+	_check(tod.meteor_level == 2 and mat.get_shader_parameter("meteor_period") < 5.0, "a shooting star shower is more frequent")
+	menu.cycle_meteors()
+	_check(tod.meteor_level == 0 and is_zero_approx(mat.get_shader_parameter("meteor_strength")), "shooting stars can be turned off")
+	menu.cycle_meteors()
+	_check(tod.meteor_level == 1, "and back to some")
+	# Typing "starlink" with the menu open sends a train, but only on a dark sky.
+	menu.choose_time("day")
+	_type(menu, "starlink")
+	_check(not tod.is_starlink_running() and menu.is_open() and menu._hint.text != "", "no Starlink train by day, and the menu says why")
+	menu.choose_time("night")
+	_type(menu, "starlnk")
+	_check(not tod.is_starlink_running(), "a typo does not start it")
+	_type(menu, "starlink")
+	_check(tod.is_starlink_running() and not menu.is_open(), "typing starlink at night closes the menu and starts a train")
+	_check(mat.get_shader_parameter("train_time") >= 0.0, "the sky shader is told")
+	tod._train_time = TimeOfDay.STARLINK_SECONDS - 0.01
+	tod._process(0.1)
+	_check(not tod.is_starlink_running(), "the train ends")
+	weather.set_weather("thunderstorm", true)
+	_check(not tod.start_starlink(), "no Starlink train under storm cloud")
 	main.queue_free()
 	await process_frame
+
+func _type(menu: Node, text: String) -> void:
+	for letter in text:
+		var e := InputEventKey.new()
+		e.keycode = OS.find_keycode_from_string(letter)
+		e.pressed = true
+		menu._input(e)
 
 func _dim(menu: Node, key: String) -> bool:
 	return (menu._weather_buttons[key] as Button).modulate.a < 1.0
