@@ -64,13 +64,23 @@ func set_open(open: bool) -> void:
 	if open:
 		refresh()
 
+## Pick a time of day. A rainbow or aurora that can't be seen at the new time
+## is dropped (weather goes back to clear).
 func choose_time(preset_name: String) -> void:
 	if _tod:
 		_tod.set_preset(preset_name, true)
+		if _weather and not Weather.allowed_at(_weather.current, preset_name):
+			_weather.set_weather("clear", true)
 	refresh()
 
+## Pick a weather. A special (rainbow, aurora) that doesn't suit the current
+## time of day is ignored; picking the special that is already on turns it off.
 func choose_weather(weather_name: String) -> void:
 	if _weather:
+		if _tod and not Weather.allowed_at(weather_name, _tod.current):
+			return
+		if Weather.SPECIAL_TIMES.has(weather_name) and _weather.current == weather_name:
+			weather_name = "clear"
 		_weather.set_weather(weather_name, true)
 	refresh()
 
@@ -95,7 +105,9 @@ func refresh() -> void:
 		_names_button.text = "Constellation lines and names: " + ("on" if _tod.show_constellations else "off")
 	if _weather:
 		for key in _weather_buttons:
-			(_weather_buttons[key] as Button).set_pressed_no_signal(key == _weather.current)
+			var b := _weather_buttons[key] as Button
+			b.set_pressed_no_signal(key == _weather.current)
+			b.disabled = _tod != null and not Weather.allowed_at(key, _tod.current)
 
 func _build() -> void:
 	_panel = PanelContainer.new()
@@ -122,14 +134,16 @@ func _build() -> void:
 	box.add_child(title)
 
 	box.add_child(_heading("Time of day"))
-	var times := GridContainer.new()
-	times.columns = 3
-	times.add_theme_constant_override("h_separation", 8)
-	times.add_theme_constant_override("v_separation", 8)
+	# One row of six buttons, each painted in that time's sky colour with the
+	# name and clock time on two short lines.
+	var times := HBoxContainer.new()
+	times.add_theme_constant_override("separation", 6)
 	box.add_child(times)
 	for key in TimeOfDay.ORDER:
 		var hour := TimeOfDay.hour_of(key)
-		var b := _button("%s  %s" % [TimeOfDay.PRESETS[key].label, TimeOfDay.clock_estimate(hour).trim_prefix("~")])
+		var b := _button("%s\n%s" % [TimeOfDay.PRESETS[key].label, TimeOfDay.clock_estimate(hour).trim_prefix("~")])
+		_paint_time_button(b, TimeOfDay.PRESETS[key].sky_color)
+		b.custom_minimum_size = Vector2(92, 64)
 		b.pressed.connect(choose_time.bind(key))
 		times.add_child(b)
 		_time_buttons[key] = b
@@ -144,10 +158,15 @@ func _build() -> void:
 	grid.add_theme_constant_override("v_separation", 8)
 	box.add_child(grid)
 	for key in Weather.ORDER:
-		var b := _button(Weather.WEATHER[key].label)
-		b.pressed.connect(choose_weather.bind(key))
-		grid.add_child(b)
-		_weather_buttons[key] = b
+		if not Weather.SPECIAL_TIMES.has(key):
+			_add_weather_button(grid, key)
+
+	box.add_child(_heading("Special sky   (rainbow by day, aurora at night)"))
+	var specials := HBoxContainer.new()
+	specials.add_theme_constant_override("separation", 8)
+	box.add_child(specials)
+	for key in Weather.SPECIAL_TIMES:
+		_add_weather_button(specials, key)
 
 	_names_button = _button("")
 	_names_button.pressed.connect(toggle_names)
@@ -157,6 +176,29 @@ func _build() -> void:
 	close.toggle_mode = false
 	close.pressed.connect(set_open.bind(false))
 	box.add_child(close)
+
+func _add_weather_button(parent: Container, key: String) -> void:
+	var b := _button(Weather.WEATHER[key].label)
+	b.pressed.connect(choose_weather.bind(key))
+	parent.add_child(b)
+	_weather_buttons[key] = b
+
+## Fill a time-of-day button with the sky colour (lightened a little so Night
+## isn't a black hole), light text on the dark ones and dark text on the rest,
+## and a bright border when it is the chosen one.
+func _paint_time_button(b: Button, sky: Color) -> void:
+	var fill := sky.lerp(Color.WHITE, 0.12)
+	var dark := fill.get_luminance() < 0.45
+	var text := Color(1, 1, 1) if dark else Color(0.1, 0.1, 0.12)
+	for state in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
+		var s := StyleBoxFlat.new()
+		s.bg_color = fill.lightened(0.12) if state.begins_with("hover") else fill
+		s.set_corner_radius_all(8)
+		s.set_border_width_all(4 if state.ends_with("pressed") else 1)
+		s.border_color = KEY_COLOR if state.ends_with("pressed") else Color(1, 1, 1, 0.25)
+		b.add_theme_stylebox_override(state, s)
+	for color_name in ["font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color"]:
+		b.add_theme_color_override(color_name, text)
 
 func _heading(text: String) -> Label:
 	var l := Label.new()
