@@ -24,6 +24,8 @@ farm-sim/
 │   │                              # ever needs to leave the photographer's machine
 │   └── models/                   # 3D models (buildings, animals) once created
 ├── tools/
+│   ├── build_player_model.py     # Blender (bpy) script that builds project/models/player.glb
+│   │                              from Quaternius's CC0 base-character + animation packs (D-89)
 │   ├── ortho_fence_trace.py      # Python (Pillow + numpy) helpers to trace white fence
 │   │                              lines off the front-section orthomosaic and convert
 │   │                              pixels to scene meters via the ground plane's own
@@ -47,7 +49,7 @@ farm-sim/
     │   ├── main.tscn             # ground plane (NAIP-textured) + a higher-res drone-orthomosaic
     │   │                          # patch over the front section (see D-19) and one over the
     │   │                          # middle section (see D-83) + instances below
-    │   ├── player.tscn           # first-person player, instanced once in main.tscn
+    │   ├── player.tscn           # player (Forrest model + 1st/3rd-person cameras), instanced once in main.tscn — see D-89
     │   ├── fence_segment.tscn    # procedurally-generated wire/post fence, instanced 11x (boundary polygon, east side across the road) — see D-11, D-82
     │   ├── fence_path.tscn       # same wire/post look, but built from a Path3D/Curve3D's points instead of a length — instanced 2x for the round pens, hand-editable in the editor by clicking points on the ground — see D-67/D-69
     │   ├── gate.tscn              # swinging pipe-panel gate (hinge at the origin, panel along +X), opened/closed with E via player.gd — see D-76
@@ -67,7 +69,7 @@ farm-sim/
     │   ├── quail.tscn             # wraps models/quail.glb with wander.gd, instanced 6x
     │   └── tr6.tscn               # wraps models/tr6.glb (no script — stationary prop), instanced once
     ├── scripts/
-    │   ├── player.gd             # first-person walking controller + look-at-and-press-E interaction ray and prompt (D-76)
+    │   ├── player.gd             # walking controller, V toggles 1st/3rd person, drives the body's animations (D-89) + look-at-and-press-E interaction ray and prompt (D-76)
     │   ├── horse.gd               # horse-specific wander AI (drives its own AnimationPlayer)
     │   ├── wander.gd              # generic no-animation wander AI, reused by hen/rooster/flock/coyote/ducks/geese/quail
     │   ├── fence_segment.gd       # @tool script: builds posts+wire strands from an exported length — see D-11
@@ -86,6 +88,8 @@ farm-sim/
     │   ├── duck_madtroll.glb       # CC-BY static mesh (madtrollstudio) — see D-15/D-17, credits.md
     │   ├── goose.glb               # CC-BY static mesh (Poly by Google) — see D-16, credits.md
     │   ├── quail.glb               # CC-BY static mesh (Poly by Google) — see D-17, credits.md
+    │   ├── player.glb              # CC0 rigged/animated player character (Quaternius base, dressed by
+    │   │                            # tools/build_player_model.py; textures embedded) — see D-89
     │   └── tr6.glb                 # CC-BY static mesh (Configcars, Sketchfab), simplified from a 32MB/879k-tri
     │                                # download to 7.7MB — see D-25, credits.md
     └── textures/
