@@ -144,7 +144,7 @@ func _process(delta: float) -> void:
 	if vehicle:
 		interact_prompt.visible = true
 		_prompt_flash_left -= delta
-		var speed_text := "%d km/h" % roundi(vehicle.speed_kmh())
+		var speed_text := "%d mph" % roundi(vehicle.speed_mph())
 		if _prompt_flash_left > 0.0:
 			interact_prompt.text = "%s  ·  %s" % [_prompt_flash, speed_text]
 		else:
