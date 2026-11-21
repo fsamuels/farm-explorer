@@ -12,6 +12,10 @@ The highlights of Farm Explorer, newest first. For the full technical history, s
   and the northern lights.
 - **Weather that changes the world.** Fog, rain, snow, thunderstorms and rainbows,
   with wet ground, puddles and snow that settles.
+- **Wildfire smoke.** Smoke haze and heavy smoke turn the light orange and drop a
+  little ash.
+- **Look up.** A sun by day, a moon at night, Venus, Mars, Jupiter and Saturn where
+  they really are, and the occasional shooting star.
 - **Pick your sky.** A new sky menu (G) sets the time of day and the weather
   directly, and a clock can run the day for you.
 - **Easier to use.** A clearer "press E" prompt, and a clock readout in the corner.
