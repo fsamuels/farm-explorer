@@ -12,6 +12,9 @@ extends Node3D
 
 const Corrugated := preload("res://scripts/corrugated.gd")
 
+## Physics layer (bit 8) for interact-only bodies; the interact rays look at it.
+const PICK_LAYER := 1 << 7
+
 enum Kind { SWING, SLIDE, ROLLUP }
 
 @export var kind: Kind = Kind.SWING
@@ -31,6 +34,7 @@ enum Kind { SWING, SLIDE, ROLLUP }
 
 var is_open := false
 var _body: AnimatableBody3D
+var _visual: Node3D
 var _shape: CollisionShape3D
 var _tween: Tween
 
@@ -59,16 +63,17 @@ func set_open(open: bool) -> void:
 		Kind.SLIDE:
 			_tween.tween_property(_body, "position:x", slide if open else 0.0, time)
 		Kind.ROLLUP:
-			_tween.tween_property(_body, "scale:y", 0.02 if open else 1.0, time)
-	# Sliding and rolling leaves have no useful collision once open (a scaled
-	# collider would also misbehave); swing leaves keep theirs mid-swing so
-	# they shove the player, like gates.
+			_tween.tween_property(_visual, "scale:y", 0.02 if open else 1.0, time)
+	# Sliding and rolling leaves stop blocking once open; the collider comes
+	# back only when they have finished closing, so it never appears inside
+	# the player. Swing leaves keep theirs mid-swing so they shove the player,
+	# like gates. The pick body (see _build) stays put so E can still close.
 	if kind == Kind.SWING:
 		return
 	if open:
-		_tween.tween_callback(func(): _shape.set_deferred("disabled", true))
+		_shape.set_deferred("disabled", true)
 	else:
-		_shape.set_deferred("disabled", false)
+		_tween.tween_callback(func(): _shape.set_deferred("disabled", false))
 
 func _build() -> void:
 	for child in get_children():
@@ -90,9 +95,14 @@ func _build() -> void:
 	# SWING leaves are centred on their hinge at the origin; the others are
 	# centred over the opening so scaling / sliding reads naturally.
 	var centre := Vector3(width / 2.0, height / 2.0, offset_z)
+	var parent: Node3D = _body
 	if kind == Kind.ROLLUP:
-		# Pivot at the top so the leaf rolls up toward the header.
-		_body.position.y = height
+		# Pivot at the top so the leaf rolls up toward the header; only this
+		# visual is scaled, never the physics body.
+		_visual = Node3D.new()
+		_visual.position.y = height
+		_body.add_child(_visual)
+		parent = _visual
 		centre.y = -height / 2.0
 	var mesh := BoxMesh.new()
 	mesh.size = Vector3(width, height, thickness)
@@ -100,7 +110,7 @@ func _build() -> void:
 	leaf.mesh = mesh
 	leaf.material_override = material
 	leaf.position = centre
-	_body.add_child(leaf)
+	parent.add_child(leaf)
 
 	if window_pane:
 		var glass := StandardMaterial3D.new()
@@ -112,7 +122,7 @@ func _build() -> void:
 		pane.mesh = pane_mesh
 		pane.material_override = glass
 		pane.position = centre + Vector3(0, height * 0.22, 0)
-		_body.add_child(pane)
+		parent.add_child(pane)
 
 	if kind != Kind.ROLLUP:
 		# A knob / pull on the inside face is skipped; a handle on both faces
@@ -127,11 +137,27 @@ func _build() -> void:
 		handle_material.roughness = 0.35
 		handle.material_override = handle_material
 		handle.position = Vector3(width - 0.12 if kind == Kind.SWING else 0.2, 0.95, offset_z)
-		_body.add_child(handle)
+		parent.add_child(handle)
 
 	var box := BoxShape3D.new()
 	box.size = Vector3(width, height, thickness)
 	_shape = CollisionShape3D.new()
 	_shape.shape = box
-	_shape.position = centre
+	_shape.position = Vector3(width / 2.0, height / 2.0, offset_z)
 	_body.add_child(_shape)
+
+	if kind != Kind.SWING:
+		# Interact-only body that stays at the closed position so the player's
+		# ray can still find the door while it is open. It sits on its own
+		# layer, which the player's body ignores (player.gd adds it to the rays).
+		var pick := StaticBody3D.new()
+		pick.name = "Pick"
+		pick.collision_layer = PICK_LAYER
+		pick.collision_mask = 0
+		var pick_shape := CollisionShape3D.new()
+		var pick_box := BoxShape3D.new()
+		pick_box.size = Vector3(width, height, 0.05)
+		pick_shape.shape = pick_box
+		pick_shape.position = Vector3(width / 2.0, height / 2.0, 0.0)
+		pick.add_child(pick_shape)
+		add_child(pick)

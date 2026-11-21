@@ -9,12 +9,17 @@ const NORMAL := "res://textures/buildings/corrugated_blue_normal.png"
 ## One 256 px tile holds 8 ribs; a 1.25 scale gives a ~10 cm rib pitch.
 const TILE_SCALE := 1.25
 
+static var _cache := {}
+
 static func _mipmapped(path: String) -> Texture2D:
+	if _cache.has(path):
+		return _cache[path]
 	var image := (load(path) as Texture2D).get_image()
 	if image.is_compressed():
 		image.decompress()
 	image.generate_mipmaps()
-	return ImageTexture.create_from_image(image)
+	_cache[path] = ImageTexture.create_from_image(image)
+	return _cache[path]
 
 ## World-space triplanar keeps the ribs continuous across separate wall
 ## pieces and facing in the same direction on every wall.

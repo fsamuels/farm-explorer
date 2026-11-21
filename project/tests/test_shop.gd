@@ -17,7 +17,7 @@ func _check(cond: bool, what: String) -> void:
 
 ## True if a ray between two points in the Shop's frame hits something.
 func _hits(shell: Node3D, from: Vector3, to: Vector3) -> bool:
-	var query := PhysicsRayQueryParameters3D.create(shell.to_global(from), shell.to_global(to))
+	var query := PhysicsRayQueryParameters3D.create(shell.to_global(from), shell.to_global(to), 1)
 	return not _space.intersect_ray(query).is_empty()
 
 func _run() -> void:
@@ -64,14 +64,23 @@ func _run() -> void:
 	_check(not _hits(shell, barn_ray[0], barn_ray[1]), "open barn door lets you through")
 	_check(_hits(shell, Vector3(0, 1.0, -hd - 2), Vector3(0, 1.0, -hd + 2)), "north wall still solid")
 
+	# E must still find an open sliding / roll-up door to close it: the interact
+	# rays see the door's pick body, which stays put and never blocks walking.
+	for ray in [garage_ray, barn_ray]:
+		var q := PhysicsRayQueryParameters3D.create(shell.to_global(ray[0]), shell.to_global(ray[1]), 1 << 7)
+		var hit := _space.intersect_ray(q)
+		_check(not hit.is_empty() and hit.collider.get_parent().has_method("interact"), "open door is still pickable")
+
 	# The barn door ends up clear of the opening, flush with the north wall.
 	var leaf := barn.get_node("Leaf") as Node3D
 	var leaf_north := shell.to_local(leaf.global_position + leaf.global_basis.x * barn.width).z
 	_check(absf(leaf_north - (-hd)) < 0.05, "barn leaf's far edge is even with the north wall: %s vs %s" % [leaf_north, -hd])
 
 	barn.interact(null)
+	garage.interact(null)
 	await create_timer(3.2).timeout
 	await physics_frame
+	_check(_hits(shell, garage_ray[0], garage_ray[1]), "closing the garage door blocks it again")
 	_check(_hits(shell, barn_ray[0], barn_ray[1]), "closing the barn door blocks it again")
 
 	print("shop: %s" % ("OK" if _failures == 0 else "%d FAILED" % _failures))

@@ -61,9 +61,10 @@ func _ready() -> void:
 	width = b.x.length()
 	depth = b.z.length()
 	height = b.y.length()
-	# Same yaw as the box, but unscaled and sitting on the ground.
+	var x_axis := (b.x / width).normalized()
+	# Same yaw as the box (re-orthogonalised: its basis is slightly skewed), but unscaled and sitting on the ground.
 	global_transform = Transform3D(
-			Basis(b.x / width, Vector3.UP, b.z / depth),
+			Basis(x_axis, Vector3.UP, x_axis.cross(Vector3.UP)),
 			Vector3(shop.global_position.x, 0.0, shop.global_position.z))
 	_make_materials()
 	_walls = StaticBody3D.new()
@@ -137,11 +138,11 @@ func _build() -> void:
 	_build_lights()
 
 	# East door: hinge on the north edge, leaf runs south, swings inward (-X).
-	_add_door(Vector3(half_w, 0, main_c - MAIN_DOOR_W / 2.0 - 0.02), -90.0, {
+	_add_door(Vector3(half_w - WALL_T / 2.0, 0, main_c - MAIN_DOOR_W / 2.0 - 0.02), -90.0, {
 		kind = DoorScript.Kind.SWING, width = MAIN_DOOR_W, height = MAIN_DOOR_H - 0.02,
 		label = "door", window_pane = true, swing_time = 0.8})
 	# South wall: origin at the opening's east edge, leaf extends west.
-	_add_door(Vector3(garage_c + GARAGE_W / 2.0, 0, half_d), 180.0, {
+	_add_door(Vector3(garage_c + GARAGE_W / 2.0, 0, half_d - WALL_T / 2.0), 180.0, {
 		kind = DoorScript.Kind.ROLLUP, width = GARAGE_W, height = GARAGE_H,
 		label = "garage door", color = Color(0.9, 0.9, 0.88), swing_time = 1.2})
 	# West wall: origin at the leaf's south edge, hung outside, slides north
@@ -149,7 +150,7 @@ func _build() -> void:
 	var leaf_north := barn_south - BARN_LEAF_W
 	_add_door(Vector3(-half_w, 0, barn_south), 90.0, {
 		kind = DoorScript.Kind.SLIDE, width = BARN_LEAF_W, height = BARN_LEAF_H,
-		thickness = 0.06, offset_z = -(WALL_T / 2.0 + 0.06), slide = leaf_north + half_d,
+		thickness = 0.06, offset_z = -0.06 / 2.0 - 0.01, slide = leaf_north + half_d,
 		label = "barn door", ribbed = true, color = Color(0.9, 0.93, 1.0), swing_time = 1.2})
 
 func _add_door(pos: Vector3, yaw_deg: float, props: Dictionary) -> void:
@@ -191,7 +192,14 @@ func _build_window(c: float) -> void:
 	_add_box(Vector3(x, WINDOW_SILL + WINDOW_H - f / 2.0, c), Vector3(WALL_T + 0.04, f, WINDOW_W + 2 * f), _trim_material, false)
 	for side in [-1.0, 1.0]:
 		_add_box(Vector3(x, y, c + side * (WINDOW_W / 2.0 - f / 2.0)), Vector3(WALL_T + 0.04, WINDOW_H, f), _trim_material, false)
-	_add_box(Vector3(x, y, c), Vector3(0.02, WINDOW_H - 2 * f, WINDOW_W - 2 * f), _glass_material, true, false)
+	_add_box(Vector3(x, y, c), Vector3(0.02, WINDOW_H - 2 * f, WINDOW_W - 2 * f), _glass_material, false, false)
+	# Collision spans the whole wall thickness so nothing can clip through.
+	var glass_shape := BoxShape3D.new()
+	glass_shape.size = Vector3(WALL_T, WINDOW_H - 2 * f, WINDOW_W - 2 * f)
+	var glass_cs := CollisionShape3D.new()
+	glass_cs.shape = glass_shape
+	glass_cs.position = Vector3(x, y, c)
+	_walls.add_child(glass_cs)
 	# Centre mullion splits the pane into two sashes.
 	_add_box(Vector3(x, y, c), Vector3(WALL_T + 0.02, WINDOW_H - 2 * f, 0.04), _trim_material, false)
 
