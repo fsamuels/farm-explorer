@@ -29,6 +29,7 @@ in that repo).
   godot --headless -s res://tests/test_map_scene.gd
   godot --headless -s res://tests/test_time_of_day.gd
   godot --headless -s res://tests/test_weather.gd
+  godot --headless -s res://tests/test_night_sky.gd
   godot --headless -s res://tests/test_wall_layout.gd
   godot --headless -s res://tests/test_shop.gd
   ```

@@ -4,6 +4,12 @@ Third-party assets used in this project that require attribution under their lic
 CC0 assets (e.g. the horse model, see D-9 in
 [decisions.md](project/decisions.md)) need no entry here — they're public domain.
 
+## Data
+
+| Asset | Creator | Source | License |
+| --- | --- | --- | --- |
+| Star positions and magnitudes (`project/scripts/star_data.gd`, built by `tools/build_star_data.py`) | Yale Bright Star Catalogue, 5th revised ed. (Hoffleit & Warren); JSON conversion by Bretton Wade | [github.com/brettonw/YaleBrightStarCatalog](https://github.com/brettonw/YaleBrightStarCatalog) | Catalogue is public domain; the conversion is MIT |
+
 ## Models
 
 | Asset | Creator | Source | License |

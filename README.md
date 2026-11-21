@@ -11,7 +11,7 @@ Project skeleton is in [`project/`](project) — a walkable first-person control
 (F or the mouse wheel switches to a third-person view of the player character, D-89/D-91;
 M opens a full-screen map with labeled buildings, a waypoint, your trail and an X / Z coordinate grid, D-93/D-97;
 T cycles the time of day through day, sunset, dusk, night, dawn and sunrise, D-94–D-96,
-and Y runs a clock that advances it on its own, D-99;
+and Y runs a clock that advances it on its own, D-99, under a night sky of real stars, a Milky Way and constellation lines (N), D-101;
 R cycles the weather through clear, drizzle, rain, downpour, thunderstorm, light and heavy fog and snow, D-95/D-99;
 the Shop is walk-in — blue corrugated walls, windows, and an entry door, roll-up garage door and sliding barn door you open with E, D-98),
 the real parcel boundary and (approximate) building footprints, and a ground
