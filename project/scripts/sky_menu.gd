@@ -10,7 +10,34 @@ const Weather := preload("res://scripts/weather.gd")
 
 const FONT_SIZE := 22
 const KEY_COLOR := Color(1.0, 0.86, 0.55)
-const WEATHER_COLUMNS := 2
+const UNAVAILABLE_TINT := Color(1, 1, 1, 0.4)
+
+## Times of day left to right, dawn to night (TimeOfDay.ORDER is the T-key order).
+const TIME_ORDER := ["dawn", "sunrise", "day", "sunset", "dusk", "night"]
+
+## The weather columns: a heading and the weathers under it, top to bottom.
+const WEATHER_GROUPS := [
+	["Clear & fog", ["clear", "light_fog", "heavy_fog"]],
+	["Rain", ["drizzle", "rain", "downpour", "thunderstorm"]],
+	["Snow", ["snow", "heavy_snow"]],
+	["Special", ["rainbow", "aurora"]],
+]
+
+## Each weather button's gradient, top and bottom, echoing how that weather
+## looks in the sky.
+const WEATHER_COLORS := {
+	"clear": [Color(0.35, 0.6, 0.9), Color(0.7, 0.85, 0.97)],
+	"light_fog": [Color(0.62, 0.65, 0.68), Color(0.78, 0.8, 0.82)],
+	"heavy_fog": [Color(0.45, 0.47, 0.5), Color(0.65, 0.67, 0.7)],
+	"drizzle": [Color(0.5, 0.6, 0.7), Color(0.62, 0.7, 0.78)],
+	"rain": [Color(0.33, 0.42, 0.55), Color(0.5, 0.58, 0.68)],
+	"downpour": [Color(0.22, 0.3, 0.45), Color(0.36, 0.45, 0.58)],
+	"thunderstorm": [Color(0.16, 0.14, 0.28), Color(0.36, 0.3, 0.5)],
+	"snow": [Color(0.72, 0.8, 0.9), Color(0.93, 0.96, 1.0)],
+	"heavy_snow": [Color(0.6, 0.68, 0.8), Color(0.85, 0.9, 0.96)],
+	"rainbow": [Color(0.5, 0.7, 0.95), Color(0.97, 0.82, 0.62)],
+	"aurora": [Color(0.04, 0.1, 0.18), Color(0.1, 0.55, 0.4)],
+}
 
 @export var time_of_day_path: NodePath = ^"../TimeOfDay"
 @export var weather_path: NodePath = ^"../Weather"
@@ -21,6 +48,7 @@ var _time_buttons := {}
 var _weather_buttons := {}
 var _clock_button: Button
 var _names_button: Button
+var _hint: Label
 var _panel: PanelContainer
 var _mouse_before := Input.MOUSE_MODE_CAPTURED
 
@@ -71,6 +99,7 @@ func choose_time(preset_name: String) -> void:
 		_tod.set_preset(preset_name, true)
 		if _weather and not Weather.allowed_at(_weather.current, preset_name):
 			_weather.set_weather("clear", true)
+	_hint.text = ""
 	refresh()
 
 ## Pick a weather. A special (rainbow, aurora) that doesn't suit the current
@@ -79,10 +108,21 @@ func choose_weather(weather_name: String) -> void:
 	if _weather:
 		if Weather.SPECIAL_TIMES.has(weather_name) and _weather.current == weather_name:
 			weather_name = "clear"
-		elif _tod and not Weather.allowed_at(weather_name, _tod.current):
+		elif not is_available(weather_name):
+			# Dimmed, not disabled, so a click can say why it isn't offered now.
+			_hint.text = Weather.restriction_text(weather_name)
 			return
 		_weather.set_weather(weather_name, true)
+	_hint.text = ""
 	refresh()
+
+## True if `weather_name` can be chosen at the current time of day. The active
+## weather always counts, so a special left on at the wrong time (R, the clock)
+## can still be switched off.
+func is_available(weather_name: String) -> bool:
+	if _weather and weather_name == _weather.current:
+		return true
+	return _tod == null or Weather.allowed_at(weather_name, _tod.current)
 
 func toggle_clock() -> void:
 	if _tod:
@@ -107,14 +147,12 @@ func refresh() -> void:
 		for key in _weather_buttons:
 			var b := _weather_buttons[key] as Button
 			b.set_pressed_no_signal(key == _weather.current)
-			# Never lock the active one: R or the clock can leave a special on
-			# at the wrong time, and it must still be possible to switch it off.
-			b.disabled = key != _weather.current and _tod != null and not Weather.allowed_at(key, _tod.current)
+			b.modulate = Color.WHITE if is_available(key) else UNAVAILABLE_TINT
 
 func _build() -> void:
 	_panel = PanelContainer.new()
 	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.04, 0.06, 0.1, 0.88)
+	style.bg_color = Color(0.04, 0.06, 0.1, 0.97)
 	style.set_corner_radius_all(14)
 	style.set_content_margin_all(22)
 	style.border_color = KEY_COLOR
@@ -131,7 +169,7 @@ func _build() -> void:
 	_panel.add_child(box)
 
 	var title := Label.new()
-	title.text = "Sky & weather"
+	title.text = "Sky & Weather"
 	title.add_theme_font_size_override("font_size", FONT_SIZE + 10)
 	box.add_child(title)
 
@@ -141,10 +179,11 @@ func _build() -> void:
 	var times := HBoxContainer.new()
 	times.add_theme_constant_override("separation", 6)
 	box.add_child(times)
-	for key in TimeOfDay.ORDER:
+	for key in TIME_ORDER:
 		var hour := TimeOfDay.hour_of(key)
 		var b := _button("%s\n%s" % [TimeOfDay.PRESETS[key].label, TimeOfDay.clock_estimate(hour).trim_prefix("~")])
-		_paint_time_button(b, TimeOfDay.PRESETS[key].sky_color)
+		var sky: Color = TimeOfDay.PRESETS[key].sky_color.lerp(Color.WHITE, 0.1)
+		_paint_gradient(b, sky.darkened(0.12), sky.lightened(0.18), 8)
 		b.custom_minimum_size = Vector2(92, 64)
 		b.pressed.connect(choose_time.bind(key))
 		times.add_child(b)
@@ -154,21 +193,30 @@ func _build() -> void:
 	box.add_child(_clock_button)
 
 	box.add_child(_heading("Weather"))
-	var grid := GridContainer.new()
-	grid.columns = WEATHER_COLUMNS
-	grid.add_theme_constant_override("h_separation", 8)
-	grid.add_theme_constant_override("v_separation", 8)
-	box.add_child(grid)
-	for key in Weather.ORDER:
-		if not Weather.SPECIAL_TIMES.has(key):
-			_add_weather_button(grid, key)
+	# Related weathers stack in vertical lists.
+	var columns := HBoxContainer.new()
+	columns.add_theme_constant_override("separation", 8)
+	box.add_child(columns)
+	for group in WEATHER_GROUPS:
+		var column := VBoxContainer.new()
+		column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		column.add_theme_constant_override("separation", 8)
+		columns.add_child(column)
+		var label := Label.new()
+		label.text = group[0]
+		label.add_theme_font_size_override("font_size", FONT_SIZE - 6)
+		label.add_theme_color_override("font_color", Color(0.7, 0.72, 0.78))
+		column.add_child(label)
+		for key in group[1]:
+			_add_weather_button(column, key)
 
-	box.add_child(_heading("Special sky   (rainbow dawn to sunset, aurora dusk and night)"))
-	var specials := HBoxContainer.new()
-	specials.add_theme_constant_override("separation", 8)
-	box.add_child(specials)
-	for key in Weather.SPECIAL_TIMES:
-		_add_weather_button(specials, key)
+	# Says why a dimmed weather isn't available when you click it; sits right
+	# under the columns and keeps its height when empty so nothing jumps.
+	_hint = Label.new()
+	_hint.custom_minimum_size = Vector2(0, 30)
+	_hint.add_theme_font_size_override("font_size", FONT_SIZE - 4)
+	_hint.add_theme_color_override("font_color", KEY_COLOR)
+	box.add_child(_hint)
 
 	_names_button = _button("")
 	_names_button.pressed.connect(toggle_names)
@@ -181,24 +229,41 @@ func _build() -> void:
 
 func _add_weather_button(parent: Container, key: String) -> void:
 	var b := _button(Weather.WEATHER[key].label)
+	_paint_gradient(b, WEATHER_COLORS[key][0], WEATHER_COLORS[key][1], 6)
+	if Weather.SPECIAL_TIMES.has(key):
+		b.tooltip_text = Weather.restriction_text(key)
 	b.pressed.connect(choose_weather.bind(key))
 	parent.add_child(b)
 	_weather_buttons[key] = b
 
-## Fill a time-of-day button with the sky colour (lightened a little so Night
-## isn't a black hole), light text on the dark ones and dark text on the rest,
-## and a bright border when it is the chosen one.
-func _paint_time_button(b: Button, sky: Color) -> void:
-	var fill := sky.lerp(Color.WHITE, 0.12)
-	var dark := fill.get_luminance() < 0.45
-	var text := Color(1, 1, 1) if dark else Color(0.1, 0.1, 0.12)
-	for state in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
-		var s := StyleBoxFlat.new()
-		s.bg_color = fill.lightened(0.12) if state.begins_with("hover") else fill
-		s.set_corner_radius_all(8)
-		s.set_border_width_all(4 if state.ends_with("pressed") else 1)
-		s.border_color = KEY_COLOR if state.ends_with("pressed") else Color(1, 1, 1, 0.25)
+## Paint a button with a top-to-bottom gradient (the weather's or time's sky),
+## dark text on light colours and white on dark, and a gold border plus a flat
+## mid-tone fill when it is the chosen one.
+func _paint_gradient(b: Button, top: Color, bottom: Color, radius: int) -> void:
+	var gradient := Gradient.new()
+	gradient.set_color(0, top)
+	gradient.set_color(1, bottom)
+	var tex := GradientTexture2D.new()
+	tex.gradient = gradient
+	tex.fill_from = Vector2(0, 0)
+	tex.fill_to = Vector2(0, 1)
+	tex.width = 4
+	tex.height = 64
+	var mid := top.lerp(bottom, 0.5)
+	for state in ["normal", "hover"]:
+		var s := StyleBoxTexture.new()
+		s.texture = tex
+		if state == "hover":
+			s.modulate_color = Color(1.15, 1.15, 1.15)
 		b.add_theme_stylebox_override(state, s)
+	for state in ["pressed", "hover_pressed"]:
+		var s := StyleBoxFlat.new()
+		s.bg_color = mid
+		s.set_corner_radius_all(radius)
+		s.set_border_width_all(4)
+		s.border_color = KEY_COLOR
+		b.add_theme_stylebox_override(state, s)
+	var text := Color(1, 1, 1) if mid.get_luminance() < 0.45 else Color(0.1, 0.1, 0.12)
 	for color_name in ["font_color", "font_hover_color", "font_pressed_color", "font_hover_pressed_color"]:
 		b.add_theme_color_override(color_name, text)
 
@@ -217,4 +282,12 @@ func _button(text: String) -> Button:
 	b.custom_minimum_size = Vector2(0, 44)
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	b.add_theme_font_size_override("font_size", FONT_SIZE - 2)
+	# The chosen one stands out: lighter fill and the menu's gold border.
+	for state in ["pressed", "hover_pressed"]:
+		var s := StyleBoxFlat.new()
+		s.bg_color = Color(0.2, 0.26, 0.38)
+		s.set_corner_radius_all(6)
+		s.set_border_width_all(3)
+		s.border_color = KEY_COLOR
+		b.add_theme_stylebox_override(state, s)
 	return b

@@ -63,17 +63,34 @@ func _test_scene() -> void:
 		_check(Weather.allowed_at("rainbow", t) and not Weather.allowed_at("aurora", t), "rainbow but no aurora at %s" % t)
 	_check(Weather.allowed_at("aurora", "dusk") and Weather.allowed_at("aurora", "night"), "aurora at dusk and night")
 	_check(Weather.allowed_at("snow", "day") and Weather.allowed_at("snow", "night"), "ordinary weather at any time")
-	_check((menu._weather_buttons["rainbow"] as Button).disabled and not (menu._weather_buttons["aurora"] as Button).disabled, "at night the rainbow is greyed out, the aurora is not")
+	_check(_dim(menu, "rainbow") and not _dim(menu, "aurora"), "at night the rainbow is dimmed, the aurora is not")
 	menu.choose_weather("rainbow")
 	_check(weather.current == "snow", "a rainbow can't be picked at night: %s" % weather.current)
+	_check(menu._hint.text == Weather.restriction_text("rainbow") and menu._hint.text.contains("dawn"), "clicking the dimmed rainbow says when it appears: '%s'" % menu._hint.text)
 	menu.choose_weather("aurora")
+	_check(menu._hint.text == "", "the hint clears after a real pick")
+	_check(menu.TIME_ORDER == ["dawn", "sunrise", "day", "sunset", "dusk", "night"], "times run dawn to night")
+	var grouped := []
+	for group in menu.WEATHER_GROUPS:
+		grouped.append_array(group[1])
+	grouped.sort()
+	var all_weather: Array = weather.ORDER.duplicate()
+	all_weather.sort()
+	_check(grouped == all_weather, "every weather is in exactly one column")
+	for key in weather.ORDER:
+		_check(menu.WEATHER_COLORS.has(key), "a gradient for weather '%s'" % key)
+	var times_sorted: Array = menu.TIME_ORDER.duplicate()
+	times_sorted.sort()
+	var tod_sorted: Array = tod.ORDER.duplicate()
+	tod_sorted.sort()
+	_check(times_sorted == tod_sorted, "the menu lists every time of day once")
 	_check(weather.current == "aurora", "the aurora can be picked at night")
 	menu.choose_weather("aurora")
 	_check(weather.current == "clear", "picking the aurora again turns it off: %s" % weather.current)
 	menu.choose_weather("aurora")
 	menu.choose_time("day")
 	_check(weather.current == "clear", "moving to day drops the aurora: %s" % weather.current)
-	_check((menu._weather_buttons["aurora"] as Button).disabled and not (menu._weather_buttons["rainbow"] as Button).disabled, "by day the aurora is greyed out, the rainbow is not")
+	_check(_dim(menu, "aurora") and not _dim(menu, "rainbow"), "by day the aurora is dimmed, the rainbow is not")
 	menu.choose_weather("rainbow")
 	_check(weather.current == "rainbow", "the rainbow can be picked by day")
 	menu.choose_time("sunset")
@@ -83,7 +100,7 @@ func _test_scene() -> void:
 	# A special left on at the wrong time (R, the clock) can still be switched off.
 	weather.set_weather("rainbow", true)
 	menu.refresh()
-	_check(not (menu._weather_buttons["rainbow"] as Button).disabled, "an active special is never locked")
+	_check(not _dim(menu, "rainbow"), "an active special is never dimmed")
 	menu.choose_weather("rainbow")
 	_check(weather.current == "clear", "it can be switched off: %s" % weather.current)
 	menu.choose_time("night")
@@ -138,6 +155,9 @@ func _test_scene() -> void:
 	_check(_visible_names(tod) == 0, "N hides the names with the lines")
 	main.queue_free()
 	await process_frame
+
+func _dim(menu: Node, key: String) -> bool:
+	return (menu._weather_buttons[key] as Button).modulate.a < 1.0
 
 func _visible_names(tod: Node) -> int:
 	var n := 0
