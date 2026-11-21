@@ -143,6 +143,8 @@ func _draw() -> void:
 		_draw_compass(Vector2(size.x - 90, 90))
 	if show_scale_bar:
 		_draw_scale_bar(Vector2(32, size.y - 40))
+	if show_grid:
+		_draw_grid_labels()
 
 func _screen_points(world_points: PackedVector2Array) -> PackedVector2Array:
 	var out := PackedVector2Array()
@@ -282,22 +284,37 @@ const GRID_COLOR := Color(1, 1, 1, 0.14)
 const GRID_MAJOR_COLOR := Color(1, 1, 1, 0.3)
 const GRID_LABEL_COLOR := Color(1, 1, 1, 0.8)
 
-## Faint lines every grid_step() metres, every fifth one a little stronger,
-## with the coordinate of each line along the top (X) and left (Z) edges.
+## Faint lines every grid_step() metres, every fifth one a little stronger.
+## Drawn under everything else; the labels go on top in _draw_grid_labels().
 func _draw_grid() -> void:
 	var step := MapMath.grid_step(scale_px, GRID_MIN_PX)
 	var lo := to_world(Vector2.ZERO)
 	var hi := to_world(size)
-	var font := get_theme_default_font()
-	var label_size := 15
 	for x in MapMath.grid_values(lo.x, hi.x, step):
 		var sx := to_screen(Vector2(x, 0)).x
 		draw_line(Vector2(sx, 0), Vector2(sx, size.y), _grid_color(x, step), 1.0)
-		_grid_label(font, "X %d" % int(x), Vector2(sx + 4, 4), label_size)
 	for z in MapMath.grid_values(lo.y, hi.y, step):
 		var sy := to_screen(Vector2(0, z)).y
 		draw_line(Vector2(0, sy), Vector2(size.x, sy), _grid_color(z, step), 1.0)
-		_grid_label(font, "Z %d" % int(z), Vector2(4, sy + 2), label_size)
+
+## Each line's coordinate along the top (X) and left (Z) edges, drawn last so
+## nothing covers them. Labels that would collide in the top-left corner are
+## skipped.
+func _draw_grid_labels() -> void:
+	var step := MapMath.grid_step(scale_px, GRID_MIN_PX)
+	var lo := to_world(Vector2.ZERO)
+	var hi := to_world(size)
+	var font := get_theme_default_font()
+	var label_size := font_size - 4
+	var corner := Vector2(font.get_string_size("Z -000", HORIZONTAL_ALIGNMENT_LEFT, -1, label_size).x + 8, font.get_height(label_size) + 6)
+	for x in MapMath.grid_values(lo.x, hi.x, step):
+		var sx := to_screen(Vector2(x, 0)).x
+		if sx >= corner.x:
+			_grid_label(font, "X %d" % int(x), Vector2(sx + 4, 4), label_size)
+	for z in MapMath.grid_values(lo.y, hi.y, step):
+		var sy := to_screen(Vector2(0, z)).y
+		if sy >= corner.y:
+			_grid_label(font, "Z %d" % int(z), Vector2(4, sy + 2), label_size)
 
 func _grid_color(v: float, step: float) -> Color:
 	return GRID_MAJOR_COLOR if is_zero_approx(fmod(v, step * 5.0)) else GRID_COLOR

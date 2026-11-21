@@ -122,9 +122,11 @@ func _test_clamp_to_rect_edge() -> void:
 	_near(MapMath.clamp_to_rect_edge(Vector2(150, 150), rect), Vector2(100, 100), "pinned corner")
 
 func _test_grid() -> void:
-	_near(MapMath.grid_step(1.8, 80.0), 50.0, "minimap scale picks 50 m")
+	_near(MapMath.grid_step(1.8, 80.0), 50.0, "1.8 px/m picks 50 m")
 	_near(MapMath.grid_step(20.0, 80.0), 5.0, "zoomed in picks 5 m")
 	_near(MapMath.grid_step(0.01, 80.0), 500.0, "far out caps at 500 m")
 	var v := MapMath.grid_values(-12.0, 31.0, 10.0)
 	_check(v == PackedFloat32Array([-10, 0, 10, 20, 30]), "grid values: %s" % v)
 	_check(MapMath.grid_values(1.0, 9.0, 10.0).is_empty(), "no line in range")
+	_check(MapMath.grid_values(-INF, 10.0, 10.0).is_empty(), "non-finite range draws nothing instead of looping forever")
+	_check(MapMath.grid_values(0.0, 10.0, 0.0).is_empty(), "zero step draws nothing")
