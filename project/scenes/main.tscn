@@ -55,6 +55,7 @@
 [ext_resource type="Script" uid="uid://chj2456j84ouy" path="res://scripts/time_of_day.gd" id="55_time_of_day"]
 [ext_resource type="Script" uid="uid://v4f6tjmojwcq" path="res://scripts/weather.gd" id="56_weather"]
 [ext_resource type="Script" path="res://scripts/sky_menu.gd" id="57_sky_menu"]
+[ext_resource type="Script" path="res://scripts/building_shell.gd" id="58_building_shell"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -1433,3 +1434,22 @@ player_path = NodePath("../../Player")
 
 [node name="SkyMenu" type="CanvasLayer" parent="."]
 script = ExtResource("57_sky_menu")
+
+[node name="SallysHouseShell" type="Node3D" parent="Buildings"]
+script = ExtResource("58_building_shell")
+building_name = "Sally's House"
+skin_walls = PackedStringArray("west")
+skin_color = Color(0.33, 0.33, 0.36, 1)
+light_count = 2
+doors = [{"wall": "south", "plane": "SallysHouse_Wall_South", "u": 0.42, "width": 1.0, "height": 3.8, "label": "door"}, {"wall": "east", "plane": "SallysHouse_Wall_East", "u": 0.5725, "width": 0.8, "height": 3.44, "label": "front door"}]
+
+[node name="FrontBarnShell" type="Node3D" parent="Buildings"]
+script = ExtResource("58_building_shell")
+building_name = "Front Barn"
+skin_walls = PackedStringArray("north", "south", "east", "west")
+skin_color = Color(0.6, 0.55, 0.5, 1)
+floor_color = Color(0.5, 0.45, 0.4, 1)
+rise = 4.7
+ridge_along_z = true
+light_count = 3
+doors = [{"wall": "south", "u": 0.5, "width": 3.6, "height": 3.4, "kind": 1, "label": "barn door", "ribbed": true, "color": Color(0.7, 0.65, 0.58, 1)}, {"wall": "north", "u": 0.5, "width": 3.6, "height": 3.4, "kind": 1, "label": "barn door", "ribbed": true, "color": Color(0.7, 0.65, 0.58, 1)}, {"wall": "east", "u": 0.85, "width": 1.0, "height": 2.1, "label": "door"}]
