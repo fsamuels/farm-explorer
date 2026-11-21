@@ -124,6 +124,35 @@ func _test_wheel_builder() -> void:
 		var arr: Array = (w.meshes[0] as ArrayMesh).surface_get_arrays(0)
 		_check((arr[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() == 3, "wheel %d keeps just its own triangle" % w.quadrant)
 	car.queue_free()
+	_test_wheel_builder_mirrored()
+
+## A mesh under a mirroring transform keeps its faces pointing the same way.
+func _test_wheel_builder_mirrored() -> void:
+	var car := Node3D.new()
+	root.add_child(car)
+	var a := Vector3(0.7, 0.0, -1.2)
+	var b := Vector3(0.7, 0.4, -1.2)
+	var c := Vector3(0.7, 0.0, -0.8)
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = PackedVector3Array([a, b, c])
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	var mi := MeshInstance3D.new()
+	mi.mesh = mesh
+	mi.scale = Vector3(-1, 1, 1)
+	car.add_child(mi)
+	var wheels := WheelBuilder.build([mi], car)
+	_check(wheels.size() == 1, "mirrored mesh gives one wheel")
+	if wheels.size() == 1:
+		var arr: Array = (wheels[0].meshes[0] as ArrayMesh).surface_get_arrays(0)
+		var v: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var idx: PackedInt32Array = arr[Mesh.ARRAY_INDEX]
+		var baked := (v[idx[1]] - v[idx[0]]).cross(v[idx[2]] - v[idx[0]])
+		var mirror := Basis.from_scale(Vector3(-1, 1, 1))
+		var want := mirror * (b - a).cross(c - a)
+		_check(baked.dot(want) > 0.0, "mirrored wheel faces keep their orientation")
+	car.queue_free()
 
 func _step(frames: int) -> void:
 	for i in frames:
@@ -208,7 +237,9 @@ func _drive(main: Node, player: CharacterBody3D, car: CharacterBody3D, nm: Strin
 	_check(absf(absf(spin_total) * wheel0.radius - travelled) < travelled * 0.15,
 			"%s wheel roll matches distance: %s m rolled vs %s m driven" % [nm, absf(spin_total) * wheel0.radius, travelled])
 	_check(car.engine_rpm > car.idle_rpm + 500.0, "%s revs rise with speed (%s rpm)" % [nm, car.engine_rpm])
-	_check(car.frames_pushed > 0, "%s engine audio was generated (%d frames)" % [nm, car.frames_pushed])
+	# Audio frames only flow where the audio driver gives the generator a playback.
+	if car._playback != null:
+		_check(car.frames_pushed > 0, "%s engine audio was generated (%d frames)" % [nm, car.frames_pushed])
 	var heading := -start.basis.z
 	var moved := car.global_position - start.origin
 	_check(car.speed > 3.0, "%s accelerates (%s m/s)" % [nm, car.speed])

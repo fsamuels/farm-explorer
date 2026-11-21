@@ -97,12 +97,15 @@ static func _split_surface(src: Array, xf: Transform3D, normal_basis: Basis, mid
 	var out_i: Array[PackedInt32Array] = [PackedInt32Array(), PackedInt32Array(), PackedInt32Array(), PackedInt32Array()]
 	var remap: Array[Dictionary] = [{}, {}, {}, {}]
 
+	# A mirroring transform (negative determinant) reverses every triangle's
+	# facing, which the engine would have corrected at draw time; bake that in.
+	var mirrored := xf.basis.determinant() < 0.0
 	for t in range(0, index.size() - 2, 3):
 		var a := index[t]
 		var b := index[t + 1]
 		var c := index[t + 2]
 		var q := quadrant((car_verts[a] + car_verts[b] + car_verts[c]) / 3.0, mid_z)
-		for old in [a, b, c]:
+		for old in ([a, c, b] if mirrored else [a, b, c]):
 			var mapped: Dictionary = remap[q]
 			if not mapped.has(old):
 				mapped[old] = out_v[q].size()

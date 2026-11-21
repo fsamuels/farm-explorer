@@ -15,6 +15,8 @@ const EngineSound := preload("res://scripts/engine_sound.gd")
 
 ## How fast the wheel turns toward the key (full lock per 1/STEER_RATE seconds).
 const STEER_RATE := 4.0
+## Most engine audio frames synthesized in one _process call.
+const MAX_AUDIO_FRAMES_PER_UPDATE := 1024
 
 @export var label := "car"
 @export var wheelbase := 2.6
@@ -126,7 +128,9 @@ func _process(delta: float) -> void:
 		_playback = _audio.get_stream_playback() as AudioStreamGeneratorPlayback
 	engine_rpm = move_toward(engine_rpm, minf(target, redline_rpm), 8.0 * redline_rpm * delta)
 	if _playback:
-		var frames := _playback.get_frames_available()
+		# Top the buffer up in small chunks so boarding doesn't synthesize all of
+		# it in one frame.
+		var frames := mini(_playback.get_frames_available(), MAX_AUDIO_FRAMES_PER_UPDATE)
 		if frames > 0:
 			_playback.push_buffer(_synth.render(frames, engine_rpm, clampf(_throttle, 0.0, 1.0)))
 			frames_pushed += frames
@@ -187,7 +191,7 @@ func _physics_process(delta: float) -> void:
 		throttle = Input.get_axis("move_back", "move_forward")
 		steer_input = Input.get_axis("move_right", "move_left")
 		handbrake = Input.is_action_pressed("jump")
-	_throttle = throttle
+	_throttle = 0.0 if handbrake else throttle
 	steer = move_toward(steer, steer_input, STEER_RATE * delta)
 	speed = VehicleMath.next_speed(speed, throttle, handbrake, delta, accel, brake_decel,
 			hand_decel, drag, max_speed, max_reverse)
