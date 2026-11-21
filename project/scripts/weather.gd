@@ -342,6 +342,9 @@ func _configure_snow(look: Dictionary) -> void:
 func _build_surfaces() -> void:
 	_surface_material = ShaderMaterial.new()
 	_surface_material.shader = SURFACE_SHADER
+	# Draw after the farm's alpha-blended orthomosaic patches, which sort at the
+	# same depth; otherwise snow vanishes from them depending on camera position.
+	_surface_material.render_priority = 1
 	for node in get_tree().get_nodes_in_group(SURFACE_GROUP):
 		if node is MeshInstance3D:
 			_surface_meshes.append(node)
