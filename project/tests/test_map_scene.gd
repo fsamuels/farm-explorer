@@ -83,7 +83,7 @@ func _test_teleport(main: Node, map) -> void:
 		_check(facing.dot((target.center - here).normalized()) > 0.99, "%s: faces the building" % target.name)
 
 	# Walk-in buildings use their real front door: the Shop's east door, Sally's
-	# House's east/porch door, the Front Barn's north end (D-124).
+	# House's east/porch door, the Front Barn's north end (D-125).
 	var shop := _building(data, "Shop")
 	_check(absf(shop.front.x - (210.2 + 2.5)) < 0.5 and absf(shop.front.y - -50.6) < 0.5, "Shop front is outside its east door: %s" % shop.front)
 	var house := _building(data, "Sally's House")

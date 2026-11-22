@@ -173,7 +173,7 @@ func _open_side_tests(player: CharacterBody3D, shell: Node3D) -> void:
 		else:
 			_check(inside, "the player walks in through the open %s side (at %s)" % [wall, at])
 
-## The north-side photo (D-124): lower wings, a tall middle, siding above the
+## The north-side photo (D-125): lower wings, a tall middle, siding above the
 ## open bays, a closed skirted west wing, and a way in on the north side.
 func _facade_tests(main: Node, shell: Node3D) -> void:
 	var facade: Node3D = main.get_node("Buildings/FrontBarnFacade")

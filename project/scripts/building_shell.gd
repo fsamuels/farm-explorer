@@ -30,9 +30,9 @@ extends Node3D
 ## `wall_height` (when above 0) is how tall the liners stand, instead of the
 ## footprint box's height, and `ceiling` off leaves out the built-in ceiling,
 ## for a building whose roof and underside are built elsewhere (the Front
-## Barn's facade, D-124). `front_wall` / `front_u` name where the map's
+## Barn's facade, D-125). `front_wall` / `front_u` name where the map's
 ## teleport puts you when there is no door labelled "front door": that wall,
-## `front_u` of the way across it seen from outside (D-124).
+## `front_u` of the way across it seen from outside (D-125).
 
 const WallLayout := preload("res://scripts/wall_layout.gd")
 const DoorScript := preload("res://scripts/shop_door.gd")

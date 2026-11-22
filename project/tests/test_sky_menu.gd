@@ -222,7 +222,9 @@ func _test_scene() -> void:
 	# Moon and shooting stars.
 	var mat: ShaderMaterial = tod._sky_material
 	var star_before: float = mat.get_shader_parameter("star_strength")
+	_check(menu._names_button.text.begins_with("Constellations") and menu._moon_button.text.begins_with("Moon") and menu._meteor_button.text.begins_with("Shooting stars"), "the night sky buttons all have labels")
 	menu.toggle_moon()
+	_check(menu._moon_button.text.ends_with("never"), "the Moon button says when it is off")
 	_check(not tod.moon_enabled and mat.get_shader_parameter("star_strength") > star_before - 0.0001, "the menu turns the moon off")
 	_check(is_zero_approx(mat.get_shader_parameter("body_strength")), "no moon disc with the moon off")
 	menu.toggle_moon()

@@ -28,7 +28,7 @@ farm-sim/
 │   ├── build_player_model.py     # Blender (bpy) script that builds project/models/player.glb
 │   │                              from Quaternius's CC0 base-character + animation packs (D-89)
 │   ├── make_corrugated_texture.py # generates the tileable blue corrugated-metal albedo + normal textures for the Shop walls (D-98)
-│   ├── make_barn_textures.py     # generates the tileable tan siding (albedo + normal) and post-wood textures for the Front Barn (D-124)
+│   ├── make_barn_textures.py     # generates the tileable tan siding (albedo + normal) and post-wood textures for the Front Barn (D-125)
 │   ├── ortho_fence_trace.py      # Python (Pillow + numpy) helpers to trace white fence
 │   │                              lines off the front-section orthomosaic and convert
 │   │                              pixels to scene meters via the ground plane's own
@@ -83,8 +83,8 @@ farm-sim/
     │   ├── fence_segment.gd       # @tool script: builds posts+wire strands from an exported length — see D-11
     │   ├── fence_path.gd          # @tool script: builds posts+wire strands from a Path3D/Curve3D's points instead of a length, closing the loop back to the first point (optional `solid` collision, D-76) — see D-67/D-69
     │   ├── gate.gd                # @tool script: builds the gate and swings its AnimatableBody3D hinge on interact() — see D-76
-    │   ├── barn_facade.gd         # Front Barn outside: siding, skirt, posts, trim and roofs from the photo's cross-section — see D-124
-    │   ├── barn_profile.gd        # the Front Barn's heights (wings, eave, ridge, clearance), shared by facade and interior — see D-124
+    │   ├── barn_facade.gd         # Front Barn outside: siding, skirt, posts, trim and roofs from the photo's cross-section — see D-125
+    │   ├── barn_profile.gd        # the Front Barn's heights (wings, eave, ridge, clearance), shared by facade and interior — see D-125
     │   ├── barn_interior.gd       # Front Barn fittings: corner posts, three stalls with gates, tack room, two cubbies, hay stack — see D-116, D-121
     │   ├── building_shell.gd      # data-driven walk-in shell (hollow room, doors, optional open walls) for Sally's House and the open Front Barn — see D-115, D-121
     │   ├── shop_shell.gd          # builds the walk-in Shop (hollow corrugated walls, windows, floor, ceiling, lights, pad) over the placeholder box's footprint and places its three doors — see D-98

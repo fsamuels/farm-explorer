@@ -2,7 +2,7 @@ extends Node3D
 ## The Front Barn's inside (D-116, D-121). It is a pole barn: the shell leaves
 ## the north, south and east sides open, so this node adds a post at each
 ## corner (the facade, barn_facade.gd, adds the rest of the posts, the siding and
-## the roofs, D-124) and fills in the rest: three stalls along the east side (low board
+## the roofs, D-125) and fills in the rest: three stalls along the east side (low board
 ## walls with a gate each), a tack room in the middle third of the west side
 ## (walls, the barn's only door, a low ceiling), an open cubby on each side of
 ## it (a wall at each end) and a stack of hay bales in the middle of the tall
@@ -153,7 +153,7 @@ func _build_cubbies() -> void:
 	for z in [-end_z, end_z]:
 		_add_box(Vector3((west_x + front_x) / 2.0, tack_height / 2.0, z), Vector3(side_depth, tack_height, WALL_T), _wood, true)
 
-## A post at each corner of the footprint, up to the siding line (D-124); the
+## A post at each corner of the footprint, up to the siding line (D-125); the
 ## facade adds the posts along the two ends.
 func _build_posts(eave: float) -> void:
 	var half := post_size / 2.0

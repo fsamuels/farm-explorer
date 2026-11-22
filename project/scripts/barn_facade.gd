@@ -1,5 +1,5 @@
 extends Node3D
-## The Front Barn's outside (D-124), rebuilt from the user's photo of its north
+## The Front Barn's outside (D-125), rebuilt from the user's photo of its north
 ## end: the cross-section in barn_profile.gd (a tall central section with a
 ## low-pitched roof and a lower wing each side), tan T1-11 siding over every
 ## open bay, the big middle opening with a header beam, a closed west wing

@@ -1,4 +1,4 @@
-"""Generate the tileable Front Barn textures (D-124), all under
+"""Generate the tileable Front Barn textures (D-125), all under
 project/textures/buildings/:
 
   barn_siding_tan.png / barn_siding_tan_normal.png

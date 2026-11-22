@@ -21,7 +21,7 @@ static func _mipmapped(path: String) -> Texture2D:
 	_cache[path] = ImageTexture.create_from_image(image)
 	return _cache[path]
 
-## A texture with mipmaps generated, shared with the barn's siding (D-124).
+## A texture with mipmaps generated, shared with the barn's siding (D-125).
 static func mipmapped(path: String) -> Texture2D:
 	return _mipmapped(path)
 

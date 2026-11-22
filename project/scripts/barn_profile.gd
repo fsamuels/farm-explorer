@@ -1,5 +1,5 @@
 extends RefCounted
-## The Front Barn's cross-section (D-124), read off the north-side photo: a
+## The Front Barn's cross-section (D-125), read off the north-side photo: a
 ## tall central section with a low-pitched roof, and a lower lean-to wing each
 ## side whose roof falls away from the centre. Heights are metres above the
 ## ground, x is across the barn from its middle (+x east). Shared by the
