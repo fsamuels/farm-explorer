@@ -6,6 +6,7 @@ extends SceneTree
 ##   godot --headless -s res://tests/test_buildings.gd
 
 const Shell := preload("res://scripts/building_shell.gd")
+const Profile := preload("res://scripts/barn_profile.gd")
 
 var _failures := 0
 
@@ -39,11 +40,20 @@ func _run() -> void:
 	await _walk_tests(player, back, "east", "Back Barn east door")
 	await _walk_tests(player, back, "west", "Back Barn west door")
 	await _open_side_tests(player, barn)
+	_facade_tests(main, barn)
 	await _interior_tests(main, player)
 	print("buildings: %s" % ("OK" if _failures == 0 else "%d FAILED" % _failures))
 	quit(1 if _failures else 0)
 
 func _test_math() -> void:
+	# The barn's cross-section: wing roofs fall outward, the central one peaks in the middle.
+	var w := 16.25
+	_check(is_equal_approx(Profile.roof_y(0.0, w), Profile.RIDGE), "barn ridge height")
+	_check(is_equal_approx(Profile.roof_y(w / 2.0 - Profile.WING_W - 0.0001, w), Profile.EAVE), "central eave at the junction (%s)" % Profile.roof_y(w / 2.0 - Profile.WING_W - 0.0001, w))
+	_check(is_equal_approx(Profile.roof_y(w / 2.0 - Profile.WING_W, w), Profile.WING_HIGH), "wing roof is high at the junction")
+	_check(is_equal_approx(Profile.roof_y(-w / 2.0, w), Profile.WING_LOW), "wing roof is low at the outer wall")
+	_check(is_equal_approx(Profile.roof_y(3.0, w), Profile.roof_y(-3.0, w)), "the roof is symmetric")
+	_check(Profile.WING_LOW > Profile.CLEARANCE and Profile.WING_HIGH < Profile.EAVE and Profile.EAVE < Profile.RIDGE, "barn heights are ordered")
 	# Left to right seen from outside: south runs +x, north -x, east +z, west -z.
 	_check(is_equal_approx(Shell.along_for("south", 0.75, 10.0), 2.5), "south wall: right of centre is +x")
 	_check(is_equal_approx(Shell.along_for("north", 0.75, 10.0), -2.5), "north wall: right of centre is -x")
@@ -64,7 +74,7 @@ func _test_built(main: Node, shell: Node3D, nm: String) -> void:
 			door_count += 1
 	_check(door_count == shell.live_doors().size() and (door_count > 0 or not shell.open_walls.is_empty()), "%s: a working door for each entry (%d)" % [nm, door_count])
 	_check(shell.front_door_spot(3.0) != null, "%s: the map has a way-in spot" % nm)
-	_check(shell.get_node("Ceiling") != null, "%s: has a ceiling" % nm)
+	_check(not shell.ceiling or shell.get_node("Ceiling") != null, "%s: has a ceiling" % nm)
 
 ## The Back Barn: Shop-style corrugated walls and a big sliding door on each end.
 func _test_back_barn(shell: Node3D) -> void:
@@ -162,6 +172,27 @@ func _open_side_tests(player: CharacterBody3D, shell: Node3D) -> void:
 			_check(not inside, "the west wall stops the player (at %s)" % at)
 		else:
 			_check(inside, "the player walks in through the open %s side (at %s)" % [wall, at])
+
+## The north-side photo (D-124): lower wings, a tall middle, siding above the
+## open bays, a closed skirted west wing, and a way in on the north side.
+func _facade_tests(main: Node, shell: Node3D) -> void:
+	var facade: Node3D = main.get_node("Buildings/FrontBarnFacade")
+	_check(facade.width == shell.width and facade.depth == shell.depth, "the facade follows the shell's footprint")
+	_check(facade.posts.size() == 10, "five posts on each end (%d)" % facade.posts.size())
+	_check(facade.siding_pieces >= 10 and facade.skirt_pieces >= 3, "siding and skirt are built (%d, %d)" % [facade.siding_pieces, facade.skirt_pieces])
+	_check(facade.get_node_or_null("Roof_East") != null and facade.get_node_or_null("Roof_West") != null, "both roofs are built")
+	# The roofs and walls stay under the ridge: the highest vertex is the ridge.
+	var top := 0.0
+	for child in facade.get_children():
+		if child is MeshInstance3D and child.mesh is ArrayMesh:
+			top = maxf(top, (child as MeshInstance3D).get_aabb().end.y)
+	_check(absf(top - Profile.RIDGE) < 0.01, "nothing stands above the ridge (%s)" % top)
+	_check(shell.wall_height == Profile.WING_LOW, "the west wall is as tall as the wing's outer eave")
+	_check(not main.has_node("Buildings/FrontBarn_Gable_North"), "the old tall gable ends are gone")
+	# The teleport spot is outside the north end, in the middle.
+	var spot: Vector3 = shell.front_door_spot(4.0)
+	var local := shell.to_local(spot)
+	_check(absf(local.x) < 0.01 and absf(local.z + shell.depth / 2.0 + 4.0) < 0.01, "the barn's front spot is 4 m north of the middle of its north end (%s)" % local)
 
 func _interior_tests(main: Node, player: CharacterBody3D) -> void:
 	var interior: Node3D = main.get_node("Buildings/FrontBarnInterior")

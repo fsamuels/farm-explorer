@@ -26,6 +26,13 @@ extends Node3D
 ##
 ## `open_walls` names walls that are not there at all (a pole barn's open
 ## sides, D-121): no liner, skin, collision or doors, just the roof above.
+##
+## `wall_height` (when above 0) is how tall the liners stand, instead of the
+## footprint box's height, and `ceiling` off leaves out the built-in ceiling,
+## for a building whose roof and underside are built elsewhere (the Front
+## Barn's facade, D-124). `front_wall` / `front_u` name where the map's
+## teleport puts you when there is no door labelled "front door": that wall,
+## `front_u` of the way across it seen from outside (D-124).
 
 const WallLayout := preload("res://scripts/wall_layout.gd")
 const DoorScript := preload("res://scripts/shop_door.gd")
@@ -53,6 +60,10 @@ const WALLS := {
 @export var liner_color := Color(0.84, 0.82, 0.78)
 @export var floor_color := Color(0.45, 0.36, 0.29)
 @export var rise := 0.0
+@export var wall_height := 0.0
+@export var ceiling := true
+@export var front_wall := ""
+@export var front_u := 0.5
 @export var ridge_along_z := false
 @export var light_count := 1
 @export var doors: Array = []
@@ -131,19 +142,25 @@ func spot_building() -> String:
 func live_doors() -> Array:
 	return doors.filter(func(d: Dictionary) -> bool: return not open_walls.has(d.wall))
 
-## World position `clearance` metres outside the building's front door: the
-## door labelled "front door" if there is one, else the first. With no doors, the
-## middle of the first open wall; null with neither.
+## World position `clearance` metres outside the building's way in: the door
+## labelled "front door" if there is one, else `front_wall` (when set), else
+## the first door, else the middle of the first open wall; null with none.
 func front_door_spot(clearance: float) -> Variant:
 	var live := live_doors()
-	if live.is_empty() and open_walls.is_empty():
-		return null
-	# With no doors, the middle of the first open side is the way in.
-	var d: Dictionary = {"wall": open_walls[0], "u": 0.5} if live.is_empty() else live[0]
+	var d: Dictionary = {}
 	for candidate: Dictionary in live:
 		if candidate.get("label", "") == "front door":
 			d = candidate
 			break
+	if d.is_empty():
+		if front_wall != "":
+			d = {"wall": front_wall, "u": front_u}
+		elif not live.is_empty():
+			d = live[0]
+		elif not open_walls.is_empty():
+			d = {"wall": open_walls[0], "u": 0.5}
+		else:
+			return null
 	var spec: Dictionary = WALLS[d.wall]
 	var out: Vector3 = spec.out
 	var along := _door_along(d)
@@ -186,7 +203,8 @@ func _build() -> void:
 			continue
 		_build_wall(wall, by_wall[wall], skin_walls.has(wall))
 	_build_floor()
-	_build_ceiling()
+	if ceiling:
+		_build_ceiling()
 	_build_lights()
 
 ## One wall's inside liner (and, when asked, an outside skin), cut around the
@@ -198,7 +216,8 @@ func _build_wall(wall: String, openings: Array, with_skin: bool) -> void:
 	var length := _wall_length(wall)
 	var offset := (depth if along_x else width) / 2.0
 	var body_t := WALL_T - SKIN_T
-	for r in WallLayout.pieces(length, height, openings):
+	var wall_h := wall_height if wall_height > 0.0 else height
+	for r in WallLayout.pieces(length, wall_h, openings):
 		var along := r.position.x + r.size.x / 2.0
 		var y := r.position.y + r.size.y / 2.0
 		var body_off := offset - SKIN_T - body_t / 2.0
