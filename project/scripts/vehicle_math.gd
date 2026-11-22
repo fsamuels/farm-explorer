@@ -23,10 +23,20 @@ static func next_speed(speed: float, throttle: float, handbrake: bool, delta: fl
 		return move_toward(speed, 0.0, hand_decel * delta)
 	if absf(throttle) < 0.01:
 		return move_toward(speed, 0.0, drag * delta)
-	var opposing := absf(speed) > REST_SPEED and signf(throttle) != signf(speed)
-	if opposing:
+	if is_braking(speed, throttle, false):
 		return move_toward(speed, 0.0, brake_decel * delta)
 	return clampf(speed + throttle * accel * delta, -max_reverse, max_speed)
+
+## True while the driver is slowing the car down on purpose, which is what
+## lights the brake lights: the handbrake held while moving, or the throttle
+## pushed against the way the car is going (S while rolling forward, W while
+## reversing). Coasting and standing still don't count.
+static func is_braking(speed: float, throttle: float, handbrake: bool) -> bool:
+	if absf(speed) <= REST_SPEED:
+		return false
+	if handbrake:
+		return true
+	return absf(throttle) >= 0.01 and signf(throttle) != signf(speed)
 
 ## Yaw rate (rad/s, positive turns left) of a bicycle model with the given
 ## wheelbase, front-wheel angle `steer * max_steer`, capped so the sideways

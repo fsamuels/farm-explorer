@@ -19,6 +19,10 @@ const STEER_RATE := 4.0
 const MAX_AUDIO_FRAMES_PER_UPDATE := 1024
 ## Headlight fade speed, in full brightness per second.
 const HEADLIGHT_FADE_RATE := 2.0
+## Brake lights come on and go off almost at once.
+const BRAKE_LIGHT_FADE_RATE := 12.0
+## Tail lamps glow at this fraction of full brightness with just the headlights.
+const TAIL_DIM := 0.2
 
 @export var label := "car"
 @export var wheelbase := 2.6
@@ -54,6 +58,10 @@ const HEADLIGHT_FADE_RATE := 2.0
 @export var headlight_energy := 5.0
 ## Also light the lamps on a parked, empty car when it's dark.
 @export var headlights_when_parked := false
+## Tail lamp positions (same frame as the headlamps, at the back of the car).
+## They glow dim red whenever the headlights are on and bright red while the
+## driver brakes, by day or night.
+@export var taillight_positions := PackedVector3Array()
 
 var driver: Node3D
 var speed := 0.0
@@ -68,6 +76,15 @@ var _throttle := 0.0
 var _headlight_demand := 0.0
 var headlight_level := 0.0
 var _headlight_applied := -1.0
+## 0..1 glow of the rear lamps (the larger of the dim running glow and the brake
+## light) and how hard the brake light is on.
+var tail_level := 0.0
+var brake_level := 0.0
+var _braking := false
+var _tail_applied := -1.0
+var _tail_lamps: Array[SpotLight3D] = []
+var _tail_lenses: Array[MeshInstance3D] = []
+var _tail_material: StandardMaterial3D
 var _lamps: Array[SpotLight3D] = []
 var _lenses: Array[MeshInstance3D] = []
 var _lens_material: StandardMaterial3D
@@ -81,6 +98,7 @@ func _ready() -> void:
 	_build_wheels()
 	_build_engine_sound()
 	_build_headlights()
+	_build_taillights()
 	# Deferred so every node in the scene is in the tree whatever the order.
 	_watch_time_of_day.call_deferred()
 
@@ -159,6 +177,34 @@ func _build_headlights() -> void:
 		add_child(lens)
 		_lenses.append(lens)
 
+func _build_taillights() -> void:
+	_tail_material = StandardMaterial3D.new()
+	_tail_material.albedo_color = Color(0.6, 0.02, 0.02)
+	_tail_material.emission_enabled = true
+	_tail_material.emission = Color(0.8, 0.03, 0.02)
+	_tail_material.emission_energy_multiplier = 0.0
+	# A flat lens like a tail lamp, rather than a ball.
+	var lens_mesh := BoxMesh.new()
+	lens_mesh.size = Vector3(0.12, 0.08, 0.02)
+	lens_mesh.material = _tail_material
+	for pos in taillight_positions:
+		var lamp := SpotLight3D.new()
+		lamp.position = pos
+		lamp.rotation_degrees.y = 180.0  # shine backward (+Z)
+		lamp.spot_range = 8.0
+		lamp.spot_angle = 55.0
+		lamp.light_color = Color(1.0, 0.1, 0.05)
+		lamp.light_energy = 0.0
+		lamp.visible = false
+		add_child(lamp)
+		_tail_lamps.append(lamp)
+		var lens := MeshInstance3D.new()
+		lens.mesh = lens_mesh
+		lens.position = pos
+		lens.visible = false
+		add_child(lens)
+		_tail_lenses.append(lens)
+
 ## Follow the scene's darkness: time_of_day.gd announces every lighting change
 ## (including the weather dimming the sun), and the lamps fade toward it.
 func _watch_time_of_day() -> void:
@@ -195,6 +241,7 @@ func _update_headlights(delta: float) -> void:
 ## topped up with audio each frame.
 func _process(delta: float) -> void:
 	_update_headlights(delta)
+	_update_taillights(delta)
 	if driver == null:
 		if _audio.playing:
 			_audio.stop()
@@ -259,6 +306,22 @@ func seat_transform(look_yaw: float) -> Transform3D:
 	var seat := Vector3(eye_offset.x, 0.0, eye_offset.z)
 	return global_transform * Transform3D(Basis(Vector3.UP, look_yaw), seat)
 
+## Tail lights: dim red with the headlights, bright red while braking (the
+## brake light works by day too, but only while someone is driving).
+func _update_taillights(delta: float) -> void:
+	brake_level = move_toward(brake_level, 1.0 if _braking else 0.0, BRAKE_LIGHT_FADE_RATE * delta)
+	tail_level = maxf(headlight_level * TAIL_DIM, brake_level)
+	if tail_level == _tail_applied:
+		return
+	_tail_applied = tail_level
+	var on := tail_level > 0.001
+	for lamp in _tail_lamps:
+		lamp.visible = on
+		lamp.light_energy = 2.0 * tail_level
+	for lens in _tail_lenses:
+		lens.visible = on
+	_tail_material.emission_energy_multiplier = 3.0 * tail_level
+
 func speed_mph() -> float:
 	return VehicleMath.to_mph(speed)
 
@@ -267,12 +330,14 @@ func _physics_process(delta: float) -> void:
 	var steer_input := 0.0
 	var handbrake := driver == null
 	if handbrake and speed == 0.0 and steer == 0.0 and is_on_floor():
+		_braking = false
 		return  # parked and settled: nothing to simulate
 	if driver != null:
 		throttle = Input.get_axis("move_back", "move_forward")
 		steer_input = Input.get_axis("move_right", "move_left")
 		handbrake = Input.is_action_pressed("jump")
 	_throttle = 0.0 if handbrake else throttle
+	_braking = driver != null and VehicleMath.is_braking(speed, throttle, handbrake)
 	steer = move_toward(steer, steer_input, STEER_RATE * delta)
 	speed = VehicleMath.next_speed(speed, throttle, handbrake, delta, accel, brake_decel,
 			hand_decel, drag, max_speed, max_reverse)

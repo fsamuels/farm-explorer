@@ -49,6 +49,17 @@ func _test_math() -> void:
 	_check(is_equal_approx(VehicleMath.to_mph(-10.0), 22.369362920544), "mph of reverse speed: %s" % VehicleMath.to_mph(-10.0))
 	_check(absf(VehicleMath.to_mph(26.8224) - 60.0) < 0.001, "26.82 m/s is 60 mph")
 
+	# Brake lights: on for the handbrake or the throttle against the motion, not
+	# for coasting, accelerating or standing still.
+	_check(VehicleMath.is_braking(5.0, -1.0, false), "S while rolling forward brakes")
+	_check(VehicleMath.is_braking(-3.0, 1.0, false), "W while reversing brakes")
+	_check(VehicleMath.is_braking(5.0, 0.0, true), "handbrake while moving brakes")
+	_check(not VehicleMath.is_braking(5.0, 1.0, false), "gas is not braking")
+	_check(not VehicleMath.is_braking(5.0, 0.0, false), "coasting is not braking")
+	_check(not VehicleMath.is_braking(-3.0, -1.0, false), "S while reversing is not braking")
+	_check(not VehicleMath.is_braking(0.0, -1.0, false), "S from rest is reversing, not braking")
+	_check(not VehicleMath.is_braking(0.0, 0.0, true), "handbrake at rest is not braking")
+
 	# Headlights: off in daylight (sun 1.0, dawn 0.8), full at dusk / night
 	# (0.25-0.3), fading in between, never outside 0..1.
 	_check(VehicleMath.headlight_demand(1.0) == 0.0, "headlights off at noon")
@@ -291,6 +302,41 @@ func _drive(main: Node, player: CharacterBody3D, car: CharacterBody3D, nm: Strin
 			"%s drives forward along its nose: %s" % [nm, moved])
 	_check(_flat_dist(player.global_position, car.seat_transform(0.0).origin) < 0.05, "%s player carried along" % nm)
 
+	# Tail and brake lights: dim red with the headlights at night, bright red
+	# while braking (by day too), off again when the brake is released.
+	_check(car._tail_lamps.size() == 2 and car._tail_lenses.size() == 2, "%s has two tail lamps" % nm)
+	_check(car._tail_lamps[0].position.z > 1.5 and car._tail_lamps[0].position.x < 0.0 and car._tail_lamps[1].position.x > 0.0,
+			"%s tail lamps sit at the back, one each side" % nm)
+	_check(car.brake_level == 0.0 and is_equal_approx(car.tail_level, car.TAIL_DIM),
+			"%s night driving: dim tail lights, no brake light (%s / %s)" % [nm, car.tail_level, car.brake_level])
+	Input.action_release("move_forward")
+	Input.action_press("move_back")
+	await _step(6)
+	_check(car.speed > 0.5, "%s still rolling while braking (%s)" % [nm, car.speed])
+	_check(car.brake_level == 1.0 and car.tail_level == 1.0 and car._tail_lamps[0].visible and car._tail_lamps[0].light_energy > 1.0,
+			"%s brake lights come on (%s)" % [nm, car.brake_level])
+	Input.action_release("move_back")
+	Input.action_press("move_forward")
+	await _step(10)
+	_check(car.brake_level == 0.0 and is_equal_approx(car.tail_level, car.TAIL_DIM), "%s brake lights go off on the gas" % nm)
+	tod.set_preset("day", true)
+	await _step(36)
+	_check(car.tail_level == 0.0 and not car._tail_lamps[0].visible, "%s no tail lights by day" % nm)
+	Input.action_release("move_forward")
+	Input.action_press("move_back")
+	await _step(6)
+	_check(car.speed > 0.5 and car.brake_level == 1.0 and car._tail_lamps[0].visible, "%s brake lights work by day (speed %s)" % [nm, car.speed])
+	Input.action_release("move_back")
+	tod.set_preset("night", true)
+	# Back to the start with a fresh run-up, so the steering checks below see
+	# the same open road and speed they always did.
+	car.global_transform = start
+	car.speed = 0.0
+	car.steer = 0.0
+	await _step(5)
+	Input.action_press("move_forward")
+	await _step(60)
+
 	# Can't get out while moving.
 	_check(not car.can_leave(), "%s is too fast to leave (%s)" % [nm, car.speed])
 	player.leave_vehicle()
@@ -379,6 +425,7 @@ func _drive(main: Node, player: CharacterBody3D, car: CharacterBody3D, nm: Strin
 	_check(not car._audio.playing, "%s engine stops when you get out" % nm)
 	await _step(60)
 	_check(car.headlight_level == 0.0 and not car._lamps[0].visible, "%s parked car's lamps go off at night" % nm)
+	_check(car.tail_level == 0.0 and car.brake_level == 0.0 and not car._tail_lamps[0].visible, "%s parked car's tail lights are off" % nm)
 	# The parked-lights option lights an empty car at night too, lens glow included.
 	car.headlights_when_parked = true
 	main.get_node("TimeOfDay").set_preset("night", true)

@@ -16,6 +16,7 @@ half_width = 0.9
 half_length = 2.15
 wheel_meshes = PackedStringArray("pneu_1_pneus_0", "Cylinder_3_3_2_jante_0", "Array_Mat_21_0", "Cylinder_1_2_Mat_1_0", "Boole_1_Mat_25_0")
 headlight_positions = PackedVector3Array(-0.55, 0.64, -1.85, 0.55, 0.64, -1.85)
+taillight_positions = PackedVector3Array(-0.62, 0.7, 2.09, 0.62, 0.7, 2.09)
 cylinders = 6
 idle_rpm = 800.0
 redline_rpm = 5500.0
