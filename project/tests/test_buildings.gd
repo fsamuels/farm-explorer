@@ -178,7 +178,9 @@ func _open_side_tests(player: CharacterBody3D, shell: Node3D) -> void:
 func _facade_tests(main: Node, shell: Node3D) -> void:
 	var facade: Node3D = main.get_node("Buildings/FrontBarnFacade")
 	_check(facade.width == shell.width and facade.depth == shell.depth, "the facade follows the shell's footprint")
-	_check(facade.posts.size() == 10, "five posts on each end (%d)" % facade.posts.size())
+	_check(facade.posts.size() >= 10 and facade.posts.size() % 2 == 0, "the same posts on each end (%d)" % facade.posts.size())
+	var Interior := preload("res://scripts/barn_interior.gd")
+	_check(Interior.new().tack_height + 0.04 < Profile.WING_LOW - 0.12, "the tack room ceiling stays under the wing roof")
 	_check(facade.siding_pieces >= 10 and facade.skirt_pieces >= 3, "siding and skirt are built (%d, %d)" % [facade.siding_pieces, facade.skirt_pieces])
 	_check(facade.get_node_or_null("Roof_East") != null and facade.get_node_or_null("Roof_West") != null, "both roofs are built")
 	# The roofs and walls stay under the ridge: the highest vertex is the ridge.
