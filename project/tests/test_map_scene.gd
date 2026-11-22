@@ -83,13 +83,13 @@ func _test_teleport(main: Node, map) -> void:
 		_check(facing.dot((target.center - here).normalized()) > 0.99, "%s: faces the building" % target.name)
 
 	# Walk-in buildings use their real front door: the Shop's east door, Sally's
-	# House's east/porch door, the Front Barn's south sliding door.
+	# House's east/porch door, the Front Barn's north end (D-125).
 	var shop := _building(data, "Shop")
 	_check(absf(shop.front.x - (210.2 + 2.5)) < 0.5 and absf(shop.front.y - -50.6) < 0.5, "Shop front is outside its east door: %s" % shop.front)
 	var house := _building(data, "Sally's House")
 	_check(house.front.x > house.center.x + 4.0, "Sally's House front is on its east side: %s" % house.front)
 	var barn := _building(data, "Front Barn")
-	_check(barn.front.y > barn.center.y + 10.0, "Front Barn front is at its south end: %s" % barn.front)
+	_check(barn.front.y < barn.center.y - 10.0, "Front Barn front is at its north end: %s" % barn.front)
 
 	# A click that misses every building does nothing, and neither does one
 	# while driving (the car would be left behind).

@@ -3,6 +3,16 @@
 The highlights of Farm Explorer, newest first. For the full technical history, see
 [docs/project/decisions.md](docs/project/decisions.md).
 
+## November 22: The Front Barn, as it really is
+- **A barn that looks like the real one.** The Front Barn now has a tall middle with
+  a low roof and a lower wing on each side, tan vertical siding, a big open middle
+  bay, red roof trim and wood posts. Only the tack-room end is closed in, with a
+  blue metal skirt along the bottom. The siding and posts are generated textures,
+  not a photo laid over the walls.
+- **Teleport to the north side.** Double-clicking the Front Barn on the map now puts
+  you in front of the big opening on its north side, as in the photo, instead of at
+  the south end.
+
 ## November 21: Weather, sky, cars and open doors
 - **A better night.** A full moon now rises and sets, lights the night and washes
   out the dimmer stars while it is high; the sky menu can turn it off for darker

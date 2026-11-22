@@ -21,6 +21,10 @@ static func _mipmapped(path: String) -> Texture2D:
 	_cache[path] = ImageTexture.create_from_image(image)
 	return _cache[path]
 
+## A texture with mipmaps generated, shared with the barn's siding (D-125).
+static func mipmapped(path: String) -> Texture2D:
+	return _mipmapped(path)
+
 ## World-space triplanar keeps the ribs continuous across separate wall
 ## pieces and facing in the same direction on every wall.
 static func material(tint := Color.WHITE) -> StandardMaterial3D:
