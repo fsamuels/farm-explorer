@@ -188,7 +188,12 @@ func refresh() -> void:
 		_clock_button.set_pressed_no_signal(_tod.clock_running)
 		_clock_button.text = "Clock: " + ("running  (%s)" % TimeOfDay.clock_estimate(_tod.hour) if _tod.clock_running else "paused")
 		_names_button.set_pressed_no_signal(_tod.show_constellations)
-		_names_button.text = "Constellation lines and names: " + ("on" if _tod.show_constellations else "off")
+		_names_button.text = "Constellations\n" + ("lines + names" if _tod.show_constellations else "off")
+		_moon_button.set_pressed_no_signal(_tod.moon_enabled)
+		_moon_button.text = "Moon\n" + ("rises and sets" if _tod.moon_enabled else "never")
+		var level: String = TimeOfDay.METEOR_LEVELS[_tod.meteor_level][0]
+		_meteor_button.set_pressed_no_signal(_tod.meteor_level > 0)
+		_meteor_button.text = "Shooting stars\n" + level
 	if _weather:
 		for key in _weather_buttons:
 			var b := _weather_buttons[key] as Button
@@ -281,7 +286,6 @@ func _build() -> void:
 	_moon_button = _button("")
 	_moon_button.pressed.connect(toggle_moon)
 	_meteor_button = _button("")
-	_meteor_button.toggle_mode = false
 	_meteor_button.pressed.connect(cycle_meteors)
 	for b in [_names_button, _moon_button, _meteor_button]:
 		b.custom_minimum_size = Vector2(0, 62)
