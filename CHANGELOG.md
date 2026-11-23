@@ -10,6 +10,14 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 23: Faster around the farm
+> Hold Ctrl to super sprint, and glowing transport pads in the back pastures send you around the farm.
+- **Super sprint.** Hold Ctrl while you move to run about three times as fast as
+  normal. Shift still slows you to a walk.
+- **Transport pads.** Five glowing blue pads in the back pastures, west and south of
+  the Back Barn. Look at a pillar of light and press E to be sent to the next pad;
+  the last one sends you back to the Back Barn.
+
 ## November 23: What's New
 > The game now shows its own changelog and size: press C, or click the star under the minimap.
 - **A What's New window.** Press C (or click "C — News" under the minimap) to see
