@@ -6,6 +6,17 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**One hint bar.** Map, Sky, News and Help hints now sit together in a dark bar along the bottom instead of scattered over the minimap.",
+				"**Fits big screens.** Text and panels grow on large and high-resolution windows so they stay easy to read.",
+				"**Resize the minimap.** Press Tab to cycle it between medium, large and small.",
+				"**Cleaner view.** The hint bar fades away after a few quiet seconds and comes back when you press a key or click.",
+				"**Matching dialogs.** The Sky, News and Map panels now share one look."
+			],
+			"summary": "One hint bar along the bottom, a HUD that scales on big screens, a resizable minimap, and hints that fade when you're idle.",
+			"title": "November 23: A tidier screen"
+		},
+		{
+			"bullets": [
 				"**The land beyond the fence.** Real hills and plains reach out 80 km in every direction, built from USGS elevation data. They shift against the farm as you walk.",
 				"**The Blue Mountains.** Snow-streaked ridges with dark forest on top, 35 to 65 km east, drawn a little taller than life so they stand out.",
 				"**Wind turbines.** About 1,100 turbines stand where they really are, most of them on the Stateline ridge to the west and south-west. Their blades turn, and at night some flash red in time with each other.",
@@ -123,14 +134,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 10694,
-		"commits": 272,
-		"decisions": 133,
+		"code_lines": 10846,
+		"commits": 274,
+		"decisions": 134,
 		"models": 13,
 		"scenes": 26,
 		"scripts": 47,
-		"size_kb": 111324,
-		"test_lines": 2761,
+		"size_kb": 111330,
+		"test_lines": 2800,
 		"textures": 48,
 		"vehicles": 3
 	}
