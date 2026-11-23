@@ -123,14 +123,17 @@ func _apply_minimap_size() -> void:
 	var edge: float = HudStyle.MINIMAP_SIZES[_size_index]
 	_minimap.custom_minimum_size = Vector2(edge, edge)
 	_minimap.size = Vector2(edge, edge)
+	if _hint_bar != null:
+		_hint_bar.offset_left = MINIMAP_MARGIN * 2.0 + edge + 8.0
 
 ## One dark bar of key chips along the bottom, in place of the loose hints. It
 ## fades after a few idle seconds (see _process) and returns on any input.
 func _build_hint_bar() -> void:
 	_hint_bar = PanelContainer.new()
 	_hint_bar.add_theme_stylebox_override("panel", HudStyle.panel(8.0, 0.68))
-	_hint_bar.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
-	_hint_bar.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	# Bottom row, just right of the minimap so the two never overlap.
+	_hint_bar.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	_hint_bar.grow_horizontal = Control.GROW_DIRECTION_END
 	_hint_bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_hint_bar.offset_bottom = -MINIMAP_MARGIN
 	add_child(_hint_bar)
@@ -158,6 +161,14 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_TAB and not is_open() and not get_tree().paused:
 		_size_index = HudStyle.next_minimap_index(_size_index)
 		_apply_minimap_size()
+		get_viewport().set_input_as_handled()
+
+func _exit_tree() -> void:
+	var window := get_window()
+	if window != null:
+		if window.size_changed.is_connected(_apply_hud_scale):
+			window.size_changed.disconnect(_apply_hud_scale)
+		window.content_scale_factor = 1.0
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_map"):

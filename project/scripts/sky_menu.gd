@@ -202,7 +202,7 @@ func refresh() -> void:
 
 func _build() -> void:
 	_panel = PanelContainer.new()
-	var style := preload("res://scripts/hud_style.gd").dialog()
+	var style := preload("res://scripts/hud_style.gd").dialog(KEY_COLOR)
 	_panel.add_theme_stylebox_override("panel", style)
 	_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_RIGHT)
 	_panel.grow_horizontal = Control.GROW_DIRECTION_BEGIN
