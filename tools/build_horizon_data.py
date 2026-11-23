@@ -29,6 +29,7 @@ import json
 import math
 import os
 import sys
+import tempfile
 import urllib.request
 
 import numpy as np
@@ -140,13 +141,20 @@ def turbines(data):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dem", help="cache the DEM GeoTIFF here (reused if present)")
+    ap.add_argument("--dem", help="cache the DEM GeoTIFF here (reused if present; without it the DEM is"
+                    " downloaded fresh every run, so a changed DEM_BBOX can't pick up a stale file)")
     ap.add_argument("--turbines", help="cache the turbine JSON here (reused if present)")
     args = ap.parse_args()
 
-    dem_path = args.dem or "/tmp/horizon_dem.tif"
-    fetch(DEM_URL.format(*DEM_BBOX, *DEM_SIZE), dem_path)
-    dem = Dem(dem_path)
+    if args.dem:
+        dem_path = args.dem
+        fetch(DEM_URL.format(*DEM_BBOX, *DEM_SIZE), dem_path)
+        dem = Dem(dem_path)
+    else:
+        with tempfile.TemporaryDirectory() as tmp:
+            dem_path = os.path.join(tmp, "dem.tif")
+            fetch(DEM_URL.format(*DEM_BBOX, *DEM_SIZE), dem_path)
+            dem = Dem(dem_path)
     radii = ring_radii()
     observer = dem.at(0.0, 0.0)
     heights = sample_grid(dem, radii)

@@ -38,6 +38,8 @@ const SQUEEZE_START := 2400.0
 const SQUEEZE_RANGE := 1150.0
 const SQUEEZE_SCALE := 25000.0
 const SQUEEZE_MAX := SQUEEZE_START + SQUEEZE_RANGE
+## A far nacelle may be drawn at most this many times its true size.
+const NACELLE_MAX_STRETCH := 2.0
 ## Rotor tip speed (m/s) used to give each turbine a believable spin rate.
 const TIP_SPEED := 70.0
 
@@ -104,6 +106,28 @@ static func elevation_at(heights: PackedFloat32Array, rings: Array, columns: int
 static func rotor_speed(diameter: float) -> float:
 	var rpm := clampf(TIP_SPEED * 60.0 / (PI * maxf(diameter, 1.0)), 8.0, 30.0)
 	return rpm * TAU / 60.0
+
+## Scale of a turbine's nacelle (modelled for a 100 m rotor) for a rotor
+## `rotor` metres across, stretched by `s`, `min_width` being the thinnest it
+## should draw at its distance. Kept to at most twice its true size: the
+## distance floor alone grows without limit and made far nacelles bigger than
+## their towers.
+static func nacelle_scale(rotor: float, s: float, min_width: float) -> float:
+	var true_scale := rotor / 100.0 * s
+	return clampf(min_width / 4.0, true_scale, true_scale * NACELLE_MAX_STRETCH)
+
+## How much to enlarge a warning light beyond its nacelle's scale so it is
+## still about as big on screen as the distance floor asks (>= 1).
+static func beacon_boost(head_scale: float, min_width: float) -> float:
+	return maxf(1.0, (min_width / 4.0) / maxf(head_scale, 1e-3))
+
+## `speed` (rad/s) nudged so a whole number of turns fits in `period` seconds:
+## shader TIME wraps every `period` (time_rollover_secs, 3600 by default), and
+## this keeps the blades from jumping when it does. Under 0.1 % off.
+static func loop_safe_speed(speed: float, period: float) -> float:
+	if speed <= 0.0 or period <= 0.0:
+		return speed
+	return maxf(1.0, roundf(speed * period / TAU)) * TAU / period
 
 ## How much haze (0..1) lies between the camera and ground `d` metres away,
 ## for an extinction of `per_metre`.

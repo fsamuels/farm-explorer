@@ -35,6 +35,9 @@ const MIN_WIDTH_PER_METRE := 1.2e-3
 ## Towers are sunk this far (before exaggeration) so they never float over
 ## the coarse terrain facets.
 const TOWER_SINK := 12.0
+## Where the warning light sits on the nacelle mesh (a 2.4 m cube; its base,
+## 1.2 m lower, is wind_turbine.gdshader's BEACON_BASE, which it grows from).
+const BEACON_CENTER := Vector3(0.0, 3.2, -4.0)
 
 @export var time_of_day_path: NodePath = ^"../TimeOfDay"
 @export var weather_path: NodePath = ^"../Weather"
@@ -225,33 +228,46 @@ func _build_turbines() -> void:
 		node.multimesh = mm
 		node.material_override = _rotor_material if node == rotors else _tower_material
 		mms.append(mm)
+	var rollover: float = ProjectSettings.get_setting("rendering/limits/time/time_rollover_secs", 3600.0)
+	for idx in n:
+		var placed := turbine_placement(_heights, list[idx], idx, rollover)
+		for m in 3:
+			mms[m].set_instance_transform(idx, placed.transforms[m])
+			mms[m].set_instance_custom_data(idx, placed.custom[m])
+
+## Where and how big turbine `idx` (row `t` of HorizonData.TURBINES) is drawn:
+## `transforms` and `custom` (INSTANCE_CUSTOM) for its tower, nacelle and rotor,
+## in that order, plus its `scale`. Pure, so the tests can check it without a
+## renderer (a MultiMesh reads back identity transforms headless).
+static func turbine_placement(heights: PackedFloat32Array, t: Array, idx: int, rollover: float) -> Dictionary:
 	# Rotors face into the wind: local +z points toward WIND_FROM_BEARING.
 	var into_wind := HorizonMath.polar_point(WIND_FROM_BEARING, 1.0)
 	var facing := Basis.looking_at(-Vector3(into_wind.x, 0.0, into_wind.y), Vector3.UP)
-	for idx in n:
-		var t: Array = list[idx]
-		var base := turbine_base(_heights, t)
-		var s: float = base.scale
-		var dist: float = base.distance
-		var hub: float = t[2] * s
-		var blade: float = t[3] * 0.5 * s
-		var min_width := dist * MIN_WIDTH_PER_METRE
-		var tower_width := maxf(4.0 * s, min_width)
-		var head_scale := maxf(t[3] / 100.0 * s, min_width / 4.0)
-		var foot: Vector3 = base.position - Vector3(0, TOWER_SINK * s, 0)
-		var top: Vector3 = base.position + Vector3(0, hub, 0)
-		var tower_basis := facing * Basis.from_scale(Vector3(tower_width, hub + TOWER_SINK * s, tower_width))
-		var head_basis := facing * Basis.from_scale(Vector3.ONE * head_scale)
-		var rotor_basis := facing * Basis.from_scale(Vector3.ONE * blade)
-		var beacon := 1.0 if _hash(idx * 13 + 7) < BEACON_SHARE else 0.0
-		var speed := 0.0 if _hash(idx * 17 + 3) < IDLE_SHARE else HorizonMath.rotor_speed(t[3])
-		var custom := Color(_hash(idx * 29 + 1) * TAU, speed, beacon, maxf(3.5 * s, min_width) / blade)
-		mms[0].set_instance_transform(idx, Transform3D(tower_basis, foot))
-		mms[1].set_instance_transform(idx, Transform3D(head_basis, top))
-		# The rotor sits in front of the nacelle (its local +z, into the wind).
-		mms[2].set_instance_transform(idx, Transform3D(rotor_basis, top + facing.z * 6.0 * head_scale))
-		for m in 3:
-			mms[m].set_instance_custom_data(idx, custom)
+	var base := turbine_base(heights, t)
+	var s: float = base.scale
+	var hub: float = t[2] * s
+	var blade: float = t[3] * 0.5 * s
+	var min_width: float = base.distance * MIN_WIDTH_PER_METRE
+	var tower_width := maxf(4.0 * s, min_width)
+	var head_scale := HorizonMath.nacelle_scale(t[3], s, min_width)
+	var foot: Vector3 = base.position - Vector3(0, TOWER_SINK * s, 0)
+	var top: Vector3 = base.position + Vector3(0, hub, 0)
+	var beacon := 1.0 if _hash(idx * 13 + 7) < BEACON_SHARE else 0.0
+	var speed := 0.0 if _hash(idx * 17 + 3) < IDLE_SHARE else HorizonMath.loop_safe_speed(HorizonMath.rotor_speed(t[3]), rollover)
+	# Towers and nacelles don't spin; their x is how much the warning light is
+	# enlarged beyond the nacelle so it still shows from far away.
+	var head_custom := Color(HorizonMath.beacon_boost(head_scale, min_width), 0.0, beacon, 0.0)
+	var rotor_custom := Color(_hash(idx * 29 + 1) * TAU, speed, beacon, maxf(3.5 * s, min_width) / blade)
+	return {
+		"scale": s,
+		"transforms": [
+			Transform3D(facing * Basis.from_scale(Vector3(tower_width, hub + TOWER_SINK * s, tower_width)), foot),
+			Transform3D(facing * Basis.from_scale(Vector3.ONE * head_scale), top),
+			# The rotor sits in front of the nacelle (its local +z, into the wind).
+			Transform3D(facing * Basis.from_scale(Vector3.ONE * blade), top + facing.z * 6.0 * head_scale),
+		],
+		"custom": [head_custom, head_custom, rotor_custom],
+	}
 
 ## A unit tower: 1 m across at the foot, 0.6 m at the top, 1 m tall, foot at
 ## the origin. Instances scale it to width and height.
@@ -279,7 +295,7 @@ static func _head_mesh() -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	_box(st, Vector3(0, 0, -1.5), Vector3(4.0, 4.0, 11.0), 0.0)
-	_box(st, Vector3(0, 3.2, -4.0), Vector3(2.4, 2.4, 2.4), 1.0)
+	_box(st, BEACON_CENTER, Vector3(2.4, 2.4, 2.4), 1.0)
 	return st.commit()
 
 static func _box(st: SurfaceTool, center: Vector3, size: Vector3, marker: float) -> void:

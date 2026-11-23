@@ -1,15 +1,20 @@
 // Wind turbines on the distant ridges (D-133), drawn from two MultiMeshes: the
 // towers (with a nacelle and a red warning light on top) and the rotors, which
 // spin about their local z axis at each turbine's own speed. INSTANCE_CUSTOM
-// holds (spin phase, spin speed in rad/s, 1 if this turbine carries a warning
-// light, rotor blade width / blade length). Shares the distance squeezing and
-// haze of the terrain.
+// holds, for rotors, (spin phase, spin speed in rad/s, 1 if this turbine
+// carries a warning light, rotor blade width / blade length) and, for towers
+// and nacelles, (warning light enlargement, unused, warning light flag,
+// unused). Shares the distance squeezing and haze of the terrain.
 shader_type spatial;
 render_mode skip_vertex_transform, fog_disabled, cull_disabled, diffuse_lambert, specular_disabled;
 
 #include "res://shaders/horizon.gdshaderinc"
 
 uniform bool spin = false;
+// Where the warning light sits on the nacelle roof (the middle of its base,
+// DistantTerrain.BEACON_CENTER less half its 2.4 m height): it is enlarged
+// about this point so it grows upward, clear of the nacelle.
+const vec3 BEACON_BASE = vec3(0.0, 2.0, -4.0);
 // 0 by day .. 1 at night: the warning lights only show in the dark.
 uniform float darkness : hint_range(0.0, 1.0) = 0.0;
 
@@ -35,6 +40,10 @@ void vertex() {
 	// UV.x = 1 marks the warning light on the nacelle (the rotor's UV is blade
 	// coordinates, so it never counts); only some turbines carry one.
 	v_beacon = spin ? 0.0 : step(0.75, UV.x) * INSTANCE_CUSTOM.z;
+	if (!spin && UV.x > 0.75) {
+		// The nacelle keeps near its true size far away; the light alone grows.
+		v = BEACON_BASE + (v - BEACON_BASE) * max(INSTANCE_CUSTOM.x, 1.0);
+	}
 	vec3 world = (MODEL_MATRIX * vec4(v, 1.0)).xyz;
 	vec3 camera = INV_VIEW_MATRIX[3].xyz;
 	v_dist = length(world - camera);

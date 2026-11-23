@@ -137,6 +137,20 @@ func _test_math() -> void:
 	var rpm47 := HorizonMath.rotor_speed(47.0) * 60.0 / TAU
 	_check(rpm47 > 25.0 and rpm47 < 31.0, "a 47 m rotor turns ~28 rpm: %s" % rpm47)
 	_check(HorizonMath.rotor_speed(127.0) < HorizonMath.rotor_speed(47.0), "bigger rotors turn slower")
+	# Spin speeds fit whole turns into TIME's rollover, so blades don't jump.
+	for rd in [47.0, 80.0, 103.0, 127.0]:
+		var raw := HorizonMath.rotor_speed(rd)
+		var safe := HorizonMath.loop_safe_speed(raw, 3600.0)
+		var turns := safe * 3600.0 / TAU
+		_check(absf(turns - roundf(turns)) < 1e-3 and absf(safe - raw) / raw < 0.001, "%s m rotor: whole turns per rollover, speed barely changed" % rd)
+	# Far nacelles stay within twice their true size (they used to outgrow their
+	# towers at 55-78 km), and the warning light makes up the rest.
+	for far in [15000.0, 55000.0, 78000.0]:
+		var s := HorizonMath.exaggeration(far)
+		var mw: float = far * DistantTerrain.MIN_WIDTH_PER_METRE
+		var hs := HorizonMath.nacelle_scale(100.0, s, mw)
+		_check(hs <= s * HorizonMath.NACELLE_MAX_STRETCH + 1e-4 and hs >= s - 1e-4, "nacelle at %d km is 1-2x true size: %s" % [far / 1000.0, hs])
+		_check(is_equal_approx(hs * HorizonMath.beacon_boost(hs, mw), maxf(hs, mw / 4.0)), "the warning light still reaches the distance floor at %d km" % (far / 1000.0))
 	# Haze: clear air leaves the Blues showing, light fog hides even the near ridge.
 	var clear := HorizonMath.haze_per_metre(0.0, 0.0, 0.0, false)
 	_check(HorizonMath.haze(50000.0, clear) < 0.65, "the Blues show through clear air")
@@ -186,8 +200,19 @@ func _test_scene() -> void:
 	var t: Array = HorizonData.TURBINES[HorizonData.TURBINES.size() / 2]
 	var base: Dictionary = DistantTerrain.turbine_base(terrain._heights, t)
 	_check(base.scale >= 1.0 and base.scale <= HorizonMath.EXAGGERATION, "turbines scale with the land: %s" % base.scale)
-	var tower: Transform3D = terrain.towers.multimesh.get_instance_transform(HorizonData.TURBINES.size() / 2)
+	# (MultiMesh transforms read back as identity headless, so the placement
+	# is checked through the pure function that produces them.)
+	var tower: Transform3D = DistantTerrain.turbine_placement(terrain._heights, t, HorizonData.TURBINES.size() / 2, 3600.0).transforms[0]
 	_check(tower.origin.y < base.position.y, "tower feet are sunk into the hill")
+	# No turbine's nacelle (11 m long in its mesh) outgrows its tower.
+	var too_big := 0
+	for k in HorizonData.TURBINES.size():
+		var placed := DistantTerrain.turbine_placement(terrain._heights, HorizonData.TURBINES[k], k, 3600.0)
+		var tw: Transform3D = placed.transforms[0]
+		var hd: Transform3D = placed.transforms[1]
+		if 11.0 * hd.basis.get_scale().x > tw.basis.get_scale().y * 0.6:
+			too_big += 1
+	_check(too_big == 0, "nacelles stay small against their towers (%d too big)" % too_big)
 
 	var tod: Node = main.get_node("TimeOfDay")
 	var weather: Node = main.get_node("Weather")
