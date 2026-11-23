@@ -1,0 +1,33 @@
+{
+  "_status": "DRAFT v1 - traced by eye from the NAIP + drone orthomosaics, NOT yet reviewed by the owner. Do not build terrain from this until confirmed.",
+  "_crs": "scene meters, +X east, +Z south, origin at the parcel centroid (D-6)",
+  "_how_to_review": "python3 tools/water_overlay.py  (draws this file over the imagery with numbered vertices); correct by vertex id, e.g. 'D7 -> (251, 12)'",
+  "_units": "dimensions are the owner's figures converted from feet, midpoint of the stated range",
+
+  "weir": { "id": "W", "pos": [258.5, -87.0], "confidence": "medium", "note": "NE corner of the parcel at the road; gate/structure visible at about (258, -88)" },
+
+  "ditch": {
+    "depth_m": 0.76,
+    "depth_note": "2-3 ft stated by owner, midpoint 2.5 ft",
+    "width_m": 1.5,
+    "width_note": "NOT stated - assumed from the drone image (channel reads ~1-1.5 m); please confirm",
+    "segments": [
+      { "name": "road side (weir south)", "confidence": "high",
+        "points": [[258.5,-87],[258,-75],[257.5,-55],[255,-40],[253,-25],[251.5,-10],[250.8,10],[250.3,30],[250,50],[250,62]] },
+      { "name": "south edge, west through the green pasture", "confidence": "medium",
+        "points": [[250,62],[240,64],[220,64],[200,64],[180,63.5],[160,63],[140,62.5],[125,62]] },
+      { "name": "track team area to pond", "confidence": "low",
+        "points": [[125,62],[105,50],[90,42],[80,36],[74,32]] }
+    ]
+  },
+
+  "pond": {
+    "depth_m": 3.8,
+    "depth_note": "owner wrote '10-15' (read as feet of depth); midpoint 12.5 ft",
+    "shape_note": "long three-lobed peanut, NE to W, dirt arena side to past the Back Barn; spine with half-width at each point",
+    "confidence": "low",
+    "spine_x_z_halfwidth_m": [
+      [112,0,3],[96,6,7],[82,15,5],[66,26,13],[46,35,5],[22,37,5],[2,32,6],[-14,26,9],[-28,19,12],[-40,13,8]
+    ]
+  }
+}
