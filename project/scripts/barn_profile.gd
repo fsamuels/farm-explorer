@@ -13,12 +13,15 @@ const CLEARANCE := 2.3
 ## The big middle opening: how wide, and the height of its header beam.
 const OPENING_W := 4.6
 const HEADER := 3.3
-## The wing roof: high at the central section, low at the outer wall.
-const WING_HIGH := 3.1
-const WING_LOW := 2.6
 ## The central roof: eave at the wings, ridge in the middle.
 const EAVE := 3.55
 const RIDGE := 4.7
+## How far each wing roof stands below the middle roof's eave, about a foot as
+## in the photo (D-129): a siding riser fills the step.
+const STEP := 0.3
+## The wing roof: high at the central section, low at the outer wall.
+const WING_HIGH := EAVE - STEP
+const WING_LOW := 2.6
 ## The blue corrugated skirt along the bottom of the closed walls.
 const SKIRT := 1.1
 
