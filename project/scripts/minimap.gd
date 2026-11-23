@@ -54,6 +54,8 @@ const CONTROLS := [
 
 ## The "G — Sky" icon button under the minimap (D-110).
 var sky_button: Button
+## The "C — News" icon button beside it (D-130).
+var news_button: Button
 var trail := PackedVector2Array()
 ## Vector2 world position, or null when no waypoint is set.
 var waypoint = null
@@ -283,6 +285,8 @@ func _build_minimap() -> void:
 	hint_row.add_child(hint)
 	sky_button = _build_sky_button()
 	hint_row.add_child(sky_button)
+	news_button = _build_news_button()
+	hint_row.add_child(news_button)
 	_minimap_info = _outlined_label("", FONT_SIZE - 4)
 	_minimap_box.add_child(_minimap_info)
 
@@ -310,6 +314,7 @@ func _build_minimap() -> void:
 	_ignore_mouse(_minimap_box)
 	# The icon is the one clickable thing here (with a free mouse).
 	sky_button.mouse_filter = Control.MOUSE_FILTER_STOP
+	news_button.mouse_filter = Control.MOUSE_FILTER_STOP
 
 ## The sun-and-cloud icon (and "G") that opens the sky menu (D-110). It needs a
 ## free mouse to click (Esc), so the key is the main way in.
@@ -325,6 +330,33 @@ func _build_sky_button() -> Button:
 	button.tooltip_text = "Pick the time of day and the weather"
 	button.pressed.connect(func() -> void: get_tree().call_group("sky_menu", "set_open", true))
 	return button
+
+## The star icon (and "C") that opens the What's New dialog (D-130).
+func _build_news_button() -> Button:
+	var button := Button.new()
+	button.flat = true
+	button.focus_mode = Control.FOCUS_NONE
+	button.text = "C — News"
+	button.add_theme_font_size_override("font_size", FONT_SIZE - 2)
+	button.add_theme_color_override("font_color", KEY_COLOR)
+	button.add_theme_color_override("font_hover_color", Color(1, 1, 1))
+	button.icon = _news_icon()
+	button.tooltip_text = "What's new in the game"
+	button.pressed.connect(func() -> void: get_tree().call_group("whats_new", "set_open", true))
+	return button
+
+## A four-pointed sparkle, drawn into a texture so there is no icon file to ship.
+static func _news_icon() -> ImageTexture:
+	var size := 40
+	var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
+	var c := Vector2(20, 20)
+	for y in size:
+		for x in size:
+			var d := Vector2(x + 0.5, y + 0.5) - c
+			# |x|^0.5 + |y|^0.5 < r is a pointed four-armed star (an astroid).
+			var inside := sqrt(absf(d.x)) + sqrt(absf(d.y)) < 4.2
+			img.set_pixel(x, y, Color(1.0, 0.86, 0.35) if inside else Color(0, 0, 0, 0))
+	return ImageTexture.create_from_image(img)
 
 ## A small sun peeking out from behind a cloud, drawn into a texture so there
 ## is no icon file to ship.

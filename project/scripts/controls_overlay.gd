@@ -18,6 +18,7 @@ const CONTROLS := [
 	["F", "Switch first- / third-person view"],
 	["Mouse wheel", "Zoom the camera out into third person, or in to first person"],
 	["M", "Open / close the map (pauses the game)"],
+	["C", "What's New: the changelog and the game's size (pauses the game)"],
 	["G", "Sky menu: pick the time of day, weather, moon and shooting stars (pauses the game)"],
 	["T", "Change the time of day: day, sunset, dusk, night, dawn, sunrise"],
 	["Y", "Start / stop the clock (time shown top right)"],

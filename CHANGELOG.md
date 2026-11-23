@@ -3,7 +3,22 @@
 The highlights of Farm Explorer, newest first. For the full technical history, see
 [docs/project/decisions.md](docs/project/decisions.md).
 
+This file is shown in the game's What's New dialog (the C key), so write it for
+players. Every release block is a `## Date: Title` heading, then a one-line
+`> summary` (at most 140 characters), then `- ` bullets. After editing it, run
+`cd project && godot --headless -s ../tools/build_release_notes.gd` and commit the
+regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
+fails if the two disagree.
+
+## November 23: What's New
+> The game now shows its own changelog and size: press C, or click the star under the minimap.
+- **A What's New window.** Press C (or click "C — News" under the minimap) to see
+  what changed in each release, newest first, with a one-line headline for each.
+- **By the numbers.** The same window shows how big the game is: lines of code,
+  scenes, 3D models, images, vehicles, decisions logged and commits.
+
 ## November 23: A UTV in the barn
+> A yellow Cub Cadet 550 UTV you can drive, with a dump bed, now lives in the Front Barn.
 - **A yellow Cub Cadet 550.** It's parked in the Front Barn's middle aisle, facing the
   big north opening. Press E to get in, then drive it like the cars: W / S gas and
   brake, A / D steer, Space handbrake. It's slower and tighter than the cars, with
@@ -12,12 +27,14 @@ The highlights of Farm Explorer, newest first. For the full technical history, s
   first, and you can only crawl while it's raised.
 
 ## November 23: Fixes
+> The property lines now slope the right way, and the Starlink train looks better.
 - **Property lines.** The north-west and south-west corners of the property line
   now slope the right way and join up with their neighbours; they had been drawn
   as mirror images.
 - **A better Starlink train.** Longer, with each light a little dimmer.
 
 ## November 23: Front Barn stalls and fences
+> The Front Barn's stalls, roof and neighbouring fences now match the photo.
 - **The south stall is closed in,** and the Front Barn's roof now reads as a middle
   section with a side section each side, about a foot lower, as in the photo.
 - **Open stalls.** The stall walls are now four spaced boards instead of solid
@@ -26,6 +43,7 @@ The highlights of Farm Explorer, newest first. For the full technical history, s
   now join it.
 
 ## November 22: The Front Barn, as it really is
+> The Front Barn was rebuilt to look like the real one, and the map teleports you to its north side.
 - **A barn that looks like the real one.** The Front Barn now has a tall middle with
   a low roof and a lower wing on each side, tan vertical siding, a big open middle
   bay, red roof trim and wood posts. Only the tack-room end is closed in, with a
@@ -36,6 +54,7 @@ The highlights of Farm Explorer, newest first. For the full technical history, s
   the south end.
 
 ## November 21: Weather, sky, cars and open doors
+> Real weather, a night sky with a moon and planets, a sky menu, drivable cars and walk-in buildings.
 - **A better night.** A full moon now rises and sets, lights the night and washes
   out the dimmer stars while it is high; the sky menu can turn it off for darker
   skies. Shooting stars can be turned off or turned up to a shower, and
@@ -70,6 +89,7 @@ The highlights of Farm Explorer, newest first. For the full technical history, s
 - **Easier to use.** A clearer "press E" prompt, and a clock readout in the corner.
 
 ## November 20: Meet the explorer
+> You now appear in the game as a character, with a full map and a time of day.
 - **You're in the game.** A player character you can walk around as, with a
   third-person view and a controls overlay.
 - **A map of the whole ranch.** A full-screen map with labeled buildings and a
@@ -79,6 +99,7 @@ The highlights of Farm Explorer, newest first. For the full technical history, s
 - **Camera control.** Keyboard camera keys and mouse-wheel zoom.
 
 ## September–October: The ranch takes shape
+> Fences, aerial imagery, buildings, animals, cars and a web version of the ranch.
 - **Fences and gates.** Pastures, barn lots, the round pen, the track and the
   gates between them, all traced from the real property.
 - **Aerial imagery.** The ground is textured from drone photos of the ranch, and
@@ -91,5 +112,6 @@ The highlights of Farm Explorer, newest first. For the full technical history, s
 - **Play it in your browser.** A web version you can play on itch.io.
 
 ## September 14: The first version
+> A walkable 3D model of Reign Cloud Ranch built from the real parcel and satellite imagery.
 - A walkable 3D model of Reign Cloud Ranch in Touchet, WA, built from the real
   parcel boundary and satellite imagery.
