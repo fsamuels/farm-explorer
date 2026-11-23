@@ -8,6 +8,7 @@ extends Control
 
 const MapMath := preload("res://scripts/map_math.gd")
 const MapCanvas := preload("res://scripts/map_canvas.gd")
+const HudStyle := preload("res://scripts/hud_style.gd")
 
 const MINIMAP_SIZE := Vector2(360, 360)
 const MINIMAP_MARGIN := 24.0
@@ -103,6 +104,7 @@ func _process(_delta: float) -> void:
 	else:
 		_minimap.center = here
 		_minimap_info.text = _minimap_text(here)
+		_minimap_info.visible = _minimap_info.text != ""
 		_minimap.queue_redraw()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -277,9 +279,14 @@ func _build_minimap() -> void:
 	_minimap_box.add_theme_constant_override("separation", 6)
 	add_child(_minimap_box)
 
+	# Dark backing so the M / G / C hints read against a bright daytime sky (D-132).
+	var hint_backing := PanelContainer.new()
+	hint_backing.add_theme_stylebox_override("panel", HudStyle.backing())
+	hint_backing.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_minimap_box.add_child(hint_backing)
 	var hint_row := HBoxContainer.new()
 	hint_row.add_theme_constant_override("separation", 16)
-	_minimap_box.add_child(hint_row)
+	hint_backing.add_child(hint_row)
 	var hint := _outlined_label("M — Map", FONT_SIZE - 2)
 	hint.add_theme_color_override("font_color", KEY_COLOR)
 	hint_row.add_child(hint)
@@ -288,6 +295,9 @@ func _build_minimap() -> void:
 	news_button = _build_news_button()
 	hint_row.add_child(news_button)
 	_minimap_info = _outlined_label("", FONT_SIZE - 4)
+	_minimap_info.add_theme_stylebox_override("normal", HudStyle.backing(8.0, 2.0))
+	_minimap_info.visible = false
+	_minimap_info.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_minimap_box.add_child(_minimap_info)
 
 	var frame := PanelContainer.new()

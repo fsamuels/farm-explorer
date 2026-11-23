@@ -3,6 +3,9 @@ extends Control
 ## (`toggle_help`) hides/shows it. While hidden, a small "F1 — Controls" hint
 ## stays in the corner. Purely informational: it never takes the mouse.
 ##
+## It also tucks itself away once you've been moving for AUTO_HIDE_MOVE_SECONDS
+## (walking or driving), so it never sits over the view for long (D-132).
+##
 ## Pressing any other key (anything but the movement keys, Space, Shift and F1
 ## itself) tucks the panel away, so a key you use for something is also the
 ## moment the screen clears. It watches input without consuming it.
@@ -26,17 +29,25 @@ const CONTROLS := [
 	["N", "Show / hide constellation lines (and, at night, their names)"],
 	["R", "Change the weather: rain, storm, fog, snow, rainbow, aurora, clear"],
 	["Esc", "Release the mouse (click to recapture)"],
-	["F1", "Show / hide this help (any other key but moving also hides it)"],
+	["F1", "Show / hide this help (it hides itself after a few seconds of moving, or when you press another key)"],
 ]
 
 ## Keys that only move you around: they never minimize the panel.
 const MOVE_ACTIONS := ["move_forward", "move_back", "move_left", "move_right", "jump", "walk", "super_sprint"]
+
+## Seconds of walking or driving after which the open panel hides itself.
+const AUTO_HIDE_MOVE_SECONDS := 5.0
+
+const HudStyle := preload("res://scripts/hud_style.gd")
+## Only these count as "moving" for the auto-hide: holding Shift or Ctrl alone doesn't.
+const DIRECTION_ACTIONS := ["move_forward", "move_back", "move_left", "move_right"]
 
 const FONT_SIZE := 22
 const KEY_COLOR := Color(1.0, 0.86, 0.55)
 
 var _panel: PanelContainer
 var _hint: Label
+var _moved := 0.0
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -45,6 +56,7 @@ func _ready() -> void:
 	add_child(_panel)
 	_hint = _outlined_label("F1 — Controls")
 	_hint.position = Vector2(16, 16)
+	_hint.add_theme_stylebox_override("normal", HudStyle.backing())
 	add_child(_hint)
 	_set_open(true)
 
@@ -63,6 +75,25 @@ static func is_action_key(event: InputEvent) -> bool:
 			return false
 	return true
 
+## Moving time so far: grows by `delta` while `moving`, holds when you pause.
+static func advance_move_time(moved: float, moving: bool, delta: float) -> float:
+	return moved + delta if moving else moved
+
+static func should_auto_hide(moved: float) -> bool:
+	return moved >= AUTO_HIDE_MOVE_SECONDS
+
+func _process(delta: float) -> void:
+	if not _panel.visible:
+		return
+	var moving := false
+	for action in DIRECTION_ACTIONS:
+		if Input.is_action_pressed(action):
+			moving = true
+			break
+	_moved = advance_move_time(_moved, moving, delta)
+	if should_auto_hide(_moved):
+		_set_open(false)
+
 func _input(event: InputEvent) -> void:
 	if _panel.visible and is_action_key(event):
 		_set_open(false)
@@ -74,6 +105,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _set_open(open: bool) -> void:
 	_panel.visible = open
+	_moved = 0.0
 	_hint.visible = not open
 
 func _build_panel() -> PanelContainer:

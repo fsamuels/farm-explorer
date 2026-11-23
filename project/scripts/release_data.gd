@@ -6,6 +6,14 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**Readable by day.** The M / G / C hints, the location line under the minimap, the F1 hint and the clock now sit on a soft dark backing instead of floating on the sky.",
+				"**Help clears itself.** The controls panel hides after about five seconds of walking or driving. Press F1 to bring it back."
+			],
+			"summary": "The map, sky and news hints now stand out in bright daylight, and the controls help gets out of your way sooner.",
+			"title": "November 23: Easier to see"
+		},
+		{
+			"bullets": [
 				"**Super sprint.** Hold Ctrl while you move to run about three times as fast as normal. Shift still slows you to a walk.",
 				"**Transport pads.** Five glowing blue pads in the back pastures, west and south of the Back Barn. Look at a pillar of light and press E to be sent to the next pad; the last one sends you back to the Back Barn."
 			],
@@ -105,14 +113,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 8940,
-		"commits": 268,
-		"decisions": 131,
+		"code_lines": 8995,
+		"commits": 269,
+		"decisions": 132,
 		"models": 13,
 		"scenes": 26,
-		"scripts": 41,
-		"size_kb": 111119,
-		"test_lines": 2507,
+		"scripts": 42,
+		"size_kb": 111120,
+		"test_lines": 2534,
 		"textures": 48,
 		"vehicles": 3
 	}

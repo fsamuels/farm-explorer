@@ -667,6 +667,7 @@ func _build_clock_label() -> void:
 	_clock_label.offset_right = -20
 	_clock_label.offset_top = 16
 	_clock_label.add_theme_font_size_override("font_size", 22)
+	_clock_label.add_theme_stylebox_override("normal", preload("res://scripts/hud_style.gd").backing())
 	_clock_label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
 	_clock_label.add_theme_constant_override("outline_size", 4)
 	_clock_label.visible = false
