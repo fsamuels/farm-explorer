@@ -104,6 +104,7 @@ func _process(_delta: float) -> void:
 	else:
 		_minimap.center = here
 		_minimap_info.text = _minimap_text(here)
+		_minimap_info.visible = _minimap_info.text != ""
 		_minimap.queue_redraw()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -295,6 +296,7 @@ func _build_minimap() -> void:
 	hint_row.add_child(news_button)
 	_minimap_info = _outlined_label("", FONT_SIZE - 4)
 	_minimap_info.add_theme_stylebox_override("normal", HudStyle.backing(8.0, 2.0))
+	_minimap_info.visible = false
 	_minimap_info.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_minimap_box.add_child(_minimap_info)
 

@@ -39,6 +39,9 @@ const MOVE_ACTIONS := ["move_forward", "move_back", "move_left", "move_right", "
 const AUTO_HIDE_MOVE_SECONDS := 5.0
 
 const HudStyle := preload("res://scripts/hud_style.gd")
+## Only these count as "moving" for the auto-hide: holding Shift or Ctrl alone doesn't.
+const DIRECTION_ACTIONS := ["move_forward", "move_back", "move_left", "move_right"]
+
 const FONT_SIZE := 22
 const KEY_COLOR := Color(1.0, 0.86, 0.55)
 
@@ -83,8 +86,8 @@ func _process(delta: float) -> void:
 	if not _panel.visible:
 		return
 	var moving := false
-	for action in MOVE_ACTIONS:
-		if Input.is_action_pressed(action) and action != "jump":
+	for action in DIRECTION_ACTIONS:
+		if Input.is_action_pressed(action):
 			moving = true
 			break
 	_moved = advance_move_time(_moved, moving, delta)
