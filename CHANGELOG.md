@@ -3,6 +3,12 @@
 The highlights of Farm Explorer, newest first. For the full technical history, see
 [docs/project/decisions.md](docs/project/decisions.md).
 
+## November 23: Fixes
+- **Property lines.** The north-west and south-west corners of the property line
+  now slope the right way and join up with their neighbours; they had been drawn
+  as mirror images.
+- **A better Starlink train.** Longer, with each light a little dimmer.
+
 ## November 22: The Front Barn, as it really is
 - **A barn that looks like the real one.** The Front Barn now has a tall middle with
   a low roof and a lower wing on each side, tan vertical siding, a big open middle

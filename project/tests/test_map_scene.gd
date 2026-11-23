@@ -32,6 +32,19 @@ func _run() -> void:
 	_check(data.fences.size() > 20, "fence paths collected: %d" % data.fences.size())
 	_check(data.boundary.size() > 5, "boundary segments collected: %d" % data.boundary.size())
 	_check(data.horses.size() >= 10, "horses collected: %d" % data.horses.size())
+	# The property line is one closed loop: every segment end meets another
+	# segment's end, so a segment rotated the wrong way (a mirrored diagonal) shows
+	# up as a gap.
+	var ends: Array = []
+	for seg in data.boundary:
+		ends.append(seg[0])
+		ends.append(seg[1])
+	for i in ends.size():
+		var near := 0
+		for j in ends.size():
+			if i != j and ends[i].distance_to(ends[j]) < 1.5:
+				near += 1
+		_check(near == 1, "boundary end %s meets exactly one other end (%d)" % [ends[i], near])
 
 	_check(not map.is_open() and not paused, "starts closed and unpaused")
 	_press_m()

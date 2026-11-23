@@ -188,7 +188,7 @@ vec3 meteor(vec3 d, float t) {
 // star the train takes about a minute and does not flash.
 vec3 starlink_train(vec3 d, float t) {
 	const float SECONDS = 70.0;
-	const int BEADS = 24;
+	const int BEADS = 40;
 	const float SPACING = 0.012;   // radians between satellites
 	vec3 a = normalize(vec3(-0.85, 0.30, -0.45));
 	vec3 b = normalize(vec3(0.80, 0.22, 0.55));
@@ -209,7 +209,7 @@ vec3 starlink_train(vec3 d, float t) {
 		// About 0.2 degrees across: wide enough to stay visible on a 1080p screen.
 		sum += (exp(-pow(dist / 0.0032, 2.0)) + 0.25 * exp(-pow(dist / 0.009, 2.0))) * inside * (1.0 - 0.012 * float(k));
 	}
-	return vec3(0.95, 0.96, 1.0) * sum * 1.4;
+	return vec3(0.95, 0.96, 1.0) * sum * 0.9;
 }
 
 void sky() {
