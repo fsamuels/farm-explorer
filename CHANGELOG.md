@@ -48,6 +48,8 @@ fails if the two disagree.
 
 ## November 23: Front Barn stalls and fences
 > The Front Barn's stalls, roof and neighbouring fences now match the photo.
+- **A solid south wall.** The stall on the Front Barn's south-east corner now has a
+  siding wall with a blue metal bottom across its south end, like the west side.
 - **The south stall is closed in,** and the Front Barn's roof now reads as a middle
   section with a side section each side, about a foot lower, as in the photo.
 - **Open stalls.** The stall walls are now four spaced boards instead of solid

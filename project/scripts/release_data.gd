@@ -46,6 +46,7 @@ const DATA := {
 		},
 		{
 			"bullets": [
+				"**A solid south wall.** The stall on the Front Barn's south-east corner now has a siding wall with a blue metal bottom across its south end, like the west side.",
 				"**The south stall is closed in,** and the Front Barn's roof now reads as a middle section with a side section each side, about a foot lower, as in the photo.",
 				"**Open stalls.** The stall walls are now four spaced boards instead of solid walls, so you can see through them like in the photo.",
 				"**Fences meet the barn.** Three fences that stopped just short of the Front Barn now join it."
@@ -113,13 +114,13 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 8995,
-		"commits": 269,
-		"decisions": 132,
+		"code_lines": 9009,
+		"commits": 165,
+		"decisions": 133,
 		"models": 13,
 		"scenes": 26,
 		"scripts": 42,
-		"size_kb": 111120,
+		"size_kb": 111113,
 		"test_lines": 2534,
 		"textures": 48,
 		"vehicles": 3

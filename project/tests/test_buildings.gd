@@ -181,7 +181,7 @@ func _facade_tests(main: Node, shell: Node3D) -> void:
 	_check(facade.posts.size() >= 10 and facade.posts.size() % 2 == 0, "the same posts on each end (%d)" % facade.posts.size())
 	var Interior := preload("res://scripts/barn_interior.gd")
 	_check(Interior.new().tack_height + 0.04 < Profile.WING_LOW - 0.12, "the tack room ceiling stays under the wing roof")
-	_check(facade.siding_pieces >= 10 and facade.skirt_pieces >= 3, "siding and skirt are built (%d, %d)" % [facade.siding_pieces, facade.skirt_pieces])
+	_check(facade.siding_pieces >= 10 and facade.skirt_pieces >= 4, "siding and skirt are built (%d, %d)" % [facade.siding_pieces, facade.skirt_pieces])
 	_check(facade.get_node_or_null("RoofMiddle") != null and facade.get_node_or_null("RoofWing_East") != null and facade.get_node_or_null("RoofWing_West") != null, "the roof is three sections")
 	_check(absf((Profile.EAVE - Profile.WING_HIGH) - 0.3) < 0.01, "each wing roof stands about a foot below the middle roof's eave")
 	_check(((facade.get_node("RoofMiddle") as MeshInstance3D).mesh as ArrayMesh).get_surface_count() == 2, "the middle roof has an east and a west slope")
