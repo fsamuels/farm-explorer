@@ -207,7 +207,7 @@ vec3 starlink_train(vec3 d, float t) {
 		float inside = smoothstep(0.0, 0.15, at / arc) * (1.0 - smoothstep(0.85, 1.0, at / arc));
 		float dist = length(vec2(ang - at, side));
 		// About 0.2 degrees across: wide enough to stay visible on a 1080p screen.
-		sum += (exp(-pow(dist / 0.0032, 2.0)) + 0.25 * exp(-pow(dist / 0.009, 2.0))) * inside * (1.0 - 0.012 * float(k));
+		sum += (exp(-pow(dist / 0.0032, 2.0)) + 0.25 * exp(-pow(dist / 0.009, 2.0))) * inside * (1.0 - 0.288 * float(k) / float(BEADS));
 	}
 	return vec3(0.95, 0.96, 1.0) * sum * 0.9;
 }

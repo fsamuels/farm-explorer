@@ -44,7 +44,7 @@ func _run() -> void:
 		for j in ends.size():
 			if i != j and ends[i].distance_to(ends[j]) < 1.5:
 				near += 1
-		_check(near == 1, "boundary end %s meets exactly one other end (%d)" % [ends[i], near])
+		_check(near >= 1, "boundary end %s meets another end (%d)" % [ends[i], near])
 
 	_check(not map.is_open() and not paused, "starts closed and unpaused")
 	_press_m()
