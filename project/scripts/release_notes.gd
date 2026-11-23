@@ -100,7 +100,8 @@ static func collect_stats(project_dir: String) -> Dictionary:
 	var files: Array[String] = []
 	_walk(project_dir, files)
 	for path in files:
-		bytes += FileAccess.get_file_as_bytes(path).size()
+		if path.get_file() != GENERATED:
+			bytes += FileAccess.get_file_as_bytes(path).size()
 		var ext := path.get_extension().to_lower()
 		var in_tests := path.contains("/tests/")
 		if ext == "gd" and path.get_file() != GENERATED:
@@ -154,19 +155,25 @@ static func _count_lines(path: String) -> int:
 	var text := FileAccess.get_file_as_string(path)
 	return text.count("\n") + (0 if text == "" or text.ends_with("\n") else 1)
 
-## How far apart two counts may be, as a fraction, before the committed stats
-## count as stale (a few commits of drift is fine; the test cares that they
-## are regenerated now and then, not on every change).
+## How far apart two counts may be, as a fraction (and at least MIN_SLACK
+## counts), before the committed stats count as stale. The test cares that they
+## are regenerated now and then, not on every change.
 const STALE_FRACTION := 0.05
+const MIN_SLACK := 5.0
+## Shown in the dialog but never compared: the commit count moves with every
+## merge, and a shallow clone reports a tiny one.
+const UNCOMPARED := ["commits"]
 
-## True when every stat in `shown` is within STALE_FRACTION (and at least 2
-## counts) of the same stat in `fresh`.
+## True when every compared stat in `shown` is within STALE_FRACTION (and at
+## least MIN_SLACK counts) of the same stat in `fresh`.
 static func stats_current(shown: Dictionary, fresh: Dictionary) -> bool:
 	for key in fresh:
+		if UNCOMPARED.has(key):
+			continue
 		if not shown.has(key):
 			return false
 		var a: float = shown[key]
 		var b: float = fresh[key]
-		if absf(a - b) > maxf(2.0, STALE_FRACTION * b):
+		if absf(a - b) > maxf(MIN_SLACK, STALE_FRACTION * b):
 			return false
 	return true

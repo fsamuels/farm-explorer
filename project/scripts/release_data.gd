@@ -97,13 +97,13 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 8805,
-		"commits": 267,
+		"code_lines": 8822,
+		"commits": 268,
 		"decisions": 130,
 		"models": 13,
 		"scenes": 25,
 		"scripts": 40,
-		"size_kb": 111118,
+		"size_kb": 111112,
 		"test_lines": 2408,
 		"textures": 48,
 		"vehicles": 3

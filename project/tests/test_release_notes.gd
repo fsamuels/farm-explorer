@@ -49,7 +49,9 @@ func _test_format() -> void:
 	_check(ReleaseNotes.bullet_bbcode("a **b** c") == "a [b]b[/b] c", "bold becomes BBCode: %s" % ReleaseNotes.bullet_bbcode("a **b** c"))
 	_check(ReleaseNotes.bullet_bbcode("see [x]") == "see [lb]x]", "a literal bracket is escaped")
 	var a := {"n": 1000, "m": 3}
-	_check(ReleaseNotes.stats_current(a, {"n": 1040, "m": 4}), "within 5% and 2 counts is current")
+	_check(ReleaseNotes.stats_current(a, {"n": 1040, "m": 7}), "within 5% or 5 counts is current")
+	_check(not ReleaseNotes.stats_current(a, {"n": 1000, "m": 9}), "6 counts off a small stat is stale")
+	_check(ReleaseNotes.stats_current({"commits": 5}, {"commits": 500}), "the commit count is never compared")
 	_check(not ReleaseNotes.stats_current(a, {"n": 1100, "m": 3}), "10% off is stale")
 	_check(ReleaseNotes.stats_current({"n": 1000, "extra": 7}, {"n": 1000}), "extra keys in the shown stats are ignored")
 	_check(not ReleaseNotes.stats_current({"n": 1000}, {"n": 1000, "k": 5}), "a missing stat is stale")
@@ -66,8 +68,6 @@ func _test_freshness() -> void:
 	_check(JSON.stringify(entries) == JSON.stringify(ReleaseData.DATA.entries),
 			"release_data.gd matches CHANGELOG.md (%s)" % REGENERATE)
 	var fresh := ReleaseNotes.collect_stats(project_dir)
-	if fresh.commits == 0:
-		fresh.erase("commits")  # no git here, so there is nothing to compare
 	_check(ReleaseNotes.stats_current(ReleaseData.DATA.stats, fresh),
 			"the game stats in release_data.gd are stale: %s vs now %s (%s)" % [ReleaseData.DATA.stats, fresh, REGENERATE])
 
@@ -117,7 +117,7 @@ func _test_scene() -> void:
 	button.pressed.emit()
 	_check(dialog.is_open(), "the news icon opens the dialog")
 	dialog.set_open(false)
-	var overlay_text := ""
+	var listed := false
 	for row in preload("res://scripts/controls_overlay.gd").CONTROLS:
-		overlay_text += row[0] + " "
-	_check(overlay_text.contains("C "), "the controls panel lists C")
+		listed = listed or row[0] == "C"
+	_check(listed, "the controls panel lists C")

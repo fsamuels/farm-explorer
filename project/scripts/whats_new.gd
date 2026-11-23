@@ -20,6 +20,7 @@ var heading_labels: Array[Label] = []
 var summary_labels: Array[Label] = []
 var stat_values: Dictionary = {}
 var latest_label: Label
+var _scroll: ScrollContainer
 
 func _ready() -> void:
 	layer = 11
@@ -51,10 +52,18 @@ func set_open(open: bool) -> void:
 	_panel.visible = open
 	get_tree().paused = open
 	if open:
+		_fit_to_window()
 		_mouse_before = Input.mouse_mode
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	else:
 		Input.mouse_mode = _mouse_before
+
+## Shrink the panel to a small window (the web build can be short): the list's
+## height gives way first, so the stats and the Close button stay on screen.
+func _fit_to_window() -> void:
+	var view := get_viewport().get_visible_rect().size
+	_panel.custom_minimum_size.x = clampf(view.x - 40.0, 320.0, 760.0)
+	_scroll.custom_minimum_size.y = clampf(view.y - 400.0, 100.0, 330.0)
 
 func _build(data: Dictionary) -> void:
 	_panel = PanelContainer.new()
@@ -86,6 +95,7 @@ func _build(data: Dictionary) -> void:
 	box.add_child(latest_label)
 
 	var scroll := ScrollContainer.new()
+	_scroll = scroll
 	scroll.custom_minimum_size = Vector2(0, 330)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	box.add_child(scroll)
