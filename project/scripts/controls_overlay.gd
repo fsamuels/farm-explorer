@@ -14,6 +14,7 @@ const CONTROLS := [
 	["Space", "Jump"],
 	["E", "Open / close a gate or door you're looking at; get in or out of a car"],
 	["Driving", "W gas / brake / reverse, A D steer, Space handbrake, mouse looks around"],
+	["B", "Tip the Cub Cadet's dump bed up or down (slow down first)"],
 	["F", "Switch first- / third-person view"],
 	["Mouse wheel", "Zoom the camera out into third person, or in to first person"],
 	["M", "Open / close the map (pauses the game)"],

@@ -204,7 +204,7 @@ func _interior_tests(main: Node, player: CharacterBody3D) -> void:
 	for i in 3:
 		_check(absf(interior.to_local(interior.gates[i].global_position).z - (centres[i] + (interior.stall_gate_width + 0.04) / 2.0)) < 0.01, "gate %d sits in its bay" % i)
 	_check(interior.gates.size() == 3, "three stall gates (%d)" % interior.gates.size())
-	# The stall walls are four spaced boards, open between them (D-126).
+	# The stall walls are four spaced boards, open between them (D-128).
 	var boards := 0
 	for child in interior.get_children():
 		if child is MeshInstance3D and (child.mesh as BoxMesh).size.y == interior.BOARD_H:

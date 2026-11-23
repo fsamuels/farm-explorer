@@ -28,6 +28,7 @@
 [ext_resource type="PackedScene" path="res://scenes/lean_to_end.tscn" id="28_lean_to_end_scene"]
 [ext_resource type="Texture2D" path="res://textures/buildings/red_shipping_container.png" id="29_container_tex"]
 [ext_resource type="PackedScene" path="res://scenes/bmw_2002_tii.tscn" id="30_bmw_scene"]
+[ext_resource type="PackedScene" path="res://scenes/cub_cadet_utv.tscn" id="61_utv_scene"]
 [ext_resource type="Texture2D" path="res://textures/buildings/sallys_house_north_wall.png" id="31_wall_sh_n"]
 [ext_resource type="Texture2D" path="res://textures/buildings/sallys_house_south_wall.png" id="32_wall_sh_s"]
 [ext_resource type="Texture2D" path="res://textures/buildings/sallys_house_garage_north_wall.png" id="33_wall_shg_n"]
@@ -590,7 +591,7 @@ surface_material_override/0 = SubResource("StandardMaterial3D_middle_section")
 [node name="Boundary" type="Node3D" parent="." unique_id=1203940462]
 
 [node name="Fence_01" parent="Boundary" instance=ExtResource("3_fence_scene")]
-transform = Transform3D(0.007832658, 0, 0.9999693, 0, 1, 0, -0.9999693, 0, 0.007832658, -67.45, 0, -112.55)
+transform = Transform3D(0.007832658, 0, -0.9999693, 0, 1, 0, 0.9999693, 0, 0.007832658, -67.45, 0, -112.55)
 length = 114.9035
 
 [node name="Fence_02" parent="Boundary" instance=ExtResource("3_fence_scene")]
@@ -622,15 +623,15 @@ transform = Transform3D(-0.970386, 0, 0.2415594, 0, 1, 0, 0.2415594, 0, 0.970386
 length = 123.6567
 
 [node name="Fence_11" parent="Boundary" instance=ExtResource("3_fence_scene")]
-transform = Transform3D(-0.7257109, 0, -0.6879997, 0, 1, 0, 0.6879997, 0, -0.7257109, -124.25, 0, 146.5)
+transform = Transform3D(-0.7257109, 0, 0.6879997, 0, 1, 0, -0.6879997, 0, -0.7257109, -124.25, 0, 146.5)
 length = 108.721
 
 [node name="Fence_12" parent="Boundary" instance=ExtResource("3_fence_scene")]
-transform = Transform3D(-0.003736387, 0, -0.999993, 0, 1, 0, 0.999993, 0, -0.003736387, -164.25, 0, -38.1)
+transform = Transform3D(-0.003736387, 0, 0.999993, 0, 1, 0, -0.999993, 0, -0.003736387, -164.25, 0, -38.1)
 length = 294.4021
 
 [node name="Fence_13" parent="Boundary" instance=ExtResource("3_fence_scene")]
-transform = Transform3D(0.987763, 0, 0.1559626, 0, 1, 0, -0.1559626, 0, 0.987763, -116.35, 0, -177.65)
+transform = Transform3D(0.987763, 0, -0.1559626, 0, 1, 0, 0.1559626, 0, 0.987763, -116.35, 0, -177.65)
 length = 98.10046
 
 [node name="PastureFences" type="Node3D" parent="."]
@@ -860,7 +861,7 @@ closed = false
 [node name="TreeLine" type="Node3D" parent="."]
 
 [node name="TreeLine_01" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(0.007832658, 0, 0.9999693, 0, 1, 0, -0.9999693, 0, 0.007832658, -47.595, 0, -131.2)
+transform = Transform3D(0.007832658, 0, -0.9999693, 0, 1, 0, 0.9999693, 0, 0.007832658, -47.595, 0, -131.2)
 length = 111.8226
 
 [node name="TreeLine_02" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
@@ -888,19 +889,19 @@ transform = Transform3D(0.002937905, 0, 0.9999957, 0, 1, 0, 0.9999957, 0, -0.002
 length = 82.04794
 
 [node name="TreeLine_10" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(-0.9703062, 0, 0.24188, 0, 1, 0, -0.24188, 0, -0.9703062, -25.301, 0, 189.68)
+transform = Transform3D(-0.9703062, 0, -0.24188, 0, 1, 0, 0.24188, 0, -0.9703062, -25.301, 0, 189.68)
 length = 134.5998
 
 [node name="TreeLine_11" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(-0.7257109, 0, -0.6879997, 0, 1, 0, 0.6879997, 0, -0.7257109, -137.14, 0, 161.84)
+transform = Transform3D(-0.7257109, 0, 0.6879997, 0, 1, 0, -0.6879997, 0, -0.7257109, -137.14, 0, 161.84)
 length = 128.2392
 
 [node name="TreeLine_12" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(-0.003736387, 0, -0.999993, 0, 1, 0, 0.999993, 0, -0.003736387, -184.28, 0, -45.495)
+transform = Transform3D(-0.003736387, 0, 0.999993, 0, 1, 0, -0.999993, 0, -0.003736387, -184.28, 0, -45.495)
 length = 326.4507
 
 [node name="TreeLine_13" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(0.987763, 0, 0.1559626, 0, 1, 0, -0.1559626, 0, 0.987763, -116.46, 0, -197.92)
+transform = Transform3D(0.987763, 0, -0.1559626, 0, 1, 0, 0.1559626, 0, 0.987763, -116.46, 0, -197.92)
 length = 138.5497
 
 [node name="Buildings" type="Node3D" parent="." unique_id=1610982085]
@@ -1405,6 +1406,9 @@ transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 215, 0, -52.205)
 
 [node name="BMW2002tii" parent="." instance=ExtResource("30_bmw_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 218.8421, 0, -36.34435)
+
+[node name="CubCadetUTV" parent="." instance=ExtResource("61_utv_scene")]
+transform = Transform3D(0.996862, 0, -0.079155, 0, 1, 0, 0.079155, 0, 0.996862, 143.972, 0.06, 40.495)
 
 [node name="Player" parent="." unique_id=1542815032 instance=ExtResource("2_player_scene")]
 transform = Transform3D(-0.358368, 0, 0.933580, 0, 1, 0, -0.933580, 0, -0.358368, 232.6, 1, -48.4)

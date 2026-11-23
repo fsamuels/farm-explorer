@@ -33,7 +33,7 @@ const Profile := preload("res://scripts/barn_profile.gd")
 @export var hay_tiers := 8
 
 const WALL_T := 0.1
-## The stall boards (D-126): a board's height, thickness and how far off the
+## The stall boards (D-128): a board's height, thickness and how far off the
 ## floor the lowest one sits, and the posts between runs.
 const BOARD_H := 0.25
 const BOARD_T := 0.05
@@ -121,7 +121,7 @@ func _build_stalls() -> void:
 		add_child(door)
 		gates.append(door)
 
-## One stall wall run (D-126): `board_count` horizontal boards stacked up to
+## One stall wall run (D-128): `board_count` horizontal boards stacked up to
 ## `stall_wall_height` with open gaps between them, and a post at each end. It
 ## is centred on (`x`, `z`) and `length` long, along z when `along_z`, else x.
 func _add_boards(x: float, z: float, length: float, along_z: bool) -> void:
