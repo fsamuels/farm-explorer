@@ -2,8 +2,8 @@ extends Node3D
 ## The Front Barn's inside (D-116, D-121). It is a pole barn: the shell leaves
 ## the north, south and east sides open, so this node adds a post at each
 ## corner (the facade, barn_facade.gd, adds the rest of the posts, the siding and
-## the roofs, D-125) and fills in the rest: three stalls along the east side (low board
-## walls with a gate each), a tack room in the middle third of the west side
+## the roofs, D-125) and fills in the rest: three stalls along the east side (walls of four spaced
+## boards, a gate each), a tack room in the middle third of the west side
 ## (walls, the barn's only door, a low ceiling), an open cubby on each side of
 ## it (a wall at each end) and a stack of hay bales in the middle of the tall
 ## central part. It sits in the barn shell's frame (`shell`
@@ -20,6 +20,8 @@ const Profile := preload("res://scripts/barn_profile.gd")
 @export var side_depth := 4.0
 @export var stall_count := 3
 @export var stall_wall_height := 1.8
+## Boards in each stall wall, spaced up to `stall_wall_height` with gaps between.
+@export var board_count := 4
 @export var stall_gate_width := 1.3
 @export var tack_height := 2.4  # under the wing roof's low edge (D-125)
 @export var tack_door_width := 0.9
@@ -31,6 +33,12 @@ const Profile := preload("res://scripts/barn_profile.gd")
 @export var hay_tiers := 8
 
 const WALL_T := 0.1
+## The stall boards (D-126): a board's height, thickness and how far off the
+## floor the lowest one sits, and the posts between runs.
+const BOARD_H := 0.25
+const BOARD_T := 0.05
+const BOARD_BOTTOM := 0.2
+const STALL_POST := 0.12
 const BALE := Vector3(0.9, 0.45, 0.45)
 
 var width := 1.0
@@ -86,19 +94,17 @@ func _build_stalls() -> void:
 	var inner := depth - 2.0 * wall_t
 	var front_x := width / 2.0 - wall_t - side_depth
 	var centres := bay_centres(inner, stall_count)
-	# The stall fronts: one wall along z with a gate opening per stall.
+	# The stall fronts: a run of boards along z with a gate opening per stall.
 	var openings: Array = []
 	for c in centres:
 		openings.append({c = c, w = stall_gate_width + 0.04, y0 = 0.0, y1 = stall_wall_height})
 	for r in WallLayout.pieces(inner, stall_wall_height, openings):
-		_add_box(Vector3(front_x, r.position.y + r.size.y / 2.0, r.position.x + r.size.x / 2.0),
-				Vector3(WALL_T, r.size.y, r.size.x), _wood, true)
+		_add_boards(front_x, r.position.x + r.size.x / 2.0, r.size.x, true)
 	# Dividers between the stalls, from the front to the east wall.
 	var east_x := width / 2.0 - wall_t
 	for i in range(1, stall_count):
 		var z: float = (centres[i - 1] + centres[i]) / 2.0
-		_add_box(Vector3((front_x + east_x) / 2.0, stall_wall_height / 2.0, z),
-				Vector3(east_x - front_x, stall_wall_height, WALL_T), _wood, true)
+		_add_boards((front_x + east_x) / 2.0, z, east_x - front_x, false)
 	# A gate in each opening, hinged at its south edge, swinging into the stall.
 	for c in centres:
 		var door := DoorScript.new()
@@ -114,6 +120,20 @@ func _build_stalls() -> void:
 		door.name = "StallGate%d" % gates.size()
 		add_child(door)
 		gates.append(door)
+
+## One stall wall run (D-126): `board_count` horizontal boards stacked up to
+## `stall_wall_height` with open gaps between them, and a post at each end. It
+## is centred on (`x`, `z`) and `length` long, along z when `along_z`, else x.
+func _add_boards(x: float, z: float, length: float, along_z: bool) -> void:
+	var pitch := (stall_wall_height - BOARD_BOTTOM - BOARD_H) / float(board_count - 1)
+	for i in board_count:
+		var y := BOARD_BOTTOM + BOARD_H / 2.0 + pitch * float(i)
+		var size := Vector3(BOARD_T, BOARD_H, length) if along_z else Vector3(length, BOARD_H, BOARD_T)
+		_add_box(Vector3(x, y, z), size, _wood, true)
+	for end in [-1.0, 1.0]:
+		var at := Vector3(x, stall_wall_height / 2.0, z + end * length / 2.0) if along_z \
+				else Vector3(x + end * length / 2.0, stall_wall_height / 2.0, z)
+		_add_box(at, Vector3(STALL_POST, stall_wall_height, STALL_POST), _wood, true)
 
 func _build_tack_room() -> void:
 	var west_x := -width / 2.0 + wall_t

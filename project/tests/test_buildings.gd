@@ -204,6 +204,13 @@ func _interior_tests(main: Node, player: CharacterBody3D) -> void:
 	for i in 3:
 		_check(absf(interior.to_local(interior.gates[i].global_position).z - (centres[i] + (interior.stall_gate_width + 0.04) / 2.0)) < 0.01, "gate %d sits in its bay" % i)
 	_check(interior.gates.size() == 3, "three stall gates (%d)" % interior.gates.size())
+	# The stall walls are four spaced boards, open between them (D-126).
+	var boards := 0
+	for child in interior.get_children():
+		if child is MeshInstance3D and (child.mesh as BoxMesh).size.y == interior.BOARD_H:
+			boards += 1
+	_check(boards >= 4 * 5, "the stall fronts and dividers are runs of boards (%d)" % boards)
+	_check(interior.board_count == 4 and 0.2 + 4.0 * interior.BOARD_H < interior.stall_wall_height - 0.3, "four boards leave gaps between them")
 	_check(interior.tack_door != null, "a tack room door")
 	_check(interior.hay_size.y > 3.0, "the hay stack is tall: %s" % interior.hay_size)
 	var front_x: float = interior.width / 2.0 - interior.wall_t - interior.side_depth

@@ -3,6 +3,12 @@
 The highlights of Farm Explorer, newest first. For the full technical history, see
 [docs/project/decisions.md](docs/project/decisions.md).
 
+## November 23: Front Barn stalls and fences
+- **Open stalls.** The stall walls are now four spaced boards instead of solid
+  walls, so you can see through them like in the photo.
+- **Fences meet the barn.** Three fences that stopped just short of the Front Barn
+  now join it.
+
 ## November 22: The Front Barn, as it really is
 - **A barn that looks like the real one.** The Front Barn now has a tall middle with
   a low roof and a lower wing on each side, tan vertical siding, a big open middle
