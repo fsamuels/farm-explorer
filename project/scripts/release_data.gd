@@ -6,6 +6,22 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**Readable by day.** The M / G / C hints, the location line under the minimap, the F1 hint and the clock now sit on a soft dark backing instead of floating on the sky.",
+				"**Help clears itself.** The controls panel hides after about five seconds of walking or driving. Press F1 to bring it back."
+			],
+			"summary": "The map, sky and news hints now stand out in bright daylight, and the controls help gets out of your way sooner.",
+			"title": "November 23: Easier to see"
+		},
+		{
+			"bullets": [
+				"**Super sprint.** Hold Ctrl while you move to run about three times as fast as normal. Shift still slows you to a walk.",
+				"**Transport pads.** Five glowing blue pads in the back pastures, west and south of the Back Barn. Look at a pillar of light and press E to be sent to the next pad; the last one sends you back to the Back Barn."
+			],
+			"summary": "Hold Ctrl to super sprint, and glowing transport pads in the back pastures send you around the farm.",
+			"title": "November 23: Faster around the farm"
+		},
+		{
+			"bullets": [
 				"**A What's New window.** Press C (or click \"C — News\" under the minimap) to see what changed in each release, newest first, with a one-line headline for each.",
 				"**By the numbers.** The same window shows how big the game is: lines of code, scenes, 3D models, images, vehicles, decisions logged and commits."
 			],
@@ -97,14 +113,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 8822,
-		"commits": 268,
-		"decisions": 130,
+		"code_lines": 8995,
+		"commits": 269,
+		"decisions": 132,
 		"models": 13,
-		"scenes": 25,
-		"scripts": 40,
-		"size_kb": 111112,
-		"test_lines": 2408,
+		"scenes": 26,
+		"scripts": 42,
+		"size_kb": 111120,
+		"test_lines": 2534,
 		"textures": 48,
 		"vehicles": 3
 	}

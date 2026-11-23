@@ -3,6 +3,8 @@ extends CharacterBody3D
 const SPEED := 9.0
 ## Holding Shift (`walk`) slows to a real walking pace (D-90).
 const WALK_SPEED := 1.5
+## Holding Ctrl (`super_sprint`) is a much faster run for crossing the farm (D-131).
+const SUPER_SPRINT_SPEED := 30.0
 const JUMP_VELOCITY := 4.5
 const MOUSE_SENSITIVITY := 0.003
 
@@ -16,6 +18,9 @@ const BODY_LAYER := 2
 ## against these so feet don't skate.
 const WALK_ANIM_SPEED := 1.0
 const SPRINT_ANIM_SPEED := 8.9
+## The sprint cycle stops speeding up past this ground speed, so a super sprint
+## doesn't make the legs a blur.
+const MAX_ANIM_SPEED_SCALE := 2.0
 const LOOPING_ANIMS := ["Idle", "Walk", "Jog", "Sprint", "Jump_Loop"]
 const MODEL_TURN_RATE := 10.0
 const DriveHud := preload("res://scripts/drive_hud.gd")
@@ -242,6 +247,13 @@ func leave_vehicle() -> void:
 	model_yaw = 0.0
 	collision_shape.set_deferred("disabled", false)
 
+## Ground speed for the held keys: walking (Shift) wins over super sprinting
+## (Ctrl) so holding both never speeds you up.
+static func move_speed(walking: bool, super_sprinting: bool) -> float:
+	if walking:
+		return WALK_SPEED
+	return SUPER_SPRINT_SPEED if super_sprinting else SPEED
+
 func _physics_process(delta: float) -> void:
 	if vehicle:
 		global_transform = vehicle.seat_transform(drive_look_yaw)
@@ -254,7 +266,7 @@ func _physics_process(delta: float) -> void:
 
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	var speed := WALK_SPEED if Input.is_action_pressed("walk") else SPEED
+	var speed := move_speed(Input.is_action_pressed("walk"), Input.is_action_pressed("super_sprint"))
 	if direction:
 		velocity.x = direction.x * speed
 		velocity.z = direction.z * speed
@@ -278,7 +290,7 @@ func _animate(input_dir: Vector2, delta: float) -> void:
 	if not is_on_floor():
 		_play("Jump_Loop", 1.0)
 	elif ground_speed > 3.0:
-		_play("Sprint", ground_speed / SPRINT_ANIM_SPEED)
+		_play("Sprint", min(ground_speed / SPRINT_ANIM_SPEED, MAX_ANIM_SPEED_SCALE))
 	elif ground_speed > 0.2:
 		_play("Walk", max(ground_speed / WALK_ANIM_SPEED, 0.5))
 	else:
