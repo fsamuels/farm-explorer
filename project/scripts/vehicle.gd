@@ -19,6 +19,11 @@ const STEER_RATE := 4.0
 const MAX_AUDIO_FRAMES_PER_UPDATE := 1024
 ## Headlight fade speed, in full brightness per second.
 const HEADLIGHT_FADE_RATE := 2.0
+## A dump bed (D-127): how fast it tips (full travel per 1/BED_RATE seconds), the
+## speed (m/s) it can be raised at, and the most you can drive with it up.
+const BED_RATE := 0.5
+const BED_RAISE_MAX_SPEED := 2.0
+const BED_UP_MAX_SPEED := 3.0
 
 @export var label := "car"
 @export var wheelbase := 2.6
@@ -54,8 +59,16 @@ const HEADLIGHT_FADE_RATE := 2.0
 @export var headlight_energy := 5.0
 ## Also light the lamps on a parked, empty car when it's dark.
 @export var headlights_when_parked := false
+## How far the dump bed tips up when fully raised (B toggles it), if the
+## vehicle has one: a `bed` node set by the subclass (utv.gd) before _ready.
+@export var bed_max_deg := 40.0
 
 var driver: Node3D
+## The tipping bed (hinged at its rear edge, rotated about X), or null.
+var bed: Node3D
+## Where the bed is, 0 (down) to 1 (fully raised), and where it is heading.
+var bed_level := 0.0
+var bed_target := 0.0
 var speed := 0.0
 var steer := 0.0
 var engine_rpm := 0.0
@@ -216,6 +229,31 @@ func _process(delta: float) -> void:
 			_playback.push_buffer(_synth.render(frames, engine_rpm, clampf(_throttle, 0.0, 1.0)))
 			frames_pushed += frames
 
+## B (dump_bed) raises or lowers the bed. It only goes up when you are nearly
+## stopped, and a raised bed limits your speed.
+func _update_bed(delta: float) -> void:
+	if bed == null:
+		return
+	if driver != null and Input.is_action_just_pressed("dump_bed"):
+		if bed_target > 0.0:
+			bed_target = 0.0
+		elif can_raise_bed():
+			bed_target = 1.0
+		elif driver.has_method("_flash_prompt"):
+			driver._flash_prompt("Slow down to raise the bed")
+	bed_level = move_toward(bed_level, bed_target, BED_RATE * delta)
+	# Positive rotation about X lifts the bed's front (it extends toward -Z).
+	bed.rotation.x = deg_to_rad(bed_max_deg) * bed_level
+
+func can_raise_bed() -> bool:
+	return absf(speed) <= BED_RAISE_MAX_SPEED
+
+func _top_speed() -> float:
+	return minf(max_speed, BED_UP_MAX_SPEED) if bed_target > 0.0 else max_speed
+
+func _top_reverse() -> float:
+	return minf(max_reverse, BED_UP_MAX_SPEED) if bed_target > 0.0 else max_reverse
+
 func get_interact_prompt() -> String:
 	return "Get in the " + label
 
@@ -252,6 +290,7 @@ func find_exit_spot() -> Variant:
 ## Frees the seat once the player has been put at a spot from find_exit_spot().
 func release() -> void:
 	driver = null
+	bed_target = 0.0  # the bed goes back down once nobody is driving
 
 ## The player's transform while seated, `look_yaw` being how far they've turned
 ## their head left of straight ahead.
@@ -266,6 +305,7 @@ func _physics_process(delta: float) -> void:
 	var throttle := 0.0
 	var steer_input := 0.0
 	var handbrake := driver == null
+	_update_bed(delta)
 	if handbrake and speed == 0.0 and steer == 0.0 and is_on_floor():
 		return  # parked and settled: nothing to simulate
 	if driver != null:
@@ -275,7 +315,7 @@ func _physics_process(delta: float) -> void:
 	_throttle = 0.0 if handbrake else throttle
 	steer = move_toward(steer, steer_input, STEER_RATE * delta)
 	speed = VehicleMath.next_speed(speed, throttle, handbrake, delta, accel, brake_decel,
-			hand_decel, drag, max_speed, max_reverse)
+			hand_decel, drag, _top_speed(), _top_reverse())
 	rotate_y(VehicleMath.yaw_rate(speed, steer, wheelbase, deg_to_rad(max_steer_deg), max_lat_accel) * delta)
 
 	var forward := -global_basis.z

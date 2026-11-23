@@ -179,7 +179,8 @@ func _run() -> void:
 	var space := main.get_viewport().world_3d.direct_space_state
 
 	_test_wheel_builder()
-	var names := ["BMW2002tii", "TR6"]
+	await _test_utv_placement(main, player)
+	var names := ["BMW2002tii", "TR6", "CubCadetUTV"]
 	var homes := {}
 	for car_name in names:
 		homes[car_name] = main.get_node(car_name).global_transform
@@ -193,11 +194,102 @@ func _run() -> void:
 				slot += 1
 		var car := main.get_node(car_name)
 		car.global_transform = homes[car_name]
+		if car_name == "CubCadetUTV":
+			# Its barn is full of hay and posts: drive it on open ground.
+			car.global_transform = Transform3D(Basis.IDENTITY, Vector3(90, 0.0, 150))
 		car.speed = 0.0
 		await _step(5)
 		await _drive(main, player, car, car_name, space)
 
+	await _test_utv(main, player)
 	_done()
+
+## The UTV is parked inside the Front Barn, facing out its open north side.
+func _test_utv_placement(main: Node, player: CharacterBody3D) -> void:
+	var utv: CharacterBody3D = main.get_node("CubCadetUTV")
+	var shell: Node3D = main.get_node("Buildings/FrontBarnShell")
+	var inside := shell.to_local(utv.global_position)
+	_check(absf(inside.x) < shell.width / 2.0 - 1.0 and absf(inside.z) < shell.depth / 2.0 - 1.0,
+			"the UTV starts inside the Front Barn: %s" % inside)
+	_check((-utv.global_basis.z).dot(-shell.global_basis.z) > 0.99, "the UTV faces out the barn's north side")
+	# Straight ahead is clear all the way out of the barn.
+	utv.board(player)
+	Input.action_press("move_forward")
+	await _step(420)
+	Input.action_release("move_forward")
+	utv.release()
+	var out := shell.to_local(utv.global_position)
+	_check(out.z < -shell.depth / 2.0 - 0.5, "the UTV drives out of the barn's north side: %s" % out)
+	utv.global_transform = Transform3D(Basis.IDENTITY, Vector3(0, -50, 0))
+	utv.speed = 0.0
+
+## The Cub Cadet: parked in the Front Barn facing out its north side, and its
+## dump bed tips with B only when nearly stopped, limiting speed while up.
+func _test_utv(main: Node, player: CharacterBody3D) -> void:
+	var utv: CharacterBody3D = main.get_node("CubCadetUTV")
+	_check(utv.bed != null and utv.bed.name == "Bed" and utv.wheels.size() == 4, "the UTV has a bed and four wheels")
+	_check(utv.max_speed < 14.0 and utv.label == "Cub Cadet 550", "the UTV is tuned slower than the cars")
+	# Yellow bodywork.
+	var hood := utv.get_node("Model/Hood") as MeshInstance3D
+	var yellow := (hood.material_override as StandardMaterial3D).albedo_color
+	_check(yellow.r > 0.9 and yellow.g > 0.7 and yellow.b < 0.2, "the UTV is yellow: %s" % yellow)
+
+	utv.speed = 0.0
+	player.global_position = utv.to_global(Vector3(-2.0, 0.2, 0.0))
+	await _step(5)
+	utv.interact(player)
+	await _step(3)
+	_check(utv.driver == player, "the UTV can be boarded")
+	_check(utv.bed.rotation.x == 0.0, "the bed starts down")
+	Input.action_press("dump_bed")
+	await _step(2)
+	Input.action_release("dump_bed")
+	await _step(60)
+	_check(utv.bed_target == 1.0 and utv.bed.rotation.x > deg_to_rad(10.0), "B tips the bed up (%s rad)" % utv.bed.rotation.x)
+	await _step(120)
+	_check(is_equal_approx(utv.bed.rotation.x, deg_to_rad(utv.bed_max_deg)), "the bed stops at its maximum (%s rad)" % utv.bed.rotation.x)
+	# The bed's front rises: a point at the bed's front edge is higher than the hinge.
+	var front_y: float = (utv.bed as Node3D).to_global(Vector3(0, 0, -1.0)).y
+	_check(front_y > utv.bed.global_position.y + 0.4, "the raised bed's front is up")
+	# With the bed up the top speed is limited.
+	Input.action_press("move_forward")
+	await _step(150)
+	Input.action_release("move_forward")
+	_check(utv.speed <= utv.BED_UP_MAX_SPEED + 0.01 and utv.speed > 1.0, "bed up limits speed (%s m/s)" % utv.speed)
+	Input.action_press("move_back")
+	await _step(150)
+	Input.action_release("move_back")
+	_check(utv.speed >= -utv.BED_UP_MAX_SPEED - 0.01 and utv.speed < -1.0, "bed up limits reverse too (%s m/s)" % utv.speed)
+	Input.action_press("jump")
+	await _step(90)
+	Input.action_release("jump")
+	Input.action_press("dump_bed")
+	await _step(2)
+	Input.action_release("dump_bed")
+	await _step(200)
+	_check(utv.bed.rotation.x == 0.0 and utv.bed_target == 0.0, "B lowers the bed again")
+	# It won't tip while moving fast.
+	Input.action_press("move_forward")
+	await _step(90)
+	_check(utv.speed > utv.BED_RAISE_MAX_SPEED + 1.0, "the UTV reaches %s m/s" % utv.speed)
+	Input.action_press("dump_bed")
+	await _step(2)
+	Input.action_release("dump_bed")
+	Input.action_release("move_forward")
+	await _step(30)
+	_check(utv.bed_target == 0.0 and utv.bed.rotation.x == 0.0, "the bed refuses to tip at speed")
+	Input.action_press("jump")
+	await _step(120)
+	Input.action_release("jump")
+	# Getting out with the bed up lowers it.
+	Input.action_press("dump_bed")
+	await _step(2)
+	Input.action_release("dump_bed")
+	await _step(5)
+	utv.release()
+	_check(utv.bed_target == 0.0, "releasing the UTV sends the bed down")
+	player.leave_vehicle()
+	await _step(5)
 
 func _test_drive_hud() -> void:
 	var Hud := preload("res://scripts/drive_hud.gd")
@@ -343,7 +435,10 @@ func _drive(main: Node, player: CharacterBody3D, car: CharacterBody3D, nm: Strin
 	await _step(150)
 	Input.action_release("move_forward")
 	var gap := (wall.global_position - car.global_position).dot(ahead)
-	_check(gap > 0.25 + 1.8, "%s stops at the wall (gap %s)" % [nm, gap])
+	var body_half: float = (car.get_node("CollisionShape3D").shape as BoxShape3D).size.z / 2.0
+	# The cars keep their original bar; the shorter UTV is judged by its own body.
+	var min_gap := 0.25 + (body_half - 0.1 if nm == "CubCadetUTV" else 1.8)
+	_check(gap > min_gap, "%s stops at the wall (gap %s)" % [nm, gap])
 	_check(absf(car.speed) < 3.0, "%s lost its speed on impact (%s)" % [nm, car.speed])
 	wall.queue_free()
 	Input.action_press("jump")

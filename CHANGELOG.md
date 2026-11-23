@@ -3,6 +3,14 @@
 The highlights of Farm Explorer, newest first. For the full technical history, see
 [docs/project/decisions.md](docs/project/decisions.md).
 
+## November 23: A UTV in the barn
+- **A yellow Cub Cadet 550.** It's parked in the Front Barn's middle aisle, facing the
+  big north opening. Press E to get in, then drive it like the cars: W / S gas and
+  brake, A / D steer, Space handbrake. It's slower and tighter than the cars, with
+  an open cab, headlights and a little single-cylinder engine note.
+- **A dump bed.** Press B while driving to tip the bed up or back down. Slow down
+  first, and you can only crawl while it's raised.
+
 ## November 23: Fixes
 - **Property lines.** The north-west and south-west corners of the property line
   now slope the right way and join up with their neighbours; they had been drawn
