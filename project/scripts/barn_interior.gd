@@ -5,7 +5,7 @@ extends Node3D
 ## the roofs, D-125) and fills in the rest: three stalls along the east side (walls of four spaced
 ## boards, a gate each), a tack room in the middle third of the west side
 ## (walls, the barn's only door, a low ceiling), an open cubby on each side of
-## it (a wall at each end) and a stack of hay bales in the middle of the tall
+## it (a wall at each end) and a staircase of hay bales in the southern third of the tall
 ## central part. It sits in the barn shell's frame (`shell`
 ## is the FrontBarnShell node; +X east, +Z south, origin at the footprint
 ## centre on the ground) and reads the shell's width, depth and wall
@@ -27,10 +27,12 @@ const Profile := preload("res://scripts/barn_profile.gd")
 @export var tack_door_width := 0.9
 @export var tack_door_height := 2.1
 @export var post_size := 0.25
-## The hay stack: bales across x and z, tiers high (a bale is 0.9 x 0.45 x 0.45).
+## The hay pile: `hay_bales_x` bales across, and steps climbing south, each
+## `hay_step_bales` bales deep with the listed number of tiers (a bale is 0.9 x
+## 0.45 x 0.45).
 @export var hay_bales_x := 4
-@export var hay_bales_z := 6
-@export var hay_tiers := 8
+@export var hay_step_bales := 3
+@export var hay_step_tiers := PackedInt32Array([1, 2, 3, 4])
 
 const WALL_T := 0.1
 ## The stall boards (D-128): a board's height, thickness and how far off the
@@ -184,6 +186,11 @@ func _build_posts(eave: float) -> void:
 		for sz in [-1.0, 1.0]:
 			_add_box(Vector3(sx * (width / 2.0 - half), eave / 2.0, sz * (depth / 2.0 - half)), Vector3(post_size, eave, post_size), _wood, true)
 
+## The hay pile (D-134): in the barn's southernmost third, against the south
+## end, built as a staircase of `hay_step_tiers.size()` steps that climb toward
+## the south, each step `hay_step_bales` bales deep and a bale higher than the
+## last (so up to 4 bales). Each step is its own collision box, so a player can
+## hop up it. `hay_center` / `hay_size` are the pile's whole bounding box.
 func _build_hay() -> void:
 	var mesh := BoxMesh.new()
 	mesh.size = BALE * 0.97
@@ -196,33 +203,46 @@ func _build_hay() -> void:
 	multi.transform_format = MultiMesh.TRANSFORM_3D
 	multi.use_colors = true
 	multi.mesh = mesh
-	multi.instance_count = hay_bales_x * hay_bales_z * hay_tiers
-	hay_size = Vector3(BALE.x * hay_bales_x, BALE.y * hay_tiers, BALE.z * hay_bales_z)
-	hay_center = Vector3(0.0, hay_size.y / 2.0, 0.0)
+	var steps := hay_step_tiers.size()
+	var step_depth := BALE.z * float(hay_step_bales)
+	var max_tiers := 0
+	var total := 0
+	for tiers in hay_step_tiers:
+		max_tiers = maxi(max_tiers, tiers)
+		total += tiers * hay_bales_x * hay_step_bales
+	multi.instance_count = total
+	hay_size = Vector3(BALE.x * hay_bales_x, BALE.y * max_tiers, step_depth * steps)
+	# Against the south end, inside its wall.
+	var south_z := depth / 2.0 - wall_t - 0.1
+	hay_center = Vector3(0.0, hay_size.y / 2.0, south_z - hay_size.z / 2.0)
+	var north_z := south_z - hay_size.z
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 116
 	var i := 0
-	for t in hay_tiers:
-		for ix in hay_bales_x:
-			for iz in hay_bales_z:
-				var p := Vector3(
-						(float(ix) + 0.5) * BALE.x - hay_size.x / 2.0,
-						(float(t) + 0.5) * BALE.y,
-						(float(iz) + 0.5) * BALE.z - hay_size.z / 2.0)
-				multi.set_instance_transform(i, Transform3D(Basis.IDENTITY, p))
-				var shade := rng.randf_range(0.85, 1.05)
-				multi.set_instance_color(i, Color(0.86 * shade, 0.7 * shade, 0.3 * shade))
-				i += 1
+	for step in steps:
+		var tiers: int = hay_step_tiers[step]
+		var z0 := north_z + step_depth * float(step)
+		for t in tiers:
+			for ix in hay_bales_x:
+				for iz in hay_step_bales:
+					var p := Vector3(
+							(float(ix) + 0.5) * BALE.x - hay_size.x / 2.0,
+							(float(t) + 0.5) * BALE.y,
+							z0 + (float(iz) + 0.5) * BALE.z)
+					multi.set_instance_transform(i, Transform3D(Basis.IDENTITY, p))
+					var shade := rng.randf_range(0.85, 1.05)
+					multi.set_instance_color(i, Color(0.86 * shade, 0.7 * shade, 0.3 * shade))
+					i += 1
+		var shape := BoxShape3D.new()
+		shape.size = Vector3(hay_size.x, BALE.y * float(tiers), step_depth)
+		var cs := CollisionShape3D.new()
+		cs.shape = shape
+		cs.position = Vector3(0.0, shape.size.y / 2.0, z0 + step_depth / 2.0)
+		_body.add_child(cs)
 	var instance := MultiMeshInstance3D.new()
 	instance.name = "HayStack"
 	instance.multimesh = multi
 	add_child(instance)
-	var shape := BoxShape3D.new()
-	shape.size = hay_size
-	var cs := CollisionShape3D.new()
-	cs.shape = shape
-	cs.position = hay_center
-	_body.add_child(cs)
 
 func _add_box(pos: Vector3, size: Vector3, material: Material, collide: bool) -> void:
 	var mesh := BoxMesh.new()
