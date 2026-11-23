@@ -7,6 +7,7 @@ extends CanvasLayer
 
 const TimeOfDay := preload("res://scripts/time_of_day.gd")
 const Weather := preload("res://scripts/weather.gd")
+const DistantTerrain := preload("res://scripts/distant_terrain.gd")
 
 const FONT_SIZE := 22
 const KEY_COLOR := Color(1.0, 0.86, 0.55)
@@ -48,9 +49,12 @@ const STARLINK_CODE := "starlink"
 
 @export var time_of_day_path: NodePath = ^"../TimeOfDay"
 @export var weather_path: NodePath = ^"../Weather"
+@export var terrain_path: NodePath = ^"../DistantTerrain"
 
 var _tod: Node
 var _weather: Node
+var _terrain: Node
+var _season_buttons := {}
 var _time_buttons := {}
 var _weather_buttons := {}
 var _clock_button: Button
@@ -68,6 +72,7 @@ func _ready() -> void:
 	add_to_group("sky_menu")
 	_tod = get_node_or_null(time_of_day_path)
 	_weather = get_node_or_null(weather_path)
+	_terrain = get_node_or_null(terrain_path)
 	_build()
 	_panel.visible = false
 
@@ -169,6 +174,12 @@ func cycle_meteors() -> void:
 		_tod.set_meteor_level((_tod.meteor_level + 1) % TimeOfDay.METEOR_LEVELS.size())
 	refresh()
 
+## Summer or winter on the distant hills and mountains (D-133).
+func choose_season(season_name: String) -> void:
+	if _terrain:
+		_terrain.set_season(season_name)
+	refresh()
+
 ## The Starlink easter egg: close the menu and send a train across the sky, or
 ## say why not if the sky is too bright or cloudy to see one.
 func starlink() -> void:
@@ -194,6 +205,9 @@ func refresh() -> void:
 		var level: String = TimeOfDay.METEOR_LEVELS[_tod.meteor_level][0]
 		_meteor_button.set_pressed_no_signal(_tod.meteor_level > 0)
 		_meteor_button.text = "Shooting stars\n" + level
+	if _terrain:
+		for key in _season_buttons:
+			(_season_buttons[key] as Button).set_pressed_no_signal(key == _terrain.season)
 	if _weather:
 		for key in _weather_buttons:
 			var b := _weather_buttons[key] as Button
@@ -290,6 +304,18 @@ func _build() -> void:
 	for b in [_names_button, _moon_button, _meteor_button]:
 		b.custom_minimum_size = Vector2(0, 62)
 		night.add_child(b)
+
+	# The season of the land beyond the farm: snow on the Blue Mountains or
+	# summer-gold hills. Snow falling shows winter whichever is picked.
+	box.add_child(_heading("Season (distant hills)"))
+	var seasons := HBoxContainer.new()
+	seasons.add_theme_constant_override("separation", 8)
+	box.add_child(seasons)
+	for key in DistantTerrain.SEASONS:
+		var b := _button(DistantTerrain.SEASON_LABELS[key])
+		b.pressed.connect(choose_season.bind(key))
+		seasons.add_child(b)
+		_season_buttons[key] = b
 
 	var close := _button("Close  (G or Esc)")
 	close.toggle_mode = false
