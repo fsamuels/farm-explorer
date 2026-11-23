@@ -251,6 +251,9 @@ func can_raise_bed() -> bool:
 func _top_speed() -> float:
 	return minf(max_speed, BED_UP_MAX_SPEED) if bed_target > 0.0 else max_speed
 
+func _top_reverse() -> float:
+	return minf(max_reverse, BED_UP_MAX_SPEED) if bed_target > 0.0 else max_reverse
+
 func get_interact_prompt() -> String:
 	return "Get in the " + label
 
@@ -287,6 +290,7 @@ func find_exit_spot() -> Variant:
 ## Frees the seat once the player has been put at a spot from find_exit_spot().
 func release() -> void:
 	driver = null
+	bed_target = 0.0  # the bed goes back down once nobody is driving
 
 ## The player's transform while seated, `look_yaw` being how far they've turned
 ## their head left of straight ahead.
@@ -311,7 +315,7 @@ func _physics_process(delta: float) -> void:
 	_throttle = 0.0 if handbrake else throttle
 	steer = move_toward(steer, steer_input, STEER_RATE * delta)
 	speed = VehicleMath.next_speed(speed, throttle, handbrake, delta, accel, brake_decel,
-			hand_decel, drag, _top_speed(), max_reverse)
+			hand_decel, drag, _top_speed(), _top_reverse())
 	rotate_y(VehicleMath.yaw_rate(speed, steer, wheelbase, deg_to_rad(max_steer_deg), max_lat_accel) * delta)
 
 	var forward := -global_basis.z

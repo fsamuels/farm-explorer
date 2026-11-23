@@ -256,6 +256,10 @@ func _test_utv(main: Node, player: CharacterBody3D) -> void:
 	await _step(150)
 	Input.action_release("move_forward")
 	_check(utv.speed <= utv.BED_UP_MAX_SPEED + 0.01 and utv.speed > 1.0, "bed up limits speed (%s m/s)" % utv.speed)
+	Input.action_press("move_back")
+	await _step(150)
+	Input.action_release("move_back")
+	_check(utv.speed >= -utv.BED_UP_MAX_SPEED - 0.01 and utv.speed < -1.0, "bed up limits reverse too (%s m/s)" % utv.speed)
 	Input.action_press("jump")
 	await _step(90)
 	Input.action_release("jump")
@@ -277,6 +281,13 @@ func _test_utv(main: Node, player: CharacterBody3D) -> void:
 	Input.action_press("jump")
 	await _step(120)
 	Input.action_release("jump")
+	# Getting out with the bed up lowers it.
+	Input.action_press("dump_bed")
+	await _step(2)
+	Input.action_release("dump_bed")
+	await _step(5)
+	utv.release()
+	_check(utv.bed_target == 0.0, "releasing the UTV sends the bed down")
 	player.leave_vehicle()
 	await _step(5)
 
@@ -425,7 +436,9 @@ func _drive(main: Node, player: CharacterBody3D, car: CharacterBody3D, nm: Strin
 	Input.action_release("move_forward")
 	var gap := (wall.global_position - car.global_position).dot(ahead)
 	var body_half: float = (car.get_node("CollisionShape3D").shape as BoxShape3D).size.z / 2.0
-	_check(gap > 0.25 + body_half - 0.1, "%s stops at the wall (gap %s)" % [nm, gap])
+	# The cars keep their original bar; the shorter UTV is judged by its own body.
+	var min_gap := 0.25 + (body_half - 0.1 if nm == "CubCadetUTV" else 1.8)
+	_check(gap > min_gap, "%s stops at the wall (gap %s)" % [nm, gap])
 	_check(absf(car.speed) < 3.0, "%s lost its speed on impact (%s)" % [nm, car.speed])
 	wall.queue_free()
 	Input.action_press("jump")

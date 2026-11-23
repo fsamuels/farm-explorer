@@ -22,7 +22,7 @@ const FRONT_AXLE_Z := -0.95
 const REAR_AXLE_Z := 0.95
 ## Where the bed hinges (its rear edge), and how long it is toward the front.
 const BED_HINGE := Vector3(0.0, 0.62, 1.55)
-const BED_LENGTH := 1.15
+const BED_LENGTH := 0.95
 const BED_WIDTH := 1.2
 
 static func material(color: Color, rough := 0.6, metal := 0.0) -> StandardMaterial3D:
