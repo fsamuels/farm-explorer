@@ -1,5 +1,5 @@
 extends Node3D
-## A transport pad (D-128): a glowing disc with a pillar of light. Look at the
+## A transport pad (D-131): a glowing disc with a pillar of light. Look at the
 ## pillar and press E to be sent to the pad named by `destination`, which lands
 ## you beside it facing away. Pads are chained in a ring in main.tscn, so
 ## pressing E at each one in turn walks the whole loop and ends back where it

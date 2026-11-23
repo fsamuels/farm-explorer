@@ -25,6 +25,7 @@ farm-sim/
 │   └── models/                   # 3D models (buildings, animals) once created
 ├── tools/
 │   ├── build_star_data.py        # regenerates project/scripts/star_data.gd from the Yale Bright Star Catalogue JSON (D-104)
+│   ├── build_release_notes.gd    # regenerates project/scripts/release_data.gd from CHANGELOG.md and a count of the game (D-130)
 │   ├── build_player_model.py     # Blender (bpy) script that builds project/models/player.glb
 │   │                              from Quaternius's CC0 base-character + animation packs (D-89)
 │   ├── make_corrugated_texture.py # generates the tileable blue corrugated-metal albedo + normal textures for the Shop walls (D-98)
@@ -58,7 +59,7 @@ farm-sim/
     │   ├── gate.tscn              # swinging pipe-panel gate (hinge at the origin, panel along +X), opened/closed with E via player.gd — see D-76
     │   ├── tree_line_segment.tscn # procedurally-scattered treeline + invisible collision wall, instanced 11x, 20m outside the boundary — see D-11, D-82
     │   ├── tree.tscn              # wraps models/tree.glb, instanced by tree_line_segment.gd
-    │   ├── transport_pad.tscn    # a glowing transport pad (script only), instanced 5x under `TransportPads` in main.tscn, linked in a ring — see D-128
+    │   ├── transport_pad.tscn    # a glowing transport pad (script only), instanced 5x under `TransportPads` in main.tscn, linked in a ring — see D-131
     │   ├── cub_cadet_utv.tscn    # the drivable Cub Cadet 550 UTV (tuning only; utv.gd builds the body), instanced once in the Front Barn — see D-127
     │   ├── building.tscn         # one unit building box, instanced 7x (footprint placeholders)
     │   ├── horse.tscn            # wraps models/horse.glb with wander-AI script, instanced 2x, roams a shared rectangle (D-27)
@@ -92,7 +93,10 @@ farm-sim/
     │   ├── shop_shell.gd          # builds the walk-in Shop (hollow corrugated walls, windows, floor, ceiling, lights, pad) over the placeholder box's footprint and places its three doors — see D-98
     │   ├── shop_door.gd           # interactive door: swinging, sliding or roll-up leaf with collision, E to open — see D-98
     │   ├── vehicle.gd             # drivable car: E to get in/out, W/S/A/D/Space to drive, collides with the world — see D-106
-    │   ├── transport_pad.gd       # transport pad: builds the disc and pillar, E sends you to its `destination` pad — see D-128
+    │   ├── transport_pad.gd       # transport pad: builds the disc and pillar, E sends you to its `destination` pad — see D-131
+    │   ├── whats_new.gd           # the What's New dialog (C key): the changelog and game-size stats, from release_data.gd — see D-130
+    │   ├── release_notes.gd       # parses CHANGELOG.md, counts the game's size; pure, covered by tests/ — see D-130
+    │   ├── release_data.gd        # GENERATED from CHANGELOG.md by tools/build_release_notes.gd; do not edit — see D-130
     │   ├── utv.gd                 # the Cub Cadet 550 UTV: vehicle.gd plus a body built by utv_builder.gd and a dump bed — see D-127
     │   ├── utv_builder.gd         # builds the UTV's yellow body, cage, wheels and tipping bed from primitives — see D-127
     │   ├── vehicle_math.gd        # pure driving maths (speed, mph, turn rate, exit spots), covered by tests/ — see D-106

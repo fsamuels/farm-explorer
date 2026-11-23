@@ -36,6 +36,7 @@ pulls the latest `sdlc` version (applied on the next restart or `/reload-plugins
   godot --headless -s res://tests/test_shop.gd
   godot --headless -s res://tests/test_vehicle.gd
   godot --headless -s res://tests/test_transport.gd
+  godot --headless -s res://tests/test_release_notes.gd
   ```
 
   Each prints `OK` and exits 0, or prints the failures and exits 1. The scene test

@@ -3,7 +3,7 @@ extends CharacterBody3D
 const SPEED := 9.0
 ## Holding Shift (`walk`) slows to a real walking pace (D-90).
 const WALK_SPEED := 1.5
-## Holding Ctrl (`super_sprint`) is a much faster run for crossing the farm (D-128).
+## Holding Ctrl (`super_sprint`) is a much faster run for crossing the farm (D-131).
 const SUPER_SPRINT_SPEED := 30.0
 const JUMP_VELOCITY := 4.5
 const MOUSE_SENSITIVITY := 0.003

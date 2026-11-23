@@ -1,5 +1,5 @@
 extends SceneTree
-## Tests for the super sprint and the transport pads (D-128). Run headless from
+## Tests for the super sprint and the transport pads (D-131). Run headless from
 ## project/ (after the editor has imported assets once):
 ##   godot --headless -s res://tests/test_transport.gd
 

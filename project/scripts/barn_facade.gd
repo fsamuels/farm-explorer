@@ -146,12 +146,13 @@ func _build_west_wall() -> void:
 	# The step where the central roof stands above the wing roof, both sides.
 	var jn := junction()
 	for sx in [-1.0, 1.0]:
-		_side_rect(sx * jn, Profile.WING_HIGH - ROOF_T, Profile.EAVE, _siding)
+		_side_rect(sx * jn, Profile.WING_HIGH - ROOF_T, Profile.EAVE, _siding, OVERHANG)
 		siding_pieces += 1
 
-## A siding quad on the plane x = `x`, from y0 to y1, along the whole depth.
-func _side_rect(x: float, y0: float, y1: float, material: Material) -> void:
-	var h := depth / 2.0
+## A siding quad on the plane x = `x`, from y0 to y1, along the whole depth
+## plus `extra` at each end.
+func _side_rect(x: float, y0: float, y1: float, material: Material, extra := 0.0) -> void:
+	var h := depth / 2.0 + extra
 	var n := Vector3(signf(x), 0.0, 0.0)
 	_add_mesh(_quad_mesh([Vector3(x, y0, -h), Vector3(x, y0, h), Vector3(x, y1, h), Vector3(x, y1, -h)], n), material)
 
@@ -199,61 +200,78 @@ func _post(at: Vector3, height: float) -> void:
 	var m := _box(at + Vector3(0.0, height / 2.0, 0.0), Vector3(POST, height, POST), _wood, true)
 	posts.append(m)
 
-## The roofs: for each side a central slope and a wing slope, with a dark
-## underside (what you see from inside) and a red fascia on the low edge.
+## The roofs, as three separate sections (D-129): the main middle roof (both
+## slopes, one mesh) and a wing roof each side, which stands STEP below the
+## middle roof's eave with a siding riser between them, as in the photo. Each
+## has a dark underside (what you see from inside), and the low edges get a red
+## fascia: the wings' outer edges and the middle roof's eaves over the step.
 func _build_roofs() -> void:
 	var half := width / 2.0
 	var jn := junction()
 	var z0 := -depth / 2.0 - OVERHANG
 	var z1 := depth / 2.0 + OVERHANG
-	var span := z1 - z0
 	var under := SurfaceTool.new()
 	under.begin(Mesh.PRIMITIVE_TRIANGLES)
-	for side in [-1.0, 1.0]:
+	# The middle: ridge to eave on each side, with the east and west crops.
+	var middle := MeshInstance3D.new()
+	middle.name = "RoofMiddle"
+	var mesh := ArrayMesh.new()
+	for side in [1.0, -1.0]:
 		var st := SurfaceTool.new()
 		st.begin(Mesh.PRIMITIVE_TRIANGLES)
-		# (x, y, v) along the slope, ridge to wall: the roof crop's v runs the same way.
-		var rows := [
-			[0.0, Profile.RIDGE, 0.0],
-			[side * jn, Profile.EAVE, ROOF_SPLIT],
-		]
-		var wing := [
-			[side * jn, Profile.WING_HIGH, ROOF_SPLIT],
-			[side * half, Profile.WING_LOW, 1.0],
-		]
-		for pair in [rows, wing]:
-			var a: Array = pair[0]
-			var b: Array = pair[1]
-			var pa := Vector3(a[0], a[1], z0)
-			var pb := Vector3(b[0], b[1], z0)
-			var pc := Vector3(b[0], b[1], z1)
-			var pd := Vector3(a[0], a[1], z1)
-			var n := (pb - pa).cross(pd - pa).normalized()
-			if n.y < 0.0:
-				n = -n
-			_tri_quad_uv(st, pa, pb, pc, pd, n, Vector2(0.0, a[2]), Vector2(0.0, b[2]), Vector2(1.0, b[2]), Vector2(1.0, a[2]))
-			var d := Vector3(0.0, -ROOF_T, 0.0)
-			_tri_quad(under, pa + d, pb + d, pc + d, pd + d, -n)
-		var top := MeshInstance3D.new()
-		top.name = "Roof_%s" % ("East" if side > 0.0 else "West")
-		top.mesh = st.commit()
-		var rm := StandardMaterial3D.new()
-		rm.albedo_texture = ROOF_EAST if side > 0.0 else ROOF_WEST
-		rm.roughness = 0.7
-		rm.cull_mode = BaseMaterial3D.CULL_DISABLED
-		top.material_override = rm
-		add_child(top)
-		# The fascia on the low edge.
-		var edge := SurfaceTool.new()
-		edge.begin(Mesh.PRIMITIVE_TRIANGLES)
-		var ex: float = side * half
-		_tri_quad(edge, Vector3(ex, Profile.WING_LOW - ROOF_T - 0.05, z0), Vector3(ex, Profile.WING_LOW - ROOF_T - 0.05, z1), Vector3(ex, Profile.WING_LOW, z1), Vector3(ex, Profile.WING_LOW, z0), Vector3(side, 0.0, 0.0))
-		_add_mesh(edge.commit(), _red)
+		_roof_slab(st, under, Vector3(0.0, Profile.RIDGE, 0.0), Vector3(side * jn, Profile.EAVE, 0.0), 0.0, ROOF_SPLIT, z0, z1)
+		st.commit(mesh)
+		mesh.surface_set_material(mesh.get_surface_count() - 1, _roof_material(side))
+	middle.mesh = mesh
+	add_child(middle)
+	# Each wing: high edge at the middle's riser, low edge at the outer wall.
+	for side in [1.0, -1.0]:
+		var st := SurfaceTool.new()
+		st.begin(Mesh.PRIMITIVE_TRIANGLES)
+		_roof_slab(st, under, Vector3(side * jn, Profile.WING_HIGH, 0.0), Vector3(side * half, Profile.WING_LOW, 0.0), ROOF_SPLIT, 1.0, z0, z1)
+		var wing := MeshInstance3D.new()
+		wing.name = "RoofWing_%s" % ("East" if side > 0.0 else "West")
+		wing.mesh = st.commit()
+		wing.material_override = _roof_material(side)
+		add_child(wing)
+		# Red fascia on the wing's outer edge, and under the middle roof's eave.
+		_fascia(side * half, Profile.WING_LOW, side, z0, z1)
+		# 1 cm toward the wing so it does not share the riser's plane.
+		_fascia(side * (jn + 0.01), Profile.EAVE, side, z0, z1)
 	var under_mesh := MeshInstance3D.new()
 	under_mesh.name = "RoofUnderside"
 	under_mesh.mesh = under.commit()
 	under_mesh.material_override = _under
 	add_child(under_mesh)
+
+func _roof_material(side: float) -> StandardMaterial3D:
+	var rm := StandardMaterial3D.new()
+	rm.albedo_texture = ROOF_EAST if side > 0.0 else ROOF_WEST
+	rm.roughness = 0.7
+	rm.cull_mode = BaseMaterial3D.CULL_DISABLED
+	return rm
+
+## One roof slope from `a` (high) to `b` (low), z0 to z1 long: the top into
+## `top` with the crop's v running from `va` to `vb`, the underside (ROOF_T
+## lower) into `under`.
+func _roof_slab(top: SurfaceTool, under: SurfaceTool, a: Vector3, b: Vector3, va: float, vb: float, z0: float, z1: float) -> void:
+	var pa := Vector3(a.x, a.y, z0)
+	var pb := Vector3(b.x, b.y, z0)
+	var pc := Vector3(b.x, b.y, z1)
+	var pd := Vector3(a.x, a.y, z1)
+	var n := (pb - pa).cross(pd - pa).normalized()
+	if n.y < 0.0:
+		n = -n
+	_tri_quad_uv(top, pa, pb, pc, pd, n, Vector2(0.0, va), Vector2(0.0, vb), Vector2(1.0, vb), Vector2(1.0, va))
+	var d := Vector3(0.0, -ROOF_T, 0.0)
+	_tri_quad(under, pa + d, pb + d, pc + d, pd + d, -n)
+
+## A red band under a roof's low edge at x, facing `side`.
+func _fascia(x: float, y: float, side: float, z0: float, z1: float) -> void:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	_tri_quad(st, Vector3(x, y - ROOF_T - 0.05, z0), Vector3(x, y - ROOF_T - 0.05, z1), Vector3(x, y, z1), Vector3(x, y, z0), Vector3(side, 0.0, 0.0))
+	_add_mesh(st.commit(), _red)
 
 func _quad_mesh(p: Array, n: Vector3) -> ArrayMesh:
 	var st := SurfaceTool.new()
