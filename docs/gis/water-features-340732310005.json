@@ -1,33 +1,42 @@
 {
-  "_status": "DRAFT v1 - traced by eye from the NAIP + drone orthomosaics, NOT yet reviewed by the owner. Do not build terrain from this until confirmed.",
+  "_status": "DRAFT v2 - revised from the owner's first-round corrections; still traced by eye and NOT yet confirmed. Do not build terrain from this until confirmed.",
   "_crs": "scene meters, +X east, +Z south, origin at the parcel centroid (D-6)",
   "_how_to_review": "python3 tools/water_overlay.py  (draws this file over the imagery with numbered vertices); correct by vertex id, e.g. 'D7 -> (251, 12)'",
   "_units": "dimensions are the owner's figures converted from feet, midpoint of the stated range",
+  "_v2_changes": [
+    "ditch moved east: ~x=259.5 from the weir to the driveway, ~x=255 south of it (the brown band)",
+    "ditch goes underground (buried pipe/culvert) on its way to the pond and reaches it at x=60",
+    "pond made larger to the west",
+    "brighter green in the imagery is dried-out pond vegetation, so the bright-green bowl and the pale NE strip are pond bed"
+  ],
 
-  "weir": { "id": "W", "pos": [258.5, -87.0], "confidence": "medium", "note": "NE corner of the parcel at the road; gate/structure visible at about (258, -88)" },
+  "weir": { "id": "W", "pos": [259.5, -87.0], "confidence": "medium", "note": "NE corner of the parcel at the road" },
 
   "ditch": {
     "depth_m": 0.76,
     "depth_note": "2-3 ft stated by owner, midpoint 2.5 ft",
     "width_m": 1.5,
-    "width_note": "NOT stated - assumed from the drone image (channel reads ~1-1.5 m); please confirm",
+    "width_note": "NOT stated - assumed; the brown band beside the road is ~4-6 m wide, so the channel may be wider. Please confirm",
     "segments": [
-      { "name": "road side (weir south)", "confidence": "high",
-        "points": [[258.5,-87],[258,-75],[257.5,-55],[255,-40],[253,-25],[251.5,-10],[250.8,10],[250.3,30],[250,50],[250,62]] },
-      { "name": "south edge, west through the green pasture", "confidence": "medium",
-        "points": [[250,62],[240,64],[220,64],[200,64],[180,63.5],[160,63],[140,62.5],[125,62]] },
-      { "name": "track team area to pond", "confidence": "low",
-        "points": [[125,62],[105,50],[90,42],[80,36],[74,32]] }
+      { "name": "weir to driveway", "confidence": "medium", "buried": false,
+        "points": [[259.5,-87],[259.5,-70],[259.3,-52],[258,-45]] },
+      { "name": "south of the driveway, along the road (browner)", "confidence": "high", "buried": false,
+        "points": [[258,-45],[256.5,-40],[256,-25],[255.5,-10],[255,10],[255,30],[254.5,50],[254.5,62]] },
+      { "name": "south edge, west through the green pasture", "confidence": "medium", "buried": false,
+        "points": [[254.5,62],[240,64],[220,64],[200,64],[180,63.5],[160,63],[140,62.5],[125,62]] },
+      { "name": "buried pipe to the pond inlet at x=60", "confidence": "low", "buried": true,
+        "note": "start of burial and the pipe route are guesses; only the x=60 end is from the owner",
+        "points": [[125,62],[95,50],[75,43],[60,38]] }
     ]
   },
 
   "pond": {
     "depth_m": 3.8,
     "depth_note": "owner wrote '10-15' (read as feet of depth); midpoint 12.5 ft",
-    "shape_note": "long three-lobed peanut, NE to W, dirt arena side to past the Back Barn; spine with half-width at each point",
+    "shape_note": "long three-lobed peanut, NE to W, larger to the west; bright green areas are dried-out pond bed; spine with half-width at each point",
     "confidence": "low",
     "spine_x_z_halfwidth_m": [
-      [112,0,3],[96,6,7],[82,15,5],[66,26,13],[46,35,5],[22,37,5],[2,32,6],[-14,26,9],[-28,19,12],[-40,13,8]
+      [118,-4,4],[108,2,7],[96,7,7],[82,15,6],[66,26,13],[46,35,5],[22,37,5],[2,32,7],[-14,26,11],[-28,19,15],[-42,13,13],[-54,9,8]
     ]
   }
 }

@@ -98,7 +98,15 @@ def render(box, res, out, grid=10):
     n = 0
     for seg in d["ditch"]["segments"]:
         pts = [P(*q) for q in seg["points"]]
-        dr.line(pts, fill=col[seg["confidence"]], width=3)
+        if seg.get("buried"):
+            for a, b in zip(pts, pts[1:]):  # dashed magenta = buried pipe
+                L = math.hypot(b[0] - a[0], b[1] - a[1]); k = max(int(L / 8), 1)
+                for j in range(0, k, 2):
+                    dr.line([(a[0] + (b[0] - a[0]) * j / k, a[1] + (b[1] - a[1]) * j / k),
+                             (a[0] + (b[0] - a[0]) * min(j + 1, k) / k, a[1] + (b[1] - a[1]) * min(j + 1, k) / k)],
+                            fill=(255, 0, 255, 255), width=3)
+        else:
+            dr.line(pts, fill=col[seg["confidence"]], width=3)
         for q in pts:
             dr.ellipse([q[0] - 3, q[1] - 3, q[0] + 3, q[1] + 3], outline=(255, 255, 255, 255))
             dr.text((q[0] + 5, q[1] - 5), "D%d" % n, fill=(255, 255, 255, 255)); n += 1
@@ -112,7 +120,7 @@ if __name__ == "__main__":
     out = Path(sys.argv[1] if len(sys.argv) > 1 else ".")
     out.mkdir(parents=True, exist_ok=True)
     render((-70, -100, 275, 85), 0.25, out / "overview.png", 20)
-    render((-60, -10, 125, 55), 0.1, out / "pond.png", 10)
+    render((-70, -10, 130, 55), 0.1, out / "pond.png", 10)
     render((225, -95, 270, 75), 0.1, out / "ditch_east.png", 10)
     render((30, 40, 270, 80), 0.15, out / "ditch_south.png", 10)
     print("wrote overlays to", out)
