@@ -214,12 +214,14 @@ func _test_scene() -> void:
 	tod.set_preset("night", true)
 	_check(tower_mat.get_shader_parameter("darkness") > 0.9, "warning lights on at night")
 	tod.set_preset("day", true)
-	# The sky menu's Season row.
+	# The sky menu's Season button.
 	var menu: Node = main.get_node("SkyMenu")
 	menu.choose_season("winter")
 	_check(terrain.season == "winter", "the sky menu picks winter")
-	_check((menu._season_buttons["winter"] as Button).button_pressed and not (menu._season_buttons["summer"] as Button).button_pressed, "the Winter button shows as chosen")
-	menu.choose_season("summer")
-	_check(terrain.season == "summer" and (menu._season_buttons["summer"] as Button).button_pressed, "the sky menu picks summer")
+	_check(menu._season_button.button_pressed and menu._season_button.text.contains("winter"), "the Season button shows winter")
+	menu.toggle_season()
+	_check(terrain.season == "summer" and not menu._season_button.button_pressed and menu._season_button.text.contains("summer"), "the Season button switches to summer")
+	menu.toggle_season()
+	_check(terrain.season == "winter", "and back to winter")
 	main.queue_free()
 	await process_frame

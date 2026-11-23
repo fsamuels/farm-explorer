@@ -12,7 +12,7 @@ extends Node3D
 ## inside the camera's far plane; and with their own distance haze, because
 ## the scene fog would hide anything this far away.
 ##
-## `season` picks summer or winter colours (the G sky menu's Season row). The
+## `season` picks summer or winter colours (the G sky menu's Season button). The
 ## snow weathers show winter whatever the season.
 
 const HorizonMath := preload("res://scripts/horizon_math.gd")
@@ -22,7 +22,6 @@ const TERRAIN_SHADER := preload("res://shaders/distant_terrain.gdshader")
 const TURBINE_SHADER := preload("res://shaders/wind_turbine.gdshader")
 
 const SEASONS := ["summer", "winter"]
-const SEASON_LABELS := {"summer": "Summer", "winter": "Winter"}
 ## The wind here mostly blows from the south-west, so rotors face that way.
 const WIND_FROM_BEARING := 235.0
 ## Share of turbines carrying a red warning light (the FAA lights a farm's
