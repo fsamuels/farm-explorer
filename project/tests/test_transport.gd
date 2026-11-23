@@ -1,0 +1,96 @@
+extends SceneTree
+## Tests for the super sprint and the transport pads (D-128). Run headless from
+## project/ (after the editor has imported assets once):
+##   godot --headless -s res://tests/test_transport.gd
+
+const PlayerScript := preload("res://scripts/player.gd")
+
+## The pads must sit this far inside the property line, metres.
+const BOUNDARY_MARGIN := 15.0
+
+var _failures := 0
+
+func _init() -> void:
+	_test_speed()
+	_run.call_deferred()
+
+func _check(cond: bool, what: String) -> void:
+	if not cond:
+		_failures += 1
+		push_error("FAIL: " + what)
+
+func _done() -> void:
+	print("transport: %s" % ("OK" if _failures == 0 else "%d FAILED" % _failures))
+	quit(1 if _failures else 0)
+
+func _test_speed() -> void:
+	_check(PlayerScript.move_speed(false, false) == PlayerScript.SPEED, "plain move speed")
+	_check(PlayerScript.move_speed(false, true) == PlayerScript.SUPER_SPRINT_SPEED, "Ctrl super sprints")
+	_check(PlayerScript.move_speed(true, false) == PlayerScript.WALK_SPEED, "Shift walks")
+	_check(PlayerScript.move_speed(true, true) == PlayerScript.WALK_SPEED, "walking beats super sprint")
+	_check(PlayerScript.SUPER_SPRINT_SPEED >= 3.0 * PlayerScript.SPEED, "super sprint is much faster than a sprint")
+	_check(InputMap.has_action("super_sprint") and not InputMap.action_get_events("super_sprint").is_empty(), "super_sprint is bound to a key")
+
+func _run() -> void:
+	var main: Node = load("res://scenes/main.tscn").instantiate()
+	root.add_child(main)
+	for i in 3:
+		await physics_frame
+	var player = main.get_node("Player")
+	var pads: Array = main.get_node("TransportPads").get_children()
+	_check(pads.size() >= 4, "several pads: %d" % pads.size())
+
+	# Boundary segments, for the "well inside the property" check.
+	var segments: Array = []
+	for fence in main.get_node("Boundary").get_children():
+		var half: Vector3 = fence.global_transform.basis.x.normalized() * float(fence.get("length")) * 0.5
+		segments.append([Vector2(fence.global_position.x - half.x, fence.global_position.z - half.z),
+				Vector2(fence.global_position.x + half.x, fence.global_position.z + half.z)])
+
+	var seen := {}
+	for pad in pads:
+		var dest = pad.get_destination()
+		_check(dest != null and dest != pad, "%s has another pad as its destination" % pad.pad_name)
+		_check(not seen.has(dest), "%s: only one pad leads to %s" % [pad.pad_name, dest.pad_name if dest else "?"])
+		seen[dest] = true
+		_check(pad.get_interact_prompt() == "Transport to " + dest.pad_name, "%s prompt names its destination" % pad.pad_name)
+		for point in [pad.global_position, pad.arrival_spot()]:
+			var here := Vector2(point.x, point.z)
+			var nearest := INF
+			var crossings := 0
+			for seg in segments:
+				nearest = minf(nearest, (Geometry2D.get_closest_point_to_segment(here, seg[0], seg[1]) - here).length())
+				# Ray toward -X: an odd number of crossings means inside the parcel.
+				if Geometry2D.segment_intersects_segment(here, here + Vector2(-1000.0, 0.0), seg[0], seg[1]) != null:
+					crossings += 1
+			_check(nearest >= BOUNDARY_MARGIN, "%s is %.1f m from the property line" % [pad.pad_name, nearest])
+			_check(crossings % 2 == 1, "%s is inside the property (%d crossings)" % [pad.pad_name, crossings])
+
+	# The pads form one loop that visits all of them.
+	var visited := 0
+	var at = pads[0]
+	while visited <= pads.size():
+		at = at.get_destination()
+		visited += 1
+		if at == pads[0]:
+			break
+	_check(visited == pads.size(), "pads form a single ring (%d hops for %d pads)" % [visited, pads.size()])
+
+	# Looking at a pad's pillar offers it, and E sends you to the next one.
+	var first = pads[0]
+	var next = first.get_destination()
+	player.global_transform = Transform3D(Basis(Vector3.UP, first.global_rotation.y), first.arrival_spot() + Vector3(0, 1.0, 0))
+	player.velocity = Vector3.ZERO
+	for i in 3:
+		await physics_frame
+	_check(player._interact_target() == first, "the pad's pillar is what the player is looking at")
+	player.velocity = Vector3(5, 0, 5)
+	player._interact_target().interact(player)
+	var landed := Vector2(player.global_position.x, player.global_position.z)
+	var want := Vector2(next.arrival_spot().x, next.arrival_spot().z)
+	_check(landed.distance_to(want) < 0.01, "E lands beside the destination pad")
+	_check(player.velocity == Vector3.ZERO, "arrival stops you dead")
+	var facing := Vector2(-sin(player.global_rotation.y), -cos(player.global_rotation.y))
+	var away := (landed - Vector2(next.global_position.x, next.global_position.z)).normalized()
+	_check(facing.dot(away) > 0.99, "you arrive facing away from the pad")
+	_done()

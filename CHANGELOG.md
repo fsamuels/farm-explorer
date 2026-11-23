@@ -3,6 +3,13 @@
 The highlights of Farm Explorer, newest first. For the full technical history, see
 [docs/project/decisions.md](docs/project/decisions.md).
 
+## November 23: Faster around the farm
+- **Super sprint.** Hold Ctrl while you move to run about three times as fast as
+  normal. Shift still slows you to a walk.
+- **Transport pads.** Five glowing blue pads in the back pastures, west and south of
+  the Back Barn. Look at a pillar of light and press E to be sent to the next pad;
+  the last one sends you back to the Back Barn.
+
 ## November 23: A UTV in the barn
 - **A yellow Cub Cadet 550.** It's parked in the Front Barn's middle aisle, facing the
   big north opening. Press E to get in, then drive it like the cars: W / S gas and

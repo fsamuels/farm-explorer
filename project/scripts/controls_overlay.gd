@@ -10,9 +10,10 @@ extends Control
 const CONTROLS := [
 	["W A S D", "Move (sprint by default)"],
 	["Hold Shift", "Walk"],
+	["Hold Ctrl", "Super sprint: run three times as fast"],
 	["Mouse", "Look around"],
 	["Space", "Jump"],
-	["E", "Open / close a gate or door you're looking at; get in or out of a car"],
+	["E", "Open / close a gate or door you're looking at; get in or out of a car; use a glowing transport pad (back pastures)"],
 	["Driving", "W gas / brake / reverse, A D steer, Space handbrake, mouse looks around"],
 	["B", "Tip the Cub Cadet's dump bed up or down (slow down first)"],
 	["F", "Switch first- / third-person view"],
@@ -28,7 +29,7 @@ const CONTROLS := [
 ]
 
 ## Keys that only move you around: they never minimize the panel.
-const MOVE_ACTIONS := ["move_forward", "move_back", "move_left", "move_right", "jump", "walk"]
+const MOVE_ACTIONS := ["move_forward", "move_back", "move_left", "move_right", "jump", "walk", "super_sprint"]
 
 const FONT_SIZE := 22
 const KEY_COLOR := Color(1.0, 0.86, 0.55)

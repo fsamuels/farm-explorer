@@ -58,6 +58,7 @@ farm-sim/
     │   ├── gate.tscn              # swinging pipe-panel gate (hinge at the origin, panel along +X), opened/closed with E via player.gd — see D-76
     │   ├── tree_line_segment.tscn # procedurally-scattered treeline + invisible collision wall, instanced 11x, 20m outside the boundary — see D-11, D-82
     │   ├── tree.tscn              # wraps models/tree.glb, instanced by tree_line_segment.gd
+    │   ├── transport_pad.tscn    # a glowing transport pad (script only), instanced 5x under `TransportPads` in main.tscn, linked in a ring — see D-128
     │   ├── cub_cadet_utv.tscn    # the drivable Cub Cadet 550 UTV (tuning only; utv.gd builds the body), instanced once in the Front Barn — see D-127
     │   ├── building.tscn         # one unit building box, instanced 7x (footprint placeholders)
     │   ├── horse.tscn            # wraps models/horse.glb with wander-AI script, instanced 2x, roams a shared rectangle (D-27)
@@ -91,6 +92,7 @@ farm-sim/
     │   ├── shop_shell.gd          # builds the walk-in Shop (hollow corrugated walls, windows, floor, ceiling, lights, pad) over the placeholder box's footprint and places its three doors — see D-98
     │   ├── shop_door.gd           # interactive door: swinging, sliding or roll-up leaf with collision, E to open — see D-98
     │   ├── vehicle.gd             # drivable car: E to get in/out, W/S/A/D/Space to drive, collides with the world — see D-106
+    │   ├── transport_pad.gd       # transport pad: builds the disc and pillar, E sends you to its `destination` pad — see D-128
     │   ├── utv.gd                 # the Cub Cadet 550 UTV: vehicle.gd plus a body built by utv_builder.gd and a dump bed — see D-127
     │   ├── utv_builder.gd         # builds the UTV's yellow body, cage, wheels and tipping bed from primitives — see D-127
     │   ├── vehicle_math.gd        # pure driving maths (speed, mph, turn rate, exit spots), covered by tests/ — see D-106
@@ -120,6 +122,7 @@ farm-sim/
     │   ├── test_sky_menu.gd       # start position / third person, constellation name labels, sky menu picks and pause
     │   ├── test_weather.gd        # weather/overcast helpers + Weather switching rain/snow on R in main.tscn
     │   ├── test_night_sky.gd      # sky maths, star data + baked maps, and the sky shader driven by TimeOfDay
+    │   ├── test_transport.gd      # super-sprint speed choice, and the transport pads: one ring, inside the property, E lands you facing away
     │   └── test_vehicle.gd        # driving maths, then both cars driven in main.tscn: board, throttle, steer, brake, reverse, wall, exit
     ├── models/
     │   ├── horse.glb              # CC0 rigged/animated horse (Quaternius) — see D-9; scale fixed in D-18
