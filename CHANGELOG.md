@@ -10,6 +10,13 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 23: Mountains on the horizon
+> The Blue Mountains now rise in the east and the wind-farm ridges in the west, with turbines that spin and blink red at night.
+- **The land beyond the fence.** Real hills and plains reach out 80 km in every direction, built from USGS elevation data. They shift against the farm as you walk.
+- **The Blue Mountains.** Snow-streaked ridges with dark forest on top, 35 to 65 km east, drawn a little taller than life so they stand out.
+- **Wind turbines.** About 1,100 turbines stand where they really are, most of them on the Stateline ridge to the west and south-west. Their blades turn, and at night some flash red in time with each other.
+- **Seasons.** Pick Summer or Winter in the sky menu (G). Winter puts snow on the mountains, and falling snow always brings winter.
+
 ## November 23: Easier to see
 > The map, sky and news hints now stand out in bright daylight, and the controls help gets out of your way sooner.
 - **Readable by day.** The M / G / C hints, the location line under the minimap, the F1 hint and the clock now sit on a soft dark backing instead of floating on the sky.
@@ -48,6 +55,8 @@ fails if the two disagree.
 
 ## November 23: Front Barn stalls and fences
 > The Front Barn's stalls, roof and neighbouring fences now match the photo.
+- **Hay staircase.** The hay pile moved to the back (south) of the Front Barn and now
+  climbs like a staircase, up to four bales high, leaving the middle aisle clear.
 - **A solid south wall.** The stall on the Front Barn's south-east corner now has a
   siding wall with a blue metal bottom across its south end, like the west side.
 - **The south stall is closed in,** and the Front Barn's roof now reads as a middle

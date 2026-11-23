@@ -186,7 +186,7 @@ func _build_posts(eave: float) -> void:
 		for sz in [-1.0, 1.0]:
 			_add_box(Vector3(sx * (width / 2.0 - half), eave / 2.0, sz * (depth / 2.0 - half)), Vector3(post_size, eave, post_size), _wood, true)
 
-## The hay pile (D-134): in the barn's southernmost third, against the south
+## The hay pile (D-135): in the barn's southernmost third, against the south
 ## end, built as a staircase of `hay_step_tiers.size()` steps that climb toward
 ## the south, each step `hay_step_bales` bales deep and a bale higher than the
 ## last (so up to 4 bales). Each step is its own collision box, so a player can

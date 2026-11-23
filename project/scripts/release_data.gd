@@ -6,6 +6,16 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**The land beyond the fence.** Real hills and plains reach out 80 km in every direction, built from USGS elevation data. They shift against the farm as you walk.",
+				"**The Blue Mountains.** Snow-streaked ridges with dark forest on top, 35 to 65 km east, drawn a little taller than life so they stand out.",
+				"**Wind turbines.** About 1,100 turbines stand where they really are, most of them on the Stateline ridge to the west and south-west. Their blades turn, and at night some flash red in time with each other.",
+				"**Seasons.** Pick Summer or Winter in the sky menu (G). Winter puts snow on the mountains, and falling snow always brings winter."
+			],
+			"summary": "The Blue Mountains now rise in the east and the wind-farm ridges in the west, with turbines that spin and blink red at night.",
+			"title": "November 23: Mountains on the horizon"
+		},
+		{
+			"bullets": [
 				"**Readable by day.** The M / G / C hints, the location line under the minimap, the F1 hint and the clock now sit on a soft dark backing instead of floating on the sky.",
 				"**Help clears itself.** The controls panel hides after about five seconds of walking or driving. Press F1 to bring it back."
 			],
@@ -46,6 +56,7 @@ const DATA := {
 		},
 		{
 			"bullets": [
+				"**Hay staircase.** The hay pile moved to the back (south) of the Front Barn and now climbs like a staircase, up to four bales high, leaving the middle aisle clear.",
 				"**A solid south wall.** The stall on the Front Barn's south-east corner now has a siding wall with a blue metal bottom across its south end, like the west side.",
 				"**The south stall is closed in,** and the Front Barn's roof now reads as a middle section with a side section each side, about a foot lower, as in the photo.",
 				"**Open stalls.** The stall walls are now four spaced boards instead of solid walls, so you can see through them like in the photo.",
@@ -114,14 +125,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 9009,
-		"commits": 165,
-		"decisions": 133,
+		"code_lines": 10772,
+		"commits": 167,
+		"decisions": 135,
 		"models": 13,
 		"scenes": 26,
-		"scripts": 42,
-		"size_kb": 111113,
-		"test_lines": 2534,
+		"scripts": 47,
+		"size_kb": 111320,
+		"test_lines": 2797,
 		"textures": 48,
 		"vehicles": 3
 	}

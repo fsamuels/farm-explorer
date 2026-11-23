@@ -48,9 +48,12 @@ const STARLINK_CODE := "starlink"
 
 @export var time_of_day_path: NodePath = ^"../TimeOfDay"
 @export var weather_path: NodePath = ^"../Weather"
+@export var terrain_path: NodePath = ^"../DistantTerrain"
 
 var _tod: Node
 var _weather: Node
+var _terrain: Node
+var _season_button: Button
 var _time_buttons := {}
 var _weather_buttons := {}
 var _clock_button: Button
@@ -68,6 +71,7 @@ func _ready() -> void:
 	add_to_group("sky_menu")
 	_tod = get_node_or_null(time_of_day_path)
 	_weather = get_node_or_null(weather_path)
+	_terrain = get_node_or_null(terrain_path)
 	_build()
 	_panel.visible = false
 
@@ -169,6 +173,17 @@ func cycle_meteors() -> void:
 		_tod.set_meteor_level((_tod.meteor_level + 1) % TimeOfDay.METEOR_LEVELS.size())
 	refresh()
 
+## Summer or winter on the distant hills and mountains (D-133).
+func choose_season(season_name: String) -> void:
+	if _terrain:
+		_terrain.set_season(season_name)
+	refresh()
+
+## Switch the distant hills between summer and winter.
+func toggle_season() -> void:
+	if _terrain:
+		choose_season("summer" if _terrain.season == "winter" else "winter")
+
 ## The Starlink easter egg: close the menu and send a train across the sky, or
 ## say why not if the sky is too bright or cloudy to see one.
 func starlink() -> void:
@@ -194,6 +209,9 @@ func refresh() -> void:
 		var level: String = TimeOfDay.METEOR_LEVELS[_tod.meteor_level][0]
 		_meteor_button.set_pressed_no_signal(_tod.meteor_level > 0)
 		_meteor_button.text = "Shooting stars\n" + level
+	if _terrain:
+		_season_button.set_pressed_no_signal(_terrain.season == "winter")
+		_season_button.text = "Season\n" + ("winter (snowy hills)" if _terrain.season == "winter" else "summer")
 	if _weather:
 		for key in _weather_buttons:
 			var b := _weather_buttons[key] as Button
@@ -277,7 +295,10 @@ func _build() -> void:
 	_hint.add_theme_color_override("font_color", KEY_COLOR)
 	box.add_child(_hint)
 
-	box.add_child(_heading("Night sky"))
+	# The season shares the bottom row so the menu doesn't grow taller: snow on
+	# the Blue Mountains or summer-gold hills (D-133). Falling snow shows winter
+	# whichever is picked.
+	box.add_child(_heading("Night sky & season"))
 	var night := HBoxContainer.new()
 	night.add_theme_constant_override("separation", 8)
 	box.add_child(night)
@@ -287,7 +308,10 @@ func _build() -> void:
 	_moon_button.pressed.connect(toggle_moon)
 	_meteor_button = _button("")
 	_meteor_button.pressed.connect(cycle_meteors)
-	for b in [_names_button, _moon_button, _meteor_button]:
+	_season_button = _button("")
+	_season_button.pressed.connect(toggle_season)
+	_season_button.visible = _terrain != null
+	for b in [_names_button, _moon_button, _meteor_button, _season_button]:
 		b.custom_minimum_size = Vector2(0, 62)
 		night.add_child(b)
 

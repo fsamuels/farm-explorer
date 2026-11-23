@@ -59,6 +59,7 @@
 [ext_resource type="Script" path="res://scripts/building_shell.gd" id="58_building_shell"]
 [ext_resource type="Script" path="res://scripts/barn_interior.gd" id="59_barn_interior"]
 [ext_resource type="Script" path="res://scripts/barn_facade.gd" id="60_barn_facade"]
+[ext_resource type="Script" path="res://scripts/distant_terrain.gd" id="61_distant_terrain"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -568,6 +569,9 @@ script = ExtResource("55_time_of_day")
 
 [node name="Weather" type="Node3D" parent="."]
 script = ExtResource("56_weather")
+
+[node name="DistantTerrain" type="Node3D" parent="."]
+script = ExtResource("61_distant_terrain")
 
 [node name="Ground" type="StaticBody3D" parent="." unique_id=1019721883]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 49.4, 0, -33.7)

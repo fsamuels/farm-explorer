@@ -8,6 +8,8 @@ CC0 assets (e.g. the horse model, see D-9 in
 
 | Asset | Creator | Source | License |
 | --- | --- | --- | --- |
+| Distant terrain elevations (`project/scripts/horizon_data.gd`, built by `tools/build_horizon_data.py`) | USGS 3D Elevation Program (3DEP), via The National Map `3DEPElevation` ImageServer | [elevation.nationalmap.gov](https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer) | US Government work, public domain |
+| Wind turbine positions, hub heights and rotor sizes (same file) | U.S. Wind Turbine Database (USGS, Lawrence Berkeley National Laboratory, American Clean Power Association) | [energy.usgs.gov/uswtdb](https://energy.usgs.gov/uswtdb/) | Public domain |
 | Star positions and magnitudes (`project/scripts/star_data.gd`, built by `tools/build_star_data.py`) | Yale Bright Star Catalogue, 5th revised ed. (Hoffleit & Warren); JSON conversion by Bretton Wade | [github.com/brettonw/YaleBrightStarCatalog](https://github.com/brettonw/YaleBrightStarCatalog) | Catalogue is public domain; the conversion is MIT |
 
 ## Models

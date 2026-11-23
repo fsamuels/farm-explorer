@@ -161,7 +161,7 @@ func _open_side_tests(player: CharacterBody3D, shell: Node3D) -> void:
 	_check(shell.open_walls.size() == 3 and not shell.open_walls.has("west"), "the barn is open on three sides")
 	# From 4 m outside the middle of each side, walk in. The north run reaches the
 	# aisle and the east run a stall front. The hay pile fills the south end's
-	# middle (D-134), so the south run comes in through its open west bay.
+	# middle (D-135), so the south run comes in through its open west bay.
 	for wall in ["south", "north", "east", "west"]:
 		var spec: Dictionary = Shell.WALLS[wall]
 		var out: Vector3 = spec.out

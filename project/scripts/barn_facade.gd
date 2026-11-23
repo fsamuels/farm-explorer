@@ -109,7 +109,7 @@ func _build_end(end: float) -> void:
 	var ow := Profile.OPENING_W / 2.0
 	var z := end * (depth / 2.0 + SKIN)
 	# The east wing is open below the clearance line at the north end, but the
-	# south stall is closed in like the west wing: skirt below, siding above (D-133).
+	# south stall is closed in like the west wing: skirt below, siding above (D-134).
 	var closed_east := end > 0.0
 	if closed_east:
 		_band(z, end, jn, half, Profile.SKIRT, _siding)
