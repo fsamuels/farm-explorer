@@ -6,6 +6,17 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**One hint bar.** Map, Sky, News and Help hints now sit together in a dark bar at the bottom of the screen instead of scattered over the minimap.",
+				"**Fits big screens.** Text and panels grow on large and high-resolution windows so they stay easy to read.",
+				"**Resize the minimap.** Press Tab to cycle it between medium, large and small.",
+				"**Cleaner view.** The hint bar fades away after a few quiet seconds and comes back when you press a key or click.",
+				"**Matching dialogs.** The Sky, News and Map panels now share one look."
+			],
+			"summary": "One hint bar along the bottom, a HUD that scales on big screens, a resizable minimap, and hints that fade when you're idle.",
+			"title": "November 23: A tidier screen"
+		},
+		{
+			"bullets": [
 				"**Readable by day.** The M / G / C hints, the location line under the minimap, the F1 hint and the clock now sit on a soft dark backing instead of floating on the sky.",
 				"**Help clears itself.** The controls panel hides after about five seconds of walking or driving. Press F1 to bring it back."
 			],
@@ -113,14 +124,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 8995,
-		"commits": 269,
-		"decisions": 132,
+		"code_lines": 9067,
+		"commits": 270,
+		"decisions": 133,
 		"models": 13,
 		"scenes": 26,
 		"scripts": 42,
-		"size_kb": 111120,
-		"test_lines": 2534,
+		"size_kb": 111124,
+		"test_lines": 2548,
 		"textures": 48,
 		"vehicles": 3
 	}
