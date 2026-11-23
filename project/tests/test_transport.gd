@@ -84,12 +84,15 @@ func _run() -> void:
 	for i in 3:
 		await physics_frame
 	_check(player._interact_target() == first, "the pad's pillar is what the player is looking at")
+	var target = player._interact_target()
 	player.velocity = Vector3(5, 0, 5)
-	player._interact_target().interact(player)
+	player.get_node("Head").rotation.x = -1.0
+	target.interact(player)
 	var landed := Vector2(player.global_position.x, player.global_position.z)
 	var want := Vector2(next.arrival_spot().x, next.arrival_spot().z)
 	_check(landed.distance_to(want) < 0.01, "E lands beside the destination pad")
 	_check(player.velocity == Vector3.ZERO, "arrival stops you dead")
+	_check(player.get_node("Head").rotation.x == 0.0, "arrival looks level")
 	var facing := Vector2(-sin(player.global_rotation.y), -cos(player.global_rotation.y))
 	var away := (landed - Vector2(next.global_position.x, next.global_position.z)).normalized()
 	_check(facing.dot(away) > 0.99, "you arrive facing away from the pad")

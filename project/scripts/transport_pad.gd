@@ -50,6 +50,10 @@ func receive(actor: Node3D) -> void:
 		(actor as CharacterBody3D).velocity = Vector3.ZERO
 	if "model_yaw" in actor:
 		actor.model_yaw = 0.0
+	# Arrive looking level, not at the ground or sky you were looking at.
+	var head := actor.get_node_or_null("Head") as Node3D
+	if head:
+		head.rotation.x = 0.0
 
 func _build() -> void:
 	var glow := StandardMaterial3D.new()
