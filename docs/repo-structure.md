@@ -58,6 +58,7 @@ farm-sim/
     │   ├── gate.tscn              # swinging pipe-panel gate (hinge at the origin, panel along +X), opened/closed with E via player.gd — see D-76
     │   ├── tree_line_segment.tscn # procedurally-scattered treeline + invisible collision wall, instanced 11x, 20m outside the boundary — see D-11, D-82
     │   ├── tree.tscn              # wraps models/tree.glb, instanced by tree_line_segment.gd
+    │   ├── cub_cadet_utv.tscn    # the drivable Cub Cadet 550 UTV (tuning only; utv.gd builds the body), instanced once in the Front Barn — see D-127
     │   ├── building.tscn         # one unit building box, instanced 7x (footprint placeholders)
     │   ├── horse.tscn            # wraps models/horse.glb with wander-AI script, instanced 2x, roams a shared rectangle (D-27)
     │   ├── hen.tscn               # wraps models/hen.glb with wander.gd, instanced 6x inside flock.tscn
@@ -90,6 +91,8 @@ farm-sim/
     │   ├── shop_shell.gd          # builds the walk-in Shop (hollow corrugated walls, windows, floor, ceiling, lights, pad) over the placeholder box's footprint and places its three doors — see D-98
     │   ├── shop_door.gd           # interactive door: swinging, sliding or roll-up leaf with collision, E to open — see D-98
     │   ├── vehicle.gd             # drivable car: E to get in/out, W/S/A/D/Space to drive, collides with the world — see D-106
+    │   ├── utv.gd                 # the Cub Cadet 550 UTV: vehicle.gd plus a body built by utv_builder.gd and a dump bed — see D-127
+    │   ├── utv_builder.gd         # builds the UTV's yellow body, cage, wheels and tipping bed from primitives — see D-127
     │   ├── vehicle_math.gd        # pure driving maths (speed, mph, turn rate, exit spots), covered by tests/ — see D-106
     │   ├── wheel_builder.gd       # splits a car model's wheel meshes into four wheels that spin and steer, covered by tests/ — see D-107
     │   ├── engine_sound.gd        # synthesized engine note: gears, revs, harmonics; covered by tests/ — see D-107
