@@ -10,6 +10,11 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 23: Easier to see
+> The map, sky and news hints now stand out in bright daylight, and the controls help gets out of your way sooner.
+- **Readable by day.** The M / G / C hints, the location line under the minimap, the F1 hint and the clock now sit on a soft dark backing instead of floating on the sky.
+- **Help clears itself.** The controls panel hides after about five seconds of walking or driving. Press F1 to bring it back.
+
 ## November 23: Faster around the farm
 > Hold Ctrl to super sprint, and glowing transport pads in the back pastures send you around the farm.
 - **Super sprint.** Hold Ctrl while you move to run about three times as fast as
