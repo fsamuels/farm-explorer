@@ -18,6 +18,8 @@ The highlights of Farm Explorer, newest first. For the full technical history, s
 - **A better Starlink train.** Longer, with each light a little dimmer.
 
 ## November 23: Front Barn stalls and fences
+- **The south stall is closed in,** and the Front Barn's roof now reads as a middle
+  section with a side section each side, about a foot lower, as in the photo.
 - **Open stalls.** The stall walls are now four spaced boards instead of solid
   walls, so you can see through them like in the photo.
 - **Fences meet the barn.** Three fences that stopped just short of the Front Barn

@@ -100,6 +100,9 @@ func _build_stalls() -> void:
 		openings.append({c = c, w = stall_gate_width + 0.04, y0 = 0.0, y1 = stall_wall_height})
 	for r in WallLayout.pieces(inner, stall_wall_height, openings):
 		_add_boards(front_x, r.position.x + r.size.x / 2.0, r.size.x, true)
+	# The south stall is closed at its south end (D-129): a board wall from its front to the east wall.
+	var east_end := width / 2.0 - wall_t
+	_add_boards((front_x + east_end) / 2.0, inner / 2.0 - STALL_POST / 2.0, east_end - front_x, false)
 	# Dividers between the stalls, from the front to the east wall.
 	var east_x := width / 2.0 - wall_t
 	for i in range(1, stall_count):

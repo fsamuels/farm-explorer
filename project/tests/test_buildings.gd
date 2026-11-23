@@ -182,7 +182,9 @@ func _facade_tests(main: Node, shell: Node3D) -> void:
 	var Interior := preload("res://scripts/barn_interior.gd")
 	_check(Interior.new().tack_height + 0.04 < Profile.WING_LOW - 0.12, "the tack room ceiling stays under the wing roof")
 	_check(facade.siding_pieces >= 10 and facade.skirt_pieces >= 3, "siding and skirt are built (%d, %d)" % [facade.siding_pieces, facade.skirt_pieces])
-	_check(facade.get_node_or_null("Roof_East") != null and facade.get_node_or_null("Roof_West") != null, "both roofs are built")
+	_check(facade.get_node_or_null("RoofMiddle") != null and facade.get_node_or_null("RoofWing_East") != null and facade.get_node_or_null("RoofWing_West") != null, "the roof is three sections")
+	_check(absf((Profile.EAVE - Profile.WING_HIGH) - 0.3) < 0.01, "each wing roof stands about a foot below the middle roof's eave")
+	_check(((facade.get_node("RoofMiddle") as MeshInstance3D).mesh as ArrayMesh).get_surface_count() == 2, "the middle roof has an east and a west slope")
 	# The roofs and walls stay under the ridge: the highest vertex is the ridge.
 	var top := 0.0
 	for child in facade.get_children():
@@ -240,6 +242,11 @@ func _interior_tests(main: Node, player: CharacterBody3D) -> void:
 	at = await _walk_local(player, interior, Vector3(front_x - 2.0, 0, c), Vector3(8, 0, c), 100)
 	_check(at.x > front_x + 0.8, "the player walks into the stall through its gate (x %s)" % at.x)
 	gate.set_open(false)
+	# The south stall is closed at its south end (D-129); the north end stays open.
+	at = await _walk_local(player, interior, Vector3(5.1, 0, 8.0), Vector3(5.1, 0, 15.0), 100)
+	_check(at.z < interior.depth / 2.0 - 0.3, "the south stall's end wall stops the player (z %s)" % at.z)
+	at = await _walk_local(player, interior, Vector3(5.1, 0, -8.0), Vector3(5.1, 0, -15.0), 100)
+	_check(at.z < -interior.depth / 2.0 - 0.3, "the north end of the stalls is open (z %s)" % at.z)
 
 func _inside(shell: Node3D, world: Vector3) -> bool:
 	var p := shell.to_local(world)
