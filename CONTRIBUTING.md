@@ -37,6 +37,7 @@ pulls the latest `sdlc` version (applied on the next restart or `/reload-plugins
   godot --headless -s res://tests/test_vehicle.gd
   godot --headless -s res://tests/test_transport.gd
   godot --headless -s res://tests/test_hud.gd
+  godot --headless -s res://tests/test_horizon.gd
   godot --headless -s res://tests/test_release_notes.gd
   ```
 
