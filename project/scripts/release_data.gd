@@ -6,7 +6,7 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
-				"**One hint bar.** Map, Sky, News and Help hints now sit together in a dark bar at the bottom of the screen instead of scattered over the minimap.",
+				"**One hint bar.** Map, Sky, News and Help hints now sit together in a dark bar along the bottom instead of scattered over the minimap.",
 				"**Fits big screens.** Text and panels grow on large and high-resolution windows so they stay easy to read.",
 				"**Resize the minimap.** Press Tab to cycle it between medium, large and small.",
 				"**Cleaner view.** The hint bar fades away after a few quiet seconds and comes back when you press a key or click.",
@@ -124,13 +124,13 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 9067,
-		"commits": 270,
+		"code_lines": 9101,
+		"commits": 272,
 		"decisions": 133,
 		"models": 13,
 		"scenes": 26,
 		"scripts": 42,
-		"size_kb": 111124,
+		"size_kb": 111125,
 		"test_lines": 2548,
 		"textures": 48,
 		"vehicles": 3

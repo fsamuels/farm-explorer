@@ -67,6 +67,8 @@ var _minimap_info: Label
 ## The bottom-centre key-hint bar (M Map, G Sky, C News, F1 Help, Tab size).
 var _hint_bar: PanelContainer
 var _size_index := 0
+## Chips dropped first when the window is too narrow, least important first.
+var _optional_chips: Array[Label] = []
 var _idle := 0.0
 var _full_layer: CanvasLayer
 var _full: MapCanvas
@@ -79,6 +81,7 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_apply_hud_scale()
 	get_window().size_changed.connect(_apply_hud_scale)
+	get_viewport().size_changed.connect(_on_view_resized)
 	_build_minimap()
 	_build_full_map()
 	# Wait until every building and fence has its final transform.
@@ -119,12 +122,30 @@ func _process(delta: float) -> void:
 func _apply_hud_scale() -> void:
 	get_window().content_scale_factor = HudStyle.scale_for(float(get_window().size.y))
 
+func _on_view_resized() -> void:
+	if _hint_bar != null and _minimap != null:
+		_apply_minimap_size()
+
 func _apply_minimap_size() -> void:
-	var edge: float = HudStyle.MINIMAP_SIZES[_size_index]
+	var edge: float = minf(HudStyle.MINIMAP_SIZES[_size_index], get_viewport().get_visible_rect().size.y * 0.45)
 	_minimap.custom_minimum_size = Vector2(edge, edge)
 	_minimap.size = Vector2(edge, edge)
 	if _hint_bar != null:
 		_hint_bar.offset_left = MINIMAP_MARGIN * 2.0 + edge + 8.0
+		_fit_hint_bar.call_deferred()
+
+## On a narrow window, drop the least important chips (Tab, then F1) so the
+## bar never runs off the right edge.
+func _fit_hint_bar() -> void:
+	for chip in _optional_chips:
+		chip.visible = true
+	_hint_bar.reset_size()
+	var room := get_viewport().get_visible_rect().size.x - _hint_bar.offset_left - MINIMAP_MARGIN
+	for chip in _optional_chips:
+		if _hint_bar.get_combined_minimum_size().x <= room:
+			break
+		chip.visible = false
+		_hint_bar.reset_size()
 
 ## One dark bar of key chips along the bottom, in place of the loose hints. It
 ## fades after a few idle seconds (see _process) and returns on any input.
@@ -145,8 +166,11 @@ func _build_hint_bar() -> void:
 	row.add_child(sky_button)
 	news_button = _build_news_button()
 	row.add_child(news_button)
-	row.add_child(_chip("F1", "Help"))
-	row.add_child(_chip("Tab", "Map size"))
+	var help_chip := _chip("F1", "Help")
+	row.add_child(help_chip)
+	var size_chip := _chip("Tab", "Map size")
+	row.add_child(size_chip)
+	_optional_chips = [size_chip, help_chip]
 
 func _chip(key: String, text: String) -> Label:
 	var label := _outlined_label("%s — %s" % [key, text], FONT_SIZE - 2)
@@ -561,7 +585,6 @@ func _outlined_label(text: String, font_size: int) -> Label:
 	label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
 	label.add_theme_constant_override("outline_size", 4)
 	return label
-
 
 ## Overlays never take the mouse, so drags and clicks reach the map (or, for
 ## the minimap, the game's click-to-recapture).
