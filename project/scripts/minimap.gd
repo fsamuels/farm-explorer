@@ -64,7 +64,7 @@ var _data := {}
 var _minimap_box: VBoxContainer
 var _minimap: MapCanvas
 var _minimap_info: Label
-## The bottom-centre key-hint bar (M Map, G Sky, C News, F1 Help, Tab size).
+## The bottom key-hint bar, right of the minimap (M Map, G Sky, C News, F1 Help, Tab size).
 var _hint_bar: PanelContainer
 var _size_index := 0
 ## Chips dropped first when the window is too narrow, least important first.
@@ -182,7 +182,7 @@ func _chip(key: String, text: String) -> Label:
 func _input(event: InputEvent) -> void:
 	if (event is InputEventKey and event.pressed and not event.echo) or (event is InputEventMouseButton and event.pressed):
 		_idle = 0.0
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_TAB and not is_open() and not get_tree().paused:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_TAB and not is_open() and not get_tree().paused and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_size_index = HudStyle.next_minimap_index(_size_index)
 		_apply_minimap_size()
 		get_viewport().set_input_as_handled()
@@ -193,6 +193,8 @@ func _exit_tree() -> void:
 		if window.size_changed.is_connected(_apply_hud_scale):
 			window.size_changed.disconnect(_apply_hud_scale)
 		window.content_scale_factor = 1.0
+	if get_viewport().size_changed.is_connected(_on_view_resized):
+		get_viewport().size_changed.disconnect(_on_view_resized)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_map"):
