@@ -236,7 +236,8 @@ func _build_roofs() -> void:
 		add_child(wing)
 		# Red fascia on the wing's outer edge, and under the middle roof's eave.
 		_fascia(side * half, Profile.WING_LOW, side, z0, z1)
-		_fascia(side * jn, Profile.EAVE, side, z0, z1)
+		# 1 cm toward the wing so it does not share the riser's plane.
+		_fascia(side * (jn + 0.01), Profile.EAVE, side, z0, z1)
 	var under_mesh := MeshInstance3D.new()
 	under_mesh.name = "RoofUnderside"
 	under_mesh.mesh = under.commit()
