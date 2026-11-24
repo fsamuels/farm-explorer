@@ -6,6 +6,14 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**Time passes.** The game opens at Day (about 1 PM) with the clock already running: the sun crosses the sky, sunset and dusk arrive, then night and dawn. A full day takes 20 minutes.",
+				"**Same controls.** Y still pauses and restarts the clock, T jumps to the next time of day and stops it, and the sky menu (G) works as before."
+			],
+			"summary": "The sky clock now starts running at Day, so the sun moves and the day turns to night on its own.",
+			"title": "November 24: The clock runs"
+		},
+		{
+			"bullets": [
 				"**The road is open.** The fence across Lowden-Gardena Road and the wall of trees around the farm are gone. Drive out of the driveway and keep going.",
 				"**Real roads.** US 12, Lowden-Gardena Road and about 70 other named roads out to 3 miles are laid on the real ground, with edge lines, centre lines and gravel verges.",
 				"**Gravel and asphalt.** Roads the aerial photo shows as paved get edge and centre lines; the rest are narrower gravel roads with two worn tracks and no markings. Gravel is a best guess where the photo is unclear.",
@@ -230,14 +238,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 14209,
-		"commits": 131,
-		"decisions": 150,
+		"code_lines": 14216,
+		"commits": 289,
+		"decisions": 151,
 		"models": 14,
 		"scenes": 25,
 		"scripts": 63,
-		"size_kb": 115436,
-		"test_lines": 4214,
+		"size_kb": 115437,
+		"test_lines": 4219,
 		"textures": 49,
 		"vehicles": 3
 	}

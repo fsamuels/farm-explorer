@@ -97,6 +97,8 @@ func _test_scene() -> void:
 	for i in 3:
 		await process_frame
 	var tod = main.get_node("TimeOfDay")
+	_check(tod.clock_running and tod.current == "day" and absf(tod.hour - 13.0) < 0.1, "the game starts with the clock running at Day: %s %s" % [tod.current, tod.hour])
+	tod.set_preset("day", true)  # pin the plain Day look: the running clock drifts the hour
 	var sun: DirectionalLight3D = main.get_node("DirectionalLight3D")
 	var env: Environment = main.get_node("WorldEnvironment").environment
 
@@ -133,9 +135,9 @@ func _test_scene() -> void:
 	_check(tod.current == "sunset", "T is ignored while the map has the game paused")
 	paused = false
 
-	# The clock: starts stopped, Y runs it, time advances, T stops it.
+	# The clock: starts running at Day, Y stops and restarts it, time advances, T stops it.
 	tod.set_preset("day", true)
-	_check(not tod.clock_running and is_equal_approx(tod.hour, 13.0), "clock starts stopped at 13:00")
+	_check(not tod.clock_running and is_equal_approx(tod.hour, 13.0), "picking a preset stops the clock at its hour")
 	tod.day_seconds = 24.0  # one clock hour per second
 	_press(KEY_Y)
 	await process_frame
