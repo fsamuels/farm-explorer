@@ -51,6 +51,9 @@ const PASTURE_REACH := 14.0
 ## The driveway crosses the strip here (z): gravel with a few weeds.
 const DRIVEWAY_Z := Vector2(-54.0, -39.5)
 const DRIVEWAY_FUEL := 0.2
+## The ditch turns west at the south end and runs along here (z); that stretch
+## does not burn yet (the hose and rake come first), so it is bare.
+const EAST_WEST_Z := Vector2(62.0, 76.0)
 ## Patches with less fuel than this are bare dirt.
 const BARE_BELOW := 0.14
 ## Where the propane tank stands, by the road at the south end.
@@ -128,6 +131,8 @@ var _idle_since := -1.0
 var _tank_empty_said := false
 var _moisture_timer := 0.0
 var _hud_timer := 0.0
+## A step has changed the fire since the picture was last redrawn.
+var _view_stale := false
 ## Cells of the open ditch bed and how far along the route each is.
 var _ditch_cells := PackedInt32Array()
 var _ditch_stations := PackedFloat32Array()
@@ -193,10 +198,11 @@ func _ready() -> void:
 
 # --- the ground ------------------------------------------------------------
 
-## Ground height at (x, z). Only the ditch is carved here and it lies in a
-## narrow band, so everywhere else is level and need not be looked up.
+## Ground height at (x, z). Only the ditch is carved here: the road-side run
+## in a narrow band of x, and the east-west run along the south edge of the
+## grid. Everywhere else is level and need not be looked up.
 static func ground_height(x: float, z: float) -> float:
-	if x < 250.0 or x > 262.0:
+	if x > 262.0 or (x < 250.0 and (z < EAST_WEST_Z.x or z > EAST_WEST_Z.y)):
 		return 0.0
 	return TerrainMath.height_at(x, z)
 
@@ -205,6 +211,8 @@ static func ground_height(x: float, z: float) -> float:
 ## route the cell is when it is the bed of the open ditch, else -1.
 static func classify(x: float, z: float, patch: float) -> Dictionary:
 	var out := {"fuel": 0.0, "zone": FireGrid.NONE, "ditch_s": -1.0}
+	if x < 253.0 and z > EAST_WEST_Z.x:
+		return out
 	if not RoadMath.nearest(x, z, ROAD_CLEAR).is_empty():
 		return out
 	var near := WaterMath.nearest_on_route(x, z)
@@ -721,6 +729,8 @@ func _update_torch(delta: float) -> void:
 ## Light the grass the torch's flame reaches: walk along the jet and light
 ## whatever it passes within grass height of the ground, up to the first ground it hits.
 func _torch_ignite() -> int:
+	if wetness() >= FireGrid.WET_NO_LIGHT:
+		return 0
 	var tip := _tip.global_position
 	var dir := -_head.global_transform.basis.z
 	var lit := 0
@@ -779,6 +789,9 @@ func _process(delta: float) -> void:
 		ticks += 1
 	if ticks == MAX_TICKS_PER_FRAME:
 		_accum = 0.0
+	if _view_stale:
+		_view_stale = false
+		_refresh(false)
 	_update_torch(delta)
 	_animate_lights(delta)
 	_update_audio()
@@ -799,7 +812,7 @@ func _tick(dt: float) -> void:
 	grid.step(dt, wind, wetness())
 	_apply_wind()
 	_update_rules()
-	_refresh(false)
+	_view_stale = true
 
 ## Run time forward `seconds` of game time without frames (the tests use this).
 func step(seconds: float) -> void:
@@ -807,6 +820,8 @@ func step(seconds: float) -> void:
 	while t < seconds:
 		_tick(TICK)
 		t += TICK
+	_view_stale = false
+	_refresh(false)
 
 # --- the picture -----------------------------------------------------------
 
@@ -879,7 +894,11 @@ func _update_rules() -> void:
 			_set_quest(Quest.BURNED)
 			score = burn_score()
 			_toast("The burn is finished: %d%% of the ditch and strip, score %d" % [int(round(grid.target_coverage() * 100.0)), score], GOOD_COLOR)
-			_toast("Now open the weir at the north end", QUEST_COLOR)
+			if _water != null and _water.get("weir_open"):
+				# Already open (the ditch burned where the water had not reached).
+				_on_weir_changed(true)
+			else:
+				_toast("Now open the weir at the north end", QUEST_COLOR)
 	else:
 		_idle_since = -1.0
 		if quest == Quest.BURNED:

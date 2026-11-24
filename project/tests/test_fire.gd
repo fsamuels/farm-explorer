@@ -7,6 +7,7 @@ const FireGrid := preload("res://scripts/fire_grid.gd")
 const FireHud := preload("res://scripts/fire_hud.gd")
 const FireSound := preload("res://scripts/fire_sound.gd")
 const FireSystem := preload("res://scripts/fire_system.gd")
+const TerrainMath := preload("res://scripts/terrain_math.gd")
 const WaterMath := preload("res://scripts/water_math.gd")
 
 var _failures := 0
@@ -278,6 +279,9 @@ func _test_scene() -> void:
 	_check(field["zone"] == FireGrid.PROTECTED and field["fuel"] > 0.0, "nor the field beyond the road")
 	var driveway := FireSystem.classify(264.0, -47.0, 0.9)
 	_check(driveway["fuel"] <= FireSystem.DRIVEWAY_FUEL + 0.001, "the driveway has hardly any fuel: %s" % driveway["fuel"])
+	var corner := FireSystem.classify(246.0, 69.4, 0.9)
+	_check(corner["fuel"] == 0.0, "the east-west ditch along the south edge does not burn yet")
+	_check(absf(FireSystem.ground_height(246.0, 69.4) - TerrainMath.height_at(246.0, 69.4)) < 0.001 and FireSystem.ground_height(246.0, 69.4) < -0.5, "the ground there is the carved ditch")
 	var bare := FireSystem.classify(264.0, 10.0, -1.0)
 	_check(bare["fuel"] == 0.0, "the sparsest patches are bare dirt")
 	var margin := FireSystem.classify(253.0, 10.0, 0.9)
@@ -342,6 +346,19 @@ func _test_scene() -> void:
 	water.weir_open = true
 	_check(fire.quest == FireSystem.Quest.DONE, "opening the weir finishes the quest")
 	water.weir_open = false
+	# With the weir already open, finishing the burn finishes the quest.
+	fire.regrow()
+	water.weir_open = true
+	fire.step(0.1)
+	for k in range(0, fire._ditch_cells.size(), 5):
+		grid.moisture[fire._ditch_cells[k]] = 0.0
+	var zz := -88.0
+	while zz <= 64.0:
+		fire.light_at(Vector2(264.0, zz), 3.0)
+		zz += 6.0
+	fire.step(100.0)
+	_check(fire.quest == FireSystem.Quest.DONE, "a burn that ends with the weir already open completes the quest: %d" % fire.quest)
+	water.weir_open = false
 	# Fire across the line brings the fire department.
 	fire.regrow()
 	fire.light_at(Vector2(246.0, 0.0), 1.5)
@@ -370,6 +387,16 @@ func _test_scene() -> void:
 		await process_frame
 		lit_by_torch += fire._torch_ignite()
 	_check(lit_by_torch > 0, "the torch lights grass it is pointed at: %d" % lit_by_torch)
+	weather.set_weather("rain", true)
+	fire.regrow()
+	player.get_node("Head").rotation.x = deg_to_rad(-45.0)
+	var wet_lit := 0
+	for yaw in [0.0, 90.0, 180.0, 270.0]:
+		player.rotation_degrees.y = yaw
+		await process_frame
+		wet_lit += fire._torch_ignite()
+	_check(wet_lit == 0, "the torch will not light grass in the rain")
+	weather.set_weather("clear", true)
 	player.get_node("Head").rotation.x = deg_to_rad(80.0)
 	var up: int = fire._torch_ignite()
 	_check(up == 0, "but not the sky")
