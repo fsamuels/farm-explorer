@@ -172,6 +172,7 @@ func _build_hint_bar() -> void:
 	row.add_theme_constant_override("separation", 18)
 	_hint_bar.add_child(row)
 	row.add_child(_chip("M", "Map"))
+	row.add_child(_chip("1", "Torch"))
 	sky_button = _build_sky_button()
 	row.add_child(sky_button)
 	news_button = _build_news_button()

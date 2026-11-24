@@ -9,8 +9,10 @@ const DATA := {
 				"**A real fire.** Light the tall, dry bunch grass in the ditch and the strip between it and the road, and it spreads with the wind: fast downwind, slowly against it, faster uphill. Flames lean over, smoke rises and blows away, embers drift ahead, the grass blackens to stubble and the ground scorches. It crackles and roars, and lights up the dusk.",
 				"**The usual wind.** It blows from the south-west toward the north-east, steady with gusts and the odd shift. A readout on the left shows the wind, how much propane the torch has left, and how much of the strip you have burned.",
 				"**The propane torch.** Press 1 to take it out, hold the left mouse button to burn, 1 again to put it away. The tank lasts a couple of minutes; refill it at the propane tank by the road at the south end. Press E at the tank to start the quest.",
-				"**Quest: Burn the Ditch.** Burn the ditch and the strip, keep the fire off the pasture and the field, then open the weir. If it gets across the line you lose points, and after a while the fire department puts it out.",
+				"**Quest: Burn the Ditch.** Burn the ditch and the strip, keep the fire out of the field beyond the road, then open the weir. If it gets across the line you lose points, and after a while the fire department puts it out.",
 				"**Weather and water.** Rain and snow stop a fire and put one out, and a ditch with water in it will not burn, so shut the weir first. The sky menu (G) has a Fire row to regrow the grass, refill the torch and change the wind.",
+				"**Where the grass is.** The grass is thicker, and it stays off the road, off the driveway (so the fire stops at it and you light it again on the far side) and off the pasture side of the fence.",
+				"**Finding the keys.** The F1 help lists the torch keys, the bottom bar has a 1 — Torch hint, and the burn readout always says what to press.",
 				"**Just a start.** The hose and rake are still to come, and the east-west ditch to the pond does not burn yet."
 			],
 			"summary": "Burn the dry grass along the irrigation ditch with a propane torch, south to north with the wind, then open the weir to run the water.",
@@ -274,14 +276,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 16557,
-		"commits": 295,
-		"decisions": 159,
+		"code_lines": 16562,
+		"commits": 292,
+		"decisions": 160,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 75,
-		"size_kb": 115449,
-		"test_lines": 5093,
+		"size_kb": 115448,
+		"test_lines": 5112,
 		"textures": 49,
 		"vehicles": 3
 	}

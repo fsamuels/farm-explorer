@@ -13,8 +13,7 @@ extends Node3D
 ## by the road to refill it and start the quest.
 ##
 ## The quest is "Burn the Ditch": light it, keep it in the strip, then open
-## the weir. Fire that gets across the line (the pasture to the west, the field
-## beyond the road) costs points, and after a while the fire department puts
+## the weir. Fire that gets across the line (the field beyond the road) costs points, and after a while the fire department puts
 ## it out. The ditch cannot burn while water runs in it, and rain, snow and
 ## wet ground stop a fire, so the weir has to be shut and the weather dry.
 
@@ -33,24 +32,23 @@ const PARTICLE_SHADER := preload("res://shaders/fire_particle.gdshader")
 const GRID_ORIGIN := Vector2(240.0, -92.0)
 const GRID_W := 50
 const GRID_H := 166
-## Cells within this of a road's centreline are asphalt and shoulder: bare.
-const ROAD_CLEAR := 4.4
+## Cells whose centre is within this of a road's centreline are bare. The road
+## and its shoulders reach 4.4 m; the rest keeps a clump's jitter and leaning
+## blades off them.
+const ROAD_CLEAR := 5.6
 ## The road runs north-south at about this x; the field is east of it.
 const ROAD_X := 276.0
-## The open ditch's bed and banks, half-width from the centreline.
-const DITCH_HALF := 1.6
+## The open ditch's bed and banks, half-width from the centreline. The pasture
+## fence stands about 2 m west of it, so the grass stops short of the fence.
+const DITCH_HALF := 1.1
 const DITCH_FUEL := 1.0
 const STRIP_FUEL := 0.75
-const PASTURE_FUEL := 0.6
 const FIELD_FUEL := 0.5
-## The west pasture starts this far from the ditch's centreline, with bare
-## ground between (the bank and a grazed margin, a natural fire break), and
-## counts out to PASTURE_REACH.
-const PASTURE_GAP := 3.4
-const PASTURE_REACH := 14.0
-## The driveway crosses the strip here (z): gravel with a few weeds.
+## How far a grass clump strays from the middle of its cell.
+const CLUMP_JITTER := 0.38
+## The driveway crosses the strip here (z): bare gravel, so the grass ends at
+## each side of it and the fire has to be lit again on the far side.
 const DRIVEWAY_Z := Vector2(-54.0, -39.5)
-const DRIVEWAY_FUEL := 0.2
 ## The ditch turns west at the south end and runs along here (z); that stretch
 ## does not burn yet (the hose and rake come first), so it is bare.
 const EAST_WEST_Z := Vector2(62.0, 76.0)
@@ -166,6 +164,9 @@ var _playback: AudioStreamGeneratorPlayback
 var _roar := 0.0
 var _crackle := 0.0
 var _noise := FastNoiseLite.new()
+## Where every grass clump stands (the tests check them; a headless renderer
+## keeps no MultiMesh data to read back).
+var clump_positions := PackedVector3Array()
 ## Real frames spent updating the picture, for the tests to read.
 var frames_drawn := 0
 
@@ -231,11 +232,8 @@ static func classify(x: float, z: float, patch: float) -> Dictionary:
 	elif x > on_route.x + 0.5:
 		fuel = STRIP_FUEL * thick
 		zone = FireGrid.TARGET
-	elif near.y > PASTURE_GAP and near.y <= PASTURE_REACH:
-		fuel = PASTURE_FUEL * thick
-		zone = FireGrid.PROTECTED
 	if z >= DRIVEWAY_Z.x and z <= DRIVEWAY_Z.y and out["ditch_s"] < 0.0:
-		fuel = minf(fuel, DRIVEWAY_FUEL)
+		return out
 	if fuel < BARE_BELOW:
 		return out
 	out["fuel"] = clampf(fuel, 0.0, 1.0)
@@ -320,19 +318,22 @@ func _build_grass() -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 99
 	var transforms: Array[Transform3D] = []
+	clump_positions.clear()
 	for i in grid.fuel.size():
 		var f := grid.fuel[i]
 		if f <= 0.0:
 			continue
-		var count := 1 + (1 if f > 0.5 else 0) + (1 if f > 0.85 else 0)
+		var count := 2 + (1 if f > 0.35 else 0) + (1 if f > 0.6 else 0) + (1 if f > 0.85 else 0)
 		var c := grid.center_of(i)
 		for k in count:
-			var x := c.x + rng.randf_range(-0.45, 0.45)
-			var z := c.y + rng.randf_range(-0.45, 0.45)
+			var x := c.x + rng.randf_range(-CLUMP_JITTER, CLUMP_JITTER)
+			var z := c.y + rng.randf_range(-CLUMP_JITTER, CLUMP_JITTER)
 			var tall := rng.randf_range(0.85, 1.35) * (0.65 + 0.45 * f)
 			var wide := rng.randf_range(0.8, 1.3)
 			var basis := Basis(Vector3.UP, rng.randf() * TAU).scaled(Vector3(wide, tall, wide))
-			transforms.append(Transform3D(basis, Vector3(x, ground_height(x, z), z)))
+			var at := Vector3(x, ground_height(x, z), z)
+			transforms.append(Transform3D(basis, at))
+			clump_positions.append(at)
 	var multimesh := MultiMesh.new()
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
 	multimesh.mesh = clump_mesh()
@@ -347,7 +348,7 @@ func _build_grass() -> void:
 	grass.multimesh = multimesh
 	grass.material_override = _grass_material
 	grass.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	grass.visibility_range_end = 160.0
+	grass.visibility_range_end = 220.0
 	add_child(grass)
 
 ## The scorch: a skin laid just over the ground on every fuel cell, split into
@@ -929,6 +930,12 @@ func _build_hud() -> void:
 	_hud.visible = false
 	_hud_layer.add_child(_hud)
 
+## The keys that matter right now, for the readout's last line.
+func controls_line() -> String:
+	if torch_equipped:
+		return "Hold the left mouse button to burn. Press 1 to put the torch away."
+	return "Press 1 to take out the propane torch."
+
 func quest_line() -> Array:
 	match quest:
 		Quest.STARTED:
@@ -937,7 +944,7 @@ func quest_line() -> Array:
 			return ["Quest: Burn the Ditch", "Burn finished: %d%%, score %d. Open the weir at the north end." % [int(round(grid.target_coverage() * 100.0)), score]]
 		Quest.DONE:
 			return ["Quest complete", "Burn score %d. The water is running." % score]
-	return ["Propane torch", "Hold the left mouse button to burn. Press E at the tank to start the quest."]
+	return ["Propane torch", ""]
 
 func _update_hud() -> void:
 	if _hud == null:
@@ -954,6 +961,7 @@ func _update_hud() -> void:
 		right = Vector2(cam.global_transform.basis.x.x, cam.global_transform.basis.x.z).normalized()
 		forward = Vector2(-cam.global_transform.basis.z.x, -cam.global_transform.basis.z.z).normalized()
 	var text := quest_line()
+	text[1] = text[1] + "\n" + controls_line() if quest != Quest.IDLE else controls_line() + "\nPress E at the propane tank by the road to start the quest."
 	_hud.show_state({
 		"wind": wind, "view_right": right, "view_forward": forward,
 		"tank": tank_level, "show_tank": torch_equipped,
