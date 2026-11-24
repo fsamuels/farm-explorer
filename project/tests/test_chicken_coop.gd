@@ -3,6 +3,7 @@ extends SceneTree
 ##   godot --headless -s res://tests/test_chicken_coop.gd
 
 const Coop := preload("res://scripts/chicken_coop.gd")
+const TimeOfDayScript := preload("res://scripts/time_of_day.gd")
 
 var _failures := 0
 
@@ -120,5 +121,82 @@ func _run() -> void:
 	var here := Vector2(coop.global_position.x, coop.global_position.z)
 	_check(Geometry2D.is_point_in_polygon(here, PackedVector2Array(run)), "the coop stands inside the run fence")
 
+	# The chickens roam the yard and keep an earlier, longer night than the ducks (D-166).
+	var Wander := preload("res://scripts/wander.gd")
+	var tod := main.get_node("TimeOfDay")
+	tod.clock_running = false
+	var hen := main.get_node("Flock/Hen1") as Node3D
+	var flock := main.get_node("Flock") as Node3D
+	_check(Vector2(flock.global_position.x, flock.global_position.z).distance_to(Vector2(45.0, -14.0)) < 0.01, "the flock lives in the yard by the coop")
+	_check(hen.evening_routine and hen.routine_group == &"chicken_coop", "hens follow the sleep routine, in the coop")
+	_check(main.get_node("Flock/Rooster").evening_routine, "so does the rooster")
+	_check(hen.roost_hour < Wander.PEN_HOUR and hen.roost_hour < TimeOfDayScript.hour_of("sunset"), "hens go to bed before the ducks' pen time, before sunset")
+	_check(hen.release_hour > Wander.RELEASE_HOUR, "hens get up later than the ducks")
+	_check(Wander.phase_for(7.0, hen.pen_hour, hen.roost_hour, hen.release_hour) == Wander.Phase.ROOST, "still shut in at 7:00 when the ducks are out")
+	_check(Wander.phase_for(18.0, hen.pen_hour, hen.roost_hour, hen.release_hour) == Wander.Phase.ROOST, "already in at 18:00")
+	_check(Wander.phase_at(18.0) == Wander.Phase.FREE, "when the ducks are still out")
+	# By day they wander the yard, inside the fence and never through the coop.
+	tod.hour = 12.0
+	hen.move_speed = 4.0
+	var walk: Array[Vector2] = []
+	var stray := 0
+	var in_coop := 0
+	var last := Vector2(hen.global_position.x, hen.global_position.z)
+	for i in 3000:
+		hen._process(0.1)
+		var hp := Vector2(hen.global_position.x, hen.global_position.z)
+		walk.append(hp)
+		for k in run.size() - 1:
+			if Geometry2D.segment_intersects_segment(last, hp, run[k], run[k + 1]) != null:
+				stray += 1
+		last = hp
+		if coop.is_inside(hp):
+			in_coop += 1
+	_check(stray == 0, "a hen never crosses the yard's fence by day (%d crossings)" % stray)
+	_check(in_coop == 0, "a hen never walks through the coop by day (%d steps)" % in_coop)
+	# Evening: round to the door and in, through the doorway only.
+	tod.hour = 18.5
+	walk.clear()
+	for i in 1500:
+		hen._process(0.1)
+		walk.append(Vector2(hen.global_position.x, hen.global_position.z))
+	var hp2: Vector2 = walk[-1]
+	_check(hp2.distance_to(coop.roost_point()) <= 1.0, "the hen is in the coop at 18:30 (%s)" % hp2)
+	_check(_wall_crossings(coop, walk) == 0, "it went in by the door, not through a wall")
+	# Morning, later than the ducks: still shut in at 7:00, out at 8:00 by the door.
+	tod.hour = 7.0
+	for i in 100:
+		hen._process(0.1)
+	_check(coop.is_inside(Vector2(hen.global_position.x, hen.global_position.z)), "the hen is still in at 7:00")
+	tod.hour = 8.0
+	walk.clear()
+	walk.append(Vector2(hen.global_position.x, hen.global_position.z))
+	for i in 600:
+		hen._process(0.1)
+		walk.append(Vector2(hen.global_position.x, hen.global_position.z))
+	_check(not coop.is_inside(walk[-1]), "the hen is out at 8:00")
+	_check(_wall_crossings(coop, walk) == 0, "it came out by the door (%d wall crossings, ends %s)" % [_wall_crossings(coop, walk), walk[-1]])
+	# Routes from the back of the coop go round it.
+	var behind: Vector2 = coop.world_xz(Vector2(0.0, -2.5))
+	var detour: Array[Vector2] = coop.route_to_pen_front(behind)
+	_check(detour.size() == 2, "from behind the coop, round a corner and the front corner")
+
 	print("chicken_coop: %s" % ("OK" if _failures == 0 else "%d FAILED" % _failures))
 	quit(1 if _failures else 0)
+
+## How many times a path of world points passes in or out of the coop through a
+## wall rather than the doorway.
+func _wall_crossings(coop: Node, path: Array) -> int:
+	var walls := 0
+	var door: Vector2 = Coop.door_span()
+	for i in range(1, path.size()):
+		var a: Vector2 = path[i - 1]
+		var b: Vector2 = path[i]
+		for k in 20:
+			var p: Vector2 = a.lerp(b, k / 20.0)
+			var q: Vector2 = a.lerp(b, (k + 1) / 20.0)
+			if coop.is_inside(p) != coop.is_inside(q):
+				var m: Vector2 = coop.local_xz((p + q) * 0.5)
+				if not (m.y > 0.0 and m.x > door.x and m.x < door.y):
+					walls += 1
+	return walls

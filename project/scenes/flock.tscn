@@ -6,7 +6,7 @@
 
 [node name="Flock" type="Node3D"]
 script = ExtResource("1_wander_script")
-wander_radius = 15.0
+wander_radius = 0.0
 move_speed = 0.8
 idle_time_min = 4.0
 idle_time_max = 10.0

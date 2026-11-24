@@ -1401,7 +1401,7 @@ roam_max_z = 64.0
 surface_material_override/0 = SubResource("StandardMaterial3D_coat_spotted_small")
 
 [node name="Flock" parent="." instance=ExtResource("6_flock_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, -16.096)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45, 0, -14)
 
 [node name="Coyote" parent="." instance=ExtResource("7_coyote_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70, 0, 140)

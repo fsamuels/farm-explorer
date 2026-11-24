@@ -79,6 +79,117 @@ func door_outside() -> Vector2:
 	var span := door_span()
 	return world_xz(Vector2((span.x + span.y) * 0.5, DEPTH * 0.5 + 0.8))
 
+## How far outside the walls the chickens keep when they walk round the coop, and
+## how far they spread inside (D-166). Chickens use the coop the way the ducks
+## use their house (see wander.gd): in at the door at night, out again at dawn.
+const CORNER_CLEARANCE := 0.7
+const CROSS_MARGIN := 0.15
+const ROOST_RADIUS := 0.45
+const PEN_RADIUS := 2.0
+
+func pen_radius() -> float:
+	return PEN_RADIUS
+
+func roost_radius() -> float:
+	return ROOST_RADIUS
+
+## World (x, z) point `p` in this coop's local x, z.
+func local_xz(p: Vector2) -> Vector2:
+	var q := to_local(Vector3(p.x, global_position.y, p.y))
+	return Vector2(q.x, q.z)
+
+## True if world point `p` is within the coop's walls.
+func is_inside(p: Vector2) -> bool:
+	var q := local_xz(p)
+	return absf(q.x) < WIDTH * 0.5 and absf(q.y) < DEPTH * 0.5
+
+## True if `p` is inside the coop or too close to its walls to stand there.
+func is_blocked(p: Vector2) -> bool:
+	var q := local_xz(p)
+	return absf(q.x) < WIDTH * 0.5 + CORNER_CLEARANCE and absf(q.y) < DEPTH * 0.5 + CORNER_CLEARANCE
+
+func door_inside() -> Vector2:
+	var span := door_span()
+	return world_xz(Vector2((span.x + span.y) * 0.5, DEPTH * 0.5 - 0.45))
+
+func roost_point() -> Vector2:
+	return world_xz(Vector2(0.2, -0.2))
+
+func pen_point() -> Vector2:
+	return door_outside()
+
+## The coop's four corners, pushed out by CORNER_CLEARANCE, in world (x, z).
+func _corners() -> Array[Vector2]:
+	var hx := WIDTH * 0.5 + CORNER_CLEARANCE
+	var hz := DEPTH * 0.5 + CORNER_CLEARANCE
+	return [world_xz(Vector2(-hx, -hz)), world_xz(Vector2(hx, -hz)), world_xz(Vector2(hx, hz)), world_xz(Vector2(-hx, hz))]
+
+## True if the straight walk from `a` to `b` goes through the coop's walls or
+## within CROSS_MARGIN of them (less than the corner clearance, so a bird that
+## has strayed close to a wall is still sent round it).
+func crosses_coop(a: Vector2, b: Vector2) -> bool:
+	var qa := local_xz(a)
+	var qb := local_xz(b)
+	var hx := WIDTH * 0.5 + CROSS_MARGIN
+	var hz := DEPTH * 0.5 + CROSS_MARGIN
+	for i in 21:
+		var q := qa.lerp(qb, i / 20.0)
+		if absf(q.x) < hx and absf(q.y) < hz:
+			return true
+	return false
+
+## Waypoints that take a bird from `a` to `b` round the coop instead of through
+## it: one corner if that clears it, else two. Empty if the straight walk is clear.
+func detour_round_pen(a: Vector2, b: Vector2) -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	if is_inside(a) or is_inside(b) or not crosses_coop(a, b):
+		return out
+	var corners := _corners()
+	var best := INF
+	for i in 4:
+		var c := corners[i]
+		if not crosses_coop(a, c) and not crosses_coop(c, b):
+			var len := a.distance_to(c) + c.distance_to(b)
+			if len < best:
+				best = len
+				out = [c]
+	if not out.is_empty():
+		return out
+	for i in 4:
+		var c1 := corners[i]
+		var c2 := corners[(i + 1) % 4]
+		if not crosses_coop(a, c1) and not crosses_coop(c2, b):
+			var len := a.distance_to(c1) + c1.distance_to(c2) + c2.distance_to(b)
+			if len < best:
+				best = len
+				out = [c1, c2]
+		c1 = corners[(i + 1) % 4]
+		c2 = corners[i]
+		if not crosses_coop(a, c1) and not crosses_coop(c2, b):
+			var len2 := a.distance_to(c1) + c1.distance_to(c2) + c2.distance_to(b)
+			if len2 < best:
+				best = len2
+				out = [c1, c2]
+	return out
+
+## Waypoints from anywhere to just outside the door: out of the coop through the
+## door if inside, else round the walls.
+func route_to_pen_front(p: Vector2) -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	if is_inside(p):
+		out.append(door_inside())
+		out.append(door_outside())
+		return out
+	return detour_round_pen(p, door_outside())
+
+## Waypoints out of the door if inside; empty otherwise.
+func route_out_of_pen(p: Vector2) -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	if is_inside(p):
+		out.append(door_inside())
+		out.append(door_outside())
+	return out
+
 func _ready() -> void:
 	add_to_group("chicken_coop")
 	# Stand at AT, square to the house's south wall with the door toward the house.
