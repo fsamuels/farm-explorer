@@ -1,0 +1,26 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/kayak.gd" id="1_kayak"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hull"]
+size = Vector3(0.7, 0.5, 3.3)
+
+[node name="Kayak" type="CharacterBody3D"]
+script = ExtResource("1_kayak")
+label = "kayak"
+wheelbase = 1.6
+max_speed = 4.0
+max_reverse = 1.5
+accel = 1.5
+brake_decel = 3.0
+hand_decel = 2.5
+drag = 0.5
+max_steer_deg = 40.0
+max_lat_accel = 2.5
+eye_offset = Vector3(0, 0.62, 0.35)
+half_width = 0.4
+half_length = 1.7
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.13, 0)
+shape = SubResource("BoxShape3D_hull")
