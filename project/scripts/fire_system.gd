@@ -45,9 +45,10 @@ const DITCH_FUEL := 1.0
 const STRIP_FUEL := 0.75
 const FIELD_FUEL := 0.5
 ## The strip's east edge, from the owner's two points: nothing grows east of
-## the line between them (z -38.4 to 67.3). A cell's centre must be this far
+## the line between them (z -92.2 to 67.3), so the ground out to the road stays
+## bare. A cell's centre must be this far
 ## inside it, which keeps a clump and its leaning blades off the line.
-const STRIP_EAST_A := Vector2(263.9, -38.4)
+const STRIP_EAST_A := Vector2(265.1, -92.2)
 const STRIP_EAST_B := Vector2(261.3, 67.3)
 const STRIP_EDGE_MARGIN := 0.6
 ## How far a grass clump strays from the middle of its cell.
