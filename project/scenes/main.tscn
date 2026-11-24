@@ -16,6 +16,7 @@
 [ext_resource type="Texture2D" path="res://textures/ground/orthomosaic-front-section.png" id="15_front_section_ortho"]
 [ext_resource type="Texture2D" path="res://textures/ground/orthomosaic-middle-section.png" id="46_middle_section_ortho"]
 [ext_resource type="Script" path="res://scripts/shop_shell.gd" id="99_shop_shell"]
+[ext_resource type="Script" path="res://scripts/duck_house.gd" id="100_duck_house"]
 [ext_resource type="Texture2D" path="res://textures/roofs/shop_north.png" id="16_roof_shop_n"]
 [ext_resource type="Texture2D" path="res://textures/roofs/shop_south.png" id="17_roof_shop_s"]
 [ext_resource type="Texture2D" path="res://textures/roofs/sallys_house_north.png" id="18_roof_sh_n"]
@@ -539,6 +540,20 @@ _data = {
 }
 point_count = 12
 
+[sub_resource type="Curve3D" id="Curve3D_duckpen_south_east"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 10.600, 0, 17.100, 0, 0, 0, 0, 0, 0, 13.667, 0, 18.033, 0, 0, 0, 0, 0, 0, 16.733, 0, 18.967, 0, 0, 0, 0, 0, 0, 19.800, 0, 19.900, 0, 0, 0, 0, 0, 0, 20.525, 0, 17.325, 0, 0, 0, 0, 0, 0, 21.250, 0, 14.750, 0, 0, 0, 0, 0, 0, 21.975, 0, 12.175, 0, 0, 0, 0, 0, 0, 22.700, 0, 9.600),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 8
+
+[sub_resource type="Curve3D" id="Curve3D_duckpen_west"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 10.320, 0, 13.800, 0, 0, 0, 0, 0, 0, 10.151, 0, 10.797, 0, 0, 0, 0, 0, 0, 9.982, 0, 7.794, 0, 0, 0, 0, 0, 0, 9.813, 0, 4.791, 0, 0, 0, 0, 0, 0, 9.644, 0, 1.788, 0, 0, 0, 0, 0, 0, 9.475, 0, -1.215, 0, 0, 0, 0, 0, 0, 9.306, 0, -4.218, 0, 0, 0, 0, 0, 0, 9.137, 0, -7.221, 0, 0, 0, 0, 0, 0, 8.968, 0, -10.224, 0, 0, 0, 0, 0, 0, 8.799, 0, -13.227, 0, 0, 0, 0, 0, 0, 8.630, 0, -16.230),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 11
+
 [sub_resource type="Curve3D" id="Curve3D_greenpaddock"]
 _data = {
 "points": PackedVector3Array(0, 0, 0, 0, 0, 0, 3.300, 0, -15.500, 0, 0, 0, 0, 0, 0, 0.475, 0, -16.300, 0, 0, 0, 0, 0, 0, -2.350, 0, -17.100, 0, 0, 0, 0, 0, 0, -5.175, 0, -17.900, 0, 0, 0, 0, 0, 0, -8.000, 0, -18.700, 0, 0, 0, 0, 0, 0, -8.756, 0, -15.933, 0, 0, 0, 0, 0, 0, -9.511, 0, -13.167, 0, 0, 0, 0, 0, 0, -10.267, 0, -10.400, 0, 0, 0, 0, 0, 0, -11.022, 0, -7.633, 0, 0, 0, 0, 0, 0, -11.778, 0, -4.867, 0, 0, 0, 0, 0, 0, -12.533, 0, -2.100, 0, 0, 0, 0, 0, 0, -13.289, 0, 0.667, 0, 0, 0, 0, 0, 0, -14.044, 0, 3.433, 0, 0, 0, 0, 0, 0, -14.800, 0, 6.200),
@@ -864,6 +879,14 @@ closed = false
 curve = SubResource("Curve3D_backbarn_lane")
 closed = false
 
+[node name="DuckPen_SouthEast" parent="BackFences" instance=ExtResource("44_fence_path_scene")]
+curve = SubResource("Curve3D_duckpen_south_east")
+closed = false
+
+[node name="DuckPen_West" parent="BackFences" instance=ExtResource("44_fence_path_scene")]
+curve = SubResource("Curve3D_duckpen_west")
+closed = false
+
 [node name="GreenPaddock" parent="BackFences" instance=ExtResource("44_fence_path_scene")]
 curve = SubResource("Curve3D_greenpaddock")
 closed = false
@@ -909,6 +932,19 @@ transform = Transform3D(7.93541, 0, 0.1473495, 0, 4, 0, -0.1588796, 0, 7.359525,
 
 [node name="Back Barn" parent="Buildings" unique_id=949387090 instance=ExtResource("4_building_scene")]
 transform = Transform3D(11.188, 0, -3.2318, 0, 4, 0, 3.0725, 0, 11.768, 15.838, 2, -20.582)
+
+[node name="Duck and Geese House" parent="Buildings" instance=ExtResource("4_building_scene")]
+transform = Transform3D(4.6637, 0, -0.8912, 0, 2.35, 0, 1.4258, 0, 2.9150, 7.54, 1.175, 14.55)
+
+[node name="MeshInstance3D" parent="Buildings/Duck and Geese House"]
+visible = false
+
+[node name="CollisionShape3D" parent="Buildings/Duck and Geese House"]
+disabled = true
+
+[node name="DuckHouse" type="Node3D" parent="Buildings"]
+transform = Transform3D(0.9563, 0, -0.2924, 0, 1, 0, 0.2924, 0, 0.9563, 7.54, 0, 14.55)
+script = ExtResource("100_duck_house")
 
 [node name="Turn Out Shed 1" parent="Buildings" unique_id=863939474 instance=ExtResource("4_building_scene")]
 transform = Transform3D(4.411892, 0, -0.642147, 0, 4, 0, 0.4306271, 0, 6.630191, 151.3778, 2, 25.62595)
