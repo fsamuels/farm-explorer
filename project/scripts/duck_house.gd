@@ -88,13 +88,29 @@ func _wall(body: StaticBody3D, at: Vector3, length: float, height: float, boards
 	var size_up := Vector3(WALL_T * 0.5, upper_h, length) if along_z else Vector3(length, upper_h, WALL_T * 0.5)
 	if boards:
 		_box(body, size_low, Vector3(at.x, BOARD_HEIGHT * 0.5, at.z), BOARD_COLOR, true)
-	var upper_at := Vector3(at.x, BOARD_HEIGHT + upper_h * 0.5, at.z)
+	if along_z:
+		# Side walls follow the sloping roof: short slices, each as tall as the
+		# roof is at its south end, so nothing pokes through the roof.
+		var slices := maxi(1, ceili(length / 0.5))
+		var slice_len := length / slices
+		for k in slices:
+			var z0 := at.z - length * 0.5 + slice_len * k
+			var z1 := z0 + slice_len
+			var top := EAVE_NORTH - (z1 + DEPTH * 0.5) / DEPTH * (EAVE_NORTH - EAVE_SOUTH) - 0.02
+			var h := maxf(top - BOARD_HEIGHT, 0.05)
+			var piece := Vector3(WALL_T * 0.5, h, slice_len)
+			_upper(body, piece, Vector3(at.x, BOARD_HEIGHT + h * 0.5, z0 + slice_len * 0.5), solid_upper)
+		return
+	_upper(body, size_up, Vector3(at.x, BOARD_HEIGHT + upper_h * 0.5, at.z), solid_upper)
+
+## The part of a wall above the boards: tin, or pale see-through chain link.
+func _upper(body: StaticBody3D, size: Vector3, at: Vector3, solid_upper: bool) -> void:
 	if solid_upper:
-		_box(body, size_up, upper_at, TIN_COLOR, true)
+		_box(body, size, at, TIN_COLOR, true)
 	else:
 		# Chain link: a thin pale panel you can't see through well but that is
 		# still solid, so nothing walks or flies through the screen.
-		var link := _box(body, size_up, upper_at, Color(0.7, 0.72, 0.74, 0.35), true)
+		var link := _box(body, size, at, Color(0.7, 0.72, 0.74, 0.35), true)
 		var mat := link.material_override as StandardMaterial3D
 		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 
@@ -112,7 +128,8 @@ func _roof(body: StaticBody3D) -> void:
 ## Two grey stock tanks outside the doorway, with a little water in each.
 func _tanks() -> void:
 	for i in 2:
-		var z := -0.55 + 0.75 * i - 0.6
+		var door := door_span()
+		var z := (door.x + door.y) * 0.5 + (i - 0.5) * 1.5
 		var tank := Node3D.new()
 		tank.name = "Tank%d" % (i + 1)
 		tank.position = Vector3(WIDTH * 0.5 + 1.0, 0.0, z)
