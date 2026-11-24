@@ -146,8 +146,11 @@ func _test_scene() -> void:
 	_near(depth_in_ditch, WaterMath.ditch_water_depth(1.0), "water in the ditch at the road", 0.05)
 	_check(is_nan(water.water_surface_at(0.0, -60.0)), "no water on dry ground")
 	_check(is_nan(water.water_surface_at(258.2, -46.0)), "no surface over the buried culvert")
+	var toast: Node = main.get_node("Toast")
+	toast.clear()
 	for i in 330:
 		water._step(1.0)
+	_check(toast.current_text == "The pond is full", "a toast says the pond is full when it fills: '%s'" % toast.current_text)
 	_check(water.pond_fill_fraction() > 0.95, "the pond is full after a few minutes: %s" % water.pond_fill_fraction())
 	_check(pond_surface.visible and water.pond_level > -0.5, "the pond sheet is up near the rim: %s" % water.pond_level)
 	_near(pond_surface.position.y, water.pond_level, "the sheet sits at the pond's level", 0.001)
@@ -180,4 +183,118 @@ func _test_scene() -> void:
 
 	water.set_ditch_full(true)
 	_check(water.flow[100] == 1.0, "the ditch can be set running full at once")
+	await _test_toasts_and_controls(main, water)
+	await _test_swimming(main, water)
 	main.queue_free()
+
+## The pond announces itself when it becomes full or empty, and the sky menu's Water row drives it.
+func _test_toasts_and_controls(main: Node, water: Node) -> void:
+	var toast: Node = main.get_node("Toast")
+	var menu: Node = main.get_node("SkyMenu")
+	water.weir_open = false
+	water.time_scale = 1.0
+	water.set_pond_fill(0.5)
+	toast.clear()
+	water.set_pond_fill(1.0)
+	_check(toast.current_text == "The pond is full", "filling the pond says so: '%s'" % toast.current_text)
+	toast.clear()
+	water.set_pond_fill(1.0)
+	water.set_pond_fill(0.95)
+	water.set_pond_fill(1.0)
+	_check(not toast.is_showing(), "a pond hovering near full does not announce itself again")
+	water.set_pond_fill(0.5)
+	water.set_pond_fill(1.0)
+	_check(toast.current_text == "The pond is full", "but it does after dropping well away and refilling")
+	toast.clear()
+	water.set_pond_fill(0.0)
+	_check(toast.current_text == "The pond is empty", "emptying the pond says so: '%s'" % toast.current_text)
+	toast.clear()
+	water.set_pond_fill(0.0)
+	water.set_pond_fill(0.01)
+	water.set_pond_fill(0.0)
+	_check(not toast.is_showing(), "a pond hovering near empty does not announce itself again")
+	water.set_pond_fill(0.3)
+	water.set_pond_fill(0.0)
+	_check(toast.current_text == "The pond is empty", "but it does after being refilled and emptied again")
+	_check(toast.queued() <= toast.MAX_QUEUED, "the toast queue stays bounded")
+
+	# Water speed: the same half second of play moves the water twenty times as far.
+	toast.clear()
+	water.set_ditch_full(false)
+	water.weir_open = true
+	water.time_scale = 1.0
+	water._process(0.5)
+	var slow: float = water.flow[40]
+	water.set_ditch_full(false)
+	water.time_scale = 20.0
+	water._process(0.5)
+	_check(slow < 0.05 and water.flow[40] > 0.5, "time_scale speeds the water up: %s vs %s" % [slow, water.flow[40]])
+	water.time_scale = 1.0
+	water.weir_open = false
+
+	# The sky menu's Water row.
+	_check(menu._weir_button != null and menu._water_status != null and menu._speed_buttons.size() == 3, "the sky menu has a Water row")
+	menu.toggle_weir()
+	_check(water.weir_open and menu._weir_button.button_pressed and menu._weir_button.text == "Weir\nopen", "the menu opens the weir: %s" % menu._weir_button.text)
+	menu.toggle_weir()
+	_check(not water.weir_open and menu._weir_button.text == "Weir\nshut", "and shuts it")
+	menu.set_pond(1.0)
+	_check(is_equal_approx(water.pond_fill_fraction(), 1.0) and menu._water_status.text == "Pond 100% full", "the menu fills the pond: %s" % menu._water_status.text)
+	menu.set_pond(0.5)
+	_check(absf(water.pond_fill_fraction() - 0.5) < 0.01 and menu._water_status.text == "Pond 50% full", "or half fills it: %s" % menu._water_status.text)
+	menu.set_pond(0.0)
+	_check(water.pond_fill_fraction() == 0.0, "or empties it")
+	menu.set_ditch(true)
+	_check(water.flow[10] == 1.0 and water.flow[200] == 1.0, "the menu fills the ditch")
+	menu.set_ditch(false)
+	_check(water.flow[10] == 0.0, "and drains it")
+	menu.choose_water_speed(2)
+	_check(is_equal_approx(water.time_scale, 20.0) and menu._speed_buttons[2].button_pressed and not menu._speed_buttons[0].button_pressed, "the menu sets the water speed")
+	menu.choose_water_speed(0)
+	_check(is_equal_approx(water.time_scale, 1.0) and menu._speed_buttons[0].button_pressed, "and puts it back")
+	toast.clear()
+
+## Ducks and geese go to the pond when it has water, float on it, and walk back out when it dries.
+func _test_swimming(main: Node, water: Node) -> void:
+	var goose: Node3D = main.get_node("Goose4")
+	var duck: Node3D = main.get_node("MallardDuck")
+	_check(goose.swims and duck.swims and main.get_node("Duck1").swims and main.get_node("Duck2").swims, "ducks and geese swim")
+	_check(not main.get_node("Flock").swims, "hens do not")
+	water.weir_open = false
+	water.set_pond_fill(0.0)
+	_check(not water.pond_has_water(), "no swimming in a dry pond")
+	_check(water.random_swim_spot(Vector2(40, 20), 90.0) == Vector2.INF, "no swim spot in a dry pond")
+	goose._process(0.1)
+	_check(not goose.swimming, "a goose in a dry pond stays on the ground")
+
+	water.set_pond_fill(0.9)
+	_check(water.pond_has_water(), "a filled pond can be swum on")
+	var spot: Vector2 = water.random_swim_spot(Vector2(40, 20), 90.0)
+	_check(spot != Vector2.INF and water.pond_depth_at(spot.x, spot.y) >= water.SWIM_DEPTH, "swim spots are in deep enough water: %s" % spot)
+	_check(water.pond_depth_at(0.0, -60.0) == 0.0 and is_nan(water.pond_surface_at(0.0, -60.0)), "no pond water on dry ground")
+
+	# Send the goose to the water and let it walk there.
+	var chosen := false
+	for i in 40:
+		if goose._pick_swim_target():
+			chosen = true
+			break
+	_check(chosen, "the goose picks the water as its destination")
+	for i in 400:
+		goose._process(0.5)
+		if goose.swimming:
+			break
+	_check(goose.swimming, "the goose reaches the water and floats: at %s" % goose.global_position)
+	if goose.swimming:
+		var x: float = goose.global_position.x
+		var z: float = goose.global_position.z
+		_check(water.pond_depth_at(x, z) > water.SWIM_DEPTH * 0.1, "it is over water")
+		_check(absf(goose.global_position.y - (water.pond_level - 0.04)) < 0.05, "and sits on the surface: y %s, level %s" % [goose.global_position.y, water.pond_level])
+		# The water rising lifts it; draining the pond sets it back on the ground.
+		var before: float = goose.global_position.y
+		water.set_pond_fill(1.0)
+		goose._process(0.1)
+		_check(goose.global_position.y > before - 0.001 and goose.swimming, "it rides the surface up as the pond fills")
+		water.set_pond_fill(0.0)
+		goose._process(0.1)
+		_check(not goose.swimming and absf(goose.global_position.y - TerrainMath.height_at(goose.global_position.x, goose.global_position.z)) < 0.001, "and stands on the bottom when the pond is gone: y %s" % goose.global_position.y)

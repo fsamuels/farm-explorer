@@ -24,7 +24,7 @@ const CONTROLS := [
 	["M", "Open / close the map (pauses the game)"],
 	["Tab", "Change the minimap's size: medium, large, small"],
 	["C", "What's New: the changelog and the game's size (pauses the game)"],
-	["G", "Sky menu: pick the time of day, weather, moon, shooting stars and season (pauses the game)"],
+	["G", "Sky menu: pick the time of day, weather, season and the water (weir, pond level, speed); pauses the game"],
 	["T", "Change the time of day: day, sunset, dusk, night, dawn, sunrise"],
 	["Y", "Start / stop the clock (time shown top right)"],
 	["N", "Show / hide constellation lines (and, at night, their names)"],

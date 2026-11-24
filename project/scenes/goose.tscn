@@ -9,6 +9,7 @@ wander_radius = 3.0
 move_speed = 0.7
 idle_time_min = 1.0
 idle_time_max = 4.0
+swims = true
 
 [node name="Model" parent="." instance=ExtResource("1_goose_model")]
 transform = Transform3D(0.0844, 0, 0, 0, 0.0844, 0, 0, 0, 0.0844, 0, 0, 0)

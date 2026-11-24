@@ -9,7 +9,10 @@ extends Node3D
 ## water_math.gd; this node steps it each frame, draws it (shaders/water.gdshader)
 ## and builds the little structures: the weir, and the mouths of the pipes.
 ##
-## Times are real seconds, not game-clock time, so the fill is easy to watch.
+## Times are real seconds, not game-clock time, so the fill is easy to watch;
+## `time_scale` speeds the water up (the sky menu's Water row). It posts a toast
+## when the pond becomes full or empty (toast.gd), and swimming birds ask it
+## where the water is (wander.gd).
 
 const TerrainMath := preload("res://scripts/terrain_math.gd")
 const WaterData := preload("res://scripts/water_data.gd")
@@ -35,6 +38,19 @@ const CONCRETE := Color(0.62, 0.61, 0.58)
 const STEEL := Color(0.3, 0.34, 0.36)
 const WHEEL_RED := Color(0.72, 0.12, 0.1)
 
+## Toast colours: a cool blue for full, an amber for empty.
+const FULL_COLOR := Color(0.45, 0.72, 1.0)
+const EMPTY_COLOR := Color(1.0, 0.72, 0.35)
+## The pond counts as full at this share of its capacity, and is announced
+## again only after it has fallen back below FULL_RESET; likewise empty.
+const FULL_AT := 0.995
+const FULL_RESET := 0.9
+const EMPTY_AT := 0.004
+const EMPTY_RESET := 0.05
+## A bird can swim where the pond is at least this deep, and floats once the
+## water is deeper than its ankles.
+const SWIM_DEPTH := 0.6
+
 signal weir_changed(open: bool)
 
 ## Water runs from the weir into the ditch while this is true.
@@ -57,6 +73,8 @@ signal weir_changed(open: bool)
 ## Start with the ditch already running full.
 @export var start_ditch_full := false
 @export var weather_path: NodePath = ^"../Weather"
+## How fast the water runs compared with the clock: 1 is normal.
+@export_range(0.1, 60.0) var time_scale := 1.0
 
 ## How full the ditch is at each station along the route (0 empty .. 1 flowing).
 var flow := WaterMath.new_flow()
@@ -67,6 +85,10 @@ var pond_level := -WaterData.POND_DEPTH
 var rain_pool := 0.0
 
 var _weather: Node
+## Which toast the pond has already given, so a level that hovers near full or
+## empty doesn't announce itself over and over.
+var _said_full := false
+var _said_empty := true
 var _pond_surface: MeshInstance3D
 var _ditch_surface: MeshInstance3D
 var _pond_material: ShaderMaterial
@@ -79,9 +101,13 @@ var _gate_tween: Tween
 var _wheel: Node3D
 
 func _ready() -> void:
+	add_to_group("water")
 	_weather = get_node_or_null(weather_path)
 	pond_volume = WaterMath.pond_capacity() * start_pond_fill
 	pond_level = WaterMath.pond_level_at(pond_volume)
+	# Starting full or empty is not news.
+	_said_full = pond_fill_fraction() >= FULL_AT
+	_said_empty = pond_fill_fraction() <= EMPTY_AT
 	if start_ditch_full:
 		flow = WaterMath.new_flow(1.0)
 		_flow_active = true
@@ -95,7 +121,7 @@ func _ready() -> void:
 		_move_gate(true)
 
 func _process(delta: float) -> void:
-	_step(delta)
+	_step(delta * time_scale)
 
 ## Advance the water by `dt` seconds. Public so tests can run time forward.
 func _step(dt: float) -> void:
@@ -119,6 +145,25 @@ func _step(dt: float) -> void:
 	pond_volume = WaterMath.pond_step(pond_volume, WaterMath.outflow(flow), 1.0 / (maxf(fill_minutes, 0.01) * 60.0), rain_per_second, 1.0 / (maxf(drain_minutes, 0.01) * 60.0), dt)
 	pond_level = WaterMath.pond_level_at(pond_volume)
 	_update_pond_surface()
+	_announce_pond()
+
+## Post a toast when the pond has just become full or empty.
+func _announce_pond() -> void:
+	var fill := pond_fill_fraction()
+	if not _said_full and fill >= FULL_AT:
+		_said_full = true
+		_toast("The pond is full", FULL_COLOR)
+	elif _said_full and fill < FULL_RESET:
+		_said_full = false
+	if not _said_empty and fill <= EMPTY_AT:
+		_said_empty = true
+		_toast("The pond is empty", EMPTY_COLOR)
+	elif _said_empty and fill > EMPTY_RESET:
+		_said_empty = false
+
+func _toast(text: String, accent: Color) -> void:
+	if is_inside_tree():
+		get_tree().call_group("toast", "show_toast", text, accent)
 
 ## [standing-water share, rain multiple] for the weather right now.
 func _rain() -> Array:
@@ -145,12 +190,46 @@ func set_pond_fill(fraction: float) -> void:
 	pond_volume = WaterMath.pond_capacity() * clampf(fraction, 0.0, 1.0)
 	pond_level = WaterMath.pond_level_at(pond_volume)
 	_update_pond_surface()
+	_announce_pond()
 
 ## Set the whole ditch running full (or empty) at once.
 func set_ditch_full(full: bool) -> void:
 	flow = WaterMath.new_flow(1.0 if full else 0.0)
 	_flow_active = full
 	_upload_flow()
+
+## How deep the pond's water is above its floor at (x, z), 0 where there is none
+## (the ditch is left out). Cheap enough for a flock to ask every frame.
+func pond_depth_at(x: float, z: float) -> float:
+	if TerrainMath.pond_sdf(x, z) >= 0.0:
+		return 0.0
+	return maxf(0.0, pond_level - TerrainMath.height_at(x, z))
+
+## The pond's surface height at (x, z), or NAN where the pond holds no water there.
+func pond_surface_at(x: float, z: float) -> float:
+	return pond_level if pond_depth_at(x, z) > 0.0 else NAN
+
+## True once the pond holds enough water for a bird to swim on.
+func pond_has_water() -> bool:
+	return pond_level > -WaterData.POND_DEPTH + SWIM_DEPTH
+
+## A random point on the pond's open water (deep enough to swim), nearest to
+## `from` of a handful tried and within `reach` metres of it; Vector2.INF if
+## there is none. Used by swimming birds.
+func random_swim_spot(from: Vector2, reach: float) -> Vector2:
+	if not pond_has_water():
+		return Vector2.INF
+	var best := Vector2.INF
+	var best_distance := reach
+	for i in 30:
+		var at := Vector2(
+			randf_range(WaterMath.BASIN_MIN.x, WaterMath.BASIN_MAX.x),
+			randf_range(WaterMath.BASIN_MIN.y, WaterMath.BASIN_MAX.y))
+		var d := from.distance_to(at)
+		if d > 2.0 and d < best_distance and pond_depth_at(at.x, at.y) >= SWIM_DEPTH:
+			best = at
+			best_distance = d
+	return best
 
 ## The water's surface height at (x, z), or NAN where there is no water: the
 ## pond's level where the pond holds water, the ditch's where the ditch does.
