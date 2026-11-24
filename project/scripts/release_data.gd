@@ -6,10 +6,10 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
-				"**A proper utility vehicle.** The yellow-and-black Cub Cadet 550 is now a full side-by-side with a roll cage, four seats and big knobby tyres, in place of the boxy stand-in.",
+				"**A proper utility vehicle.** The yellow-and-black Cub Cadet 550 is now a full side-by-side with a roll cage and chunky tyres, in place of the boxy stand-in.",
 				"**Same dump bed.** Press B while driving to tip the yellow bed up or back down, slowing down first as before."
 			],
-			"summary": "The Front Barn's Cub Cadet UTV is now a detailed side-by-side with a cab, seats and roll cage, still with a dump bed.",
+			"summary": "The Front Barn's Cub Cadet UTV is now a detailed side-by-side with a roll cage, still with a dump bed.",
 			"title": "November 23: A real UTV"
 		},
 		{
@@ -152,14 +152,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 10793,
-		"commits": 274,
+		"code_lines": 10794,
+		"commits": 275,
 		"decisions": 138,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 47,
 		"size_kb": 113269,
-		"test_lines": 2827,
+		"test_lines": 2836,
 		"textures": 48,
 		"vehicles": 3
 	}

@@ -229,18 +229,27 @@ func _test_utv(main: Node, player: CharacterBody3D) -> void:
 	var utv: CharacterBody3D = main.get_node("CubCadetUTV")
 	_check(utv.bed != null and utv.bed.name == "Bed" and utv.wheels.size() == 4, "the UTV has a bed and four wheels")
 	_check(utv.max_speed < 14.0 and utv.label == "Cub Cadet 550", "the UTV is tuned slower than the cars")
-	# Cub Cadet yellow and black: some yellow material, and none of the Ranger's red.
+	# Cub Cadet yellow and black: the Ranger body has yellow and none of its red, and
+	# the bed is yellow too.
 	var has_yellow := false
 	var has_red := false
-	for mi: MeshInstance3D in utv.get_node("Model").find_children("*", "MeshInstance3D", true, false):
+	var meshes := utv.get_node("Model").find_children("*", "MeshInstance3D", true, false)
+	_check(utv.get_node_or_null("Model/Body") != null, "the Ranger body mesh loaded")
+	for mi: MeshInstance3D in meshes:
+		if mi.mesh == null:
+			continue
 		for s in mi.mesh.get_surface_count():
 			var m := mi.get_active_material(s) as StandardMaterial3D
 			if m == null:
 				continue
 			var c := m.albedo_color
-			has_yellow = has_yellow or (c.r > 0.9 and c.g > 0.7 and c.b < 0.2)
+			var yellow_here := c.r > 0.9 and c.g > 0.7 and c.b < 0.2
+			if yellow_here and mi.name == "Body":
+				has_yellow = true
 			has_red = has_red or (c.r > 0.5 and c.g < 0.3 and c.b < 0.3)
-	_check(has_yellow and not has_red, "the UTV is yellow and black, with no red (yellow %s, red %s)" % [has_yellow, has_red])
+	_check(has_yellow and not has_red, "the UTV body is yellow, with no red (yellow %s, red %s)" % [has_yellow, has_red])
+	var side := utv.get_node("Model/Bed/BedSide") as MeshInstance3D
+	_check((side.material_override as StandardMaterial3D).albedo_color.r > 0.9, "the dump bed is yellow")
 
 	utv.speed = 0.0
 	player.global_position = utv.to_global(Vector3(-2.0, 0.2, 0.0))

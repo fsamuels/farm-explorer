@@ -10,9 +10,10 @@ const YELLOW := Color(0.98, 0.78, 0.04)
 const BLACK := Color(0.07, 0.07, 0.08)
 
 ## Where the bed hinges (its rear edge), and how long and wide it is. It sits
-## above the rear wheels, which are 0.45 m from centre outward.
-const BED_HINGE := Vector3(0.0, 0.72, 1.82)
-const BED_LENGTH := 1.35
+## above the rear wheels (0.45 m from centre outward). The model's rear edge
+## is at z 1.55, so the hinge leaves a small overhang; the cab ends near z 0.4.
+const BED_HINGE := Vector3(0.0, 0.72, 1.62)
+const BED_LENGTH := 1.2
 const BED_WIDTH := 1.5
 
 static func material(color: Color, rough := 0.6, metal := 0.0) -> StandardMaterial3D:

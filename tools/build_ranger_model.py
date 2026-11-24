@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Builds project/models/ranger_xp.glb (D-132) from the Sketchfab download of
+"""Builds project/models/ranger_xp.glb (D-138) from the Sketchfab download of
 "Polaris Ranger Xp 1000 Ff" by Buthull (CC-BY-4.0).
 
 The download is one vertex-coloured mesh of a crew-cab fire/rescue Ranger with a
@@ -11,6 +11,9 @@ water-tank unit on the back. This script (numpy only, no Blender):
   * splits the four wheels into their own meshes "Wheel_Tyres" / "Wheel_Rims"
     (vehicle.gd spins and steers them);
   * recolours it Cub Cadet yellow and black, one flat material per colour.
+Built for the download whose two meshes hold 87,526 vertices in total (checked
+below); a different export fails loudly, because the axle, wheel and tank-cut
+numbers are measured from this exact file.
 Usage: python3 tools/build_ranger_model.py <dir with scene.gltf + scene.bin> [out.glb]
 """
 import json, struct, sys
@@ -73,6 +76,8 @@ def main():
     src = sys.argv[1]
     out = sys.argv[2] if len(sys.argv) > 2 else "project/models/ranger_xp.glb"
     P, N, C, I = load(src)
+    if len(P) != 87526:
+        sys.exit(f"unexpected source: {len(P)} vertices, expected 87526 (a different export of the model?)")
     cen = P[I].mean(1)
     wheel = np.zeros(len(I), bool)
     for zc in (FRONT_AXLE_Z, REAR_AXLE_Z):
@@ -135,7 +140,9 @@ def write_glb(path, prims):
     for name, plist in byname.items():
         prs = []
         for p in plist:
-            key = (tuple(round(float(x), 4) for x in p["color"]), p["rough"], p["metal"])
+            # glTF colours are linear; the palette above is sRGB (as in Godot's colour picker).
+            lin = [((x + 0.055) / 1.055) ** 2.4 if x > 0.04045 else x / 12.92 for x in p["color"]]
+            key = (tuple(round(float(x), 4) for x in lin), p["rough"], p["metal"])
             if key not in matidx:
                 matidx[key] = len(mats)
                 mats.append({"name": f"mat{len(mats)}", "pbrMetallicRoughness": {

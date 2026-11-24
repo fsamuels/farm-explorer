@@ -11,10 +11,9 @@ regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
 ## November 23: A real UTV
-> The Front Barn's Cub Cadet UTV is now a detailed side-by-side with a cab, seats and roll cage, still with a dump bed.
+> The Front Barn's Cub Cadet UTV is now a detailed side-by-side with a roll cage, still with a dump bed.
 - **A proper utility vehicle.** The yellow-and-black Cub Cadet 550 is now a full
-  side-by-side with a roll cage, four seats and big knobby tyres, in place of the
-  boxy stand-in.
+  side-by-side with a roll cage and chunky tyres, in place of the boxy stand-in.
 - **Same dump bed.** Press B while driving to tip the yellow bed up or back down,
   slowing down first as before.
 
