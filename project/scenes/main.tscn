@@ -549,10 +549,10 @@ point_count = 8
 
 [sub_resource type="Curve3D" id="Curve3D_duckpen_west"]
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 10.320, 0, 13.800, 0, 0, 0, 0, 0, 0, 10.151, 0, 10.797, 0, 0, 0, 0, 0, 0, 9.982, 0, 7.794, 0, 0, 0, 0, 0, 0, 9.813, 0, 4.791, 0, 0, 0, 0, 0, 0, 9.644, 0, 1.788, 0, 0, 0, 0, 0, 0, 9.475, 0, -1.215, 0, 0, 0, 0, 0, 0, 9.306, 0, -4.218, 0, 0, 0, 0, 0, 0, 9.137, 0, -7.221, 0, 0, 0, 0, 0, 0, 8.968, 0, -10.224, 0, 0, 0, 0, 0, 0, 8.799, 0, -13.227, 0, 0, 0, 0, 0, 0, 8.630, 0, -16.230),
-"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 7.945, 0, 11.189, 0, 0, 0, 0, 0, 0, 8.021, 0, 8.142, 0, 0, 0, 0, 0, 0, 8.097, 0, 5.096, 0, 0, 0, 0, 0, 0, 8.173, 0, 2.049, 0, 0, 0, 0, 0, 0, 8.249, 0, -0.997, 0, 0, 0, 0, 0, 0, 8.326, 0, -4.044, 0, 0, 0, 0, 0, 0, 8.402, 0, -7.090, 0, 0, 0, 0, 0, 0, 8.478, 0, -10.137, 0, 0, 0, 0, 0, 0, 8.554, 0, -13.183, 0, 0, 0, 0, 0, 0, 8.630, 0, -16.230),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 }
-point_count = 11
+point_count = 10
 
 [sub_resource type="Curve3D" id="Curve3D_greenpaddock"]
 _data = {
@@ -934,7 +934,7 @@ transform = Transform3D(7.93541, 0, 0.1473495, 0, 4, 0, -0.1588796, 0, 7.359525,
 transform = Transform3D(11.188, 0, -3.2318, 0, 4, 0, 3.0725, 0, 11.768, 15.838, 2, -20.582)
 
 [node name="Duck and Geese House" parent="Buildings" instance=ExtResource("4_building_scene")]
-transform = Transform3D(4.6637, 0, -0.8912, 0, 2.35, 0, 1.4258, 0, 2.9150, 7.54, 1.175, 14.55)
+transform = Transform3D(2.9150, 0, -1.4258, 0, 2.35, 0, 0.8912, 0, 4.6637, 8.689, 1.175, 13.966)
 
 [node name="MeshInstance3D" parent="Buildings/Duck and Geese House"]
 visible = false
@@ -943,7 +943,7 @@ visible = false
 disabled = true
 
 [node name="DuckHouse" type="Node3D" parent="Buildings"]
-transform = Transform3D(0.9563, 0, -0.2924, 0, 1, 0, 0.2924, 0, 0.9563, 7.54, 0, 14.55)
+transform = Transform3D(0.9563, 0, -0.2924, 0, 1, 0, 0.2924, 0, 0.9563, 8.689, 0, 13.966)
 script = ExtResource("100_duck_house")
 
 [node name="Turn Out Shed 1" parent="Buildings" unique_id=863939474 instance=ExtResource("4_building_scene")]

@@ -12,10 +12,10 @@ fails if the two disagree.
 
 ## November 24: Duck and geese house
 > The duck and geese house is built, with its pen fences, a doorway and two water tanks.
-- **The house.** A small wood-and-tin shed stands by the pond: boards below, chain link above, a sloping roof, sawdust underfoot. You can walk in through the doorway on the pen side.
-- **Its pen.** White-line fences run from just past the house's corner to the south-east corner of the pen, then up to the Back Barn pen, and a second fence runs from the back of the house to the barn. There is a gap about 4 feet wide between the fence and the house.
-- **Water tanks.** Two grey tanks stand outside the doorway.
-- **Just a start.** The house's size is a guess (16 by 10 feet), the other pen fences are still to come, and the ducks and geese do not live there yet.
+- **The house.** A small wood-and-tin shed stands by the pond: 16 feet long with its long side facing the pen, boards below and chain link above, tin walls, a roof sloping to the front and sawdust underfoot. You can walk in through the open bay at the north end of its front.
+- **Its pen.** White-line fences run from just past the house's south-east corner to the south-east corner of the pen, then up to the Back Barn pen, and a second fence carries on from the house's west side to the barn. There is a gap about 4 feet wide between the fence and the house.
+- **Water tanks.** Two grey tanks lie along the front of the house.
+- **Just a start.** The house's size is a guess, the other pen fences are still to come, and the ducks and geese do not live there yet.
 
 ## November 24: Swimming and a kayak
 > You can swim freestyle in a bigger pond that now reaches the trees all round, and there is a kayak on its east bank to paddle.

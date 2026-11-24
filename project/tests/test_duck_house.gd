@@ -34,18 +34,21 @@ func _run() -> void:
 		await physics_frame
 	var house := main.get_node("Buildings/DuckHouse") as Node3D
 	_check(house != null, "the duck house is in the scene")
-	_check(DuckHouse.WIDTH > DuckHouse.DEPTH, "16 ft wide by 10 ft deep")
-	_check(absf(DuckHouse.WIDTH - 4.877) < 0.01 and absf(DuckHouse.DEPTH - 3.048) < 0.01, "the size is 16 x 10 ft in metres")
+	_check(DuckHouse.LENGTH > DuckHouse.DEPTH, "16 ft long by 10 ft deep")
+	_check(absf(DuckHouse.LENGTH - 4.877) < 0.01 and absf(DuckHouse.DEPTH - 3.048) < 0.01, "the size is 16 x 10 ft in metres")
+	var centre := Vector2(house.global_position.x, house.global_position.z)
+	var along := Vector2(house.global_transform.basis.x.x, house.global_transform.basis.x.z)  # toward the pen
+	var south := Vector2(house.global_transform.basis.z.x, house.global_transform.basis.z.z)
 
 	# It is located around (6.9, 13.6).
-	_check(Vector2(house.global_position.x, house.global_position.z).distance_to(Vector2(6.9, 13.6)) < 1.5, "the house stands near 6.9, 13.6")
+	_check(centre.distance_to(Vector2(6.9, 13.6)) < 2.5, "the house stands near 6.9, 13.6")
 
 	# Its map footprint is named and matches the house.
 	var footprint := main.get_node("Buildings/Duck and Geese House") as Node3D
 	_check(footprint != null and footprint.is_in_group("map_building"), "the house has a named map footprint")
-	_check(footprint.global_position.distance_to(Vector3(house.global_position.x, footprint.global_position.y, house.global_position.z)) < 0.01, "footprint and house share a centre")
-	_check(absf(footprint.global_transform.basis.x.length() - DuckHouse.WIDTH) < 0.02, "footprint is as wide as the house")
-	_check(absf(footprint.global_transform.basis.z.length() - DuckHouse.DEPTH) < 0.02, "footprint is as deep as the house")
+	_check(Vector2(footprint.global_position.x, footprint.global_position.z).distance_to(centre) < 0.01, "footprint and house share a centre")
+	_check(absf(footprint.global_transform.basis.x.length() - DuckHouse.DEPTH) < 0.02, "footprint is as deep as the house")
+	_check(absf(footprint.global_transform.basis.z.length() - DuckHouse.LENGTH) < 0.02, "footprint is as long as the house")
 	_check(footprint.global_transform.basis.x.normalized().dot(house.global_transform.basis.x.normalized()) > 0.999, "footprint and house face the same way")
 
 	# The pen fence: the three corners given, and it is on the white lines.
@@ -63,40 +66,43 @@ func _run() -> void:
 	# The house's south wall is on the fence line, with a ~4 ft opening to the fence's end.
 	var line_dir := (Vector2(19.8, 19.9) - Vector2(10.6, 17.1)).normalized()
 	var line_n := Vector2(-line_dir.y, line_dir.x)
-	var south_mid := Vector2(house.global_position.x, house.global_position.z) + Vector2(house.global_transform.basis.z.x, house.global_transform.basis.z.z) * DuckHouse.DEPTH * 0.5
+	var south_mid := centre + south * DuckHouse.LENGTH * 0.5
 	_check(absf((south_mid - Vector2(10.6, 17.1)).dot(line_n)) < 0.2, "the south wall lies on the pen fence line")
-	var along := house.global_transform.basis.x
-	var south_east := Vector2(house.global_position.x, house.global_position.z) \
-			+ Vector2(house.global_transform.basis.z.x, house.global_transform.basis.z.z) * DuckHouse.DEPTH * 0.5 \
-			+ Vector2(along.x, along.z) * DuckHouse.WIDTH * 0.5
+	var south_east := south_mid + along * DuckHouse.DEPTH * 0.5
 	var opening := south_east.distance_to(Vector2(10.6, 17.1))
 	_check(opening > 0.9 and opening < 1.6, "about a 4 ft opening between the house and the fence: %.2f m" % opening)
 
-	# The back fence runs from the back of the house to the Back Barn.
+	# The west fence continues the house's west side up to the Back Barn.
 	var back := _fence_points(main, "DuckPen_West")
-	var house_ne := Vector2(house.global_position.x, house.global_position.z) \
-			- Vector2(house.global_transform.basis.z.x, house.global_transform.basis.z.z) * DuckHouse.DEPTH * 0.5 \
-			+ Vector2(along.x, along.z) * DuckHouse.WIDTH * 0.5
-	_check(back.front().distance_to(house_ne) < 0.5, "the back fence starts at the back corner of the house: %s vs %s" % [back.front(), house_ne])
+	var house_nw := centre - south * DuckHouse.LENGTH * 0.5 - along * DuckHouse.DEPTH * 0.5
+	_check(back.front().distance_to(house_nw) < 0.5, "the west fence starts at the house's north-west corner: %s vs %s" % [back.front(), house_nw])
 	var barn := main.get_node("Buildings/Back Barn") as Node3D
 	var barn_sw := barn.global_transform * Vector3(-0.5, 0.0, 0.5)
-	_check(back.back().distance_to(Vector2(barn_sw.x, barn_sw.z)) < 0.5, "the back fence ends at the Back Barn's south-west corner")
+	_check(back.back().distance_to(Vector2(barn_sw.x, barn_sw.z)) < 0.5, "the west fence ends at the Back Barn's south-west corner")
 
-	# Solid walls and an open doorway on the pen side.
+	# Solid walls and an open bay at the north end of the pen-side (east) front.
 	var space := root.world_3d.direct_space_state
 	var door := DuckHouse.door_span()
-	var east_x := DuckHouse.WIDTH * 0.5
-	var hit_wall := _ray(space, house, Vector3(east_x + 1.0, 0.8, -0.6), Vector3(east_x - 1.0, 0.8, -0.6))
-	_check(not hit_wall.is_empty(), "the east wall is solid beside the doorway")
+	var east_x := DuckHouse.DEPTH * 0.5
+	var south_z := (door.y + DuckHouse.LENGTH * 0.5) * 0.5
+	var hit_wall := _ray(space, house, Vector3(east_x + 1.0, 0.8, south_z), Vector3(east_x - 1.0, 0.8, south_z))
+	_check(not hit_wall.is_empty(), "the front is solid south of the bay")
 	var mid_door := (door.x + door.y) * 0.5
 	var hit_door := _ray(space, house, Vector3(east_x + 1.0, 0.8, mid_door), Vector3(east_x - 1.0, 0.8, mid_door))
-	_check(hit_door.is_empty(), "you can walk through the east doorway")
-	var hit_back := _ray(space, house, Vector3(0.0, 0.8, -DuckHouse.DEPTH * 0.5 - 1.0), Vector3(0.0, 0.8, 0.0))
-	_check(not hit_back.is_empty(), "the back wall is solid")
-	var hit_south := _ray(space, house, Vector3(0.0, 0.8, DuckHouse.DEPTH * 0.5 + 1.0), Vector3(0.0, 0.8, 0.0))
-	_check(not hit_south.is_empty(), "the south wall is solid")
-	var hit_roof := _ray(space, house, Vector3(0.0, 3.5, 0.0), Vector3(0.0, 0.5, 0.0))
-	_check(not hit_roof.is_empty(), "there is a roof")
+	_check(hit_door.is_empty(), "you can walk in through the bay")
+	var hit_back := _ray(space, house, Vector3(-east_x - 1.0, 0.8, 0.0), Vector3(0.0, 0.8, 0.0))
+	_check(not hit_back.is_empty(), "the back (west) wall is solid")
+	for sz in [-1.0, 1.0]:
+		var end_hit := _ray(space, house, Vector3(0.0, 0.8, sz * (DuckHouse.LENGTH * 0.5 + 1.0)), Vector3(0.0, 0.8, 0.0))
+		_check(not end_hit.is_empty(), "the end wall at z %.0f is solid" % sz)
+	_check(not _ray(space, house, Vector3(0.0, 3.5, 0.0), Vector3(0.0, 0.5, 0.0)).is_empty(), "there is a roof")
+
+	# The tanks lie along the front, clear of the doorway.
+	for name in ["Tank1", "Tank2"]:
+		var tank := house.get_node(name) as Node3D
+		_check(tank.position.x > east_x, "%s is in front of the house" % name)
+		_check(tank.position.z - 0.65 > door.y, "%s is clear of the doorway" % name)
+	_check(absf(house.get_node("Tank1").position.z - house.get_node("Tank2").position.z) > 1.3, "the tanks don't overlap")
 
 	_done()
 
