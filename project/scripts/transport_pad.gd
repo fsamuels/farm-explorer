@@ -1,4 +1,5 @@
 extends Node3D
+const WorldMath := preload("res://scripts/world_math.gd")
 ## A transport point (D-131, reworked in D-139): an invisible spot in the back
 ## pastures that the full map offers as a teleport destination, the way it does
 ## for buildings (D-118). There is nothing to see in the world; the map draws a
@@ -20,7 +21,7 @@ func arrival_spot() -> Vector3:
 func receive(actor: Node3D) -> void:
 	var spot := arrival_spot()
 	var yaw := global_rotation.y + PI
-	actor.global_transform = Transform3D(Basis(Vector3.UP, yaw), Vector3(spot.x, actor.global_position.y, spot.z))
+	actor.global_transform = Transform3D(Basis(Vector3.UP, yaw), Vector3(spot.x, WorldMath.height_at(spot.x, spot.z) + 0.2, spot.z))
 	if actor is CharacterBody3D:
 		(actor as CharacterBody3D).velocity = Vector3.ZERO
 	if "model_yaw" in actor:

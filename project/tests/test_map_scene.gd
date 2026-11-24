@@ -1,4 +1,5 @@
 extends SceneTree
+const WorldMath := preload("res://scripts/world_math.gd")
 
 const MapMath := preload("res://scripts/map_math.gd")
 ## Loads main.tscn headless and checks the map (D-93) picks up the farm from
@@ -90,7 +91,7 @@ func _test_teleport(main: Node, map) -> void:
 	for index in data.buildings.size():
 		var building: Dictionary = data.buildings[index]
 		map.set_open(true)
-		player.global_position = Vector3(0, 1, 0)
+		player.global_position = Vector3(0, 50, 0)
 		map._full.center = building.center
 		map._full.scale_px = 8.0
 		# Overlapping footprints resolve to the first one under the cursor.
@@ -100,6 +101,7 @@ func _test_teleport(main: Node, map) -> void:
 		var here := MapMath.flatten(player.global_position)
 		_check(not map.is_open() and not paused, "%s: teleport closes the map and unpauses" % target.name)
 		_check(here.distance_to(target.front) < 0.01, "%s: lands on its front spot" % target.name)
+		_check(absf(player.global_position.y - (WorldMath.height_at(here.x, here.y) + 0.2)) < 0.01, "%s: lands on the ground, whatever height you left from" % target.name)
 		_check(not Geometry2D.is_point_in_polygon(here, target.poly), "%s: lands outside the footprint" % target.name)
 		var facing := Vector2(-sin(player.global_rotation.y), -cos(player.global_rotation.y))
 		_check(facing.dot((target.center - here).normalized()) > 0.99, "%s: faces the building" % target.name)
