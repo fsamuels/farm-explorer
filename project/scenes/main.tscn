@@ -64,7 +64,6 @@
 [ext_resource type="Script" path="res://scripts/world_terrain.gd" id="world_terrain_script"]
 [ext_resource type="Script" path="res://scripts/terrain.gd" id="terrain_script"]
 [ext_resource type="Script" path="res://scripts/water_system.gd" id="water_system_script"]
-[ext_resource type="Script" path="res://scripts/fire_system.gd" id="fire_system_script"]
 [ext_resource type="Script" path="res://scripts/toast.gd" id="toast_script"]
 [ext_resource type="Script" path="res://scripts/bunker.gd" id="bunker_script"]
 
@@ -557,10 +556,10 @@ point_count = 10
 
 [sub_resource type="Curve3D" id="Curve3D_duckpen_cross"]
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 20.100, 0, 9.000, 0, 0, 0, 0, 0, 0, 17.348, 0, 8.365, 0, 0, 0, 0, 0, 0, 14.596, 0, 7.730, 0, 0, 0, 0, 0, 0, 11.844, 0, 7.095, 0, 0, 0, 0, 0, 0, 9.092, 0, 6.460),
-"tilts": PackedFloat32Array(0, 0, 0, 0, 0)
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 23.600, 0, 9.600, 0, 0, 0, 0, 0, 0, 22.700, 0, 9.600, 0, 0, 0, 0, 0, 0, 20.100, 0, 9.000, 0, 0, 0, 0, 0, 0, 17.348, 0, 8.365, 0, 0, 0, 0, 0, 0, 14.596, 0, 7.730, 0, 0, 0, 0, 0, 0, 11.844, 0, 7.095, 0, 0, 0, 0, 0, 0, 9.092, 0, 6.460),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0)
 }
-point_count = 5
+point_count = 7
 
 [sub_resource type="Curve3D" id="Curve3D_greenpaddock"]
 _data = {
@@ -624,9 +623,6 @@ script = ExtResource("world_terrain_script")
 
 [node name="Water" type="Node3D" parent="."]
 script = ExtResource("water_system_script")
-
-[node name="Fire" type="Node3D" parent="."]
-script = ExtResource("fire_system_script")
 
 [node name="FrontSectionOrthomosaic" type="MeshInstance3D" parent="." unique_id=2847193061 groups=["map_imagery"]]
 transform = Transform3D(0.9998, 0, 0.020012, 0, 1, 0, -0.020012, 0, 0.9998, 155.02, 0.03, -13.24)
@@ -902,9 +898,9 @@ closed = false
 curve = SubResource("Curve3D_duckpen_cross")
 closed = false
 
-[node name="DuckPen_Gate_Short" parent="BackFences" instance=ExtResource("45_gate_scene")]
-transform = Transform3D(-0.9745, 0, 0.2249, 0, 1, 0, -0.2249, 0, -0.9745, 22.700, 0, 9.600)
-width = 2.668
+[node name="DuckPen_Gate_East" parent="BackFences" instance=ExtResource("45_gate_scene")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 23.600, 0, 5.900)
+width = 3.7
 
 [node name="DuckPen_Gate_North" parent="BackFences" instance=ExtResource("45_gate_scene")]
 transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 20.100, 0, 4.750)
@@ -1451,6 +1447,7 @@ transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 1.5, 0.05, 19)
 [node name="Pad_BackBarn" parent="TransportPads" instance=ExtResource("62_pad_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 20)
 pad_name = "Back Barn"
+facing_bearing = 333.0
 
 [node name="Pad_South" parent="TransportPads" instance=ExtResource("62_pad_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, 100)

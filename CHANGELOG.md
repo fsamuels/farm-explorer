@@ -11,10 +11,12 @@ regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
 ## November 24: Duck and geese house
-> The duck and geese house is built, with its pen fences, a doorway and two water tanks.
+> The duck and geese house is built, with its pen, gates and water tanks, and the minimap's coordinates are big and click to copy.
 - **The house.** A small wood-and-tin shed stands by the pond: 16 feet long with its long side facing the pen, boards below and chain link above, tin walls, a roof sloping down to the back and sawdust underfoot. You can walk in through the open bay at the north end of its front.
-- **Its pen.** White-line fences run from just past the house's south-east corner to the south-east corner of the pen, then up to the Back Barn pen, and a second fence runs nearly north from the house's west side to the middle of the Back Barn. A short gate and a second gate meet at a fence post on the pen's north side, and a fence runs from that post west to the barn fence, closing the pen. There is a gap about 4 feet wide between the fence and the house.
+- **Its pen.** White-line fences run from just past the house's south-east corner to the south-east corner of the pen, then up to the Back Barn pen, and a second fence runs nearly north from the house's west side to the middle of the Back Barn. Two parallel gates run north from the pen's north side, one at a fence post and one on the pen's north-east corner post, and a fence runs from there west to the barn fence, closing the pen. There is a gap about 4 feet wide between the fence and the house.
 - **Water tanks.** Two grey tanks, one bigger, sit side by side by the fence, where they show in the aerial photo.
+- **Big coordinates.** The minimap's X and Z readout is much larger. With the mouse free (Esc), click it to copy the spot and which way you face to the clipboard.
+- **Back Barn teleport.** It now drops you facing the duck house.
 - **Just a start.** The house's size is a guess, the other pen fences are still to come, and the ducks and geese do not live there yet.
 
 ## November 24: Swimming and a kayak

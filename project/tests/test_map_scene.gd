@@ -25,6 +25,22 @@ func _run() -> void:
 
 	var map = main.get_node("Minimap/Root")
 	var data: Dictionary = map._data
+
+	# The X / Z readout is big, shows the spot, and clicking it copies "x, z facing N".
+	var player_node := main.get_node("Player") as Node3D
+	player_node.global_position = Vector3(12.9, 0.0, 17.6)
+	player_node.global_rotation.y = deg_to_rad(-333.0)
+	await process_frame
+	_check(map._coords.get_theme_font_size("font_size") > map._minimap_info.get_theme_font_size("font_size"), "the coordinates are bigger than the other minimap text")
+	_check(map._coords.text.begins_with("X 12.9   Z 17.6"), "the readout shows X and Z: %s" % map._coords.text)
+	_check(map.coords_clipboard_text() == "12.9, 17.6 facing 333°", "the copied text is the spot and facing: %s" % map.coords_clipboard_text())
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	DisplayServer.clipboard_set("")
+	map._coords.gui_input.emit(click)
+	_check(DisplayServer.clipboard_get() in ["", "12.9, 17.6 facing 333°"], "clicking copies it (headless may have no clipboard)")
+	_check(map._coords.text.contains("copied") or DisplayServer.clipboard_get() == "", "the readout says when it has copied")
 	var names: Array = data.buildings.map(func(b): return b.name)
 	_check(names.size() == main.get_node("Buildings").get_children().filter(func(n): return n.is_in_group("map_building")).size(), "every building collected")
 	_check("Front Barn" in names and "Sally's House" in names, "building names come from node names: %s" % [names])
