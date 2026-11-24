@@ -3,16 +3,20 @@ extends RefCounted
 ## centreline from Census TIGERweb; this resamples them and builds the ribbon of
 ## asphalt for one road piece, draped on the ground with world_math.gd.
 ##
-## Roads are resampled to a point every SPACING metres and cut into pieces
-## (one per pair of neighbouring points). Each piece belongs to the chunk that
+## road_data.gd already has a point every 8 m and a surface (asphalt or gravel,
+## read off the aerial photo by tools/build_world_data.py) for each; roads are
+## cut into pieces, one per pair of neighbouring points. Each piece belongs to the chunk that
 ## holds its first point, so world_terrain.gd draws exactly the pieces of the
 ## chunks it has loaded and nothing is drawn twice.
 
 const RoadData := preload("res://scripts/road_data.gd")
 const WorldMath := preload("res://scripts/world_math.gd")
 
-## Metres between resampled centreline points.
-const SPACING := 8.0
+## Surface codes in road_data.gd's SURFACE_B64.
+const PAVED := 0
+const GRAVEL := 1
+## Width of the driving surface of a gravel road (m), narrower than asphalt.
+const GRAVEL_WIDTH := 5.0
 ## Verge of gravel drawn each side of the asphalt.
 const SHOULDER := 1.2
 ## Points across the ribbon (left shoulder edge to right shoulder edge).
@@ -26,8 +30,9 @@ const STACK := 0.004
 static var _roads: Array = []
 static var _by_chunk: Dictionary = {}
 
-## Every road as {"name", "kind", "width", "points": PackedVector2Array (resampled),
-## "along": PackedFloat32Array (metres from the road's start to each point)}.
+## Every road as {"name", "kind", "width" (paved), "points": PackedVector2Array,
+## "surface": PackedByteArray (PAVED / GRAVEL per point), "along": PackedFloat32Array
+## (metres from the road's start to each point)}.
 static func roads() -> Array:
 	if _roads.is_empty():
 		_build_index()
@@ -41,6 +46,7 @@ static func pieces_in(chunk: Vector2i) -> Array:
 
 static func _build_index() -> void:
 	var raw := Marshalls.base64_to_raw(RoadData.POINTS_B64)
+	var surfaces := Marshalls.base64_to_raw(RoadData.SURFACE_B64)
 	for row in RoadData.ROADS:
 		var first: int = row[3]
 		var count: int = row[4]
@@ -48,7 +54,8 @@ static func _build_index() -> void:
 		for k in count:
 			var o := (first + k) * 8
 			pts.append(Vector2(raw.decode_float(o), raw.decode_float(o + 4)))
-		var sampled := resample(pts, SPACING)
+		var sampled := pts
+		var surface := surfaces.slice(first, first + count)
 		var along := PackedFloat32Array()
 		var s := 0.0
 		for k in sampled.size():
@@ -56,7 +63,7 @@ static func _build_index() -> void:
 				s += sampled[k].distance_to(sampled[k - 1])
 			along.append(s)
 		_roads.append({"name": RoadData.NAMES[row[0]], "kind": row[1], "width": row[2],
-				"points": sampled, "along": along})
+				"points": sampled, "surface": surface, "along": along})
 	for r in _roads.size():
 		var p: PackedVector2Array = _roads[r].points
 		for k in p.size() - 1:
@@ -66,6 +73,10 @@ static func _build_index() -> void:
 			if not _by_chunk.has(chunk):
 				_by_chunk[chunk] = []
 			_by_chunk[chunk].append(Vector2i(r, k))
+
+## Width (m) of the driving surface at point `k` of a road.
+static func width_at(road: Dictionary, k: int) -> float:
+	return GRAVEL_WIDTH if road.surface[k] == GRAVEL else road.width
 
 ## `points` resampled so neighbours are `spacing` apart along the line (the last
 ## step may be shorter), keeping the first and last points exactly.
@@ -107,7 +118,7 @@ static func cross_section(road_index: int, k: int) -> PackedVector3Array:
 	var pts: PackedVector2Array = road.points
 	var t := tangent(pts, k)
 	var right := Vector2(-t.y, t.x)  # to the right of travel; z is south
-	var half: float = road.width * 0.5 + SHOULDER
+	var half: float = width_at(road, k) * 0.5 + SHOULDER
 	var out := PackedVector3Array()
 	var lift := LIFT + STACK * ((road_index * 7) % 11)
 	for a in ACROSS:
@@ -118,7 +129,8 @@ static func cross_section(road_index: int, k: int) -> PackedVector3Array:
 
 ## Ribbon geometry for the given pieces (Vector2i(road, point) from pieces_in)
 ## as ArrayMesh arrays. UV.x runs 0..1 across the ribbon, UV.y is metres along
-## the road; COLOR is (kind / 2, half-width / 10, shoulder / 10, 1).
+## the road; COLOR is (kind / 2, half-width / 10, shoulder / 10, surface), the
+## surface being 0 for asphalt and 1 for gravel.
 static func build_arrays(pieces: Array) -> Array:
 	var vertices := PackedVector3Array()
 	var normals := PackedVector3Array()
@@ -129,11 +141,10 @@ static func build_arrays(pieces: Array) -> Array:
 		var road_index: int = piece.x
 		var k: int = piece.y
 		var road: Dictionary = roads()[road_index]
-		var half: float = road.width * 0.5
-		var tint := Color(road.kind / 2.0, half / 10.0, SHOULDER / 10.0, 1.0)
 		var base := vertices.size()
 		for end in 2:
 			var section := cross_section(road_index, k + end)
+			var tint := Color(road.kind / 2.0, width_at(road, k + end) * 0.05, SHOULDER / 10.0, float(road.surface[k + end]))
 			for a in ACROSS:
 				vertices.append(section[a])
 				normals.append(WorldMath.normal_at(section[a].x, section[a].z))

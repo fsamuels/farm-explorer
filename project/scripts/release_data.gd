@@ -8,11 +8,12 @@ const DATA := {
 			"bullets": [
 				"**The road is open.** The fence across Lowden-Gardena Road and the wall of trees around the farm are gone. Drive out of the driveway and keep going.",
 				"**Real roads.** US 12, Lowden-Gardena Road and about 70 other named roads out to 3 miles are laid on the real ground, with edge lines, centre lines and gravel verges.",
+				"**Gravel and asphalt.** Roads the aerial photo shows as paved get edge and centre lines; the rest are narrower gravel roads with two worn tracks and no markings. Gravel is a best guess where the photo is unclear.",
 				"**Real hills.** The ground out there follows the real land, and cars lean into slopes and hold their speed on them. The farm itself stays level.",
 				"**The map goes wide.** The map (M) and minimap show the aerial photo of the whole area, so you can see where the roads go. It still opens on the farm.",
 				"**The edge of the world.** An invisible wall stops you 3.5 miles out from the farm; the distant mountains carry on past it."
 			],
-			"summary": "The real roads for three miles around the farm are driveable, over real hills, and the farm is open all round.",
+			"summary": "The real roads for three miles around the farm are driveable, over real hills, asphalt or gravel, and the farm is open all round.",
 			"title": "November 24: Drive the roads"
 		},
 		{
@@ -228,14 +229,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 14178,
-		"commits": 128,
-		"decisions": 148,
+		"code_lines": 14202,
+		"commits": 130,
+		"decisions": 149,
 		"models": 14,
 		"scenes": 25,
 		"scripts": 63,
-		"size_kb": 115250,
-		"test_lines": 4188,
+		"size_kb": 115435,
+		"test_lines": 4212,
 		"textures": 49,
 		"vehicles": 3
 	}

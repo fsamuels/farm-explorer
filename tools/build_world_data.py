@@ -8,7 +8,9 @@ Three public-domain US Government sources, all fetched headlessly:
   GeoTIFF over a 11.2 km square centred on the parcel centroid (the scene origin,
   D-6/D-12), resampled to a 20 m grid of heights (int16 decimetres, base64) and
   written to project/scripts/world_data.gd.
-* Census TIGERweb roads (`TIGERweb/Transportation` MapServer, layers 2, 6 and 8):
+* Census TIGERweb roads (`TIGERweb/Transportation` MapServer, layers 2, 6 and 8), each
+  point of which is also marked asphalt or gravel from the full-resolution NAIP photo
+  (see classify_surfaces):
   every road that has a name and is a highway or local road (MTFCC S1100, S1200,
   S1400), clipped to the square, projected to scene metres and written to
   project/scripts/road_data.gd. Unnamed roads, driveways, parking aisles and
@@ -30,6 +32,8 @@ Usage (network needed; numpy and Pillow):
 """
 import argparse
 import base64
+import concurrent.futures
+import io
 import json
 import math
 import os
@@ -64,6 +68,13 @@ TIGER_LAYERS = (2, 6, 8)
 # MTFCC feature classes kept: primary highway, secondary highway, local road.
 KINDS = {"S1100": 0, "S1200": 1, "S1400": 2}
 WIDTHS = {0: 7.4, 1: 7.4, 2: 6.4}
+
+# Road surfaces come from the aerial photo at full resolution (about 1 m a pixel),
+# fetched in NAIP_TILES x NAIP_TILES tiles of NAIP_TILE_PX pixels.
+NAIP_TILE_PX = 1400
+NAIP_TILES = int(2 * HALF / NAIP_TILE_PX)
+SURFACE_PAVED, SURFACE_GRAVEL = 0, 1
+ROAD_SPACING = 8.0
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "project")
 OUT_WORLD = os.path.join(ROOT, "scripts", "world_data.gd")
@@ -243,29 +254,153 @@ def write_world(grid, origin):
         f.write("\n".join(lines) + "\n")
 
 
+def naip_mosaic(cache):
+    """The whole square as 1 m (R, G, B) uint8 arrays: rows run north to south, columns west to east,
+    so pixel (row, col) is scene (x = col - HALF, z = row - HALF)."""
+    size = NAIP_TILES * NAIP_TILE_PX
+    mosaic = np.zeros((size, size, 3), dtype=np.uint8)
+
+    def one(ij):
+        i, j = ij  # tile column, tile row
+        x0, z0 = -HALF + i * NAIP_TILE_PX, -HALF + j * NAIP_TILE_PX
+        bb = (LON0 + x0 / M_PER_DEG_LON, LAT0 - (z0 + NAIP_TILE_PX) / M_PER_DEG_LAT,
+              LON0 + (x0 + NAIP_TILE_PX) / M_PER_DEG_LON, LAT0 - z0 / M_PER_DEG_LAT)
+        url = NAIP_URL.format(*bb, NAIP_TILE_PX, NAIP_TILE_PX).replace("compressionQuality=85", "compressionQuality=92")
+        path = os.path.join(cache, "naip_%d_%d.jpg" % (i, j)) if cache else None
+        data = fetch(url, path)
+        return i, j, np.array(Image.open(io.BytesIO(data)).convert("RGB"))
+
+    jobs = [(i, j) for j in range(NAIP_TILES) for i in range(NAIP_TILES)]
+    with concurrent.futures.ThreadPoolExecutor(4) as pool:
+        for i, j, a in pool.map(one, jobs):
+            mosaic[j * NAIP_TILE_PX:(j + 1) * NAIP_TILE_PX, i * NAIP_TILE_PX:(i + 1) * NAIP_TILE_PX] = a
+    return mosaic
+
+
+def resample_part(part, spacing=ROAD_SPACING):
+    """`part` (scene metres) resampled to a point every `spacing` m along the line, ends kept."""
+    out = [part[0]]
+    carry = 0.0
+    for a, b in zip(part, part[1:]):
+        seg = math.dist(a, b)
+        if seg < 1e-6:
+            continue
+        at = spacing - carry
+        while at < seg:
+            t = at / seg
+            out.append((a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t))
+            at += spacing
+        carry = seg - (at - spacing)
+    if math.dist(out[-1], part[-1]) > 1e-3:
+        out.append(part[-1])
+    return out
+
+
+# A point of road is paved when the photo shows a grey ribbon on it: a 3 px strip,
+# found within +-SEARCH m across the road (TIGER's centreline is a few metres off),
+# whose colour is nearly neutral (saturation under PAVED_SAT) and not pale
+# (luminance under PAVED_LUM, so a light-grey gravel road doesn't count). The
+# land beside it is green or tan, so the neutral ribbon stands out. Anything else
+# is gravel or dirt: a gravel road is a pale tan strip about as coloured as the
+# fields, which isn't reliably separable from them, but a road with no ribbon at
+# all is far more likely to be unsurfaced than paved. The U.S. highways (kinds 0
+# and 1) are always paved: the TIGER lines for them sit tens of metres off the
+# real road in places, so the photo can't be checked there.
+SEARCH = 8
+PAVED_SAT = 0.10
+PAVED_LUM = 150.0
+SMOOTH = 7
+
+
+def photo_planes(mosaic):
+    """Luminance and saturation (0..1) of the mosaic as float16, built band by band."""
+    lum = np.zeros(mosaic.shape[:2], dtype=np.float16)
+    sat = np.zeros(mosaic.shape[:2], dtype=np.float16)
+    for r in range(0, mosaic.shape[0], 1000):
+        band = mosaic[r:r + 1000].astype(np.float32)
+        lum[r:r + 1000] = 0.299 * band[..., 0] + 0.587 * band[..., 1] + 0.114 * band[..., 2]
+        sat[r:r + 1000] = (band.max(-1) - band.min(-1)) / np.maximum(band.max(-1), 1.0)
+    return lum, sat
+
+
+def paved_points(lum, sat, pts):
+    """True for each point of the resampled road `pts` that has a grey ribbon on it."""
+    n = len(pts)
+    out = []
+    for k in range(n):
+        a, b = pts[max(k - 2, 0)], pts[min(k + 2, n - 1)]
+        t = np.array([b[0] - a[0], b[1] - a[1]])
+        norm = np.linalg.norm(t)
+        t = t / norm if norm > 1e-6 else np.array([1.0, 0.0])
+        right = np.array([-t[1], t[0]])
+        c = np.array(pts[k])
+        best = None
+        for shift in range(-SEARCH, SEARCH + 1):
+            ss, ls = [], []
+            for al in (-4, 0, 4):
+                for d in (-1, 0, 1):
+                    p = c + right * (shift + d) + t * al
+                    col, row = int(round(p[0] + HALF)), int(round(p[1] + HALF))
+                    if 0 <= row < sat.shape[0] and 0 <= col < sat.shape[1]:
+                        ss.append(float(sat[row, col]))
+                        ls.append(float(lum[row, col]))
+            if ss and (best is None or np.mean(ss) < best[0]):
+                best = (np.mean(ss), np.mean(ls))
+        out.append(best is not None and best[0] < PAVED_SAT and best[1] < PAVED_LUM)
+    return out
+
+
+def majority(flags, window=SMOOTH):
+    """`flags` with each value replaced by the majority in a window around it, so a driveway or a
+    shadow doesn't flip a road's surface for one point."""
+    n, half = len(flags), window // 2
+    return [sum(flags[max(i - half, 0):i + half + 1]) * 2 > len(flags[max(i - half, 0):i + half + 1]) for i in range(n)]
+
+
+def classify_surfaces(rs, mosaic):
+    """`rs` with each road resampled to ROAD_SPACING and given a surface per point:
+    [(name, kind, points, surfaces)], surfaces being SURFACE_PAVED or SURFACE_GRAVEL."""
+    lum, sat = photo_planes(mosaic)
+    out = []
+    for name, kind, part in rs:
+        pts = resample_part(part)
+        if kind <= 1:
+            paved = [True] * len(pts)
+        else:
+            paved = majority(paved_points(lum, sat, pts))
+        out.append((name, kind, pts, [SURFACE_PAVED if p else SURFACE_GRAVEL for p in paved]))
+    return out
+
+
 def write_roads(rs):
     names = sorted({r[0] for r in rs})
     pts = []
+    surfaces = []
     rows = []
-    for name, kind, part in rs:
+    for name, kind, part, surface in rs:
         rows.append("\t[%d, %d, %s, %d, %d]," % (names.index(name), kind, WIDTHS[kind], len(pts) // 2, len(part)))
         for x, z in part:
             pts.extend((x, z))
+        surfaces.extend(surface)
     blob = base64.b64encode(np.array(pts, dtype="<f4").tobytes()).decode()
     lines = [
-        "## Generated by tools/build_world_data.py (D-148). Do not edit by hand.",
+        "## Generated by tools/build_world_data.py (D-148, D-149). Do not edit by hand.",
         "## The named roads within the world square, from Census TIGERweb (US",
-        "## Government, public domain): highways and local roads that have a name.",
+        "## Government, public domain): highways and local roads that have a name,",
+        "## resampled to a point every %d m, with each point's surface read off the" % ROAD_SPACING,
+        "## NAIP aerial photo.",
         "",
         "## Road names, indexed by a road's first field.",
         "const NAMES := [%s]" % ", ".join(json.dumps(n) for n in names),
         "## One polyline per row: NAMES index, kind (0 primary highway, 1 secondary",
-        "## highway, 2 local road), width (m), index of its first point, point count.",
+        "## highway, 2 local road), width of asphalt (m), index of its first point, point count.",
         "const ROADS := [",
     ] + rows + [
         "]",
         "## Little-endian float32 (x east, z south) scene metres, all roads' points in order.",
         "const POINTS_B64 := \"%s\"" % blob,
+        "## One byte per point, in the same order: 0 asphalt, 1 gravel.",
+        "const SURFACE_B64 := \"%s\"" % base64.b64encode(bytes(surfaces)).decode(),
     ]
     with open(OUT_ROADS, "w") as f:
         f.write("\n".join(lines) + "\n")
@@ -287,7 +422,8 @@ def main():
     rs = roads(args.cache)
     grid, deepest, touched = carve_roads(grid, rs)
     write_world(grid, origin)
-    write_roads(rs)
+    classified = classify_surfaces(rs, naip_mosaic(args.cache))
+    write_roads(classified)
 
     os.makedirs(os.path.dirname(OUT_NAIP), exist_ok=True)
     naip = fetch(NAIP_URL.format(*BBOX, NAIP_PX, NAIP_PX), c("naip.jpg"))
@@ -295,9 +431,10 @@ def main():
         f.write(naip)
 
     km = sum(math.dist(p[i], p[i + 1]) for _, _, p in rs for i in range(len(p) - 1)) / 1000
+    gravel_km = sum(ROAD_SPACING * sum(sf) for _, _, _, sf in classified) / 1000
     print("origin %.1f m, relief %.0f..%.0f m; %d roads (%d names), %.1f km; road beds touch %d nodes, "
-          "deepest cut or fill %.1f m; imagery %d KB"
-          % (origin, grid.min(), grid.max(), len(rs), len({r[0] for r in rs}), km, touched, deepest, len(naip) // 1024))
+          "deepest cut or fill %.1f m; %.0f km of the roads read as gravel; imagery %d KB"
+          % (origin, grid.min(), grid.max(), len(rs), len({r[0] for r in rs}), km, touched, deepest, gravel_km, len(naip) // 1024))
 
 
 if __name__ == "__main__":
