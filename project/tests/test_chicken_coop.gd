@@ -1,5 +1,5 @@
 extends SceneTree
-## Tests for the chicken coop (D-163). Run headless from project/:
+## Tests for the chicken coop (D-164). Run headless from project/:
 ##   godot --headless -s res://tests/test_chicken_coop.gd
 
 const Coop := preload("res://scripts/chicken_coop.gd")

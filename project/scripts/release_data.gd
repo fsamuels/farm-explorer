@@ -28,9 +28,11 @@ const DATA := {
 		{
 			"bullets": [
 				"**Evening in the pen.** A little after sunset the ducks and geese leave the pond and field and gather in the pen in front of their house.",
-				"**Bedtime.** A little after dusk they file through the doorway into the house, and stay there all night until just after sunrise, when they come out to wander and swim again."
+				"**Bedtime.** A little after dusk they file through the doorway into the house, and stay there all night until just after sunrise, when they come out to wander and swim again.",
+				"**In by the opening, not over the fence.** The birds go in and out of the pen only through the opening between the house and the fence, which is wider now: its post stands just short of the water tanks. Out and about, they walk round the pen instead of across it.",
+				"**T keeps the clock going.** If the clock is running, pressing T to jump to the next time of day no longer stops it."
 			],
-			"summary": "The ducks and geese now come into their pen at sunset and go inside their house at dusk.",
+			"summary": "The ducks and geese come into their pen at sunset and go inside their house at dusk, and T no longer stops a running clock.",
 			"title": "November 24: Bedtime for the birds"
 		},
 		{
@@ -291,14 +293,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 16968,
-		"commits": 295,
-		"decisions": 163,
+		"code_lines": 17085,
+		"commits": 296,
+		"decisions": 164,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 76,
-		"size_kb": 115476,
-		"test_lines": 5292,
+		"size_kb": 115484,
+		"test_lines": 5346,
 		"textures": 49,
 		"vehicles": 3
 	}

@@ -53,7 +53,7 @@ func _run() -> void:
 
 	# The pen fence: the three corners given, and it is on the white lines.
 	var pen := _fence_points(main, "DuckPen_SouthEast")
-	_check(pen.front().distance_to(Vector2(10.6, 17.1)) < 0.05, "pen fence starts at 10.6, 17.1")
+	_check(pen.front().distance_to(Vector2(11.3, 17.313)) < 0.05, "pen fence starts at 11.3, 17.31, just west of the tanks (D-163)")
 	_check(pen.back().distance_to(Vector2(22.7, 9.6)) < 0.05, "pen fence ends at 22.7, 9.6")
 	var corner_ok := false
 	for p in pen:
@@ -63,14 +63,19 @@ func _run() -> void:
 	for i in range(pen.size() - 1):
 		_check(pen[i].distance_to(pen[i + 1]) < 3.6, "pen fence posts are at most 3.6 m apart (%d)" % i)
 
-	# The house's south wall is on the fence line, with a ~4 ft opening to the fence's end.
+	# The house's south wall is on the fence line, with an opening of about 2 m to
+	# the fence's end, which stands just west of the bigger tank.
 	var line_dir := (Vector2(19.8, 19.9) - Vector2(10.6, 17.1)).normalized()
 	var line_n := Vector2(-line_dir.y, line_dir.x)
 	var south_mid := centre + south * DuckHouse.LENGTH * 0.5
-	_check(absf((south_mid - Vector2(10.6, 17.1)).dot(line_n)) < 0.2, "the south wall lies on the pen fence line")
+	_check(absf((south_mid - Vector2(11.3, 17.313)).dot(line_n)) < 0.2, "the south wall lies on the pen fence line")
 	var south_east := south_mid + along * DuckHouse.DEPTH * 0.5
-	var opening := south_east.distance_to(Vector2(10.6, 17.1))
-	_check(opening > 0.9 and opening < 1.6, "about a 4 ft opening between the house and the fence: %.2f m" % opening)
+	var opening := south_east.distance_to(Vector2(11.3, 17.313))
+	_check(opening > 1.7 and opening < 2.3, "about a 2 m opening between the house and the fence: %.2f m" % opening)
+	var tank := main.get_node("Buildings/DuckHouse/Tank1") as Node3D
+	var tank_west := Vector2(tank.global_position.x, tank.global_position.z) - along * 0.75
+	var post_to_tank := (tank_west - Vector2(11.3, 17.313)).dot(along)
+	_check(post_to_tank > 0.0 and post_to_tank < 0.4, "the post is just west of the bigger tank: %.2f m" % post_to_tank)
 
 	# The west fence runs from the house's west side nearly north to the middle of the Back Barn.
 	var back := _fence_points(main, "DuckPen_West")

@@ -1,5 +1,5 @@
 extends Node3D
-## The chicken coop (D-163): a walk-in red-stained run with a tan, windowed
+## The chicken coop (D-164): a walk-in red-stained run with a tan, windowed
 ## roosting house at one end, built from primitives after the photos in
 ## Downloads/Chicken coop.
 ##
