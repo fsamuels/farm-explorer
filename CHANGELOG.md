@@ -10,8 +10,11 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
-## November 24: Water controls, toasts and swimming birds
-> The sky menu (G) now controls the weir, ditch and pond; a toast tells you when the pond is full or empty; ducks and geese swim.
+## November 24: Water controls, swimming birds and a hidden bunker
+> The sky menu (G) runs the weir, ditch and pond; ducks and geese swim; and a trap door in the House leads down to a bomb shelter.
+- **The House opens up.** Its front door on the east side opens (E) into one big white room.
+- **A trap door.** A wooden trap door in the white room's floor lifts to show concrete stairs going down.
+- **A bomb shelter.** At the foot of the stairs a steel blast door opens onto a corridor with three rooms: a munitions store with ammo racks, a gun rack and crates; a bunk room with a kitchenette; and a utility room with a generator, water tanks and air filters.
 - **Water row in the sky menu.** Open or shut the weir, fill or drain the ditch, set the pond empty, half or full, and speed the water up (x5 or x20) so you don't have to wait.
 - **Toasts.** Short notices fade in at the top of the screen. The first two: "The pond is full" and "The pond is empty".
 - **Swimming birds.** Once the pond has water, the ducks and geese head for it and float about on it, then walk out again if it dries.

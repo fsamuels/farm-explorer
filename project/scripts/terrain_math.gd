@@ -120,3 +120,19 @@ static func normal_at(x: float, z: float, eps := 0.1) -> Vector3:
 ## The pond's capsules (x0, z0, r0, x1, z1, r1 each), for callers that filter them.
 static func pond_capsules() -> PackedFloat32Array:
 	return _pond_capsules
+
+## Openings cut right through the ground (D-145), such as the House's cellar
+## stairwell: six numbers each, cx, cz, ux, uz, half_u, half_v, a rectangle
+## centred on (cx, cz) whose first axis runs along the unit vector (ux, uz).
+## True when (x, z) lies inside any of them.
+static func in_hole(x: float, z: float, holes: PackedFloat32Array) -> bool:
+	var i := 0
+	while i + 5 < holes.size():
+		var dx := x - holes[i]
+		var dz := z - holes[i + 1]
+		var u := dx * holes[i + 2] + dz * holes[i + 3]
+		var v := -dx * holes[i + 3] + dz * holes[i + 2]
+		if absf(u) <= holes[i + 4] and absf(v) <= holes[i + 5]:
+			return true
+		i += 6
+	return false

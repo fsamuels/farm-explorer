@@ -33,6 +33,11 @@ extends Node3D
 ## Barn's facade, D-125). `front_wall` / `front_u` name where the map's
 ## teleport puts you when there is no door labelled "front door": that wall,
 ## `front_u` of the way across it seen from outside (D-125).
+##
+## Floor hatches (D-145): any node in the `floor_hatch` group whose
+## `hatch_building` is this building gives a Rect2 (x, z in this frame) from
+## `hatch_rect()`; the floor is then cut around it and made solid, since the
+## ground under it has a hole (the House's cellar stairs, bunker.gd).
 
 const WallLayout := preload("res://scripts/wall_layout.gd")
 const DoorScript := preload("res://scripts/shop_door.gd")
@@ -93,10 +98,7 @@ func _ready() -> void:
 	width = b.x.length()
 	depth = b.z.length()
 	height = b.y.length()
-	var x_axis := (b.x / width).normalized()
-	global_transform = Transform3D(
-			Basis(x_axis, Vector3.UP, x_axis.cross(Vector3.UP)),
-			Vector3(box.global_position.x, 0.0, box.global_position.z))
+	global_transform = frame_for(box)
 	# The placeholder box stays as the map footprint but stops being seen or hit.
 	var box_mesh := box.get_node_or_null("MeshInstance3D") as Node3D
 	if box_mesh:
@@ -112,8 +114,16 @@ func _ready() -> void:
 	add_child(_walls_body)
 	_build()
 
-## The room's lights are on only while the camera is inside (or at the door):
-## unshadowed omnis would otherwise shine through the walls and roof at night.
+## The frame a shell over `box` builds in: the box's centre at ground level,
+## turned with the box, +y up. bunker.gd uses the same one.
+static func frame_for(box: Node3D) -> Transform3D:
+	var x_axis := box.global_transform.basis.x.normalized()
+	return Transform3D(Basis(x_axis, Vector3.UP, x_axis.cross(Vector3.UP)),
+			Vector3(box.global_position.x, 0.0, box.global_position.z))
+
+## The room's lights are on only while the camera is inside (or at the door),
+## and not below the floor: unshadowed omnis would otherwise shine through the
+## walls and roof at night, or down through the floor into a cellar.
 func _process(_delta: float) -> void:
 	if _lights.is_empty():
 		return
@@ -121,7 +131,7 @@ func _process(_delta: float) -> void:
 	var on := false
 	if cam:
 		var p := to_local(cam.global_position)
-		on = absf(p.x) < width / 2.0 + 1.0 and absf(p.z) < depth / 2.0 + 1.0 and p.y < height + rise + 2.0
+		on = absf(p.x) < width / 2.0 + 1.0 and absf(p.z) < depth / 2.0 + 1.0 and p.y < height + rise + 2.0 and p.y > -0.5
 	if _lights[0].visible != on:
 		for light in _lights:
 			light.visible = on
@@ -305,9 +315,31 @@ func _cut_hole(d: Dictionary, c: float, w: float, h: float) -> void:
 	cut.alpha_scissor_threshold = 0.5
 	plane.set_surface_override_material(0, cut)
 
+## The openings floor hatches ask for, as Rect2s in this frame's (x, z).
+func floor_holes() -> Array[Rect2]:
+	var out: Array[Rect2] = []
+	if not is_inside_tree():
+		return out
+	for node in get_tree().get_nodes_in_group("floor_hatch"):
+		if node.get("hatch_building") == building_name and node.has_method("hatch_rect"):
+			out.append(node.hatch_rect())
+	return out
+
 func _build_floor() -> void:
-	# Visual only: the player walks on the ground's own collision.
-	_add_box(Vector3(0, FLOOR_TOP / 2.0, 0), Vector3(width - 2 * WALL_T, FLOOR_TOP, depth - 2 * WALL_T), _floor, false)
+	var inner := Vector2(width - 2 * WALL_T, depth - 2 * WALL_T)
+	var holes := floor_holes()
+	if holes.is_empty():
+		# Visual only: the player walks on the ground's own collision.
+		_add_box(Vector3(0, FLOOR_TOP / 2.0, 0), Vector3(inner.x, FLOOR_TOP, inner.y), _floor, false)
+		return
+	# Cut around the hatches like a wall around its doors (x along, z "up"),
+	# and make it solid: the ground under a hatch has a hole in it.
+	var openings := []
+	for r in holes:
+		openings.append({c = r.get_center().x, w = r.size.x, y0 = r.position.y + inner.y / 2.0, y1 = r.end.y + inner.y / 2.0})
+	for piece in WallLayout.pieces(inner.x, inner.y, openings):
+		var c := piece.get_center()
+		_add_box(Vector3(c.x, FLOOR_TOP / 2.0, c.y - inner.y / 2.0), Vector3(piece.size.x, FLOOR_TOP, piece.size.y), _floor, true)
 
 func _build_ceiling() -> void:
 	var half_len := (depth if ridge_along_z else width) / 2.0 - WALL_T
