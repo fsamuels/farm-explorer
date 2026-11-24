@@ -10,7 +10,6 @@ const MapMath := preload("res://scripts/map_math.gd")
 const MapCanvas := preload("res://scripts/map_canvas.gd")
 const HudStyle := preload("res://scripts/hud_style.gd")
 
-const MINIMAP_SIZE := Vector2(360, 360)
 const MINIMAP_MARGIN := 24.0
 ## Pixels per metre on the minimap, which follows the player.
 const MINIMAP_SCALE := 1.8
@@ -65,6 +64,12 @@ var _data := {}
 var _minimap_box: VBoxContainer
 var _minimap: MapCanvas
 var _minimap_info: Label
+## The bottom key-hint bar, right of the minimap (M Map, G Sky, C News, F1 Help, Tab size).
+var _hint_bar: PanelContainer
+var _size_index := 0
+## Chips dropped first when the window is too narrow, least important first.
+var _optional_chips: Array[Label] = []
+var _idle := 0.0
 var _full_layer: CanvasLayer
 var _full: MapCanvas
 var _location_label: Label
@@ -74,6 +79,9 @@ var _dragging := false
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_apply_hud_scale()
+	get_window().size_changed.connect(_apply_hud_scale)
+	get_viewport().size_changed.connect(_on_view_resized)
 	_build_minimap()
 	_build_full_map()
 	# Wait until every building and fence has its final transform.
@@ -88,7 +96,10 @@ func _collect() -> void:
 func is_open() -> bool:
 	return _full_layer.visible
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_idle += delta
+	# A free mouse (menus, Esc) means someone is reaching for the buttons.
+	_hint_bar.modulate.a = 1.0 if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED else HudStyle.fade_alpha(_idle)
 	if player == null or _data.is_empty():
 		return
 	var here := MapMath.flatten(player.global_position)
@@ -106,6 +117,84 @@ func _process(_delta: float) -> void:
 		_minimap_info.text = _minimap_text(here)
 		_minimap_info.visible = _minimap_info.text != ""
 		_minimap.queue_redraw()
+
+## Keeps the HUD readable on big or high-DPI windows (never shrinks it).
+func _apply_hud_scale() -> void:
+	get_window().content_scale_factor = HudStyle.scale_for(float(get_window().size.y))
+
+func _on_view_resized() -> void:
+	if _hint_bar != null and _minimap != null:
+		_apply_minimap_size()
+
+func _apply_minimap_size() -> void:
+	var edge: float = minf(HudStyle.MINIMAP_SIZES[_size_index], get_viewport().get_visible_rect().size.y * 0.45)
+	_minimap.custom_minimum_size = Vector2(edge, edge)
+	_minimap.size = Vector2(edge, edge)
+	if _hint_bar != null:
+		_hint_bar.offset_left = MINIMAP_MARGIN * 2.0 + edge + 8.0
+		_fit_hint_bar.call_deferred()
+
+## On a narrow window, drop the least important chips (Tab, then F1) so the
+## bar never runs off the right edge.
+func _fit_hint_bar() -> void:
+	for chip in _optional_chips:
+		chip.visible = true
+	_hint_bar.reset_size()
+	var room := get_viewport().get_visible_rect().size.x - _hint_bar.offset_left - MINIMAP_MARGIN
+	for chip in _optional_chips:
+		if _hint_bar.get_combined_minimum_size().x <= room:
+			break
+		chip.visible = false
+		_hint_bar.reset_size()
+
+## One dark bar of key chips along the bottom, in place of the loose hints. It
+## fades after a few idle seconds (see _process) and returns on any input.
+func _build_hint_bar() -> void:
+	_hint_bar = PanelContainer.new()
+	_hint_bar.add_theme_stylebox_override("panel", HudStyle.panel(8.0, 0.68))
+	# Bottom row, just right of the minimap so the two never overlap.
+	_hint_bar.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	_hint_bar.grow_horizontal = Control.GROW_DIRECTION_END
+	_hint_bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_hint_bar.offset_bottom = -MINIMAP_MARGIN
+	add_child(_hint_bar)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 18)
+	_hint_bar.add_child(row)
+	row.add_child(_chip("M", "Map"))
+	sky_button = _build_sky_button()
+	row.add_child(sky_button)
+	news_button = _build_news_button()
+	row.add_child(news_button)
+	var help_chip := _chip("F1", "Help")
+	row.add_child(help_chip)
+	var size_chip := _chip("Tab", "Map size")
+	row.add_child(size_chip)
+	_optional_chips = [size_chip, help_chip]
+
+func _chip(key: String, text: String) -> Label:
+	var label := _outlined_label("%s — %s" % [key, text], FONT_SIZE - 2)
+	label.add_theme_color_override("font_color", KEY_COLOR)
+	return label
+
+## Any key or click counts as activity: it wakes the hint bar, and Tab cycles
+## the minimap's size.
+func _input(event: InputEvent) -> void:
+	if (event is InputEventKey and event.pressed and not event.echo) or (event is InputEventMouseButton and event.pressed):
+		_idle = 0.0
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_TAB and not is_open() and not get_tree().paused and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		_size_index = HudStyle.next_minimap_index(_size_index)
+		_apply_minimap_size()
+		get_viewport().set_input_as_handled()
+
+func _exit_tree() -> void:
+	var window := get_window()
+	if window != null:
+		if window.size_changed.is_connected(_apply_hud_scale):
+			window.size_changed.disconnect(_apply_hud_scale)
+		window.content_scale_factor = 1.0
+	if get_viewport().size_changed.is_connected(_on_view_resized):
+		get_viewport().size_changed.disconnect(_on_view_resized)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_map"):
@@ -139,6 +228,7 @@ func set_open(open: bool) -> void:
 		return
 	_full_layer.visible = open
 	_minimap_box.visible = not open
+	_hint_bar.visible = not open
 	get_tree().paused = open
 	_dragging = false
 	if open:
@@ -279,32 +369,17 @@ func _build_minimap() -> void:
 	_minimap_box.add_theme_constant_override("separation", 6)
 	add_child(_minimap_box)
 
-	# Dark backing so the M / G / C hints read against a bright daytime sky (D-132).
-	var hint_backing := PanelContainer.new()
-	hint_backing.add_theme_stylebox_override("panel", HudStyle.backing())
-	hint_backing.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	_minimap_box.add_child(hint_backing)
-	var hint_row := HBoxContainer.new()
-	hint_row.add_theme_constant_override("separation", 16)
-	hint_backing.add_child(hint_row)
-	var hint := _outlined_label("M — Map", FONT_SIZE - 2)
-	hint.add_theme_color_override("font_color", KEY_COLOR)
-	hint_row.add_child(hint)
-	sky_button = _build_sky_button()
-	hint_row.add_child(sky_button)
-	news_button = _build_news_button()
-	hint_row.add_child(news_button)
 	_minimap_info = _outlined_label("", FONT_SIZE - 4)
 	_minimap_info.add_theme_stylebox_override("normal", HudStyle.backing(8.0, 2.0))
 	_minimap_info.visible = false
 	_minimap_info.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_minimap_box.add_child(_minimap_info)
+	_build_hint_bar()
 
 	var frame := PanelContainer.new()
-	frame.add_theme_stylebox_override("panel", _panel_style(Color(0, 0, 0, 0.6), 4))
+	frame.add_theme_stylebox_override("panel", HudStyle.panel(4.0))
 	_minimap_box.add_child(frame)
 	_minimap = MapCanvas.new()
-	_minimap.custom_minimum_size = MINIMAP_SIZE
 	_minimap.clip_contents = true
 	_minimap.scale_px = MINIMAP_SCALE
 	_minimap.show_labels = false
@@ -313,6 +388,7 @@ func _build_minimap() -> void:
 	_minimap.marker_scale = 0.8
 	_minimap.font_size = FONT_SIZE - 6
 	frame.add_child(_minimap)
+	_apply_minimap_size()
 
 	# North is always up on the minimap; say so.
 	var north := _outlined_label("N", FONT_SIZE - 2)
@@ -322,7 +398,8 @@ func _build_minimap() -> void:
 	north.offset_top = 2
 	_minimap.add_child(north)
 	_ignore_mouse(_minimap_box)
-	# The icon is the one clickable thing here (with a free mouse).
+	_ignore_mouse(_hint_bar)
+	# The icons are the only clickable things here (with a free mouse).
 	sky_button.mouse_filter = Control.MOUSE_FILTER_STOP
 	news_button.mouse_filter = Control.MOUSE_FILTER_STOP
 
@@ -412,7 +489,7 @@ func _build_full_map() -> void:
 	_full_layer.add_child(_full)
 
 	var title_panel := PanelContainer.new()
-	title_panel.add_theme_stylebox_override("panel", _panel_style(Color(0, 0, 0, 0.6), 16))
+	title_panel.add_theme_stylebox_override("panel", HudStyle.panel(16.0))
 	title_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	title_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	title_panel.offset_top = 24
@@ -434,7 +511,7 @@ func _build_full_map() -> void:
 	_full_layer.add_child(legend)
 
 	var cursor_panel := PanelContainer.new()
-	cursor_panel.add_theme_stylebox_override("panel", _panel_style(Color(0, 0, 0, 0.6), 10))
+	cursor_panel.add_theme_stylebox_override("panel", HudStyle.panel(10.0))
 	cursor_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
 	cursor_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	cursor_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -448,7 +525,7 @@ func _build_full_map() -> void:
 
 func _build_legend() -> PanelContainer:
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", _panel_style(Color(0, 0, 0, 0.6), 18))
+	panel.add_theme_stylebox_override("panel", HudStyle.panel(18.0))
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 8)
 	panel.add_child(box)
@@ -510,13 +587,6 @@ func _outlined_label(text: String, font_size: int) -> Label:
 	label.add_theme_color_override("font_outline_color", Color(0, 0, 0))
 	label.add_theme_constant_override("outline_size", 4)
 	return label
-
-func _panel_style(color: Color, margin: float) -> StyleBoxFlat:
-	var style := StyleBoxFlat.new()
-	style.bg_color = color
-	style.set_corner_radius_all(8)
-	style.set_content_margin_all(margin)
-	return style
 
 ## Overlays never take the mouse, so drags and clicks reach the map (or, for
 ## the minimap, the game's click-to-recapture).
