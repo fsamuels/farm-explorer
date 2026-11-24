@@ -72,13 +72,15 @@ func _run() -> void:
 	var opening := south_east.distance_to(Vector2(10.6, 17.1))
 	_check(opening > 0.9 and opening < 1.6, "about a 4 ft opening between the house and the fence: %.2f m" % opening)
 
-	# The west fence continues the house's west side up to the Back Barn.
+	# The west fence runs from the house's west side nearly north to the middle of the Back Barn.
 	var back := _fence_points(main, "DuckPen_West")
 	var house_nw := centre - south * DuckHouse.LENGTH * 0.5 - along * DuckHouse.DEPTH * 0.5
 	_check(back.front().distance_to(house_nw) < 0.5, "the west fence starts at the house's north-west corner: %s vs %s" % [back.front(), house_nw])
 	var barn := main.get_node("Buildings/Back Barn") as Node3D
-	var barn_sw := barn.global_transform * Vector3(-0.5, 0.0, 0.5)
-	_check(back.back().distance_to(Vector2(barn_sw.x, barn_sw.z)) < 0.5, "the west fence ends at the Back Barn's south-west corner")
+	var barn_front := barn.global_transform * Vector3(0.0, 0.0, 0.5)
+	_check(back.back().distance_to(Vector2(barn_front.x, barn_front.z)) < 0.5, "the west fence ends in the middle of the Back Barn's south wall")
+	var bearing := rad_to_deg((back.back() - back.front()).angle_to(Vector2(0.0, -1.0)))
+	_check(absf(bearing) < 16.0, "the west fence runs almost due north: %.1f degrees off" % bearing)
 
 	# Solid walls and an open bay at the north end of the pen-side (east) front.
 	var space := root.world_3d.direct_space_state
@@ -97,12 +99,17 @@ func _run() -> void:
 		_check(not end_hit.is_empty(), "the end wall at z %.0f is solid" % sz)
 	_check(not _ray(space, house, Vector3(0.0, 3.5, 0.0), Vector3(0.0, 0.5, 0.0)).is_empty(), "there is a roof")
 
-	# The tanks lie along the front, clear of the doorway.
-	for name in ["Tank1", "Tank2"]:
-		var tank := house.get_node(name) as Node3D
-		_check(tank.position.x > east_x, "%s is in front of the house" % name)
-		_check(tank.position.z - 0.65 > door.y, "%s is clear of the doorway" % name)
-	_check(absf(house.get_node("Tank1").position.z - house.get_node("Tank2").position.z) > 1.3, "the tanks don't overlap")
+	# The two tanks sit where they show in the aerial photo, the first the bigger.
+	var t1 := house.get_node("Tank1") as Node3D
+	var t2 := house.get_node("Tank2") as Node3D
+	var mid := (Vector2(t1.global_position.x, t1.global_position.z) + Vector2(t2.global_position.x, t2.global_position.z)) * 0.5
+	_check(mid.distance_to(Vector2(12.9, 17.6)) < 0.3, "the tanks are centred on 12.9, 17.6: %s" % mid)
+	var big := (t1.get_child(0) as MeshInstance3D).mesh.get_aabb().size
+	var small := (t2.get_child(0) as MeshInstance3D).mesh.get_aabb().size
+	_check(big.x * big.z > small.x * small.z, "one tank is larger than the other")
+	_check(absf(t1.position.x - t2.position.x) > 1.2, "the tanks don't overlap")
+	# The roof slopes down to the back (west): its underside is lower there.
+	_check(DuckHouse.roof_height(-DuckHouse.DEPTH * 0.5) < DuckHouse.roof_height(DuckHouse.DEPTH * 0.5), "the roof is low at the back, high at the front")
 
 	_done()
 

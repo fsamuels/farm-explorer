@@ -6,9 +6,9 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
-				"**The house.** A small wood-and-tin shed stands by the pond: 16 feet long with its long side facing the pen, boards below and chain link above, tin walls, a roof sloping to the front and sawdust underfoot. You can walk in through the open bay at the north end of its front.",
-				"**Its pen.** White-line fences run from just past the house's south-east corner to the south-east corner of the pen, then up to the Back Barn pen, and a second fence carries on from the house's west side to the barn. There is a gap about 4 feet wide between the fence and the house.",
-				"**Water tanks.** Two grey tanks lie along the front of the house.",
+				"**The house.** A small wood-and-tin shed stands by the pond: 16 feet long with its long side facing the pen, boards below and chain link above, tin walls, a roof sloping down to the back and sawdust underfoot. You can walk in through the open bay at the north end of its front.",
+				"**Its pen.** White-line fences run from just past the house's south-east corner to the south-east corner of the pen, then up to the Back Barn pen, and a second fence runs nearly north from the house's west side to the middle of the Back Barn. There is a gap about 4 feet wide between the fence and the house.",
+				"**Water tanks.** Two grey tanks, one bigger, sit side by side by the fence, where they show in the aerial photo.",
 				"**Just a start.** The house's size is a guess, the other pen fences are still to come, and the ducks and geese do not live there yet."
 			],
 			"summary": "The duck and geese house is built, with its pen fences, a doorway and two water tanks.",
@@ -259,14 +259,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 15112,
-		"commits": 290,
+		"code_lines": 16426,
+		"commits": 291,
 		"decisions": 156,
 		"models": 14,
 		"scenes": 26,
-		"scripts": 69,
-		"size_kb": 115377,
-		"test_lines": 4776,
+		"scripts": 75,
+		"size_kb": 115434,
+		"test_lines": 4957,
 		"textures": 49,
 		"vehicles": 3
 	}

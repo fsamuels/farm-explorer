@@ -5,9 +5,9 @@ extends Node3D
 ## pen). The long east side is the front, facing the pen: boards low and chain
 ## link above, with an open bay at its north end where the geese walk in. The
 ## west side (the back, on the line of the west pen fence) and both ends are
-## corrugated tin with wood rails inside. A shed roof slopes down to the front,
-## the floor is sawdust, and two stock tanks lie along the front, south of the
-## doorway, for the ducks.
+## corrugated tin with wood rails inside. A shed roof slopes down to the back,
+## the floor is sawdust, and two stock tanks (one bigger) lie side by side along
+## the south pen fence, centred on TANKS_AT, where they show in the aerial photo.
 ##
 ## The node's origin is the centre of the floor and +X runs along the south pen
 ## fence. The Buildings entry of the same name keeps the map footprint and is
@@ -21,12 +21,14 @@ const LENGTH := 16.0 * FT
 const DEPTH := 10.0 * FT
 const WALL_T := 0.08
 const BOARD_HEIGHT := 1.1
-## The roof is high at the back (west) and low at the front (east).
-const EAVE_FRONT := 2.0
-const EAVE_BACK := 2.35
+## The roof is low at the back (west) and high at the front (east).
+const EAVE_FRONT := 2.35
+const EAVE_BACK := 2.0
 ## The open bay in the front wall, from its north end.
 const DOOR_WIDTH := 2.0
 const DOOR_HEIGHT := 1.9
+## Where the two tanks' shared centre is in the world (x, z), read off the aerial photo.
+const TANKS_AT := Vector2(12.9, 17.6)
 
 const BOARD_COLOR := Color(0.36, 0.2, 0.1)
 const TIN_COLOR := Color(0.72, 0.75, 0.78)
@@ -107,7 +109,7 @@ func _rails(hx: float, hz: float) -> void:
 		for sz in [-1.0, 1.0]:
 			_box(self, Vector3(DEPTH - 0.3, 0.14, 0.05), Vector3(0.0, y, sz * (hz - 0.07)), RAIL_COLOR)
 
-## The shed roof: a slab sloping down to the front, with a little overhang.
+## The shed roof: a slab sloping down to the back, with a little overhang.
 func _roof(body: StaticBody3D) -> void:
 	var rise := EAVE_BACK - EAVE_FRONT
 	var slope := -atan2(rise, DEPTH)
@@ -117,16 +119,20 @@ func _roof(body: StaticBody3D) -> void:
 	# The collision shape is a sibling of the mesh, so tilt it the same way.
 	(body.get_child(body.get_child_count() - 1) as CollisionShape3D).rotation.z = slope
 
-## Two grey stock tanks lying along the front, south of the doorway, each with a
-## little water in it.
+## Two grey stock tanks (one bigger) side by side along the fence line, centred
+## on TANKS_AT, each with a little water in it.
 func _tanks() -> void:
+	var centre := to_local(Vector3(TANKS_AT.x, global_position.y, TANKS_AT.y))
+	var sizes := [Vector2(1.5, 0.85), Vector2(1.25, 0.75)]
+	var xs := [-0.7, 0.65]
 	for i in 2:
 		var tank := Node3D.new()
 		tank.name = "Tank%d" % (i + 1)
-		tank.position = Vector3(DEPTH * 0.5 + 0.8, 0.0, LENGTH * 0.5 - 0.75 - 1.4 * i)
+		tank.position = Vector3(centre.x + xs[i], 0.0, centre.z)
 		add_child(tank)
-		_box(tank, Vector3(0.7, 0.36, 1.3), Vector3(0.0, 0.18, 0.0), TANK_COLOR)
-		_box(tank, Vector3(0.56, 0.02, 1.16), Vector3(0.0, 0.37, 0.0), WATER_COLOR)
+		var size: Vector2 = sizes[i]
+		_box(tank, Vector3(size.x, 0.36, size.y), Vector3(0.0, 0.18, 0.0), TANK_COLOR)
+		_box(tank, Vector3(size.x - 0.14, 0.02, size.y - 0.14), Vector3(0.0, 0.37, 0.0), WATER_COLOR)
 
 ## Adds a box mesh under `parent` (and a matching collision shape when `solid`
 ## and `parent` is a StaticBody3D). Returns the mesh.
