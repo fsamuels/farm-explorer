@@ -147,6 +147,30 @@ func _test_roads() -> void:
 	var near := RoadMath.nearest(275.0, 0.0, 30.0)
 	_check(not near.is_empty() and near.name == "Lowden-Gardena Rd", "the nearest road at the farm's east side is Lowden-Gardena Rd: %s" % [near])
 	_check(near.get("distance", 99.0) < 6.0, "it passes within 6 m of the aerial photo's asphalt: %s" % near.get("distance", 99.0))
+	# Every point has a surface read off the aerial photo: US highways and the road at the farm are
+	# asphalt, and there is plenty of gravel too.
+	var points := Marshalls.base64_to_raw(RoadData.POINTS_B64).size() / 8
+	_check(Marshalls.base64_to_raw(RoadData.SURFACE_B64).size() == points, "one surface per point: %s for %s points" % [Marshalls.base64_to_raw(RoadData.SURFACE_B64).size(), points])
+	var gravel := 0
+	var total := 0
+	for road in RoadMath.roads():
+		for sf in road.surface:
+			total += 1
+			if sf == RoadMath.GRAVEL:
+				gravel += 1
+		if road.kind <= 1:
+			_check(road.surface.count(RoadMath.GRAVEL) == 0, "%s is asphalt all along" % road.name)
+	print("world: %.0f%% of road points read as gravel" % (100.0 * gravel / total))
+	_check(gravel > total / 10 and gravel < total * 9 / 10, "a real mix of asphalt and gravel: %s of %s" % [gravel, total])
+	var piece_here: Vector2i = RoadMath.pieces_in(WorldMath.chunk_at(275.0, 300.0))[0]
+	_check(RoadMath.roads()[piece_here.x].surface[piece_here.y] == RoadMath.PAVED, "the road past the farm is asphalt")
+	# A gravel road is narrower than an asphalt one.
+	for road in RoadMath.roads():
+		var g: int = road.surface.find(RoadMath.GRAVEL)
+		var a: int = road.surface.find(RoadMath.PAVED)
+		if g != -1 and a != -1 and road.kind == 2:
+			_check(RoadMath.width_at(road, g) < RoadMath.width_at(road, a), "gravel is narrower than asphalt on %s" % road.name)
+			break
 	# Resampling keeps the ends and spaces the points.
 	var line := PackedVector2Array([Vector2(0, 0), Vector2(100, 0), Vector2(100, 50)])
 	var r := RoadMath.resample(line, 8.0)
