@@ -50,16 +50,22 @@ const STARLINK_CODE := "starlink"
 ## compared with the clock.
 const POND_PRESETS := [["Empty pond", 0.0], ["Half full", 0.5], ["Full pond", 1.0]]
 const WATER_SPEEDS := [["Normal", 1.0], ["Fast  x5", 5.0], ["Very fast  x20", 20.0]]
+## The ditch burn's wind (D-156): a multiple of the usual south-west wind.
+const FIRE_WINDS := [["Light", 0.5], ["Usual", 1.0], ["Gale", 1.8]]
 
 @export var time_of_day_path: NodePath = ^"../TimeOfDay"
 @export var weather_path: NodePath = ^"../Weather"
 @export var terrain_path: NodePath = ^"../DistantTerrain"
 @export var water_path: NodePath = ^"../Water"
+@export var fire_path: NodePath = ^"../Fire"
 
 var _tod: Node
 var _weather: Node
 var _terrain: Node
 var _water: Node
+var _fire: Node
+var _fire_status: Label
+var _fire_wind_buttons := []
 var _weir_button: Button
 var _water_status: Label
 var _speed_buttons := []
@@ -83,6 +89,7 @@ func _ready() -> void:
 	_weather = get_node_or_null(weather_path)
 	_terrain = get_node_or_null(terrain_path)
 	_water = get_node_or_null(water_path)
+	_fire = get_node_or_null(fire_path)
 	_build()
 	_panel.visible = false
 
@@ -253,6 +260,10 @@ func refresh() -> void:
 			var b := _weather_buttons[key] as Button
 			b.set_pressed_no_signal(key == _weather.current)
 			b.modulate = Color.WHITE if is_available(key) else UNAVAILABLE_TINT
+	if _fire:
+		_fire_status.text = "%d%% of the strip burned" % roundi(_fire.grid.target_coverage() * 100.0)
+		for i in _fire_wind_buttons.size():
+			(_fire_wind_buttons[i] as Button).set_pressed_no_signal(is_equal_approx(_fire.wind_scale, FIRE_WINDS[i][1]))
 	if _water:
 		_weir_button.set_pressed_no_signal(_water.weir_open)
 		_weir_button.text = "Weir\n" + ("open" if _water.weir_open else "shut")
@@ -354,6 +365,8 @@ func _build() -> void:
 
 	if _water:
 		_build_water(box)
+	if _fire:
+		_build_fire(box)
 
 	var close := _button("Close  (G or Esc)")
 	close.toggle_mode = false
@@ -409,6 +422,60 @@ func _build_water(box: VBoxContainer) -> void:
 		b.pressed.connect(choose_water_speed.bind(i))
 		speed.add_child(b)
 		_speed_buttons.append(b)
+
+func _build_fire(box: VBoxContainer) -> void:
+	var title := HBoxContainer.new()
+	box.add_child(title)
+	var heading := _heading("Fire")
+	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.add_child(heading)
+	_fire_status = Label.new()
+	_fire_status.add_theme_font_size_override("font_size", FONT_SIZE - 2)
+	_fire_status.add_theme_color_override("font_color", Color(1.0, 0.7, 0.4))
+	title.add_child(_fire_status)
+
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	box.add_child(row)
+	var regrow := _action_button("Regrow the grass")
+	regrow.pressed.connect(regrow_fire)
+	row.add_child(regrow)
+	var refill := _action_button("Refill the torch")
+	refill.pressed.connect(refill_torch)
+	row.add_child(refill)
+	for b in [regrow, refill]:
+		b.custom_minimum_size = Vector2(0, 62)
+
+	var wind := HBoxContainer.new()
+	wind.add_theme_constant_override("separation", 8)
+	box.add_child(wind)
+	var wind_label := Label.new()
+	wind_label.text = "Wind"
+	wind_label.add_theme_font_size_override("font_size", FONT_SIZE - 2)
+	wind_label.add_theme_color_override("font_color", Color(0.7, 0.72, 0.78))
+	wind.add_child(wind_label)
+	for i in FIRE_WINDS.size():
+		var b := _button(FIRE_WINDS[i][0])
+		b.pressed.connect(choose_fire_wind.bind(i))
+		wind.add_child(b)
+		_fire_wind_buttons.append(b)
+
+## Let the burnt grass grow back and start the burn over.
+func regrow_fire() -> void:
+	if _fire:
+		_fire.regrow()
+	refresh()
+
+func refill_torch() -> void:
+	if _fire:
+		_fire.refill()
+	refresh()
+
+## Pick the burn's wind: index into FIRE_WINDS.
+func choose_fire_wind(index: int) -> void:
+	if _fire:
+		_fire.wind_scale = FIRE_WINDS[index][1]
+	refresh()
 
 ## A button that does something when pressed rather than staying down.
 func _action_button(text: String) -> Button:

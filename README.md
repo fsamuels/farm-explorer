@@ -17,6 +17,7 @@ R cycles the weather through clear, drizzle, rain, downpour, thunderstorm, light
 the Shop is walk-in — blue corrugated walls, windows, and an entry door, roll-up garage door and sliding barn door you open with E, D-98 — and so are Sally's House, the Back Barn (D-123) and the Front Barn, Sally's House one big room for now (D-115) and the Front Barn an open pole barn with posts, stalls, a tack room and cubbies (D-121), shaped and textured from a photo of its north end, which is also where the map teleport puts you (D-125);
 the Triumph TR6, BMW 2002 tii and the Front Barn's yellow Cub Cadet 550 UTV can be driven — E to get in or out, W/S gas and brake, A/D steer, Space handbrake, D-106, and B tips the UTV's dump bed, D-127),
 holding Ctrl is a super sprint and the map (M) also teleports you to named transport points in the back pastures, D-131 and D-139, and likewise to the three driveable vehicles, which the map also shows, D-144,
+and the irrigation ditch can be burned — 1 takes out a propane torch, hold the left mouse button to burn, with a wind-driven fire, tall dry grass and the "Burn the Ditch" quest, D-156,
 the real parcel boundary and (approximate) building footprints, and a ground
 plane textured with public NAIP aerial imagery as a stand-in for the real
 drone-derived orthomosaic (Phase 1). See

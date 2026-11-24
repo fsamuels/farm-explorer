@@ -6,6 +6,18 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**A real fire.** Light the tall, dry bunch grass in the ditch and the strip between it and the road, and it spreads with the wind: fast downwind, slowly against it, faster uphill. Flames lean over, smoke rises and blows away, embers drift ahead, the grass blackens to stubble and the ground scorches. It crackles and roars, and lights up the dusk.",
+				"**The usual wind.** It blows from the south-west toward the north-east, steady with gusts and the odd shift. A readout on the left shows the wind, how much propane the torch has left, and how much of the strip you have burned.",
+				"**The propane torch.** Press 1 to take it out, hold the left mouse button to burn, 1 again to put it away. The tank lasts a couple of minutes; refill it at the propane tank by the road at the south end. Press E at the tank to start the quest.",
+				"**Quest: Burn the Ditch.** Burn the ditch and the strip, keep the fire off the pasture and the field, then open the weir. If it gets across the line you lose points, and after a while the fire department puts it out.",
+				"**Weather and water.** Rain and snow stop a fire and put one out, and a ditch with water in it will not burn, so shut the weir first. The sky menu (G) has a Fire row to regrow the grass, refill the torch and change the wind.",
+				"**Just a start.** The hose and rake are still to come, and the east-west ditch to the pond does not burn yet."
+			],
+			"summary": "Burn the dry grass along the irrigation ditch with a propane torch, south to north with the wind, then open the weir to run the water.",
+			"title": "November 24: Burn the ditch"
+		},
+		{
+			"bullets": [
 				"**The house.** A small wood-and-tin shed stands by the pond: boards below, chain link above, a sloping roof, sawdust underfoot. You can walk in through the doorway on the pen side.",
 				"**Its pen.** White-line fences run from just past the house's corner to the south-east corner of the pen, then up to the Back Barn pen, and a second fence runs from the back of the house to the barn. There is a gap about 4 feet wide between the fence and the house.",
 				"**Water tanks.** Two grey tanks stand outside the doorway.",
@@ -259,14 +271,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 14803,
-		"commits": 289,
-		"decisions": 155,
+		"code_lines": 16496,
+		"commits": 290,
+		"decisions": 156,
 		"models": 14,
 		"scenes": 26,
-		"scripts": 68,
-		"size_kb": 115358,
-		"test_lines": 4555,
+		"scripts": 75,
+		"size_kb": 115434,
+		"test_lines": 4958,
 		"textures": 49,
 		"vehicles": 3
 	}
