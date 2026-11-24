@@ -27,24 +27,31 @@ func _run() -> void:
 	var names: Array = data.buildings.map(func(b): return b.name)
 	_check(names.size() == main.get_node("Buildings").get_children().filter(func(n): return n.is_in_group("map_building")).size(), "every building collected")
 	_check("Front Barn" in names and "Sally's House" in names, "building names come from node names: %s" % [names])
-	_check(data.imagery.size() == 3, "ground + two orthomosaic sections: %d" % data.imagery.size())
+	_check(data.imagery.size() == 4, "world photo + ground + two orthomosaic sections: %d" % data.imagery.size())
+	_check(data.world_bounds.size.x >= 11000.0 and data.bounds.size.x < 1000.0, "the map pans over the whole world but opens fitted to the farm: %s vs %s" % [data.world_bounds, data.bounds])
 	_check(data.bounds.size.x >= 520.0, "bounds cover the ground plane: %s" % data.bounds)
 	_check(data.fences.size() > 20, "fence paths collected: %d" % data.fences.size())
 	_check(data.boundary.size() > 5, "boundary segments collected: %d" % data.boundary.size())
 	_check(data.horses.size() >= 10, "horses collected: %d" % data.horses.size())
-	# The property line is one closed loop: every segment end meets another
-	# segment's end, so a segment rotated the wrong way (a mirrored diagonal) shows
-	# up as a gap.
+	# The property line is one loop with its east side open to the road (D-146):
+	# every segment end meets another segment's end, so a segment rotated the wrong
+	# way (a mirrored diagonal) shows up as a gap, except the two ends at the
+	# road-side line (x = 264) where the open side begins.
 	var ends: Array = []
 	for seg in data.boundary:
 		ends.append(seg[0])
 		ends.append(seg[1])
+	var open_ends := 0
 	for i in ends.size():
 		var near := 0
 		for j in ends.size():
 			if i != j and ends[i].distance_to(ends[j]) < 1.5:
 				near += 1
+		if near == 0 and absf(ends[i].x - 264.0) < 0.1:
+			open_ends += 1
+			continue
 		_check(near >= 1, "boundary end %s meets another end (%d)" % [ends[i], near])
+	_check(open_ends == 2, "the east side is open: two ends at x = 264 (%d)" % open_ends)
 
 	_check(not map.is_open() and not paused, "starts closed and unpaused")
 	_press_m()

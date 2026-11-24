@@ -303,6 +303,11 @@ buildings, then locating the closest boundary edge to the road and offsetting
 ~15m inward (clear of every building). Facing direction was set by hand in
 the editor afterward.
 
+**Update (D-146):** the map-edge cut described above is gone. `Fence_07` (the
+fence across the road) and the whole treeline wall were removed, and `Fence_04` /
+`Fence_08` now end at the road-side property line, x = 264, so the east side of
+the property is open and the world continues past the road ([decisions.md](project/decisions.md)).
+
 **Update (D-88):** the player now starts in the middle of the front yard, the
 lawn east of the House, at (97, −25), facing the Front Barn. The road-side
 spot above is no longer the spawn.

@@ -92,6 +92,10 @@ var frames_pushed := 0
 
 func _ready() -> void:
 	add_to_group("map_vehicle")
+	# Hills (D-146): hold the ground over crests and dips at speed, and keep the
+	# speed along a slope rather than losing it to the slope's projection.
+	floor_snap_length = 0.6
+	floor_constant_speed = true
 	_build_wheels()
 	_build_engine_sound()
 	_build_headlights()
@@ -303,7 +307,10 @@ func release() -> void:
 ## their head left of straight ahead.
 func seat_transform(look_yaw: float) -> Transform3D:
 	var seat := Vector3(eye_offset.x, 0.0, eye_offset.z)
-	return global_transform * Transform3D(Basis(Vector3.UP, look_yaw), seat)
+	var at := global_transform * Transform3D(Basis(Vector3.UP, look_yaw), seat)
+	# The view stays level (heading only) however the car tilts on a hill.
+	at.basis = Basis(Vector3.UP, VehicleMath.yaw_of(global_basis) + look_yaw)
+	return at
 
 func speed_mph() -> float:
 	return VehicleMath.to_mph(speed)
@@ -325,16 +332,22 @@ func _physics_process(delta: float) -> void:
 			hand_decel, drag, _top_speed(), _top_reverse())
 	rotate_y(VehicleMath.yaw_rate(speed, steer, wheelbase, deg_to_rad(max_steer_deg), max_lat_accel) * delta)
 
-	var forward := -global_basis.z
-	velocity.x = forward.x * speed
-	velocity.z = forward.z * speed
+	# Heading is the car's forward direction flattened onto the ground plane, so a
+	# car pitched on a hill still travels at `speed` rather than cos(pitch) of it.
+	var heading := VehicleMath.heading(-global_basis.z)
+	velocity.x = heading.x * speed
+	velocity.z = heading.z * speed
 	if is_on_floor():
 		velocity.y = 0.0
 	else:
 		velocity.y -= gravity * delta
 	move_and_slide()
-	# Whatever the slide took off the car's motion (hitting a wall) is lost.
-	speed = Vector3(velocity.x, 0.0, velocity.z).dot(-global_basis.z)
+	# Whatever the slide took off the car's motion (hitting a wall) is lost. A hill
+	# doesn't count: slopes are followed at constant speed (floor_constant_speed).
+	if is_on_wall():
+		speed = Vector3(velocity.x, 0.0, velocity.z).dot(VehicleMath.heading(-global_basis.z))
+	if is_on_floor():
+		global_basis = VehicleMath.settle_basis(global_basis, get_floor_normal(), delta)
 	_turn_wheels(delta)
 
 ## Roll every wheel by the distance travelled and turn the front pair with the

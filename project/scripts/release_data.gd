@@ -6,6 +6,17 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**The road is open.** The fence across Lowden-Gardena Road and the wall of trees around the farm are gone. Drive out of the driveway and keep going.",
+				"**Real roads.** US 12, Lowden-Gardena Road and about 70 other named roads out to 3 miles are laid on the real ground, with edge lines, centre lines and gravel verges.",
+				"**Real hills.** The ground out there follows the real land, and cars lean into slopes and hold their speed on them. The farm itself stays level.",
+				"**The map goes wide.** The map (M) and minimap show the aerial photo of the whole area, so you can see where the roads go. It still opens on the farm.",
+				"**The edge of the world.** An invisible wall stops you 3.5 miles out from the farm; the distant mountains carry on past it."
+			],
+			"summary": "The real roads for three miles around the farm are driveable, over real hills, and the farm is open all round.",
+			"title": "November 24: Drive the roads"
+		},
+		{
+			"bullets": [
 				"**The House opens up.** Its front door on the east side opens (E) into one big white room.",
 				"**A trap door.** A wooden trap door in the white room's floor lifts to show concrete stairs going down.",
 				"**A bomb shelter.** At the foot of the stairs a steel blast door opens onto a corridor with three rooms: a munitions store with ammo racks, a gun rack and crates; a bunk room with a kitchenette; and a utility room with a generator, water tanks and air filters.",
@@ -210,15 +221,15 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 13379,
-		"commits": 135,
-		"decisions": 145,
+		"code_lines": 14175,
+		"commits": 127,
+		"decisions": 146,
 		"models": 14,
-		"scenes": 26,
-		"scripts": 57,
-		"size_kb": 113361,
-		"test_lines": 3745,
-		"textures": 48,
+		"scenes": 25,
+		"scripts": 63,
+		"size_kb": 115245,
+		"test_lines": 4076,
+		"textures": 49,
 		"vehicles": 3
 	}
 }

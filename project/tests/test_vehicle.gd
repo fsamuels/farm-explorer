@@ -172,6 +172,7 @@ func _flat_dist(a: Vector3, b: Vector3) -> float:
 
 func _run() -> void:
 	_test_drive_hud()
+	_test_hill_math()
 	var main: Node = load("res://scenes/main.tscn").instantiate()
 	root.add_child(main)
 	await _step(10)
@@ -307,6 +308,29 @@ func _test_utv(main: Node, player: CharacterBody3D) -> void:
 	_check(utv.bed_target == 0.0, "releasing the UTV sends the bed down")
 	player.leave_vehicle()
 	await _step(5)
+
+## Hills (D-146): heading, yaw and the tilt that settles a car onto the ground.
+func _test_hill_math() -> void:
+	# Heading is flat and unit length, however the car is pitched.
+	var pitched := Basis(Vector3.UP, 0.7) * Basis(Vector3.RIGHT, 0.3)
+	var h := VehicleMath.heading(-pitched.z)
+	_check(absf(h.y) < 1e-6 and absf(h.length() - 1.0) < 1e-5, "heading is flat and unit: %s" % h)
+	_check(absf(VehicleMath.yaw_of(pitched) - 0.7) < 1e-4, "yaw ignores pitch: %s" % VehicleMath.yaw_of(pitched))
+	for yaw in [0.0, 1.0, -2.5, 3.0]:
+		_check(absf(angle_difference(VehicleMath.yaw_of(Basis(Vector3.UP, yaw)), yaw)) < 1e-5, "yaw of a pure turn %s" % yaw)
+	# On level ground a car doesn't tilt: the basis is its pure yaw.
+	var level := VehicleMath.settle_basis(Basis(Vector3.UP, 1.2), Vector3.UP, 0.016)
+	_check(level.is_equal_approx(Basis(Vector3.UP, 1.2)), "level ground leaves the car level")
+	# On a 10% slope facing uphill (slope rises toward -Z) it settles onto it, keeping its heading.
+	var normal := Vector3(0.0, 1.0, 0.1).normalized()
+	var b := Basis.IDENTITY
+	for i in 120:
+		b = VehicleMath.settle_basis(b, normal, 1.0 / 60.0)
+	_check(b.y.angle_to(normal) < 0.01, "the car's up settles onto the ground's normal: %s" % b.y.angle_to(normal))
+	_check(absf(VehicleMath.yaw_of(b)) < 0.01, "and it keeps its heading: %s" % VehicleMath.yaw_of(b))
+	# It eases there, rather than snapping.
+	var one := VehicleMath.settle_basis(Basis.IDENTITY, normal, 1.0 / 60.0)
+	_check(one.y.angle_to(normal) > 0.5 * Basis.IDENTITY.y.angle_to(normal), "one frame moves only part of the way")
 
 func _test_drive_hud() -> void:
 	var Hud := preload("res://scripts/drive_hud.gd")

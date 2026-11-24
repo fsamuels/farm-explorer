@@ -17,11 +17,15 @@ extends Node3D
 
 const HorizonMath := preload("res://scripts/horizon_math.gd")
 const HorizonData := preload("res://scripts/horizon_data.gd")
+const WorldData := preload("res://scripts/world_data.gd")
+const WorldMath := preload("res://scripts/world_math.gd")
 const Weather := preload("res://scripts/weather.gd")
 const TERRAIN_SHADER := preload("res://shaders/distant_terrain.gdshader")
 const TURBINE_SHADER := preload("res://shaders/wind_turbine.gdshader")
 
 const SEASONS := ["summer", "winter"]
+## Rings out to this distance (m) use the world's own heights (use_world_heights).
+const WORLD_RINGS_MAX := 5400.0
 ## The wind here mostly blows from the south-west, so rotors face that way.
 const WIND_FROM_BEARING := 235.0
 ## Share of turbines carrying a red warning light (the FAA lights a farm's
@@ -58,6 +62,7 @@ func _ready() -> void:
 	_tod = get_node_or_null(time_of_day_path)
 	_weather = get_node_or_null(weather_path)
 	_heights = HorizonMath.decode_heights(HorizonData.HEIGHTS_B64)
+	use_world_heights(_heights)
 	_terrain_material = ShaderMaterial.new()
 	_terrain_material.shader = TERRAIN_SHADER
 	_tower_material = ShaderMaterial.new()
@@ -76,6 +81,21 @@ func _ready() -> void:
 			if not p.is_empty():
 				_on_lighting_changed(p)
 	_apply_season()
+
+## Inside the driveable world (D-146) the coarse land follows the same 20 m ground
+## the world is built from, rather than the polar grid's blend of mean and
+## highest, so the two meet without a step where the fine ground ends. Rings
+## beyond WORLD_RINGS_MAX keep the original data.
+static func use_world_heights(heights: PackedFloat32Array) -> void:
+	for i in HorizonData.RINGS.size():
+		var r: float = HorizonData.RINGS[i]
+		if r > WORLD_RINGS_MAX:
+			break
+		for j in HorizonData.COLUMNS:
+			var xz := HorizonMath.polar_point(j * HorizonData.BEARING_STEP, r)
+			if absf(xz.x) > WorldData.HALF - 100.0 or absf(xz.y) > WorldData.HALF - 100.0:
+				continue
+			heights[i * HorizonData.COLUMNS + j] = WorldData.ORIGIN_ELEVATION + WorldMath.raw_height(xz.x, xz.y)
 
 ## Summer or winter colours on the mountains and fields.
 func set_season(season_name: String) -> void:

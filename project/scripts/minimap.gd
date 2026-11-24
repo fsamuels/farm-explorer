@@ -284,11 +284,16 @@ func _fit_scale() -> float:
 	return minf(view.x / bounds.size.x, view.y / bounds.size.y)
 
 func _min_scale() -> float:
+	# Zoomed out as far as the whole driveable world (D-146), if it's in the data.
+	var world: Rect2 = _data.get("world_bounds", Rect2())
+	if world.has_area():
+		var view := get_viewport().get_visible_rect().size
+		return minf(view.x / world.size.x, view.y / world.size.y) * FULL_MIN_ZOOM
 	return _fit_scale() * FULL_MIN_ZOOM
 
 ## Keeps the view centered somewhere over the imagery so you can't pan away.
 func _clamp_center() -> void:
-	var bounds: Rect2 = _data.get("bounds", Rect2())
+	var bounds: Rect2 = _data.get("world_bounds", _data.get("bounds", Rect2()))
 	if bounds.has_area():
 		_full.center = _full.center.clamp(bounds.position, bounds.end)
 

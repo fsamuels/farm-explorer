@@ -396,6 +396,18 @@ func _build_surfaces() -> void:
 				_surface_meshes.append(node)
 	set_surfaces(start_wet, start_snow)
 
+## Give a mesh made after start-up (a chunk of the driveable world, D-146) the
+## wet / snow overlay too, and take it off the list again when it's freed.
+func add_surface(mesh: MeshInstance3D) -> void:
+	if mesh in _surface_meshes:
+		return
+	_surface_meshes.append(mesh)
+	if _overlay_on and _surface_material:
+		mesh.material_overlay = _surface_material
+
+func remove_surface(mesh: MeshInstance3D) -> void:
+	_surface_meshes.erase(mesh)
+
 ## Set how wet and snowy the ground and roofs are (0..1). The overlay is only
 ## attached to the meshes while there is something to show.
 func set_surfaces(wet: float, snow: float) -> void:

@@ -83,6 +83,24 @@ static func collect(tree: SceneTree) -> Dictionary:
 		imagery.append({"texture": material.albedo_texture, "xform": xform, "size": plane.size})
 		bounds_points.append_array(MapMath.box_footprint(xform.scaled_local(Vector3(plane.size.x, 1, plane.size.y))))
 
+	# The aerial photo of the whole driveable world (D-146) goes under the farm's
+	# imagery. It only widens how far the map can pan and zoom out: the zoom the
+	# map opens at still fits the farm, so it isn't counted in `bounds`.
+	var world_points := PackedVector2Array()
+	var world_imagery := []
+	for node in tree.get_nodes_in_group("map_world_imagery"):
+		var mesh_instance := node as MeshInstance3D
+		if mesh_instance == null or not mesh_instance.mesh is PlaneMesh:
+			continue
+		var plane: PlaneMesh = mesh_instance.mesh
+		var material := mesh_instance.get_active_material(0) as StandardMaterial3D
+		if material == null or material.albedo_texture == null:
+			continue
+		var xform := mesh_instance.global_transform
+		world_imagery.append({"texture": material.albedo_texture, "xform": xform, "size": plane.size})
+		world_points.append_array(MapMath.box_footprint(xform.scaled_local(Vector3(plane.size.x, 1, plane.size.y))))
+	imagery = world_imagery + imagery
+
 	# Walk-in buildings know where their front door is (D-118); the rest get
 	# a spot outside the south wall.
 	var door_spots := {}
@@ -126,6 +144,7 @@ static func collect(tree: SceneTree) -> Dictionary:
 	return {
 		"imagery": imagery,
 		"bounds": MapMath.bounds_of(bounds_points),
+		"world_bounds": MapMath.bounds_of(world_points) if not world_points.is_empty() else MapMath.bounds_of(bounds_points),
 		"buildings": buildings,
 		"places": places,
 		"vehicles": tree.get_nodes_in_group("map_vehicle"),
