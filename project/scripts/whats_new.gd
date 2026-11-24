@@ -9,7 +9,18 @@ extends CanvasLayer
 const ReleaseNotes := preload("res://scripts/release_notes.gd")
 const ReleaseData := preload("res://scripts/release_data.gd")
 
-const FONT_SIZE := 22
+## The dialog is laid out at this large size (it was 22 px and far too small to
+## read) and then scaled as a whole to fit the window, so a small window shrinks
+## it rather than cutting it off.
+const FONT_SIZE := 46
+const PANEL_WIDTH := 1900.0
+## Text room inside the panel (margins and the scroll bar), px.
+const TEXT_INSET := 120.0
+const LIST_HEIGHT := 700.0
+## The most of the window the dialog fills, and how far it may scale.
+const WINDOW_FILL := 0.96
+const MIN_SCALE := 0.3
+const MAX_SCALE := 2.5
 const KEY_COLOR := Color(1.0, 0.86, 0.55)
 const MUTED := Color(0.7, 0.72, 0.78)
 
@@ -58,12 +69,17 @@ func set_open(open: bool) -> void:
 	else:
 		Input.mouse_mode = _mouse_before
 
-## Shrink the panel to a small window (the web build can be short): the list's
-## height gives way first, so the stats and the Close button stay on screen.
+## Scale the whole panel to fit the window (the web build can be short, a 5K
+## screen is huge) about its own centre.
 func _fit_to_window() -> void:
 	var view := get_viewport().get_visible_rect().size
-	_panel.custom_minimum_size.x = clampf(view.x - 40.0, 320.0, 760.0)
-	_scroll.custom_minimum_size.y = clampf(view.y - 400.0, 100.0, 330.0)
+	var size := _panel.get_combined_minimum_size()
+	_panel.pivot_offset = size * 0.5
+	_panel.scale = Vector2.ONE * ui_scale(view, size)
+
+## The scale that makes a panel of `size` fill WINDOW_FILL of a `view`-sized window.
+static func ui_scale(view: Vector2, size: Vector2) -> float:
+	return clampf(minf(view.x / size.x, view.y / size.y) * WINDOW_FILL, MIN_SCALE, MAX_SCALE)
 
 func _build(data: Dictionary) -> void:
 	_panel = PanelContainer.new()
@@ -72,11 +88,11 @@ func _build(data: Dictionary) -> void:
 	_panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	_panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_panel.grow_vertical = Control.GROW_DIRECTION_BOTH
-	_panel.custom_minimum_size = Vector2(760, 0)
+	_panel.custom_minimum_size = Vector2(PANEL_WIDTH, 0)
 	add_child(_panel)
 
 	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 10)
+	box.add_theme_constant_override("separation", 20)
 	_panel.add_child(box)
 
 	var title := Label.new()
@@ -91,12 +107,12 @@ func _build(data: Dictionary) -> void:
 
 	var scroll := ScrollContainer.new()
 	_scroll = scroll
-	scroll.custom_minimum_size = Vector2(0, 330)
+	scroll.custom_minimum_size = Vector2(0, LIST_HEIGHT)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	box.add_child(scroll)
 	var list := VBoxContainer.new()
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	list.add_theme_constant_override("separation", 6)
+	list.add_theme_constant_override("separation", 12)
 	scroll.add_child(list)
 	for entry: Dictionary in entries:
 		var heading := Label.new()
@@ -128,8 +144,8 @@ func _build(data: Dictionary) -> void:
 	box.add_child(stats_heading)
 	var grid := GridContainer.new()
 	grid.columns = 4
-	grid.add_theme_constant_override("h_separation", 18)
-	grid.add_theme_constant_override("v_separation", 4)
+	grid.add_theme_constant_override("h_separation", 36)
+	grid.add_theme_constant_override("v_separation", 8)
 	box.add_child(grid)
 	for row in ReleaseNotes.stats_rows(data.stats):
 		var label := Label.new()
@@ -153,7 +169,7 @@ func _build(data: Dictionary) -> void:
 func _wrapped(size: int, color: Color) -> Label:
 	var label := Label.new()
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.custom_minimum_size = Vector2(700, 0)
+	label.custom_minimum_size = Vector2(PANEL_WIDTH - TEXT_INSET, 0)
 	label.add_theme_font_size_override("font_size", size)
 	label.add_theme_color_override("font_color", color)
 	return label

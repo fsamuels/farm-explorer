@@ -10,6 +10,12 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 23: A readable News window
+> The What's New window (C) now has much larger text and resizes itself to fit your window.
+- **Much bigger text.** The News window's writing is about twice the size it was.
+- **Fits any window.** It shrinks to fit a small window and grows to fill a big one,
+  so it is always whole on screen.
+
 ## November 23: A tidier screen
 > One hint bar along the bottom, a HUD that scales on big screens, a resizable minimap, and hints that fade when you're idle.
 - **One hint bar.** Map, Sky, News and Help hints now sit together in a dark bar along the bottom instead of scattered over the minimap.
