@@ -116,6 +116,14 @@ func _test_scene() -> void:
 	_check(button != null and button.mouse_filter == Control.MOUSE_FILTER_STOP, "the minimap's news icon takes clicks")
 	button.pressed.emit()
 	_check(dialog.is_open(), "the news icon opens the dialog")
+	_check(dialog._panel.get_combined_minimum_size().y > 0 and dialog.FONT_SIZE >= 40, "the dialog's text is large")
+	# It shrinks to a small window and grows (to a limit) in a big one.
+	var panel_size := Vector2(1900, 1500)
+	var small: float = dialog.ui_scale(Vector2(1280, 720), panel_size)
+	var big: float = dialog.ui_scale(Vector2(3072, 1728), panel_size)
+	var huge: float = dialog.ui_scale(Vector2(10000, 10000), panel_size)
+	_check(small < 1.0 and big > small and huge == dialog.MAX_SCALE, "scale shrinks for a small window, grows for a big one, and is capped: %s %s %s" % [small, big, huge])
+	_check(Vector2(1900, 1500) * small <= Vector2(1280, 720), "a small window still shows the whole dialog")
 	dialog.set_open(false)
 	var listed := false
 	for row in preload("res://scripts/controls_overlay.gd").CONTROLS:

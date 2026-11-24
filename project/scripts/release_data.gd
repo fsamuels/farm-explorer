@@ -6,6 +6,14 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**Much bigger text.** The News window's writing is about twice the size it was.",
+				"**Fits any window.** It shrinks to fit a small window and grows to fill a big one, so it is always whole on screen."
+			],
+			"summary": "The What's New window (C) now has much larger text and resizes itself to fit your window.",
+			"title": "November 23: A readable News window"
+		},
+		{
+			"bullets": [
 				"**One hint bar.** Map, Sky, News and Help hints now sit together in a dark bar along the bottom instead of scattered over the minimap.",
 				"**Fits big screens.** Text and panels grow on large and high-resolution windows so they stay easy to read.",
 				"**Resize the minimap.** Press Tab to cycle it between medium, large and small.",
@@ -136,14 +144,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 10875,
-		"commits": 169,
-		"decisions": 136,
+		"code_lines": 10891,
+		"commits": 273,
+		"decisions": 137,
 		"models": 13,
 		"scenes": 26,
 		"scripts": 47,
-		"size_kb": 111325,
-		"test_lines": 2811,
+		"size_kb": 111337,
+		"test_lines": 2819,
 		"textures": 48,
 		"vehicles": 3
 	}
