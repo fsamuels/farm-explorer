@@ -82,6 +82,28 @@ func _run() -> void:
 	var bearing := rad_to_deg((back.back() - back.front()).angle_to(Vector2(0.0, -1.0)))
 	_check(absf(bearing) < 16.0, "the west fence runs almost due north: %.1f degrees off" % bearing)
 
+	# The cross fence runs from the post at 20.1, 9.0 west to the barn fence, and
+	# two gates meet that post.
+	var cross := _fence_points(main, "DuckPen_Cross")
+	_check(cross.front().distance_to(Vector2(20.1, 9.0)) < 0.05, "the cross fence starts at the post at 20.1, 9.0")
+	var best := INF
+	for i in range(back.size() - 1):
+		var ab := back[i + 1] - back[i]
+		var u := clampf((cross.back() - back[i]).dot(ab) / ab.length_squared(), 0.0, 1.0)
+		best = minf(best, cross.back().distance_to(back[i] + ab * u))
+	_check(best < 0.1, "the cross fence ends on the barn fence: %.2f m away" % best)
+	for i in range(cross.size() - 1):
+		_check(cross[i].distance_to(cross[i + 1]) < 3.6, "cross fence posts are at most 3.6 m apart (%d)" % i)
+	var post := Vector3(20.1, 0.0, 9.0)
+	var short_gate := main.get_node("BackFences/DuckPen_Gate_Short") as Node3D
+	var latch := short_gate.to_global(Vector3(short_gate.get("width"), 0.0, 0.0))
+	_check(Vector2(latch.x, latch.z).distance_to(Vector2(post.x, post.z)) < 0.2, "the short gate's open end is on the post")
+	_check(Vector2(short_gate.global_position.x, short_gate.global_position.z).distance_to(Vector2(22.7, 9.6)) < 0.05, "the short gate hangs from the end of the pen fence")
+	var north_gate := main.get_node("BackFences/DuckPen_Gate_North") as Node3D
+	_check(absf(north_gate.global_position.x - post.x) < 0.1 and north_gate.global_position.z < post.z - 2.0, "the north gate's hinge is directly north of the post")
+	var north_latch := north_gate.to_global(Vector3(north_gate.get("width"), 0.0, 0.0))
+	_check(Vector2(north_latch.x, north_latch.z).distance_to(Vector2(post.x, post.z)) < 0.2, "the north gate latches on the post")
+
 	# Solid walls and an open bay at the north end of the pen-side (east) front.
 	var space := root.world_3d.direct_space_state
 	var door := DuckHouse.door_span()

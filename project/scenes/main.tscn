@@ -555,6 +555,13 @@ _data = {
 }
 point_count = 10
 
+[sub_resource type="Curve3D" id="Curve3D_duckpen_cross"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 20.100, 0, 9.000, 0, 0, 0, 0, 0, 0, 17.348, 0, 8.365, 0, 0, 0, 0, 0, 0, 14.596, 0, 7.730, 0, 0, 0, 0, 0, 0, 11.844, 0, 7.095, 0, 0, 0, 0, 0, 0, 9.092, 0, 6.460),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0)
+}
+point_count = 5
+
 [sub_resource type="Curve3D" id="Curve3D_greenpaddock"]
 _data = {
 "points": PackedVector3Array(0, 0, 0, 0, 0, 0, 3.300, 0, -15.500, 0, 0, 0, 0, 0, 0, 0.475, 0, -16.300, 0, 0, 0, 0, 0, 0, -2.350, 0, -17.100, 0, 0, 0, 0, 0, 0, -5.175, 0, -17.900, 0, 0, 0, 0, 0, 0, -8.000, 0, -18.700, 0, 0, 0, 0, 0, 0, -8.756, 0, -15.933, 0, 0, 0, 0, 0, 0, -9.511, 0, -13.167, 0, 0, 0, 0, 0, 0, -10.267, 0, -10.400, 0, 0, 0, 0, 0, 0, -11.022, 0, -7.633, 0, 0, 0, 0, 0, 0, -11.778, 0, -4.867, 0, 0, 0, 0, 0, 0, -12.533, 0, -2.100, 0, 0, 0, 0, 0, 0, -13.289, 0, 0.667, 0, 0, 0, 0, 0, 0, -14.044, 0, 3.433, 0, 0, 0, 0, 0, 0, -14.800, 0, 6.200),
@@ -890,6 +897,18 @@ closed = false
 [node name="DuckPen_West" parent="BackFences" instance=ExtResource("44_fence_path_scene")]
 curve = SubResource("Curve3D_duckpen_west")
 closed = false
+
+[node name="DuckPen_Cross" parent="BackFences" instance=ExtResource("44_fence_path_scene")]
+curve = SubResource("Curve3D_duckpen_cross")
+closed = false
+
+[node name="DuckPen_Gate_Short" parent="BackFences" instance=ExtResource("45_gate_scene")]
+transform = Transform3D(-0.9745, 0, 0.2249, 0, 1, 0, -0.2249, 0, -0.9745, 22.700, 0, 9.600)
+width = 2.668
+
+[node name="DuckPen_Gate_North" parent="BackFences" instance=ExtResource("45_gate_scene")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 20.100, 0, 4.750)
+width = 4.2
 
 [node name="GreenPaddock" parent="BackFences" instance=ExtResource("44_fence_path_scene")]
 curve = SubResource("Curve3D_greenpaddock")

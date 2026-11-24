@@ -7,7 +7,7 @@ const DATA := {
 		{
 			"bullets": [
 				"**The house.** A small wood-and-tin shed stands by the pond: 16 feet long with its long side facing the pen, boards below and chain link above, tin walls, a roof sloping down to the back and sawdust underfoot. You can walk in through the open bay at the north end of its front.",
-				"**Its pen.** White-line fences run from just past the house's south-east corner to the south-east corner of the pen, then up to the Back Barn pen, and a second fence runs nearly north from the house's west side to the middle of the Back Barn. There is a gap about 4 feet wide between the fence and the house.",
+				"**Its pen.** White-line fences run from just past the house's south-east corner to the south-east corner of the pen, then up to the Back Barn pen, and a second fence runs nearly north from the house's west side to the middle of the Back Barn. A short gate and a second gate meet at a fence post on the pen's north side, and a fence runs from that post west to the barn fence, closing the pen. There is a gap about 4 feet wide between the fence and the house.",
 				"**Water tanks.** Two grey tanks, one bigger, sit side by side by the fence, where they show in the aerial photo.",
 				"**Just a start.** The house's size is a guess, the other pen fences are still to come, and the ducks and geese do not live there yet."
 			],
@@ -259,14 +259,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 16426,
-		"commits": 291,
+		"code_lines": 16493,
+		"commits": 292,
 		"decisions": 156,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 75,
-		"size_kb": 115434,
-		"test_lines": 4957,
+		"size_kb": 115440,
+		"test_lines": 4993,
 		"textures": 49,
 		"vehicles": 3
 	}
