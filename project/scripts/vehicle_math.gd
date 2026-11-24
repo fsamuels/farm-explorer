@@ -65,3 +65,29 @@ static func exit_offsets(seat_x: float, seat_z: float, half_width: float, half_l
 		out.append(Vector3(side * (half_width + margin), 0.0, z))
 		out.append(Vector3(-side * (half_width + margin), 0.0, z))
 	return out
+
+## `forward` flattened onto the ground and made a unit vector: the direction a car
+## travels however it is pitched. Straight up or down (no heading) gives forward.
+static func heading(forward: Vector3) -> Vector3:
+	var flat := Vector3(forward.x, 0.0, forward.z)
+	if flat.length() < 1e-4:
+		return forward
+	return flat.normalized()
+
+## The car's yaw (radians about +Y, the angle of `heading`) from its basis,
+## whatever its pitch or roll.
+static func yaw_of(basis: Basis) -> float:
+	var h := heading(-basis.z)
+	return atan2(-h.x, -h.z)
+
+## How quickly a car's tilt follows the ground's (per second; exponential).
+const TILT_RATE := 8.0
+
+## `basis` eased toward sitting on ground whose normal is `floor_normal`, keeping
+## its heading: the car pitches over crests and rolls on side slopes. On level
+## ground this returns the pure yaw basis, so flat driving is unchanged.
+static func settle_basis(basis: Basis, floor_normal: Vector3, delta: float) -> Basis:
+	var yaw := Quaternion(Vector3.UP, yaw_of(basis))
+	var target := Quaternion(Vector3.UP, floor_normal.normalized()) * yaw
+	var now := basis.orthonormalized().get_rotation_quaternion()
+	return Basis(now.slerp(target, 1.0 - exp(-TILT_RATE * delta)))

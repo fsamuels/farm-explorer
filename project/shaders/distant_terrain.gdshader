@@ -18,9 +18,19 @@ varying float v_elev;
 varying float v_rand;
 varying vec3 v_world_normal;
 
+// The driveable world (D-148) has its own fine ground out to ~2.3 km around the
+// camera, inside this square. The coarse land under it is sunk out of the way
+// there (fully inside SINK_NEAR, fading out by SINK_FAR) so it can't poke through.
+const float SINK_DEPTH = 12.0;
+const float SINK_NEAR = 1700.0;
+const float SINK_FAR = 2000.0;
+const float WORLD_EDGE = 5500.0;
+
 void vertex() {
 	vec3 world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec3 camera = INV_VIEW_MATRIX[3].xyz;
+	float inside_world = step(abs(world.x), WORLD_EDGE) * step(abs(world.z), WORLD_EDGE);
+	world.y -= SINK_DEPTH * inside_world * (1.0 - smoothstep(SINK_NEAR, SINK_FAR, length(world.xz - camera.xz)));
 	v_dist = length(world - camera);
 	v_elev = COLOR.r * 2500.0;
 	v_rand = COLOR.g;

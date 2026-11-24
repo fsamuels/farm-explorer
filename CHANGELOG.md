@@ -10,6 +10,14 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 24: Drive the roads
+> The real roads for three miles around the farm are driveable, over real hills, and the farm is open all round.
+- **The road is open.** The fence across Lowden-Gardena Road and the wall of trees around the farm are gone. Drive out of the driveway and keep going.
+- **Real roads.** US 12, Lowden-Gardena Road and about 70 other named roads out to 3 miles are laid on the real ground, with edge lines, centre lines and gravel verges.
+- **Real hills.** The ground out there follows the real land, and cars lean into slopes and hold their speed on them. The farm itself stays level.
+- **The map goes wide.** The map (M) and minimap show the aerial photo of the whole area, so you can see where the roads go. It still opens on the farm.
+- **The edge of the world.** An invisible wall stops you 3.5 miles out from the farm; the distant mountains carry on past it.
+
 ## November 24: The UTV is back
 > The Cub Cadet UTV no longer drops through the ground when the game starts; it is parked in the Front Barn again.
 - **UTV fixed.** Since the ditch and pond went in, the UTV fell out of the world at startup.

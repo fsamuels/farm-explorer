@@ -7,7 +7,6 @@
 [ext_resource type="PackedScene" path="res://scenes/horse.tscn" id="5_horse_scene"]
 [ext_resource type="PackedScene" path="res://scenes/flock.tscn" id="6_flock_scene"]
 [ext_resource type="PackedScene" path="res://scenes/coyote.tscn" id="7_coyote_scene"]
-[ext_resource type="PackedScene" path="res://scenes/tree_line_segment.tscn" id="8_tree_line_scene"]
 [ext_resource type="PackedScene" path="res://scenes/minimap.tscn" id="9_minimap_scene"]
 [ext_resource type="PackedScene" path="res://scenes/duck_mallard.tscn" id="10_mallard_scene"]
 [ext_resource type="PackedScene" path="res://scenes/duck_poly.tscn" id="11_duck_poly_scene"]
@@ -60,6 +59,7 @@
 [ext_resource type="Script" path="res://scripts/barn_interior.gd" id="59_barn_interior"]
 [ext_resource type="Script" path="res://scripts/barn_facade.gd" id="60_barn_facade"]
 [ext_resource type="Script" path="res://scripts/distant_terrain.gd" id="61_distant_terrain"]
+[ext_resource type="Script" path="res://scripts/world_terrain.gd" id="world_terrain_script"]
 [ext_resource type="Script" path="res://scripts/terrain.gd" id="terrain_script"]
 [ext_resource type="Script" path="res://scripts/water_system.gd" id="water_system_script"]
 [ext_resource type="Script" path="res://scripts/toast.gd" id="toast_script"]
@@ -595,6 +595,9 @@ script = ExtResource("terrain_script")
 
 [node name="Collision" type="CollisionShape3D" parent="Terrain"]
 
+[node name="World" type="Node3D" parent="."]
+script = ExtResource("world_terrain_script")
+
 [node name="Water" type="Node3D" parent="."]
 script = ExtResource("water_system_script")
 
@@ -623,16 +626,12 @@ transform = Transform3D(0.008274428, 0, -0.9999658, 0, 1, 0, -0.9999658, 0, -0.0
 length = 32.24888
 
 [node name="Fence_04" parent="Boundary" instance=ExtResource("3_fence_scene")]
-transform = Transform3D(0.9999942, 0, 0.003397069, 0, 1, 0, -0.003397069, 0, 0.9999942, 212.6547, 0, -89.59559)
-length = 140.6914
-
-[node name="Fence_07" parent="Boundary" instance=ExtResource("3_fence_scene")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 283, 0, -9.28943)
-length = 161.0903
+transform = Transform3D(0.9999942, 0, 0.003397069, 0, 1, 0, -0.003397069, 0, 0.9999942, 203.154, 0, -89.5633)
+length = 121.691
 
 [node name="Fence_08" parent="Boundary" instance=ExtResource("3_fence_scene")]
-transform = Transform3D(-0.9999963, 0, -0.002728634, 0, 1, 0, 0.002728634, 0, -0.9999963, 158.9654, 0, 71.59414)
-length = 248.0702
+transform = Transform3D(-0.9999963, 0, -0.002728634, 0, 1, 0, 0.002728634, 0, -0.9999963, 149.4654, 0, 71.62)
+length = 229.0701
 
 [node name="Fence_09" parent="Boundary" instance=ExtResource("3_fence_scene")]
 transform = Transform3D(0.002937905, 0, 0.9999957, 0, 1, 0, 0.9999957, 0, -0.002937905, 35.05128, 0, 112.9564)
@@ -877,52 +876,6 @@ closed = false
 [node name="Track_Inner" parent="TrackFences" instance=ExtResource("44_fence_path_scene")]
 curve = SubResource("Curve3D_track_inner")
 closed = false
-
-[node name="TreeLine" type="Node3D" parent="."]
-
-[node name="TreeLine_01" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(0.007832658, 0, -0.9999693, 0, 1, 0, 0.9999693, 0, 0.007832658, -47.595, 0, -131.2)
-length = 111.8226
-
-[node name="TreeLine_02" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(0.9999519, 0, -0.009809674, 0, 1, 0, -0.009809674, 0, -0.9999519, 37.32289, 0, -76.08249)
-length = 209.0572
-
-[node name="TreeLine_03" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(0.008274428, 0, -0.9999658, 0, 1, 0, -0.9999658, 0, -0.008274428, 122.1768, 0, -73.39822)
-length = 32.24888
-
-[node name="TreeLine_04" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(0.9999942, 0, 0.003401248, 0, 1, 0, -0.003401248, 0, 0.9999942, 222.6207, 0, -109.6299)
-length = 160.7595
-
-[node name="TreeLine_07" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 303, 0, -9.35181)
-length = 201.103
-
-[node name="TreeLine_08" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(-0.9999963, 0, -0.002734314, 0, 1, 0, 0.002734314, 0, -0.9999963, 168.9927, 0, 91.56609)
-length = 268.0156
-
-[node name="TreeLine_09" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(0.002937905, 0, 0.9999957, 0, 1, 0, 0.9999957, 0, -0.002937905, 55.0512, 0, 112.8976)
-length = 82.04794
-
-[node name="TreeLine_10" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(-0.9703062, 0, -0.24188, 0, 1, 0, 0.24188, 0, -0.9703062, -25.301, 0, 189.68)
-length = 134.5998
-
-[node name="TreeLine_11" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(-0.7257109, 0, 0.6879997, 0, 1, 0, -0.6879997, 0, -0.7257109, -137.14, 0, 161.84)
-length = 128.2392
-
-[node name="TreeLine_12" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(-0.003736387, 0, 0.999993, 0, 1, 0, -0.999993, 0, -0.003736387, -184.28, 0, -45.495)
-length = 326.4507
-
-[node name="TreeLine_13" parent="TreeLine" instance=ExtResource("8_tree_line_scene")]
-transform = Transform3D(0.987763, 0, -0.1559626, 0, 1, 0, 0.1559626, 0, 0.987763, -116.46, 0, -197.92)
-length = 138.5497
 
 [node name="Buildings" type="Node3D" parent="." unique_id=1610982085]
 
