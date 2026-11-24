@@ -11,7 +11,7 @@ const DATA := {
 				"**The propane torch.** Press 1 to take it out, hold the left mouse button to burn, 1 again to put it away. The tank lasts a couple of minutes; refill it at the propane tank by the road at the south end. Press E at the tank to start the quest.",
 				"**Quest: Burn the Ditch.** Burn the ditch and the strip, keep the fire out of the field beyond the road, then open the weir. If it gets across the line you lose points, and after a while the fire department puts it out.",
 				"**Weather and water.** Rain and snow stop a fire and put one out, and a ditch with water in it will not burn, so shut the weir first. The sky menu (G) has a Fire row to regrow the grass, refill the torch and change the wind.",
-				"**Where the grass is.** The grass is thicker, and it stays off the road, off the driveway (so the fire stops at it and you light it again on the far side) and off the pasture side of the fence.",
+				"**Where the grass is.** The grass is thicker, and it stays off the road, off the driveway (so the fire stops at it and you light it again on the far side) off the pasture side of the fence, and east of the strip's edge, so the ground between the strip and the road stays bare.",
 				"**Finding the keys.** The F1 help lists the torch keys, the bottom bar has a 1 — Torch hint, and the burn readout always says what to press.",
 				"**Just a start.** The hose and rake are still to come, and the east-west ditch to the pond does not burn yet."
 			],
@@ -276,14 +276,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 16562,
-		"commits": 292,
+		"code_lines": 16584,
+		"commits": 293,
 		"decisions": 160,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 75,
-		"size_kb": 115448,
-		"test_lines": 5112,
+		"size_kb": 115450,
+		"test_lines": 5121,
 		"textures": 49,
 		"vehicles": 3
 	}

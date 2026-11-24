@@ -44,6 +44,12 @@ const DITCH_HALF := 1.1
 const DITCH_FUEL := 1.0
 const STRIP_FUEL := 0.75
 const FIELD_FUEL := 0.5
+## The strip's east edge, from the owner's two points: nothing grows east of
+## the line between them (z -38.4 to 67.3). A cell's centre must be this far
+## inside it, which keeps a clump and its leaning blades off the line.
+const STRIP_EAST_A := Vector2(263.9, -38.4)
+const STRIP_EAST_B := Vector2(261.3, 67.3)
+const STRIP_EDGE_MARGIN := 0.6
 ## How far a grass clump strays from the middle of its cell.
 const CLUMP_JITTER := 0.38
 ## The driveway crosses the strip here (z): bare gravel, so the grass ends at
@@ -207,6 +213,16 @@ static func ground_height(x: float, z: float) -> float:
 		return 0.0
 	return TerrainMath.height_at(x, z)
 
+## The x of the strip's east edge at `z`, or INF beyond its two ends (where the
+## strip runs on to the road as before).
+static func strip_edge_x(z: float) -> float:
+	# A metre and a half past each end, so a cell whose centre is just outside the range
+	# but whose clumps stray into it still stops at the line.
+	if z < STRIP_EAST_A.y - 1.5 or z > STRIP_EAST_B.y + 1.5:
+		return INF
+	var t := clampf((z - STRIP_EAST_A.y) / (STRIP_EAST_B.y - STRIP_EAST_A.y), 0.0, 1.0)
+	return lerpf(STRIP_EAST_A.x, STRIP_EAST_B.x, t)
+
 ## What stands at (x, z): {"fuel", "zone", "ditch_s"}. `patch` (-1..1) is a
 ## smooth noise that makes the fuel patchy. ditch_s is how far along the water
 ## route the cell is when it is the bed of the open ditch, else -1.
@@ -229,7 +245,7 @@ static func classify(x: float, z: float, patch: float) -> Dictionary:
 	elif x > ROAD_X:
 		fuel = FIELD_FUEL * thick
 		zone = FireGrid.PROTECTED
-	elif x > on_route.x + 0.5:
+	elif x > on_route.x + 0.5 and x <= strip_edge_x(z) - STRIP_EDGE_MARGIN:
 		fuel = STRIP_FUEL * thick
 		zone = FireGrid.TARGET
 	if z >= DRIVEWAY_Z.x and z <= DRIVEWAY_Z.y and out["ditch_s"] < 0.0:
