@@ -8,6 +8,7 @@ const FireHud := preload("res://scripts/fire_hud.gd")
 const FireSound := preload("res://scripts/fire_sound.gd")
 const FireSystem := preload("res://scripts/fire_system.gd")
 const TerrainMath := preload("res://scripts/terrain_math.gd")
+const RoadMath := preload("res://scripts/road_math.gd")
 const WaterMath := preload("res://scripts/water_math.gd")
 
 var _failures := 0
@@ -263,45 +264,70 @@ func _test_scene() -> void:
 	var weather := main.get_node("Weather")
 	var grid: FireGrid = fire.grid
 	_check(grid.width == FireSystem.GRID_W and grid.height == FireSystem.GRID_H, "the grid covers the strip")
-	_check(grid.target_total > 1500, "a long strip of fuel to burn: %d cells" % grid.target_total)
-	_check(grid.protected_total > 1000, "and land beside it that must not burn: %d cells" % grid.protected_total)
+	_check(grid.target_total > 1000, "a long strip of fuel to burn: %d cells" % grid.target_total)
+	_check(grid.protected_total > 500, "and land beside it that must not burn: %d cells" % grid.protected_total)
 	_check(fire._ditch_cells.size() > 80, "the ditch bed is fuel: %d cells" % fire._ditch_cells.size())
 	# What stands where.
 	var road := FireSystem.classify(276.0, 0.0, 0.5)
 	_check(road["fuel"] == 0.0 and road["zone"] == FireGrid.NONE, "the road is bare")
 	var bed := FireSystem.classify(255.0, 10.0, 0.0)
 	_check(bed["zone"] == FireGrid.TARGET and bed["fuel"] > 0.5 and bed["ditch_s"] >= 0.0, "the ditch bed is target fuel")
-	var strip := FireSystem.classify(264.0, 10.0, 0.3)
+	var strip := FireSystem.classify(259.0, 10.0, 0.3)
 	_check(strip["zone"] == FireGrid.TARGET and strip["fuel"] > 0.4 and strip["ditch_s"] < 0.0, "the strip between ditch and road is target fuel")
 	var pasture := FireSystem.classify(247.0, 10.0, 0.3)
-	_check(pasture["zone"] == FireGrid.PROTECTED and pasture["fuel"] > 0.0, "the pasture west of the ditch must not burn")
+	_check(pasture["fuel"] == 0.0 and pasture["zone"] == FireGrid.NONE, "there is no grass in the pasture west of the ditch")
+	var bank := FireSystem.classify(252.5, 10.0, 0.9)
+	_check(bank["fuel"] == 0.0, "nor on the pasture side of the fence, beside the ditch")
+	_check(absf(FireSystem.strip_edge_x(-92.2) - 265.1) < 0.001 and absf(FireSystem.strip_edge_x(67.3) - 261.3) < 0.001 and absf(FireSystem.strip_edge_x(-38.4) - 263.85) < 0.1 and FireSystem.strip_edge_x(-100.0) == INF and FireSystem.strip_edge_x(70.0) == INF, "the edge line runs between the owner's two points")
+	var east_bare := FireSystem.classify(266.0, 10.0, 0.9)
+	_check(east_bare["fuel"] == 0.0, "no grass between the edge line and the road: %s" % east_bare)
+	var north_bare := FireSystem.classify(268.0, -70.0, 0.9)
+	_check(north_bare["fuel"] == 0.0 and FireSystem.classify(260.0, -70.0, 0.5)["fuel"] > 0.0, "the same north of the driveway: bare east of the line, grass west of it")
 	var field := FireSystem.classify(285.0, 10.0, 0.3)
 	_check(field["zone"] == FireGrid.PROTECTED and field["fuel"] > 0.0, "nor the field beyond the road")
-	var driveway := FireSystem.classify(264.0, -47.0, 0.9)
-	_check(driveway["fuel"] <= FireSystem.DRIVEWAY_FUEL + 0.001, "the driveway has hardly any fuel: %s" % driveway["fuel"])
+	var driveway := FireSystem.classify(259.0, -47.0, 0.9)
+	_check(driveway["fuel"] == 0.0, "the driveway is bare gravel: %s" % driveway["fuel"])
+	_check(FireSystem.classify(260.0, -39.0, 0.5)["fuel"] > 0.0 and FireSystem.classify(260.0, -55.0, 0.5)["fuel"] > 0.0, "the grass runs right up to either side of it")
 	var corner := FireSystem.classify(246.0, 69.4, 0.9)
 	_check(corner["fuel"] == 0.0, "the east-west ditch along the south edge does not burn yet")
 	_check(absf(FireSystem.ground_height(246.0, 69.4) - TerrainMath.height_at(246.0, 69.4)) < 0.001 and FireSystem.ground_height(246.0, 69.4) < -0.5, "the ground there is the carved ditch")
-	var bare := FireSystem.classify(264.0, 10.0, -1.0)
+	var bare := FireSystem.classify(259.0, 10.0, -1.0)
 	_check(bare["fuel"] == 0.0, "the sparsest patches are bare dirt")
-	var margin := FireSystem.classify(253.0, 10.0, 0.9)
-	_check(margin["fuel"] == 0.0, "a bare margin separates the ditch from the pasture: %s" % margin)
 	# Looks.
 	var grass: MultiMeshInstance3D = fire.get_node("Grass")
-	_check(grass.multimesh.instance_count > 3000, "tall grass stands on the fuel: %d clumps" % grass.multimesh.instance_count)
+	_check(grass.multimesh.instance_count > 5000, "tall grass stands thick on the fuel: %d clumps" % grass.multimesh.instance_count)
+	# Where the grass is not: the road and its shoulders, and the pasture side of the fence.
+	var east_of_line := 0
+	var on_driveway := 0
+	var in_road := 0
+	var past_fence := 0
+	_check(fire.clump_positions.size() == grass.multimesh.instance_count, "every clump has a recorded position")
+	for at in fire.clump_positions:
+		if not RoadMath.nearest(at.x, at.z, 4.45).is_empty():
+			in_road += 1
+		if at.x < 272.0 and at.x > FireSystem.strip_edge_x(at.z):
+			east_of_line += 1
+		if at.z > FireSystem.DRIVEWAY_Z.x and at.z < FireSystem.DRIVEWAY_Z.y and at.x > 258.0:
+			on_driveway += 1
+		if at.z > -9.0 and at.z < 9.5 and at.x < 253.3:
+			past_fence += 1
+	_check(east_of_line == 0, "no grass east of the strip's edge line: %d clumps" % east_of_line)
+	_check(on_driveway == 0, "no grass on the driveway: %d clumps" % on_driveway)
+	_check(in_road == 0, "no grass on the road or its shoulders: %d clumps" % in_road)
+	_check(past_fence == 0, "no grass on the pasture side of the fence: %d clumps" % past_fence)
 	_check(fire.get_node_or_null("Scorch") != null and fire.get_node_or_null("Flames") != null and fire.get_node_or_null("Smoke") != null and fire.get_node_or_null("Embers") != null, "scorch, flames, smoke and embers are built")
 	_check(not fire.get_node("Flames").emitting, "nothing burns at the start")
 	_check(fire.get_node_or_null("PropaneTank") != null, "there is a propane tank")
 	_check(fire.wind.x > 0.0 and fire.wind.y < 0.0, "the wind blows toward the north-east: %s" % fire.wind)
 	# Light the south end and watch it.
-	var start: int = fire.light_at(Vector2(262.0, 58.0), 1.5)
+	var start: int = fire.light_at(Vector2(259.0, 58.0), 1.5)
 	_check(start > 0, "the torch lights the grass")
 	fire.step(5.0)
 	_check(fire.get_node("Flames").emitting and fire.get_node("Smoke").emitting, "flames and smoke rise from the fire")
 	_check(fire.quest == FireSystem.Quest.STARTED, "lighting the strip starts the quest")
 	var before: int = grid.target_lit
 	fire.step(60.0)
-	_check(grid.target_lit > before + 20, "the fire spreads: %d -> %d" % [before, grid.target_lit])
+	_check(grid.target_lit > before + 10, "the fire spreads: %d -> %d" % [before, grid.target_lit])
 	var north := INF
 	for i in grid.fuel.size():
 		if grid.state[i] != FireGrid.UNBURNT:
@@ -334,7 +360,7 @@ func _test_scene() -> void:
 	# Light the whole strip at once and let it burn out.
 	var z := -88.0
 	while z <= 64.0:
-		fire.light_at(Vector2(264.0, z), 3.0)
+		fire.light_at(Vector2(259.0, z), 3.0)
 		z += 6.0
 	for k in range(0, fire._ditch_cells.size(), 4):
 		grid.ignite_cell(fire._ditch_cells[k])
@@ -354,15 +380,15 @@ func _test_scene() -> void:
 		grid.moisture[fire._ditch_cells[k]] = 0.0
 	var zz := -88.0
 	while zz <= 64.0:
-		fire.light_at(Vector2(264.0, zz), 3.0)
+		fire.light_at(Vector2(259.0, zz), 3.0)
 		zz += 6.0
 	fire.step(100.0)
 	_check(fire.quest == FireSystem.Quest.DONE, "a burn that ends with the weir already open completes the quest: %d" % fire.quest)
 	water.weir_open = false
 	# Fire across the line brings the fire department.
 	fire.regrow()
-	fire.light_at(Vector2(246.0, 0.0), 1.5)
-	_check(grid.protected_lit > 0, "the pasture can catch")
+	fire.light_at(Vector2(285.0, 0.0), 1.5)
+	_check(grid.protected_lit > 0, "the field can catch")
 	fire.step(FireSystem.DEPT_DELAY - 5.0)
 	_check(not fire.dept_called, "the fire department takes a while")
 	fire.step(10.0)
@@ -379,7 +405,7 @@ func _test_scene() -> void:
 	fire.torch_equipped = true
 	fire._update_torch(0.016)
 	_check(fire._torch.visible, "taking it out shows it")
-	player.global_position = Vector3(264.0, 0.5, 30.0)
+	player.global_position = Vector3(259.5, 0.5, 30.0)
 	player.get_node("Head").rotation.x = deg_to_rad(-45.0)
 	var lit_by_torch := 0
 	for yaw in [0.0, 90.0, 180.0, 270.0]:
@@ -401,6 +427,10 @@ func _test_scene() -> void:
 	var up: int = fire._torch_ignite()
 	_check(up == 0, "but not the sky")
 	fire.firing = true
+	_check("left mouse" in fire.controls_line().to_lower(), "with the torch out the readout says how to burn")
+	fire.torch_equipped = false
+	_check(fire.controls_line().begins_with("Press 1"), "with the torch away it says how to take it out")
+	fire.torch_equipped = true
 	var tank: float = fire.tank_level
 	fire.tank_level = 0.0
 	fire._update_torch(0.016)
@@ -420,7 +450,7 @@ func _test_scene() -> void:
 		menu.choose_fire_wind(2)
 		_check(is_equal_approx(fire.wind_scale, 1.8), "the Gale button blows harder")
 		menu.choose_fire_wind(1)
-		fire.light_at(Vector2(264.0, 30.0), 2.0)
+		fire.light_at(Vector2(259.0, 30.0), 2.0)
 		menu.regrow_fire()
 		_check(grid.target_lit == 0 and fire.quest == FireSystem.Quest.IDLE, "Regrow the grass starts over")
 		fire.tank_level = 0.1
