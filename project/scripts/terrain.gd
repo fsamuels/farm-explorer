@@ -7,6 +7,12 @@ extends StaticBody3D
 ## small. Every carved tile's edge is level, so it meets the flat quads with no
 ## crack.
 ##
+## Holes (D-145): any node in the `terrain_hole` group with a `terrain_holes()`
+## method (six numbers per rectangle, see TerrainMath.in_hole) has those
+## rectangles cut out of the mesh and the collider, on the fine ditch grid, so
+## a stairwell can go down through the ground. Such nodes join the group in
+## `_enter_tree`, which runs before this node's `_ready`.
+##
 ## The old flat imagery planes (`Ground/MeshInstance3D` and the two orthomosaic
 ## patches) stay in the scene, hidden: the map and its tests read their
 ## textures and placement. This node reads the same textures and projects them
@@ -25,6 +31,7 @@ const POND_STEP := 0.5
 const KIND_FLAT := 0
 const KIND_POND := 1
 const KIND_DITCH := 2
+const KIND_HOLE := 3
 
 ## The flat imagery plane that sets the area covered (centre and size).
 @export var base_plane_path: NodePath = ^"../Ground/MeshInstance3D"
@@ -51,6 +58,7 @@ func build() -> void:
 
 	var started := Time.get_ticks_msec()
 	var carve := _classify(origin, tiles)
+	_mark_holes(origin, tiles, carve)
 	var arrays := _build_arrays(origin, tiles, carve)
 	var mesh := ArrayMesh.new()
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays["mesh"])
@@ -68,6 +76,7 @@ func build() -> void:
 	stats = {
 		"tiles": tiles.x * tiles.y,
 		"carved_tiles": carve["count"],
+		"hole_tiles": carve["holes"].size(),
 		"vertices": (arrays["mesh"][Mesh.ARRAY_VERTEX] as PackedVector3Array).size(),
 		"triangles": floori((arrays["mesh"][Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3.0),
 		"build_ms": Time.get_ticks_msec() - started,
@@ -132,6 +141,29 @@ func _classify(origin: Vector2, tiles: Vector2i) -> Dictionary:
 			count += 1
 	return {"kinds": kinds, "ditch": ditch_lists, "pond": pond_lists, "count": count}
 
+## Marks the tiles a hole reaches, and lists the holes for each. Such a tile is
+## built on the fine grid and leaves out the triangles inside a hole.
+func _mark_holes(origin: Vector2, tiles: Vector2i, carve: Dictionary) -> void:
+	var hole_lists := {}
+	var kinds: PackedByteArray = carve["kinds"]
+	var sources: Array[Node] = get_tree().get_nodes_in_group("terrain_hole") if is_inside_tree() else []
+	for node in sources:
+		if not node.has_method("terrain_holes"):
+			continue
+		var holes: PackedFloat32Array = node.terrain_holes()
+		var i := 0
+		while i + 5 < holes.size():
+			var reach := Vector2(holes[i + 4], holes[i + 5]).length()
+			for tile in _tiles_near(origin, tiles, holes[i] - reach, holes[i + 1] - reach, holes[i] + reach, holes[i + 1] + reach):
+				var index := tile.y * tiles.x + tile.x
+				if kinds[index] == KIND_FLAT:
+					kinds[index] = KIND_HOLE
+				if not hole_lists.has(index):
+					hole_lists[index] = PackedFloat32Array()
+				hole_lists[index].append_array(holes.slice(i, i + 6))
+			i += 6
+	carve["holes"] = hole_lists
+
 func _tiles_near(origin: Vector2, tiles: Vector2i, min_x: float, min_z: float, max_x: float, max_z: float) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
 	var x0 := clampi(floori((min_x - origin.x) / TILE), 0, tiles.x - 1)
@@ -174,7 +206,8 @@ func _build_arrays(origin: Vector2, tiles: Vector2i, carve: Dictionary) -> Dicti
 				_add_carved_tile(vertices, normals, indices, faces,
 					origin + Vector2(tx, tz) * TILE,
 					carve["ditch"].get(index, PackedFloat32Array()),
-					carve["pond"].get(index, PackedFloat32Array()))
+					carve["pond"].get(index, PackedFloat32Array()),
+					carve["holes"].get(index, PackedFloat32Array()))
 
 	var mesh_arrays := []
 	mesh_arrays.resize(Mesh.ARRAY_MAX)
@@ -194,9 +227,10 @@ func _add_flat_quad(vertices: PackedVector3Array, normals: PackedVector3Array, i
 	_add_triangle(indices, faces, vertices, base, base + 1, base + 2)
 	_add_triangle(indices, faces, vertices, base + 1, base + 3, base + 2)
 
-## One subdivided tile, heights from terrain_math against just the shapes that reach it.
-func _add_carved_tile(vertices: PackedVector3Array, normals: PackedVector3Array, indices: PackedInt32Array, faces: PackedVector3Array, corner: Vector2, ditch: PackedFloat32Array, pond: PackedFloat32Array) -> void:
-	var step := DITCH_STEP if ditch.size() > 0 else POND_STEP
+## One subdivided tile, heights from terrain_math against just the shapes that
+## reach it, less any cells whose centre falls in a hole.
+func _add_carved_tile(vertices: PackedVector3Array, normals: PackedVector3Array, indices: PackedInt32Array, faces: PackedVector3Array, corner: Vector2, ditch: PackedFloat32Array, pond: PackedFloat32Array, holes := PackedFloat32Array()) -> void:
+	var step := DITCH_STEP if ditch.size() > 0 or holes.size() > 0 else POND_STEP
 	var n := roundi(TILE / step)
 	# Heights on the tile's grid plus one ring outside it, so edge normals match the neighbour's.
 	var side := n + 3
@@ -213,6 +247,8 @@ func _add_carved_tile(vertices: PackedVector3Array, normals: PackedVector3Array,
 			normals.append(Vector3(heights[k - 1] - heights[k + 1], 2.0 * step, heights[k - side] - heights[k + side]).normalized())
 	for j in n:
 		for i in n:
+			if holes.size() > 0 and TerrainMath.in_hole(corner.x + (i + 0.5) * step, corner.y + (j + 0.5) * step, holes):
+				continue
 			var a := base + j * (n + 1) + i
 			var b := a + 1
 			var c := a + (n + 1)

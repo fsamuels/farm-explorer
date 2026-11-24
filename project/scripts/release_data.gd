@@ -6,12 +6,15 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**The House opens up.** Its front door on the east side opens (E) into one big white room.",
+				"**A trap door.** A wooden trap door in the white room's floor lifts to show concrete stairs going down.",
+				"**A bomb shelter.** At the foot of the stairs a steel blast door opens onto a corridor with three rooms: a munitions store with ammo racks, a gun rack and crates; a bunk room with a kitchenette; and a utility room with a generator, water tanks and air filters.",
 				"**Water row in the sky menu.** Open or shut the weir, fill or drain the ditch, set the pond empty, half or full, and speed the water up (x5 or x20) so you don't have to wait.",
 				"**Toasts.** Short notices fade in at the top of the screen. The first two: \"The pond is full\" and \"The pond is empty\".",
 				"**Swimming birds.** Once the pond has water, the ducks and geese head for it and float about on it, then walk out again if it dries."
 			],
-			"summary": "The sky menu (G) now controls the weir, ditch and pond; a toast tells you when the pond is full or empty; ducks and geese swim.",
-			"title": "November 24: Water controls, toasts and swimming birds"
+			"summary": "The sky menu (G) runs the weir, ditch and pond; ducks and geese swim; and a trap door in the House leads down to a bomb shelter.",
+			"title": "November 24: Water controls, swimming birds and a hidden bunker"
 		},
 		{
 			"bullets": [
@@ -207,14 +210,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 12609,
-		"commits": 280,
-		"decisions": 144,
+		"code_lines": 13379,
+		"commits": 135,
+		"decisions": 145,
 		"models": 14,
 		"scenes": 26,
-		"scripts": 55,
-		"size_kb": 113377,
-		"test_lines": 3519,
+		"scripts": 57,
+		"size_kb": 113361,
+		"test_lines": 3745,
 		"textures": 48,
 		"vehicles": 3
 	}

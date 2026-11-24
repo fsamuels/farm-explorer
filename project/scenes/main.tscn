@@ -63,6 +63,7 @@
 [ext_resource type="Script" path="res://scripts/terrain.gd" id="terrain_script"]
 [ext_resource type="Script" path="res://scripts/water_system.gd" id="water_system_script"]
 [ext_resource type="Script" path="res://scripts/toast.gd" id="toast_script"]
+[ext_resource type="Script" path="res://scripts/bunker.gd" id="bunker_script"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -929,10 +930,10 @@ length = 138.5497
 transform = Transform3D(10.644, 0, -5.0348, 0, 2.7, 0, 3.9134, 0, 13.694, 61.770, 1.35, -31.305)
 
 [node name="House Garage" parent="Buildings" instance=ExtResource("4_building_scene")]
-transform = Transform3D(7.9676, 0, -2.6207, 0, 2.7, 0, 2.4932, 0, 8.3753, 61.376, 1.35, -42.859)
+transform = Transform3D(7.9676, 0, -2.3549, 0, 2.7, 0, 2.4932, 0, 7.5259, 61.5089, 1.35, -43.2837)
 
 [node name="House South Wing" parent="Buildings" instance=ExtResource("4_building_scene")]
-transform = Transform3D(12.511, 0, -2.1478, 0, 2.7, 0, 4.5115, 0, 5.9561, 55.635, 1.35, -23.397)
+transform = Transform3D(12.511, 0, -1.8696, 0, 2.7, 0, 4.5115, 0, 5.1847, 55.4959, 1.35, -23.0113)
 
 [node name="Shop" parent="Buildings" unique_id=1803641495 instance=ExtResource("4_building_scene")]
 transform = Transform3D(14.87828, 0, 0.1571127, 0, 3.92, 0, -0.2265346, 0, 10.3188, 202.3329, 1.96, -52.5282)
@@ -1467,6 +1468,20 @@ script = ExtResource("57_sky_menu")
 
 [node name="Toast" type="CanvasLayer" parent="."]
 script = ExtResource("toast_script")
+
+[node name="HouseShell" type="Node3D" parent="Buildings"]
+script = ExtResource("58_building_shell")
+building_name = "House"
+skin_walls = PackedStringArray("north", "south", "east", "west")
+liner_color = Color(0.96, 0.96, 0.95, 1)
+floor_color = Color(0.9, 0.9, 0.88, 1)
+rise = 2.29095
+ridge_along_z = true
+light_count = 3
+doors = [{"wall": "east", "u": 0.637, "width": 0.95, "height": 2.1, "label": "front door"}]
+
+[node name="HouseBunker" type="Node3D" parent="Buildings"]
+script = ExtResource("bunker_script")
 
 [node name="SallysHouseShell" type="Node3D" parent="Buildings"]
 script = ExtResource("58_building_shell")
