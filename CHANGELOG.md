@@ -21,6 +21,11 @@ fails if the two disagree.
 - **Finding the keys.** The F1 help lists the torch keys, the bottom bar has a 1 — Torch hint, and the burn readout always says what to press.
 - **Just a start.** The hose and rake are still to come, and the east-west ditch to the pond does not burn yet.
 
+## November 24: Bedtime for the birds
+> The ducks and geese now come into their pen at sunset and go inside their house at dusk.
+- **Evening in the pen.** A little after sunset the ducks and geese leave the pond and field and gather in the pen in front of their house.
+- **Bedtime.** A little after dusk they file through the doorway into the house, and stay there all night until just after sunrise, when they come out to wander and swim again.
+
 ## November 24: Duck and geese house
 > The duck and geese house is built with its pen and gates, there's a second kayak, and the minimap's coordinates are big and click to copy.
 - **The house.** A small wood-and-tin shed stands by the pond: 16 feet long with its long side facing the pen, boards below and chain link above, tin walls, a roof sloping down to the back and sawdust underfoot. You can walk in through the open bay at the north end of its front.
