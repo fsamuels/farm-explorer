@@ -106,8 +106,8 @@ farm-sim/
     │   ├── shop_door.gd           # interactive door: swinging, sliding or roll-up leaf with collision, E to open — see D-98
     │   ├── vehicle.gd             # drivable car: E to get in/out, W/S/A/D/Space to drive, collides with the world — see D-106
     │   ├── transport_pad.gd       # transport point: invisible; the map lists it and `receive()` lands you beside it — see D-139
-    │   ├── activity_icon.gd       # the drawn icons and stars on the Things to Do card — see D-166
-    │   ├── things_to_do.gd        # the Things to Do card (H key): five things to try, teleport buttons, saved ticks — see D-165
+    │   ├── activity_icon.gd       # the drawn icons and stars on the Things to Do card — see D-168
+    │   ├── things_to_do.gd        # the Things to Do card (H key): five things to try, teleport buttons, saved ticks — see D-167
     │   ├── whats_new.gd           # the What's New dialog (C key): the changelog and game-size stats, from release_data.gd — see D-130
     │   ├── release_notes.gd       # parses CHANGELOG.md, counts the game's size; pure, covered by tests/ — see D-130
     │   ├── release_data.gd        # GENERATED from CHANGELOG.md by tools/build_release_notes.gd; do not edit — see D-130

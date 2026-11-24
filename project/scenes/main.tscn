@@ -475,10 +475,17 @@ point_count = 10
 
 [sub_resource type="Curve3D" id="Curve3D_backyard_south"]
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 22.400, 0, -22.700, 0, 0, 0, 0, 0, 0, 25.800, 0, -21.950, 0, 0, 0, 0, 0, 0, 29.200, 0, -21.200, 0, 0, 0, 0, 0, 0, 32.260, 0, -20.510, 0, 0, 0, 0, 0, 0, 35.320, 0, -19.820, 0, 0, 0, 0, 0, 0, 38.380, 0, -19.130, 0, 0, 0, 0, 0, 0, 41.440, 0, -18.440, 0, 0, 0, 0, 0, 0, 44.500, 0, -17.750, 0, 0, 0, 0, 0, 0, 47.560, 0, -17.060, 0, 0, 0, 0, 0, 0, 50.620, 0, -16.370, 0, 0, 0, 0, 0, 0, 53.680, 0, -15.680, 0, 0, 0, 0, 0, 0, 56.740, 0, -14.990, 0, 0, 0, 0, 0, 0, 59.800, 0, -14.300, 0, 0, 0, 0, 0, 0, 61.200, 0, -18.200),
-"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 22.400, 0, -22.700, 0, 0, 0, 0, 0, 0, 25.800, 0, -21.950, 0, 0, 0, 0, 0, 0, 29.200, 0, -21.200, 0, 0, 0, 0, 0, 0, 32.260, 0, -20.510, 0, 0, 0, 0, 0, 0, 35.400, 0, -19.800),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0)
 }
-point_count = 14
+point_count = 5
+
+[sub_resource type="Curve3D" id="Curve3D_chicken_run"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 61.200, 0, -18.200, 0, 0, 0, 0, 0, 0, 60.280, 0, -15.140, 0, 0, 0, 0, 0, 0, 59.360, 0, -12.080, 0, 0, 0, 0, 0, 0, 58.440, 0, -9.020, 0, 0, 0, 0, 0, 0, 57.520, 0, -5.960, 0, 0, 0, 0, 0, 0, 56.600, 0, -2.900, 0, 0, 0, 0, 0, 0, 53.543, 0, -3.971, 0, 0, 0, 0, 0, 0, 50.486, 0, -5.043, 0, 0, 0, 0, 0, 0, 47.429, 0, -6.114, 0, 0, 0, 0, 0, 0, 44.371, 0, -7.186, 0, 0, 0, 0, 0, 0, 41.314, 0, -8.257, 0, 0, 0, 0, 0, 0, 38.257, 0, -9.329, 0, 0, 0, 0, 0, 0, 35.200, 0, -10.400, 0, 0, 0, 0, 0, 0, 35.967, 0, -13.067, 0, 0, 0, 0, 0, 0, 36.733, 0, -15.733, 0, 0, 0, 0, 0, 0, 37.500, 0, -18.400),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 16
 
 [sub_resource type="Curve3D" id="Curve3D_backbarn_west"]
 _data = {
@@ -856,6 +863,14 @@ closed = false
 curve = SubResource("Curve3D_backyard_south")
 closed = false
 
+[node name="ChickenRun_Fence" parent="BackFences" instance=ExtResource("44_fence_path_scene")]
+curve = SubResource("Curve3D_chicken_run")
+closed = false
+
+[node name="ChickenRun_Gate" parent="BackFences" instance=ExtResource("45_gate_scene")]
+transform = Transform3D(0.8321, 0, -0.5547, 0, 1, 0, 0.5547, 0, 0.8321, 35.400, 0, -19.800)
+width = 2.524
+
 [node name="BackBarn_West" parent="BackFences" instance=ExtResource("44_fence_path_scene")]
 curve = SubResource("Curve3D_backbarn_west")
 closed = false
@@ -972,7 +987,7 @@ transform = Transform3D(0.9563, 0, -0.2924, 0, 1, 0, 0.2924, 0, 0.9563, 8.689, 0
 script = ExtResource("100_duck_house")
 
 [node name="Chicken Coop" parent="Buildings" instance=ExtResource("4_building_scene")]
-transform = Transform3D(-1.9202, 0, 1.1271, 0, 2.3, 0, -1.5028, 0, -1.4402, 48.7, 1.15, -14.6)
+transform = Transform3D(-2.2886, 0, 0.6311, 0, 2.3, 0, -0.8414, 0, -1.7165, 48.7, 1.15, -14.6)
 
 [node name="MeshInstance3D" parent="Buildings/Chicken Coop"]
 visible = false
@@ -981,7 +996,7 @@ visible = false
 disabled = true
 
 [node name="ChickenCoop" type="Node3D" parent="Buildings"]
-transform = Transform3D(-0.7875, 0, 0.6163, 0, 1, 0, -0.6163, 0, -0.7875, 48.7, 0, -14.6)
+transform = Transform3D(-0.9386, 0, 0.3451, 0, 1, 0, -0.3451, 0, -0.9386, 48.7, 0, -14.6)
 script = ExtResource("101_chicken_coop")
 
 [node name="Turn Out Shed 1" parent="Buildings" unique_id=863939474 instance=ExtResource("4_building_scene")]
@@ -1387,7 +1402,7 @@ roam_max_z = 64.0
 surface_material_override/0 = SubResource("StandardMaterial3D_coat_spotted_small")
 
 [node name="Flock" parent="." instance=ExtResource("6_flock_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 100, 0, -16.096)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 45, 0, -14)
 
 [node name="Coyote" parent="." instance=ExtResource("7_coyote_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -70, 0, 140)

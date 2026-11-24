@@ -1,5 +1,5 @@
 extends SceneTree
-## Tests for the Things to Do card (D-165). Run headless from project/:
+## Tests for the Things to Do card (D-167). Run headless from project/:
 ##   godot --headless -s res://tests/test_things_to_do.gd
 
 const ThingsToDo := preload("res://scripts/things_to_do.gd")

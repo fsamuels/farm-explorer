@@ -1,6 +1,6 @@
 extends Control
 ## Read-only controls help panel (D-90). F1 (`toggle_help`) hides/shows it. It no
-## longer opens at the start: the Things to Do list does (D-166). While hidden, a
+## longer opens at the start: the Things to Do list does (D-168). While hidden, a
 ## small "F1 — Controls" hint stays in the corner. Purely informational: it never
 ## takes the mouse.
 ##

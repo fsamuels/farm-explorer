@@ -1,5 +1,5 @@
 extends CanvasLayer
-## The Things to Do card (D-165): a short list of what a new player can try, each
+## The Things to Do card (D-167): a short list of what a new player can try, each
 ## with a "Take me there" button that teleports them to the spot, a Done tick
 ## once they have done it, and (for the paddle) a "Fill the pond" shortcut so
 ## the kayak has water without waiting for the weir. H (`toggle_things_to_do`)
@@ -9,7 +9,7 @@ extends CanvasLayer
 ##
 ## When the game starts a small read-only version of the list (no buttons, never
 ## takes the mouse) shows in the top left in place of the F1 controls panel
-## (D-166). It tucks itself away after HIDE_AFTER_MOVING seconds of walking or
+## (D-168). It tucks itself away after HIDE_AFTER_MOVING seconds of walking or
 ## driving, or when you press any other key, like the controls panel does.
 ##
 ## What counts as done is watched while you play (the fire quest, the weir, who

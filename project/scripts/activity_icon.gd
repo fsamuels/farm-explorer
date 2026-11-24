@@ -1,5 +1,5 @@
 extends Control
-## A little cartoon icon for a Things to Do row (D-166), drawn in code so there
+## A little cartoon icon for a Things to Do row (D-168), drawn in code so there
 ## are no image files: a flame, the weir's hand wheel, a kayak, the Cub Cadet, a
 ## car. Once the thing is done a green badge with a tick sits in its corner.
 ## Also draws the row of stars that fill in as things get done (kind "stars").
