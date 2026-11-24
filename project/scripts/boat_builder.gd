@@ -1,5 +1,5 @@
 extends RefCounted
-## Builds the kayak's model from primitives (D-150): a lofted hull, a seat and a
+## Builds the kayak's model from primitives (D-151): a lofted hull, a seat and a
 ## double-bladed paddle. The origin is the waterline, the bow points to -Z.
 
 const LENGTH := 3.4

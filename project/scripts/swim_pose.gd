@@ -1,5 +1,5 @@
 extends RefCounted
-## Poses the player's skeleton for the breaststroke (D-150). The imported walk
+## Poses the player's skeleton for the breaststroke (D-151). The imported walk
 ## and run animations know nothing about swimming, so while swimming the
 ## animation player is paused and this sets the arm and leg bones directly from
 ## swim_math.gd's directions, aiming each bone from its rest direction.

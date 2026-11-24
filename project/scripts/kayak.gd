@@ -1,5 +1,5 @@
 extends "res://scripts/vehicle.gd"
-## A one-person kayak (D-150): vehicle.gd's arcade steering on the water. It
+## A one-person kayak (D-151): vehicle.gd's arcade steering on the water. It
 ## floats on whatever water is under it (the pond, or a brimming ditch), bobbing
 ## a little, and the paddle swings while you move. Shallows stop it, because
 ## its hull is a box that meets the sloping bank; on dry ground it can only be

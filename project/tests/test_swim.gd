@@ -1,5 +1,5 @@
 extends SceneTree
-## Tests for swimming and the kayak (D-150): scripts/swim_math.gd (pure), the
+## Tests for swimming and the kayak (D-151): scripts/swim_math.gd (pure), the
 ## breaststroke pose (swim_pose.gd) on the real player skeleton, then the player
 ## and the kayak in main.tscn on a full pond. Run headless from project/:
 ##   godot --headless -s res://tests/test_swim.gd
