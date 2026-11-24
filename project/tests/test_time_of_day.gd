@@ -167,7 +167,15 @@ func _test_scene() -> void:
 	tod.transition_seconds = 0.05
 	_press(KEY_T)
 	await process_frame
-	_check(not tod.clock_running and tod.current == "dawn" and is_equal_approx(tod.hour, 5.5), "T stops the clock and jumps to the next preset")
+	_check(tod.clock_running and tod.current == "dawn" and absf(tod.hour - 5.5) < 0.1, "T jumps to the next preset and a running clock keeps running: %s %s %s" % [tod.clock_running, tod.current, tod.hour])
+	for i in 10:
+		await process_frame
+	_check(tod.hour > 5.5, "the clock carries on from the new hour")
+	_press(KEY_Y)
+	await process_frame
+	_press(KEY_T)
+	await process_frame
+	_check(not tod.clock_running and tod.current == "sunrise" and is_equal_approx(tod.hour, 6.5), "T with the clock paused leaves it paused")
 	main.queue_free()
 
 func _forward(euler_deg: Vector3) -> Vector3:

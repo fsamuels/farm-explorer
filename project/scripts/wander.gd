@@ -92,16 +92,15 @@ func _update_phase() -> void:
 	var here := Vector2(global_position.x, global_position.z)
 	match phase:
 		Phase.PEN:
-			_route = _house.route_to_front(here)
+			_route = _house.route_to_pen_front(here)   # in through the gap by the tanks
 			_route.append(_house.pen_point())
 		Phase.ROOST:
 			if not _house.is_inside(here):
-				_route = _house.route_to_front(here)
+				_route = _house.route_to_pen_front(here)
 				_route.append(_house.door_outside())
 				_route.append(_house.door_inside())
 		Phase.FREE:
-			if _house.is_inside(here):
-				_route = _house.route_to_front(here)   # out through the door first
+			_route = _house.route_out_of_pen(here)   # out of the door and the gap first
 	_pick_new_target()
 
 func _go_to(spot: Vector2) -> void:
@@ -162,12 +161,24 @@ func _pick_new_target() -> void:
 	if evening_routine and _phase != Phase.FREE:
 		_routine_target()
 		return
-	if swims and _pick_swim_target():
+	if not (swims and _pick_swim_target()):
+		var angle := randf_range(0.0, TAU)
+		var radius := randf_range(0.0, wander_radius)
+		target_position = home_position + Vector3(cos(angle), 0.0, sin(angle)) * radius
+		is_walking = true
+	if evening_routine:
+		_detour_round_pen()
+
+## Out and about, walk round the duck pen rather than across its fences.
+func _detour_round_pen() -> void:
+	if not _find_routine_nodes():
 		return
-	var angle := randf_range(0.0, TAU)
-	var radius := randf_range(0.0, wander_radius)
-	target_position = home_position + Vector3(cos(angle), 0.0, sin(angle)) * radius
-	is_walking = true
+	var to: Vector3 = get_parent().to_global(target_position) if get_parent() is Node3D else target_position
+	var target := Vector2(to.x, to.z)
+	_route = _house.detour_round_pen(Vector2(global_position.x, global_position.z), target)
+	if not _route.is_empty():
+		_route.append(target)
+		_go_to(_route.pop_front())
 
 func _process(delta: float) -> void:
 	if evening_routine:

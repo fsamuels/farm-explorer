@@ -366,8 +366,11 @@ func _process(delta: float) -> void:
 	if clock_running:
 		hour = fposmod(hour + delta * 24.0 / maxf(day_seconds, 1.0), 24.0)
 		current = keyframe_before(hour)
-		sky_hour = hour
-		_apply(preset_at_hour(hour))
+		# While T's blend to a new preset runs, it draws the sky; the clock takes
+		# over again when the blend ends.
+		if _tween == null or not _tween.is_running():
+			sky_hour = hour
+			_apply(preset_at_hour(hour))
 		_refresh_clock_label()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -376,7 +379,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if get_tree().paused:
 		return
 	if event.is_action_pressed("cycle_time_of_day"):
-		set_preset(next_preset(current))
+		set_preset(next_preset(current), false, true)
 		get_viewport().set_input_as_handled()
 	elif event.is_action_pressed("toggle_clock"):
 		set_clock_running(not clock_running)
@@ -476,14 +479,17 @@ func set_clock_running(on: bool) -> void:
 	show_toast("Clock running" if on else "Clock paused at " + format_hour(hour))
 
 ## Switch to preset `preset_name`, blending from whatever is on screen now (so a
-## second press mid-transition starts from the half-blended state).
-func set_preset(preset_name: String, instant := false) -> void:
+## second press mid-transition starts from the half-blended state). It stops the
+## clock unless `keep_clock`, which T passes so a running clock carries on from
+## the new hour (D-163).
+func set_preset(preset_name: String, instant := false, keep_clock := false) -> void:
 	if not PRESETS.has(preset_name):
 		push_warning("Unknown time-of-day preset '%s'" % preset_name)
 		return
 	current = preset_name
 	hour = hour_of(preset_name)
-	clock_running = false  # picking a preset stops the clock
+	if not keep_clock:
+		clock_running = false  # picking a preset stops the clock
 	_refresh_clock_label()
 	var target: Dictionary = PRESETS[preset_name]
 	if _tween:

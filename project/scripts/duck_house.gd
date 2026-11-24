@@ -117,6 +117,106 @@ func route_to_front(p: Vector2) -> Array[Vector2]:
 	out.append(world_xz(Vector2(hx, end_z)))    # then the front corner
 	return out
 
+## The pen (D-163). The birds' only way in and out is the gap between the house's
+## south-east corner and the first post of the south fence (`DuckPen_SouthEast`
+## in main.tscn), which stands just west of the bigger tank. The outline runs
+## round the pen in world x, z: the house, the south and east fences, the gate's
+## posts, the Back Barn pen's south fence and the west fence back to the house.
+const GAP_POST := Vector2(11.3, 17.313)
+const PEN_OUTLINE := [
+	Vector2(11.3, 17.313), Vector2(19.8, 19.9), Vector2(22.7, 9.6), Vector2(20.1, 9.0),
+	Vector2(20.2, 4.75), Vector2(10.25, 1.68), Vector2(7.95, 11.19),
+]
+## Outside the pen's south-east corner, for birds coming from the east.
+const PEN_CORNER_OUTSIDE := Vector2(20.6, 20.8)
+## How far either side of the fence line the birds line up to pass the gap.
+const GAP_CLEARANCE := 1.0
+
+## The middle of the gap, and the points just inside and outside it.
+func gap_middle() -> Vector2:
+	return (world_xz(Vector2(DEPTH * 0.5, LENGTH * 0.5)) + GAP_POST) * 0.5
+
+func _gap_inward() -> Vector2:
+	var along := (GAP_POST - world_xz(Vector2(DEPTH * 0.5, LENGTH * 0.5))).normalized()
+	return Vector2(along.y, -along.x)   # turned toward the pen (north)
+
+func gap_inside() -> Vector2:
+	return gap_middle() + _gap_inward() * GAP_CLEARANCE
+
+func gap_outside() -> Vector2:
+	return gap_middle() - _gap_inward() * GAP_CLEARANCE
+
+## The pen's outline as a polygon, with the house's two back corners.
+func pen_polygon() -> PackedVector2Array:
+	var poly := PackedVector2Array(PEN_OUTLINE)
+	poly.append(world_xz(Vector2(-DEPTH * 0.5, LENGTH * 0.5)))   # house, south-west
+	poly.append(world_xz(Vector2(DEPTH * 0.5, LENGTH * 0.5)))    # house, south-east
+	return poly
+
+## True if world point `p` is in the pen or the house.
+func in_pen(p: Vector2) -> bool:
+	return Geometry2D.is_point_in_polygon(p, pen_polygon())
+
+## Waypoints that bring a bird at `p` to just inside the gap without crossing a
+## fence or the house: round the pen's south-east corner if it is east of the
+## pen, round the house's south-west corner if it is behind the house.
+func route_into_pen(p: Vector2) -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	if in_pen(p):
+		return out
+	var q := local_xz(p)
+	if p.x > PEN_CORNER_OUTSIDE.x - 1.0 and p.y < PEN_CORNER_OUTSIDE.y:
+		out.append(PEN_CORNER_OUTSIDE)
+	elif q.x < -DEPTH * 0.5 and q.y < LENGTH * 0.5 + CORNER_CLEARANCE:
+		out.append(world_xz(Vector2(-DEPTH * 0.5 - CORNER_CLEARANCE, LENGTH * 0.5 + CORNER_CLEARANCE)))
+	out.append(gap_outside())
+	out.append(gap_inside())
+	return out
+
+## Waypoints from anywhere in the pen or house out through the gap.
+func route_out_of_pen(p: Vector2) -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	if not in_pen(p):
+		return out
+	out = route_to_front(p)
+	out.append(gap_inside())
+	out.append(gap_outside())
+	return out
+
+## True if the straight walk from `a` to `b` goes in or out of the pen anywhere.
+func crosses_pen(a: Vector2, b: Vector2) -> bool:
+	var poly := pen_polygon()
+	for i in poly.size():
+		if Geometry2D.segment_intersects_segment(a, b, poly[i], poly[(i + 1) % poly.size()]) != null:
+			return true
+	return false
+
+## Waypoints that take a bird outside the pen from `a` to `b` round the pen's south
+## side (past the house's south-west corner, the gap and the pen's south-east
+## corner) instead of across it. Empty if the straight walk misses the pen.
+func detour_round_pen(a: Vector2, b: Vector2) -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	if in_pen(a) or in_pen(b) or not crosses_pen(a, b):
+		return out
+	var chain: Array[Vector2] = [
+		world_xz(Vector2(-DEPTH * 0.5 - CORNER_CLEARANCE, LENGTH * 0.5 + CORNER_CLEARANCE)),
+		gap_outside(), PEN_CORNER_OUTSIDE,
+	]
+	if a.x > b.x:
+		chain.reverse()
+	var lo := minf(a.x, b.x)
+	var hi := maxf(a.x, b.x)
+	for c in chain:
+		if c.x > lo and c.x < hi:
+			out.append(c)
+	return out
+
+## Waypoints from anywhere to the front of the house, inside the pen.
+func route_to_pen_front(p: Vector2) -> Array[Vector2]:
+	if in_pen(p):
+		return route_to_front(p)
+	return route_into_pen(p)
+
 func _ready() -> void:
 	add_to_group("duck_house")
 	# Sit on the ground; the foot of the walls follows the carved terrain.
