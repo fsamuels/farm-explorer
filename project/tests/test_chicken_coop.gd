@@ -109,7 +109,12 @@ func _run() -> void:
 	for i in run.size() - 1:
 		_check(run[i].distance_to(run[i + 1]) < 3.6, "the run fence has a post at least every 3.6 m (span %d)" % i)
 	var yard := _fence_points(main, "BackYard_South")
-	_check(yard.back().distance_to(run.back()) < 0.05, "the back-yard fence ends where the run fence joins it")
+	var gate := main.get_node("BackFences/ChickenRun_Gate") as Node3D
+	var hinge := Vector2(gate.global_position.x, gate.global_position.z)
+	var latch_world := gate.to_global(Vector3(gate.get("width"), 0.0, 0.0))
+	_check(hinge.distance_to(Vector2(35.4, -19.8)) < 0.05, "the gate is hinged on the post at 35.4, -19.8")
+	_check(yard.back().distance_to(hinge) < 0.05, "the back-yard fence ends at the gate's hinge post")
+	_check(Vector2(latch_world.x, latch_world.z).distance_to(run.back()) < 0.1, "the gate's open end is on the post where the run fence ends")
 	for p in yard:
 		_check(p.x < 38.0, "no back-yard fence point stays east of the join")
 	var here := Vector2(coop.global_position.x, coop.global_position.z)

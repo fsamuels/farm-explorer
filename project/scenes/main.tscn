@@ -474,10 +474,10 @@ point_count = 10
 
 [sub_resource type="Curve3D" id="Curve3D_backyard_south"]
 _data = {
-"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 22.400, 0, -22.700, 0, 0, 0, 0, 0, 0, 25.800, 0, -21.950, 0, 0, 0, 0, 0, 0, 29.200, 0, -21.200, 0, 0, 0, 0, 0, 0, 32.260, 0, -20.510, 0, 0, 0, 0, 0, 0, 35.320, 0, -19.820, 0, 0, 0, 0, 0, 0, 37.500, 0, -18.400),
-"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0)
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 22.400, 0, -22.700, 0, 0, 0, 0, 0, 0, 25.800, 0, -21.950, 0, 0, 0, 0, 0, 0, 29.200, 0, -21.200, 0, 0, 0, 0, 0, 0, 32.260, 0, -20.510, 0, 0, 0, 0, 0, 0, 35.400, 0, -19.800),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0)
 }
-point_count = 6
+point_count = 5
 
 [sub_resource type="Curve3D" id="Curve3D_chicken_run"]
 _data = {
@@ -865,6 +865,10 @@ closed = false
 [node name="ChickenRun_Fence" parent="BackFences" instance=ExtResource("44_fence_path_scene")]
 curve = SubResource("Curve3D_chicken_run")
 closed = false
+
+[node name="ChickenRun_Gate" parent="BackFences" instance=ExtResource("45_gate_scene")]
+transform = Transform3D(0.8321, 0, -0.5547, 0, 1, 0, 0.5547, 0, 0.8321, 35.400, 0, -19.800)
+width = 2.524
 
 [node name="BackBarn_West" parent="BackFences" instance=ExtResource("44_fence_path_scene")]
 curve = SubResource("Curve3D_backbarn_west")

@@ -7,7 +7,7 @@ const DATA := {
 		{
 			"bullets": [
 				"**A new chicken coop.** A walk-in coop with a tan roosting house and window at one end, a white nest box, wire-mesh runs in a red frame and a silver galvanized steel roof that slopes down to the back stands behind the house, squared to its south wall. Its door is open and faces the house.",
-				"**A new fenced yard.** A fence now runs from the house out round the coop and back to the back-yard fence. The old stretch of back-yard fence that ran past the coop is gone."
+				"**A new fenced yard.** A fence now runs from the house out round the coop and back to the back-yard fence. The old stretch of back-yard fence that ran past the coop is gone. A gate on the west side lets you in."
 			],
 			"summary": "A red-and-tan chicken coop now stands near the house, in a new fenced yard, with a silver roof and its door on the house side.",
 			"title": "November 24: Chicken coop"
@@ -295,13 +295,13 @@ const DATA := {
 	],
 	"stats": {
 		"code_lines": 17109,
-		"commits": 297,
+		"commits": 299,
 		"decisions": 165,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 76,
-		"size_kb": 115489,
-		"test_lines": 5399,
+		"size_kb": 115490,
+		"test_lines": 5409,
 		"textures": 49,
 		"vehicles": 3
 	}
