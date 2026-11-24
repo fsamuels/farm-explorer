@@ -252,8 +252,11 @@ func _on_full_map_input(event: InputEvent) -> void:
 			MOUSE_BUTTON_LEFT:
 				_dragging = button.pressed
 				if button.pressed and button.double_click:
+					var vehicle := _vehicle_at(button.position)
 					var place := _place_at(button.position)
-					if place != -1:
+					if vehicle != -1:
+						_teleport_to_vehicle(vehicle)
+					elif place != -1:
 						_teleport_to_place(place)
 					else:
 						_teleport_to(MapMath.footprint_at(_full.to_world(button.position), _data.footprints))
@@ -315,6 +318,35 @@ func _place_at(screen: Vector2) -> int:
 			best_dist = d
 	return best
 
+## Index into data.vehicles of the vehicle marker under `screen`, or -1.
+func _vehicle_at(screen: Vector2) -> int:
+	var best := -1
+	var best_dist := PLACE_PICK_RADIUS
+	for i in _data.vehicles.size():
+		var car: Node3D = _data.vehicles[i]
+		if not is_instance_valid(car):
+			continue
+		var d: float = _full.to_screen(MapMath.flatten(car.global_position)).distance_to(screen)
+		if d <= best_dist:
+			best = i
+			best_dist = d
+	return best
+
+## Moves the player beside a vehicle, facing the way it points, and closes the
+## map (D-144). Not while driving, and not into a car someone is driving.
+func _teleport_to_vehicle(index: int) -> void:
+	if index == -1 or player.get("vehicle") != null:
+		return
+	var car: Node3D = _data.vehicles[index]
+	if car.driver != null:
+		return
+	var spot: Vector3 = car.map_arrival_spot()
+	player.global_transform = Transform3D(Basis(Vector3.UP, car.global_rotation.y), Vector3(spot.x, player.global_position.y, spot.z))
+	player.velocity = Vector3.ZERO
+	player.model_yaw = 0.0
+	trail.clear()
+	set_open(false)
+
 ## Moves the player to a transport point in the back pastures and closes the
 ## map (D-139). Not while driving, like building teleports.
 func _teleport_to_place(index: int) -> void:
@@ -345,8 +377,13 @@ func _update_full_map(here: Vector2) -> void:
 	_full.highlighted_building = hovered
 	var hovered_place := _place_at(_full.get_local_mouse_position())
 	_full.highlighted_place = hovered_place
-	# A marker wins over a building under it, as it does on double-click.
-	if hovered_place != -1:
+	var hovered_vehicle := _vehicle_at(_full.get_local_mouse_position())
+	_full.highlighted_vehicle = hovered_vehicle
+	# Vehicles, then markers, win over a building under them, as on double-click.
+	if hovered_vehicle != -1:
+		hovered_place = -1
+		_full.highlighted_place = -1
+	if hovered_vehicle != -1 or hovered_place != -1:
 		hovered = -1
 		_full.highlighted_building = -1
 
@@ -367,6 +404,9 @@ func _update_full_map(here: Vector2) -> void:
 	if hovered_place != -1:
 		var hint := "get out of the car to teleport" if player.get("vehicle") != null else "double-click to teleport"
 		cursor_text = "%s  (%s)   ·   %s" % [_data.places[hovered_place].name, hint, cursor_text]
+	if hovered_vehicle != -1:
+		var hint := "get out of the car to teleport" if player.get("vehicle") != null else "double-click to teleport"
+		cursor_text = "%s  (%s)   ·   %s" % [_data.vehicles[hovered_vehicle].label, hint, cursor_text]
 	_cursor_label.text = cursor_text
 
 func _minimap_text(here: Vector2) -> String:

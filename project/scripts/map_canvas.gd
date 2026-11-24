@@ -19,6 +19,7 @@ const HORSE_COLOR := Color(0.62, 0.38, 0.18)
 const TRAIL_COLOR := Color(0.35, 0.82, 1.0, 0.8)
 const WAYPOINT_COLOR := Color(0.25, 0.95, 0.45)
 const PLAYER_COLOR := Color(1.0, 0.22, 0.15)
+const VEHICLE_COLOR := Color(1.0, 0.6, 0.15)
 const PLACE_COLOR := Color(0.35, 0.85, 1.0)
 const LABEL_COLOR := Color(1, 1, 1)
 const OUTLINE_COLOR := Color(0, 0, 0)
@@ -57,8 +58,10 @@ var marker_scale := 1.0
 var highlighted_building := -1
 ## Index into data.places to highlight, or -1.
 var highlighted_place := -1
-## Draw the transport-point markers (the full map only; the minimap is too small).
+## Draw the transport-point and vehicle markers (the full map only; the minimap is too small).
 var show_places := false
+## Index into data.vehicles to highlight, or -1.
+var highlighted_vehicle := -1
 
 ## Screen rects of the labels drawn so far this frame, to avoid overlaps.
 var _placed_labels: Array[Rect2] = []
@@ -125,6 +128,7 @@ static func collect(tree: SceneTree) -> Dictionary:
 		"bounds": MapMath.bounds_of(bounds_points),
 		"buildings": buildings,
 		"places": places,
+		"vehicles": tree.get_nodes_in_group("map_vehicle"),
 		"footprints": buildings.map(func(b): return b.poly),
 		"fences": fences,
 		"boundary": boundary,
@@ -162,6 +166,7 @@ func _draw() -> void:
 		_draw_building_labels()
 	if show_places:
 		_draw_places()
+		_draw_vehicles()
 	if show_horses:
 		_draw_horses()
 	if waypoint != null:
@@ -207,6 +212,34 @@ func _draw_horses() -> void:
 			var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, label_size)
 			if _try_place(Rect2(at - text_size * 0.5, text_size)):
 				_draw_label(font, text, at, label_size, Color(1, 0.9, 0.75))
+
+## Each driveable vehicle as a rotated box with its name; vehicles move, so
+## they are read from the nodes every frame (D-144).
+func _draw_vehicles() -> void:
+	var font := get_theme_default_font()
+	for i in data.vehicles.size():
+		var car: Node3D = data.vehicles[i]
+		if not is_instance_valid(car):
+			continue
+		var p := to_screen(MapMath.flatten(car.global_position))
+		var forward := Vector2(-sin(car.global_rotation.y), -cos(car.global_rotation.y))
+		var side := forward.orthogonal()
+		var half_l := maxf(car.half_length * scale_px, 6.0 * marker_scale)
+		var half_w := maxf(car.half_width * scale_px, 3.5 * marker_scale)
+		var box := PackedVector2Array([p + forward * half_l + side * half_w, p + forward * half_l - side * half_w,
+				p - forward * half_l - side * half_w, p - forward * half_l + side * half_w])
+		var outline := PackedVector2Array()
+		for v in box:
+			outline.append(p + (v - p) * 1.25)
+		draw_colored_polygon(outline, OUTLINE_COLOR)
+		draw_colored_polygon(box, Color(1.0, 0.85, 0.35) if i == highlighted_vehicle else VEHICLE_COLOR)
+		# A nose mark so you can tell which way it points.
+		draw_line(p, p + forward * half_l, OUTLINE_COLOR, 2.0 * marker_scale)
+		if show_labels:
+			var text_size := font.get_string_size(car.label, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
+			var at := p + Vector2(0, half_l + 6 + text_size.y * 0.5)
+			if _try_place(Rect2(at - text_size * 0.5, text_size)):
+				_draw_label(font, car.label, at, font_size, VEHICLE_COLOR)
 
 ## A diamond and name for each transport point, brighter under the cursor.
 func _draw_places() -> void:

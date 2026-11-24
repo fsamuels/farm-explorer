@@ -45,6 +45,14 @@ const DATA := {
 		},
 		{
 			"bullets": [
+				"**Driveable vehicles on the map.** The Triumph TR6, BMW 2002tii and Cub Cadet 550 show as orange cars with their names, pointing the way they face and moving when they do.",
+				"**Jump to a car.** Double-click one to land beside it, ready to press E and get in."
+			],
+			"summary": "The map (M) now shows the TR6, BMW and Cub Cadet UTV; double-click one to jump to it.",
+			"title": "November 23: Cars on the map"
+		},
+		{
+			"bullets": [
 				"**Pasture teleports on the map.** Five spots in the back pastures now show as blue diamonds with names on the full map. Double-click one to go there, as you can with any building.",
 				"**No more glowing pads.** The pads and pillars of light are gone; the spots are invisible in the world and only exist on the map."
 			],
@@ -199,14 +207,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 12529,
-		"commits": 278,
-		"decisions": 143,
+		"code_lines": 12609,
+		"commits": 280,
+		"decisions": 144,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 55,
-		"size_kb": 113369,
-		"test_lines": 3482,
+		"size_kb": 113377,
+		"test_lines": 3519,
 		"textures": 48,
 		"vehicles": 3
 	}
