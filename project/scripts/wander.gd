@@ -1,7 +1,6 @@
 extends Node3D
 
 const TerrainMath := preload("res://scripts/terrain_math.gd")
-const DuckHouse := preload("res://scripts/duck_house.gd")
 
 ## The evening routine (D-161): a little after sunset (18:30) the birds come in to
 ## the pen by their house, and a little after dusk (19:30) they go inside, until
@@ -22,6 +21,13 @@ enum Phase { FREE, PEN, ROOST }
 @export var swims := false
 ## Whether this bird puts itself away in the evening (the duck house's pen, then the house).
 @export var evening_routine := false
+## The group of the building it goes to, and its own hours (clock hours): the
+## pen and then the house for the ducks, only the coop for the chickens, who go
+## in earlier and come out later (D-166).
+@export var routine_group: StringName = &"duck_house"
+@export var pen_hour := PEN_HOUR
+@export var roost_hour := ROOST_HOUR
+@export var release_hour := RELEASE_HOUR
 ## Speed on the water, slower than walking.
 @export var swim_speed := 0.5
 
@@ -51,6 +57,7 @@ var _phase := Phase.FREE
 ## Waypoints (world x, z) still to walk before wandering inside the house.
 var _route: Array[Vector2] = []
 var _warned := false
+var _warned_api := false
 var _bob_phase := 0.0
 
 func _ready() -> void:
@@ -61,29 +68,43 @@ func _ready() -> void:
 
 ## Which part of the evening routine the clock is in at hour `h`.
 static func phase_at(h: float) -> Phase:
+	return phase_for(h, PEN_HOUR, ROOST_HOUR, RELEASE_HOUR)
+
+## The same for a bird with its own hours.
+static func phase_for(h: float, pen: float, roost: float, release: float) -> Phase:
 	h = fposmod(h, 24.0)
-	if h >= ROOST_HOUR or h < RELEASE_HOUR:
+	if h >= roost or h < release:
 		return Phase.ROOST
-	if h >= PEN_HOUR:
+	if h >= pen:
 		return Phase.PEN
 	return Phase.FREE
 
 func _find_routine_nodes() -> bool:
 	if _tod == null or not is_instance_valid(_tod):
-		_tod = get_parent().get_node_or_null("TimeOfDay") if get_parent() else null
+		# The clock sits beside the bird, or beside one of its parents (the flock).
+		var up := get_parent()
+		while up != null and _tod == null:
+			_tod = up.get_node_or_null("TimeOfDay")
+			up = up.get_parent()
 	if _house == null or not is_instance_valid(_house):
-		_house = get_tree().get_first_node_in_group("duck_house")
+		_house = get_tree().get_first_node_in_group(routine_group)
 	var found := _tod != null and _house != null
+	if found and not _warned_api:
+		_warned_api = true
+		for m in ["is_inside", "door_inside", "door_outside", "roost_point", "pen_point", "pen_radius", "roost_radius", "route_to_pen_front", "route_out_of_pen", "detour_round_pen"]:
+			if not _house.has_method(m):
+				push_warning("%s: %s lacks %s() for the evening routine" % [name, routine_group, m])
+				found = false
 	if not found and not _warned:
 		_warned = true
-		push_warning("%s: evening_routine needs a TimeOfDay sibling and a duck_house; staying out" % name)
+		push_warning("%s: evening_routine needs a TimeOfDay and a building in group %s; staying out" % [name, routine_group])
 	return found
 
 ## Follow the clock into a new phase: head for the pen or the house, or go back to wandering.
 func _update_phase() -> void:
 	if not _find_routine_nodes():
 		return
-	var phase := phase_at(_tod.hour)
+	var phase := phase_for(_tod.hour, pen_hour, roost_hour, release_hour)
 	if phase == _phase:
 		return
 	_phase = phase
@@ -111,7 +132,7 @@ func _go_to(spot: Vector2) -> void:
 ## A spot to amble to while penned or roosting.
 func _routine_target() -> void:
 	var centre: Vector2 = _house.pen_point() if _phase == Phase.PEN else _house.roost_point()
-	var radius: float = DuckHouse.PEN_RADIUS if _phase == Phase.PEN else DuckHouse.ROOST_RADIUS
+	var radius: float = _house.pen_radius() if _phase == Phase.PEN else _house.roost_radius()
 	_go_to(centre + Vector2.from_angle(randf() * TAU) * randf() * radius)
 
 func _start_idle() -> void:
@@ -166,8 +187,23 @@ func _pick_new_target() -> void:
 		var radius := randf_range(0.0, wander_radius)
 		target_position = home_position + Vector3(cos(angle), 0.0, sin(angle)) * radius
 		is_walking = true
+		_keep_out_of_building()
 	if evening_routine:
 		_detour_round_pen()
+
+## Pick the wander target again, a few times, if it is inside a building (the coop).
+func _keep_out_of_building() -> void:
+	if not evening_routine or not _find_routine_nodes() or not _house.has_method("is_blocked"):
+		return
+	for i in 9:
+		var to: Vector3 = get_parent().to_global(target_position) if get_parent() is Node3D else target_position
+		if not _house.is_blocked(Vector2(to.x, to.z)):
+			return
+		if i == 8:
+			break
+		var angle := randf_range(0.0, TAU)
+		target_position = home_position + Vector3(cos(angle), 0.0, sin(angle)) * randf_range(0.0, wander_radius)
+	target_position = home_position   # eight bad draws: stay put rather than lean on a wall
 
 ## Out and about, walk round the duck pen rather than across its fences.
 func _detour_round_pen() -> void:
