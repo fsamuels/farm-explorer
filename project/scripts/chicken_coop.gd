@@ -170,6 +170,14 @@ func detour_round_pen(a: Vector2, b: Vector2) -> Array[Vector2]:
 			if len2 < best:
 				best = len2
 				out = [c1, c2]
+	if out.is_empty():
+		# Nothing clears it cleanly (the bird is right against a wall): go by the
+		# corner that is nearest the bird, rather than straight through.
+		var near := corners[0]
+		for c in corners:
+			if a.distance_to(c) < a.distance_to(near):
+				near = c
+		out = [near]
 	return out
 
 ## Waypoints from anywhere to just outside the door: out of the coop through the
@@ -273,8 +281,12 @@ func _run_walls(body: StaticBody3D, hx: float, hz: float) -> void:
 	var run_mid := (xl + hx) * 0.5
 	var h_back := roof_height(-hz) - 0.06
 	_mesh_panel(body, Vector3(run_w, h_back - 0.12, 0.03), Vector3(run_mid, 0.12 + (h_back - 0.12) * 0.5, -hz + 0.03))
-	var h_end := roof_height(0.0) - 0.18
-	_mesh_panel(body, Vector3(0.03, h_end, DEPTH - 0.2), Vector3(hx - 0.03, 0.12 + h_end * 0.5, 0.0))
+	# The east end, in three slices that each stop under the sloping roof.
+	var slice := (DEPTH - 0.2) / 3.0
+	for k in 3:
+		var z0 := -hz + 0.1 + slice * k
+		var h_end := roof_height(z0) - 0.18
+		_mesh_panel(body, Vector3(0.03, h_end, slice), Vector3(hx - 0.03, 0.12 + h_end * 0.5, z0 + slice * 0.5))
 	# Mid-rails of red on the run's walls, as in the photos.
 	for sz in [-1.0, 1.0]:
 		_box(self, Vector3(run_w, 0.08, FRAME), Vector3(run_mid, 1.0, sz * (hz - FRAME * 0.5)), RED)
@@ -312,6 +324,7 @@ func _roof(body: StaticBody3D) -> void:
 	var length := sqrt(DEPTH * DEPTH + rise * rise) + 0.5
 	var mid_y := (EAVE_HIGH + EAVE_LOW) * 0.5
 	var roof := _box(body, Vector3(WIDTH + 0.5, 0.06, length), Vector3(0.0, mid_y + 0.03, 0.0), TIN, true)
+	roof.name = "Roof"
 	roof.rotation.x = slope
 	(body.get_child(body.get_child_count() - 1) as CollisionShape3D).rotation.x = slope
 	_galvanize(roof)

@@ -82,7 +82,7 @@ func _run() -> void:
 	var top_lo := _roof_y(coop, space, -hz + 0.3)
 	_check(top_hi > top_lo + 0.1, "the roof is higher at the door side than at the back")
 	_check(absf(top_hi - Coop.roof_height(hz - 0.3)) < 0.12 and absf(top_lo - Coop.roof_height(-hz + 0.3)) < 0.12, "the roof sits on the walls")
-	var roof_mat := (walls.get_child(walls.get_child_count() - 2) as MeshInstance3D).material_override as StandardMaterial3D
+	var roof_mat := (walls.get_node("Roof") as MeshInstance3D).material_override as StandardMaterial3D
 	_check(roof_mat.albedo_color.v > 0.6 and absf(roof_mat.albedo_color.r - roof_mat.albedo_color.b) < 0.12, "the roof is a light, silvery galvanized grey")
 	# The door leaf swings out the front, not into the run.
 	var leaf := coop.get_node("DoorLeaf") as Node3D
@@ -141,19 +141,28 @@ func _run() -> void:
 	var walk: Array[Vector2] = []
 	var stray := 0
 	var in_coop := 0
-	var last := Vector2(hen.global_position.x, hen.global_position.z)
-	for i in 3000:
-		hen._process(0.1)
-		var hp := Vector2(hen.global_position.x, hen.global_position.z)
-		walk.append(hp)
-		for k in run.size() - 1:
-			if Geometry2D.segment_intersects_segment(last, hp, run[k], run[k + 1]) != null:
-				stray += 1
-		last = hp
-		if coop.is_inside(hp):
-			in_coop += 1
-	_check(stray == 0, "a hen never crosses the yard's fence by day (%d crossings)" % stray)
-	_check(in_coop == 0, "a hen never walks through the coop by day (%d steps)" % in_coop)
+	var birds: Array[Node3D] = []
+	for child in flock.get_children():
+		birds.append(child as Node3D)
+	_check(birds.size() == 7, "six hens and a rooster")
+	for bird in birds:
+		bird.move_speed = 4.0
+	var last: Array[Vector2] = []
+	for bird in birds:
+		last.append(Vector2(bird.global_position.x, bird.global_position.z))
+	for i in 1500:
+		for n in birds.size():
+			var bird := birds[n]
+			bird._process(0.1)
+			var hp := Vector2(bird.global_position.x, bird.global_position.z)
+			for k in run.size() - 1:
+				if Geometry2D.segment_intersects_segment(last[n], hp, run[k], run[k + 1]) != null:
+					stray += 1
+			last[n] = hp
+			if coop.is_inside(hp):
+				in_coop += 1
+	_check(stray == 0, "no hen or rooster crosses the yard's fence by day (%d crossings)" % stray)
+	_check(in_coop == 0, "none walks through the coop by day (%d steps)" % in_coop)
 	# Evening: round to the door and in, through the doorway only.
 	tod.hour = 18.5
 	walk.clear()

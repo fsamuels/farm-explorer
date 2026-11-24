@@ -57,6 +57,7 @@ var _phase := Phase.FREE
 ## Waypoints (world x, z) still to walk before wandering inside the house.
 var _route: Array[Vector2] = []
 var _warned := false
+var _warned_api := false
 var _bob_phase := 0.0
 
 func _ready() -> void:
@@ -88,6 +89,12 @@ func _find_routine_nodes() -> bool:
 	if _house == null or not is_instance_valid(_house):
 		_house = get_tree().get_first_node_in_group(routine_group)
 	var found := _tod != null and _house != null
+	if found and not _warned_api:
+		_warned_api = true
+		for m in ["is_inside", "door_inside", "door_outside", "roost_point", "pen_point", "pen_radius", "roost_radius", "route_to_pen_front", "route_out_of_pen", "detour_round_pen"]:
+			if not _house.has_method(m):
+				push_warning("%s: %s lacks %s() for the evening routine" % [name, routine_group, m])
+				found = false
 	if not found and not _warned:
 		_warned = true
 		push_warning("%s: evening_routine needs a TimeOfDay and a building in group %s; staying out" % [name, routine_group])
@@ -188,12 +195,15 @@ func _pick_new_target() -> void:
 func _keep_out_of_building() -> void:
 	if not evening_routine or not _find_routine_nodes() or not _house.has_method("is_blocked"):
 		return
-	for i in 8:
+	for i in 9:
 		var to: Vector3 = get_parent().to_global(target_position) if get_parent() is Node3D else target_position
 		if not _house.is_blocked(Vector2(to.x, to.z)):
 			return
+		if i == 8:
+			break
 		var angle := randf_range(0.0, TAU)
 		target_position = home_position + Vector3(cos(angle), 0.0, sin(angle)) * randf_range(0.0, wander_radius)
+	target_position = home_position   # eight bad draws: stay put rather than lean on a wall
 
 ## Out and about, walk round the duck pen rather than across its fences.
 func _detour_round_pen() -> void:

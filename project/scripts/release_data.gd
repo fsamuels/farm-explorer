@@ -6,8 +6,8 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
-				"**A new chicken coop.** A walk-in coop with a tan roosting house and window at one end, a white nest box, wire-mesh runs in a red frame and a silver galvanized steel roof that slopes down to the back stands behind the house, squared to its south wall. Its door is open and faces the house.",
-				"**A new fenced yard.** A fence now runs from the house out round the coop and back to the back-yard fence. The old stretch of back-yard fence that ran past the coop is gone. A gate at its north-west corner lets you in.",
+				"**A new chicken coop.** A walk-in coop with a tan roosting house and window at one end, a white nest box, wire-mesh runs in a red frame and a silver galvanized steel roof that slopes down to the back stands south of the house, squared to its south wall. Its door is open and faces the house.",
+				"**A new fenced yard.** A fence now runs from the south side of the house out round the coop and back to the back-yard fence. The old stretch of back-yard fence that ran past the coop is gone. A gate at its north-west corner lets you in.",
 				"**The chickens live here now.** The hens and the rooster roam the yard and the back yard by day, go into the coop through its door at a quarter to six (before the ducks are put away), and come out again at half past seven, an hour after the ducks."
 			],
 			"summary": "A red-and-tan chicken coop now stands near the house, in a new fenced yard, with a silver roof and its door on the house side.",
@@ -295,14 +295,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 17252,
-		"commits": 301,
+		"code_lines": 17275,
+		"commits": 302,
 		"decisions": 166,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 76,
-		"size_kb": 115499,
-		"test_lines": 5487,
+		"size_kb": 115500,
+		"test_lines": 5496,
 		"textures": 49,
 		"vehicles": 3
 	}
