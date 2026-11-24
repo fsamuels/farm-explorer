@@ -324,6 +324,8 @@ func _vehicle_at(screen: Vector2) -> int:
 	var best_dist := PLACE_PICK_RADIUS
 	for i in _data.vehicles.size():
 		var car: Node3D = _data.vehicles[i]
+		if not is_instance_valid(car):
+			continue
 		var d: float = _full.to_screen(MapMath.flatten(car.global_position)).distance_to(screen)
 		if d <= best_dist:
 			best = i
@@ -331,7 +333,7 @@ func _vehicle_at(screen: Vector2) -> int:
 	return best
 
 ## Moves the player beside a vehicle, facing the way it points, and closes the
-## map (D-140). Not while driving, and not into a car someone is driving.
+## map (D-143). Not while driving, and not into a car someone is driving.
 func _teleport_to_vehicle(index: int) -> void:
 	if index == -1 or player.get("vehicle") != null:
 		return

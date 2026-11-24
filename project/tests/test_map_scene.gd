@@ -148,7 +148,7 @@ func _test_places(main: Node, map) -> void:
 	player.set("vehicle", null)
 	map.set_open(false)
 
-## The driveable vehicles are on the open map (D-140) and double-clicking one
+## The driveable vehicles are on the open map (D-143) and double-clicking one
 ## puts you beside it, facing the way it points, with the map closed.
 func _test_vehicles(main: Node, map) -> void:
 	var player: Node3D = main.get_node("Player")

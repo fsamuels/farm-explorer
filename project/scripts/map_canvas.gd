@@ -58,7 +58,7 @@ var marker_scale := 1.0
 var highlighted_building := -1
 ## Index into data.places to highlight, or -1.
 var highlighted_place := -1
-## Draw the transport-point markers (the full map only; the minimap is too small).
+## Draw the transport-point and vehicle markers (the full map only; the minimap is too small).
 var show_places := false
 ## Index into data.vehicles to highlight, or -1.
 var highlighted_vehicle := -1
@@ -166,7 +166,6 @@ func _draw() -> void:
 		_draw_building_labels()
 	if show_places:
 		_draw_places()
-	if show_places:
 		_draw_vehicles()
 	if show_horses:
 		_draw_horses()
@@ -215,7 +214,7 @@ func _draw_horses() -> void:
 				_draw_label(font, text, at, label_size, Color(1, 0.9, 0.75))
 
 ## Each driveable vehicle as a rotated box with its name; vehicles move, so
-## they are read from the nodes every frame (D-140).
+## they are read from the nodes every frame (D-143).
 func _draw_vehicles() -> void:
 	var font := get_theme_default_font()
 	for i in data.vehicles.size():
