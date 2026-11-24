@@ -1,5 +1,5 @@
 extends SceneTree
-## The parked cars stay on the ground when the game starts (D-146). The UTV is
+## The parked cars stay on the ground when the game starts (D-147). The UTV is
 ## parked inside the Front Barn's solid placeholder box; if that box is still
 ## live on the first physics frame the car is shoved out of it, straight down
 ## through the thin terrain collider, and falls forever. Run headless from

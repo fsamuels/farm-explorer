@@ -34,7 +34,7 @@ extends Node3D
 ## teleport puts you when there is no door labelled "front door": that wall,
 ## `front_u` of the way across it seen from outside (D-125).
 ##
-## Floor hatches (D-146): any node in the `floor_hatch` group whose
+## Floor hatches (D-147): any node in the `floor_hatch` group whose
 ## `hatch_building` is this building gives a Rect2 (x, z in this frame) from
 ## `hatch_rect()`; the floor is then cut around it and made solid, since the
 ## ground under it has a hole (the House's cellar stairs, bunker.gd).
@@ -107,7 +107,7 @@ func _ready() -> void:
 	if box_shape:
 		# Now, not deferred: a car parked inside (the UTV in the Front Barn)
 		# would otherwise be shoved out of the solid box on the first physics
-		# frame, straight down through the thin terrain collider (D-146).
+		# frame, straight down through the thin terrain collider (D-147).
 		box_shape.disabled = true
 	_liner = _material(liner_color, true)
 	_skin = Corrugated.material() if corrugated_skin else _material(skin_color, false)
