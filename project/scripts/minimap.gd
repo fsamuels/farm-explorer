@@ -1,4 +1,5 @@
 extends Control
+const WorldMath := preload("res://scripts/world_math.gd")
 ## The minimap (bottom left, always on) and the full-screen map that M
 ## (`toggle_map`) opens (D-93). This node owns what the two share: the scene's
 ## map data, the breadcrumb trail of where you've walked, and the waypoint.
@@ -297,6 +298,11 @@ func _clamp_center() -> void:
 	if bounds.has_area():
 		_full.center = _full.center.clamp(bounds.position, bounds.end)
 
+## Where to stand at (x, z): just above the ground there. Teleporting used to
+## keep the current height, which buried you wherever the land is higher.
+func _ground_y(x: float, z: float) -> float:
+	return WorldMath.height_at(x, z) + 0.2
+
 ## Moves the player to just outside a building's front door, facing it, and
 ## closes the map (D-118). Not while driving: the car would be left behind.
 func _teleport_to(index: int) -> void:
@@ -305,7 +311,7 @@ func _teleport_to(index: int) -> void:
 	var building: Dictionary = _data.buildings[index]
 	var spot: Vector2 = building.front
 	var yaw := MapMath.yaw_facing(spot, building.center)
-	player.global_transform = Transform3D(Basis(Vector3.UP, yaw), Vector3(spot.x, player.global_position.y, spot.y))
+	player.global_transform = Transform3D(Basis(Vector3.UP, yaw), Vector3(spot.x, _ground_y(spot.x, spot.y), spot.y))
 	player.velocity = Vector3.ZERO
 	player.model_yaw = 0.0
 	# The trail is where you've walked; a jump would draw a line across the farm.
@@ -346,7 +352,7 @@ func _teleport_to_vehicle(index: int) -> void:
 	if car.driver != null:
 		return
 	var spot: Vector3 = car.map_arrival_spot()
-	player.global_transform = Transform3D(Basis(Vector3.UP, car.global_rotation.y), Vector3(spot.x, player.global_position.y, spot.z))
+	player.global_transform = Transform3D(Basis(Vector3.UP, car.global_rotation.y), Vector3(spot.x, _ground_y(spot.x, spot.z), spot.z))
 	player.velocity = Vector3.ZERO
 	player.model_yaw = 0.0
 	trail.clear()
