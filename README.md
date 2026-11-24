@@ -17,7 +17,7 @@ R cycles the weather through clear, drizzle, rain, downpour, thunderstorm, light
 the Shop is walk-in — blue corrugated walls, windows, and an entry door, roll-up garage door and sliding barn door you open with E, D-98 — and so are Sally's House, the Back Barn (D-123) and the Front Barn, Sally's House one big room for now (D-115) and the Front Barn an open pole barn with posts, stalls, a tack room and cubbies (D-121), shaped and textured from a photo of its north end, which is also where the map teleport puts you (D-125);
 the Triumph TR6, BMW 2002 tii and the Front Barn's yellow Cub Cadet 550 UTV can be driven — E to get in or out, W/S gas and brake, A/D steer, Space handbrake, D-106, and B tips the UTV's dump bed, D-127),
 holding Ctrl is a super sprint and the glowing transport pads in the back pastures send you round a ring of them with E, D-131,
-the real parcel boundary and (approximate) building footprints, and a ground
+the real parcel boundary and (approximate) building footprints, a ground
 plane textured with public NAIP aerial imagery as a stand-in for the real
 drone-derived orthomosaic (Phase 1). See
 [docs/implementation-plan.md](docs/implementation-plan.md).

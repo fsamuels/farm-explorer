@@ -68,19 +68,33 @@ def parcel_ring():
     return [((lo - cx) * k * math.cos(math.radians(cy)), -(la - cy) * k) for lo, la in ring]
 
 
-def pond_outline(spine):
-    pts = np.array([[p[0], p[1]] for p in spine]); hw = [p[2] for p in spine]
-    left, right = [], []
-    for i, p in enumerate(pts):
-        t = pts[min(i + 1, len(pts) - 1)] - pts[max(i - 1, 0)]
-        t = t / np.linalg.norm(t); n = np.array([-t[1], t[0]])
-        left.append(p + n * hw[i]); right.append(p - n * hw[i])
-    return left + right[::-1]
+def pond_sdf(spine, box, res, size):
+    """Signed distance (m, negative inside) to the pond outline on the image's pixel grid.
+
+    The pond is a union of tapered circles along its spine, the same shape
+    project/scripts/terrain_math.gd cuts into the ground.
+    """
+    x0, z0 = box[0], box[1]
+    xs = x0 + (np.arange(size[0]) + 0.5) * res
+    zs = z0 + (np.arange(size[1]) + 0.5) * res
+    X, Z = np.meshgrid(xs, zs)
+    best = np.full(X.shape, np.inf)
+    for a, b in zip(spine, spine[1:]):
+        dx, dz = b[0] - a[0], b[1] - a[1]
+        t = np.clip(((X - a[0]) * dx + (Z - a[1]) * dz) / (dx * dx + dz * dz), 0, 1)
+        d = np.hypot(X - (a[0] + t * dx), Z - (a[1] + t * dz)) - (a[2] + (b[2] - a[2]) * t)
+        best = np.minimum(best, d)
+    return best
 
 
 def render(box, res, out, grid=10):
     d = json.loads(DATA.read_text())
     img = base(box, res)
+    sdf = pond_sdf(d["pond"]["spine_x_z_halfwidth_m"], box, res, img.size)
+    layer_px = np.zeros((img.size[1], img.size[0], 4), np.uint8)
+    layer_px[sdf < 0] = (40, 120, 255, 40)
+    layer_px[np.abs(sdf) < max(res, 0.12)] = (40, 120, 255, 255)
+    img.alpha_composite(Image.fromarray(layer_px, "RGBA"))
     dr = ImageDraw.Draw(img, "RGBA")
     x0, z0, x1, z1 = box
     P = lambda x, z: ((x - x0) / res, (z - z0) / res)
@@ -89,8 +103,6 @@ def render(box, res, out, grid=10):
     for g in range(int(math.ceil(z0 / grid) * grid), int(z1), grid):
         dr.line([P(x0, g), P(x1, g)], fill=(0, 255, 255, 70)); dr.text((2, P(x0, g)[1] + 2), str(g), fill=(0, 255, 255, 255))
     dr.line([P(*q) for q in parcel_ring()], fill=(255, 40, 40, 255), width=2)
-    outline = [P(*q) for q in pond_outline(d["pond"]["spine_x_z_halfwidth_m"])]
-    dr.polygon(outline, fill=(40, 120, 255, 28), outline=(40, 120, 255, 255))
     for i, s in enumerate(d["pond"]["spine_x_z_halfwidth_m"]):
         c = P(s[0], s[1]); dr.ellipse([c[0] - 3, c[1] - 3, c[0] + 3, c[1] + 3], fill=(255, 255, 255, 255))
         dr.text((c[0] + 5, c[1] - 5), "P%d" % i, fill=(255, 255, 255, 255))
@@ -106,6 +118,8 @@ def render(box, res, out, grid=10):
                              (a[0] + (b[0] - a[0]) * min(j + 1, k) / k, a[1] + (b[1] - a[1]) * min(j + 1, k) / k)],
                             fill=(255, 0, 255, 255), width=3)
         else:
+            band = max(3, int(d["ditch"]["width_m"] / res))   # the carved top-of-bank width
+            dr.line(pts, fill=col[seg["confidence"]][:3] + (60,), width=band)
             dr.line(pts, fill=col[seg["confidence"]], width=3)
         for q in pts:
             dr.ellipse([q[0] - 3, q[1] - 3, q[0] + 3, q[1] + 3], outline=(255, 255, 255, 255))

@@ -236,6 +236,33 @@ under it are the front section's, so it was fitted to those; the Back Barn is
 only in the middle patch. The dusk imagery is a reasonable candidate for a
 daylight re-flight.
 
+## How the ditch and pond were traced
+
+Neither the county GIS nor the drone imagery says where the irrigation ditch and
+the pond are or how deep, so they were traced by eye from the NAIP image and the
+two orthomosaics and then corrected by the owner over four rounds, stored in
+[`gis/water-features-340732310005.json`](gis/water-features-340732310005.json)
+(scene metres, +x east, +z south). `python3 tools/water_overlay.py` draws it over
+the imagery with numbered vertices (D0-D26 along the ditch, P0-P12 along the pond
+spine) so a correction can be given as, say, "D7 to (251, 12)". Then
+`python3 tools/build_water_data.py` regenerates `project/scripts/water_data.gd`.
+
+What the owner said, and what it became:
+
+| Owner's description | In the trace |
+| --- | --- |
+| Weir in the north-east corner | `weir` at (259.5, -87), the parcel corner at the road |
+| Ditch follows the road south, close to the 260 marker at first; browner south of the driveway | Open run at x about 259.5 to the driveway, about 255 south of it |
+| The ditch goes underground at the driveway | Buried culvert, z -54 to -39.5 (the grey strip) |
+| Mostly straight along the fence line, then cuts west just before the property line | South run on the bare strip just south of the fence (z about 69.5), the fence being at z about 67 |
+| Passes into the track team paddock, then underground where the triangle goes into the long narrow track, and enters the pond at x = 60, 2 ft further west, straight north | Open inside the triangle at z about 66.4 to x = 67, then a buried pipe west to x = 59.4 and straight north to the pond's south bank |
+| Ditch 2-3 ft | Depth 0.76 m (2.5 ft). Width was not given: 2.7 m across the top (banks about 40 degrees) |
+| Pond a long three-lobed peanut, NE to W, from the dirt arena to past the Back Barn, larger to the west; bright green is dried-out pond vegetation; reaches almost x = 130 | Spine of 13 points from x = 131 (NE) to x = -49 (W), three lobes at about x = 96, 66 and -28; depth 3.8 m (12.5 ft, the owner's "10-15" read as feet) |
+
+Positions are good to a few metres, not surveyed. Only the road-side ditch and the
+x = 60 pond inlet come close to measured. The drain grate at about (156, 68) on the
+south fence line is not part of the trace.
+
 ## How this is used in the scene
 
 The Phase 2 blockout (`project/scenes/main.tscn`) now uses the **real parcel

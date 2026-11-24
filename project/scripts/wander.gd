@@ -1,5 +1,7 @@
 extends Node3D
 
+const TerrainMath := preload("res://scripts/terrain_math.gd")
+
 @export var wander_radius := 12.0
 @export var move_speed := 1.5
 @export var idle_time_min := 2.0
@@ -8,12 +10,16 @@ extends Node3D
 @export var faces_movement := true
 
 var home_position: Vector3
+## Height of the level ground this animal stands on; it follows the carved
+## ground (the ditch and pond, D-138) down from there.
+var _level_y := 0.0
 var target_position: Vector3
 var idle_timer := 0.0
 var is_walking := false
 
 func _ready() -> void:
 	home_position = position
+	_level_y = position.y - TerrainMath.height_at(global_position.x, global_position.z)
 	_start_idle()
 
 func _start_idle() -> void:
@@ -44,3 +50,4 @@ func _process(delta: float) -> void:
 	if faces_movement:
 		look_at(global_position + direction, Vector3.UP)
 	position += direction * move_speed * delta
+	position.y = _level_y + TerrainMath.height_at(global_position.x, global_position.z)

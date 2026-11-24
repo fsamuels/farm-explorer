@@ -60,6 +60,7 @@
 [ext_resource type="Script" path="res://scripts/barn_interior.gd" id="59_barn_interior"]
 [ext_resource type="Script" path="res://scripts/barn_facade.gd" id="60_barn_facade"]
 [ext_resource type="Script" path="res://scripts/distant_terrain.gd" id="61_distant_terrain"]
+[ext_resource type="Script" path="res://scripts/terrain.gd" id="terrain_script"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -583,6 +584,13 @@ surface_material_override/0 = SubResource("StandardMaterial3D_ground")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Ground" unique_id=49619739]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 shape = SubResource("BoxShape3D_ground")
+
+[node name="Terrain" type="StaticBody3D" parent="."]
+script = ExtResource("terrain_script")
+
+[node name="Surface" type="MeshInstance3D" parent="Terrain" groups=["map_imagery"]]
+
+[node name="Collision" type="CollisionShape3D" parent="Terrain"]
 
 [node name="FrontSectionOrthomosaic" type="MeshInstance3D" parent="." unique_id=2847193061 groups=["map_imagery"]]
 transform = Transform3D(0.9998, 0, 0.020012, 0, 1, 0, -0.020012, 0, 0.9998, 155.02, 0.03, -13.24)

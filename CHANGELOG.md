@@ -10,6 +10,13 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 24: A ditch and a pond
+> The farm's irrigation ditch and the pond are now cut into the ground. Both are dry for now; you can walk down into them.
+- **The ditch.** It starts at the weir by the road in the north-east corner, runs south beside the road, goes under the driveway, then west along the south fence and through the track team paddock.
+- **The pond.** A long pond with three lobes stretches from beside the dirt arena out past the Back Barn, with sloping banks you can walk down.
+- **Pipes underground.** The ditch goes under the driveway and into the pond through buried pipes.
+- **Fence posts and animals** follow the ground, so a post in the ditch stands on its floor and the geese walk down the bank.
+
 ## November 23: A readable News window
 > The What's New window (C) now has much larger text and resizes itself to fit your window.
 - **Much bigger text.** The News window's writing is about twice the size it was.

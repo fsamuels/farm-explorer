@@ -6,6 +6,16 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**The ditch.** It starts at the weir by the road in the north-east corner, runs south beside the road, goes under the driveway, then west along the south fence and through the track team paddock.",
+				"**The pond.** A long pond with three lobes stretches from beside the dirt arena out past the Back Barn, with sloping banks you can walk down.",
+				"**Pipes underground.** The ditch goes under the driveway and into the pond through buried pipes.",
+				"**Fence posts and animals** follow the ground, so a post in the ditch stands on its floor and the geese walk down the bank."
+			],
+			"summary": "The farm's irrigation ditch and the pond are now cut into the ground. Both are dry for now; you can walk down into them.",
+			"title": "November 24: A ditch and a pond"
+		},
+		{
+			"bullets": [
 				"**Much bigger text.** The News window's writing is about twice the size it was.",
 				"**Fits any window.** It shrinks to fit a small window and grows to fill a big one, so it is always whole on screen."
 			],
@@ -144,14 +154,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 10891,
-		"commits": 273,
-		"decisions": 137,
+		"code_lines": 11465,
+		"commits": 170,
+		"decisions": 138,
 		"models": 13,
 		"scenes": 26,
-		"scripts": 47,
-		"size_kb": 111337,
-		"test_lines": 2819,
+		"scripts": 52,
+		"size_kb": 111374,
+		"test_lines": 3086,
 		"textures": 48,
 		"vehicles": 3
 	}
