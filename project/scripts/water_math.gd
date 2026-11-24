@@ -172,7 +172,9 @@ static func _ensure_basin() -> void:
 		x += BASIN_STEP
 	floors.sort()
 	# prefix[k] = sum of the k lowest floor heights.
-	var prefix := PackedFloat32Array()
+	# 64-bit: a wide flat floor puts many cells at the same height, and a 32-bit
+	# running sum of them loses thousands of cubic metres.
+	var prefix := PackedFloat64Array()
 	prefix.resize(floors.size() + 1)
 	for k in floors.size():
 		prefix[k + 1] = prefix[k] + floors[k]
@@ -213,7 +215,7 @@ static func _interp(xs: PackedFloat32Array, ys: PackedFloat32Array, x: float) ->
 		return ys[0]
 	if x >= xs[xs.size() - 1]:
 		return ys[ys.size() - 1]
-	var hi := xs.bsearch(x)
+	var hi := maxi(xs.bsearch(x), 1)
 	var lo := hi - 1
 	var span := xs[hi] - xs[lo]
 	return ys[lo] if span <= 0.0 else lerpf(ys[lo], ys[hi], (x - xs[lo]) / span)

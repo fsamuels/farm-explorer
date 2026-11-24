@@ -6,6 +6,7 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**A bigger, deeper pond.** The pond is wider where it runs under the trees, most of all at the north-east end, and now reaches well up the north bank there. It is also a little deeper, with a flatter bottom and steeper sides.",
 				"**A list to start with.** When the game starts, a small picture list of things to try shows in the top left instead of the controls. It tucks away after about two seconds of moving, or when you press another key. The controls are still on F1.",
 				"**A Things to Do card.** Press H (it pauses the game) for the full card: burn the ditch, open the weir, go for a paddle, drive the Cub Cadet and take a car for a drive, each with a little picture and a row of stars that fill in as you go.",
 				"**Take me there.** Each one has a button that puts you at the propane tank, the weir's hand wheel, the kayaks, the Cub Cadet or the cars, facing the right way. It is switched off while you are in a vehicle.",
@@ -307,13 +308,13 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 17932,
-		"commits": 298,
-		"decisions": 168,
+		"code_lines": 17934,
+		"commits": 299,
+		"decisions": 169,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 78,
-		"size_kb": 115536,
+		"size_kb": 115538,
 		"test_lines": 5726,
 		"textures": 49,
 		"vehicles": 3

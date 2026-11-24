@@ -57,8 +57,8 @@ func _test_basin() -> void:
 	for level in [-3.0, -2.0, -1.0, -0.5]:
 		_near(WaterMath.pond_level_at(WaterMath.pond_volume_at(level)), level, "level round-trips at %s" % level, 0.05)
 	# The surface grows as the pond fills, and the deep lobes fill first.
-	_check(WaterMath.pond_area_at(-0.3) > WaterMath.pond_area_at(-3.0) * 2.0, "the pond spreads as it fills")
-	_check(WaterMath.pond_area_at(-3.7) > 0.0 and WaterMath.pond_area_at(-3.7) < 0.4 * WaterMath.pond_area_at(WaterMath.POND_SPILL_LEVEL), "only the deepest hollows hold water at first: %s m2" % WaterMath.pond_area_at(-3.7))
+	_check(WaterMath.pond_area_at(-0.3) > WaterMath.pond_area_at(-3.0) * 1.4, "the pond spreads as it fills")
+	_check(WaterMath.pond_area_at(-4.1) > 0.0 and WaterMath.pond_area_at(-4.1) < 0.5 * WaterMath.pond_area_at(WaterMath.POND_SPILL_LEVEL), "only the flat floor and lower banks hold water at first: %s m2" % WaterMath.pond_area_at(-4.1))
 	_near(WaterMath.pond_level_at(0.0), -WaterData.POND_DEPTH, "an empty pond sits at its floor", 0.001)
 	_near(WaterMath.pond_level_at(capacity), WaterMath.POND_SPILL_LEVEL, "a full pond sits at its spill level", 0.01)
 
