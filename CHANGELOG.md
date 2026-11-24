@@ -16,6 +16,7 @@ fails if the two disagree.
 - **Real roads.** US 12, Lowden-Gardena Road and about 70 other named roads out to 3 miles are laid on the real ground, with edge lines, centre lines and gravel verges.
 - **Real hills.** The ground out there follows the real land, and cars lean into slopes and hold their speed on them. The farm itself stays level.
 - **The map goes wide.** The map (M) and minimap show the aerial photo of the whole area, so you can see where the roads go. It still opens on the farm.
+- **Teleports land on the ground.** Double-clicking a building, car or pasture spot on the map no longer drops you underground when the land there is higher.
 - **The edge of the world.** An invisible wall stops you 3.5 miles out from the farm; the distant mountains carry on past it.
 
 ## November 24: The UTV is back
