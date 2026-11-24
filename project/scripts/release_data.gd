@@ -6,6 +6,13 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**A new chicken coop.** A walk-in coop with a tan roosting house and window at one end, a white nest box, wire-mesh runs in a red frame and a dark corrugated tin roof stands at 48.7, -14.6. Its door is open and faces the house."
+			],
+			"summary": "A red-and-tan chicken coop now stands near the house, with its door facing the porch.",
+			"title": "November 24: Chicken coop"
+		},
+		{
+			"bullets": [
 				"**A real fire.** Light the tall, dry bunch grass in the ditch and the strip between it and the road, and it spreads with the wind: fast downwind, slowly against it, faster uphill. Flames lean over, smoke rises and blows away, embers drift ahead, the grass blackens to stubble and the ground scorches. It crackles and roars, and lights up the dusk.",
 				"**The usual wind.** It blows from the south-west toward the north-east, steady with gusts and the odd shift. A readout on the left shows the wind, how much propane the torch has left, and how much of the strip you have burned.",
 				"**The propane torch.** Press 1 to take it out, hold the left mouse button to burn, 1 again to put it away. The tank lasts a couple of minutes; refill it at the propane tank by the road at the south end. Press E at the tank to start the quest.",
@@ -286,14 +293,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 16860,
-		"commits": 295,
-		"decisions": 163,
+		"code_lines": 17085,
+		"commits": 296,
+		"decisions": 164,
 		"models": 14,
 		"scenes": 26,
-		"scripts": 75,
-		"size_kb": 115472,
-		"test_lines": 5285,
+		"scripts": 76,
+		"size_kb": 115484,
+		"test_lines": 5346,
 		"textures": 49,
 		"vehicles": 3
 	}
