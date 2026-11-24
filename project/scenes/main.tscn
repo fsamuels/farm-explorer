@@ -62,6 +62,7 @@
 [ext_resource type="Script" path="res://scripts/distant_terrain.gd" id="61_distant_terrain"]
 [ext_resource type="Script" path="res://scripts/terrain.gd" id="terrain_script"]
 [ext_resource type="Script" path="res://scripts/water_system.gd" id="water_system_script"]
+[ext_resource type="Script" path="res://scripts/toast.gd" id="toast_script"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -1463,6 +1464,9 @@ script = ExtResource("62_whats_new")
 
 [node name="SkyMenu" type="CanvasLayer" parent="."]
 script = ExtResource("57_sky_menu")
+
+[node name="Toast" type="CanvasLayer" parent="."]
+script = ExtResource("toast_script")
 
 [node name="SallysHouseShell" type="Node3D" parent="Buildings"]
 script = ExtResource("58_building_shell")
