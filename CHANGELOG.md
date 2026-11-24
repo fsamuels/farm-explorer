@@ -10,6 +10,20 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 24: Water in the ditch and pond
+> Open the weir (E) and water runs down the ditch and fills the pond. Rain tops them up; shut the weir and it slowly drains.
+- **A working weir.** Walk up to the weir in the north-east corner and press E to open or shut its gate. The wheel turns and the gate slides up.
+- **Water you can watch.** It runs the length of the ditch, through the pipes, and fills the pond from the deepest part first. Fills take a few minutes.
+- **Rain.** Rain adds water to the pond and leaves puddles in the ditch, which dry up afterwards.
+- **Pipe ends.** The driveway culvert and the pipe into the pond now have concrete mouths.
+- **Still dry to start.** The weir starts shut, so the pond and ditch begin empty. You can't swim yet; you walk on the bottom.
+
+## November 24: A ditch and a pond
+> The farm's irrigation ditch and the pond are now cut into the ground. Both are dry for now; you can walk down into them.
+- **The ditch.** It starts at the weir by the road in the north-east corner, runs south beside the road, goes under the driveway, then west along the south fence and through the track team paddock.
+- **The pond.** A long pond with three lobes stretches from beside the dirt arena out past the Back Barn, with sloping banks you can walk down.
+- **Pipes underground.** The ditch goes under the driveway and into the pond through buried pipes.
+- **Fence posts and animals** follow the ground, so a post in the ditch stands on its floor and the geese walk down the bank.
 ## November 23: Map teleports in the pastures
 > Double-click a named marker in the back pastures on the map (M) to jump there, just like a building.
 - **Pasture teleports on the map.** Five spots in the back pastures now show as

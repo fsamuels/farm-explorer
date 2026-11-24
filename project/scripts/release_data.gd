@@ -6,6 +6,27 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**A working weir.** Walk up to the weir in the north-east corner and press E to open or shut its gate. The wheel turns and the gate slides up.",
+				"**Water you can watch.** It runs the length of the ditch, through the pipes, and fills the pond from the deepest part first. Fills take a few minutes.",
+				"**Rain.** Rain adds water to the pond and leaves puddles in the ditch, which dry up afterwards.",
+				"**Pipe ends.** The driveway culvert and the pipe into the pond now have concrete mouths.",
+				"**Still dry to start.** The weir starts shut, so the pond and ditch begin empty. You can't swim yet; you walk on the bottom."
+			],
+			"summary": "Open the weir (E) and water runs down the ditch and fills the pond. Rain tops them up; shut the weir and it slowly drains.",
+			"title": "November 24: Water in the ditch and pond"
+		},
+		{
+			"bullets": [
+				"**The ditch.** It starts at the weir by the road in the north-east corner, runs south beside the road, goes under the driveway, then west along the south fence and through the track team paddock.",
+				"**The pond.** A long pond with three lobes stretches from beside the dirt arena out past the Back Barn, with sloping banks you can walk down.",
+				"**Pipes underground.** The ditch goes under the driveway and into the pond through buried pipes.",
+				"**Fence posts and animals** follow the ground, so a post in the ditch stands on its floor and the geese walk down the bank."
+			],
+			"summary": "The farm's irrigation ditch and the pond are now cut into the ground. Both are dry for now; you can walk down into them.",
+			"title": "November 24: A ditch and a pond"
+		},
+		{
+			"bullets": [
 				"**Pasture teleports on the map.** Five spots in the back pastures now show as blue diamonds with names on the full map. Double-click one to go there, as you can with any building.",
 				"**No more glowing pads.** The pads and pillars of light are gone; the spots are invisible in the world and only exist on the map."
 			],
@@ -160,14 +181,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 10790,
-		"commits": 276,
-		"decisions": 139,
+		"code_lines": 12121,
+		"commits": 172,
+		"decisions": 141,
 		"models": 14,
 		"scenes": 26,
-		"scripts": 47,
-		"size_kb": 113270,
-		"test_lines": 2847,
+		"scripts": 54,
+		"size_kb": 113345,
+		"test_lines": 3297,
 		"textures": 48,
 		"vehicles": 3
 	}

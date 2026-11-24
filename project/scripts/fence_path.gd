@@ -1,6 +1,8 @@
 @tool
 extends Path3D
 
+const TerrainMath := preload("res://scripts/terrain_math.gd")
+
 const POST_HEIGHT := 1.1
 const POST_RADIUS := 0.05
 const WIRE_HEIGHTS := [0.35, 0.65, 0.95]
@@ -51,11 +53,23 @@ func _rebuild() -> void:
 		var p := curve.get_point_position(i)
 		positions.append(Vector3(p.x, 0.0, p.z))
 
+	# Posts stand on the carved ground (D-140): one that lands in the ditch or the
+	# pond goes down to the floor and keeps its top at the usual height, so the
+	# wires still run level across the channel.
 	for pos in positions:
+		var world := to_global(pos)
+		var ground := minf(TerrainMath.height_at(world.x, world.z), 0.0)
 		var post := MeshInstance3D.new()
-		post.mesh = post_mesh
+		if ground < -0.005:
+			var deep_mesh := CylinderMesh.new()
+			deep_mesh.top_radius = POST_RADIUS
+			deep_mesh.bottom_radius = POST_RADIUS
+			deep_mesh.height = POST_HEIGHT - ground
+			post.mesh = deep_mesh
+		else:
+			post.mesh = post_mesh
 		post.material_override = post_material
-		post.position = Vector3(pos.x, POST_HEIGHT / 2.0, pos.z)
+		post.position = Vector3(pos.x, (POST_HEIGHT + ground) / 2.0, pos.z)
 		add_child(post)
 
 	var body: StaticBody3D = null
