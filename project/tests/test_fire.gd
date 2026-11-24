@@ -279,6 +279,7 @@ func _test_scene() -> void:
 	var bank := FireSystem.classify(252.5, 10.0, 0.9)
 	_check(bank["fuel"] == 0.0, "nor on the pasture side of the fence, beside the ditch")
 	_check(absf(FireSystem.strip_edge_x(-92.2) - 265.1) < 0.001 and absf(FireSystem.strip_edge_x(67.3) - 261.3) < 0.001 and absf(FireSystem.strip_edge_x(-38.4) - 263.85) < 0.1 and FireSystem.strip_edge_x(-100.0) == INF and FireSystem.strip_edge_x(70.0) == INF, "the edge line runs between the owner's two points")
+	_check(FireSystem.classify(258.0, 62.0, 0.5)["fuel"] > 0.0 and FireSystem.classify(258.0, 66.5, 0.5)["fuel"] == 0.0 and FireSystem.classify(258.0, 72.0, 0.5)["fuel"] == 0.0, "the grass stops at the south fence, not on the gravel road beyond")
 	var east_bare := FireSystem.classify(266.0, 10.0, 0.9)
 	_check(east_bare["fuel"] == 0.0, "no grass between the edge line and the road: %s" % east_bare)
 	var north_bare := FireSystem.classify(268.0, -70.0, 0.9)
@@ -297,6 +298,7 @@ func _test_scene() -> void:
 	var grass: MultiMeshInstance3D = fire.get_node("Grass")
 	_check(grass.multimesh.instance_count > 5000, "tall grass stands thick on the fuel: %d clumps" % grass.multimesh.instance_count)
 	# Where the grass is not: the road and its shoulders, and the pasture side of the fence.
+	var south_of_fence := 0
 	var east_of_line := 0
 	var on_driveway := 0
 	var in_road := 0
@@ -305,12 +307,15 @@ func _test_scene() -> void:
 	for at in fire.clump_positions:
 		if not RoadMath.nearest(at.x, at.z, 4.45).is_empty():
 			in_road += 1
+		if at.z > 66.6:
+			south_of_fence += 1
 		if at.x < 272.0 and at.x > FireSystem.strip_edge_x(at.z):
 			east_of_line += 1
 		if at.z > FireSystem.DRIVEWAY_Z.x and at.z < FireSystem.DRIVEWAY_Z.y and at.x > 258.0:
 			on_driveway += 1
 		if at.z > -9.0 and at.z < 9.5 and at.x < 253.3:
 			past_fence += 1
+	_check(south_of_fence == 0, "no grass south of the property's south fence: %d clumps" % south_of_fence)
 	_check(east_of_line == 0, "no grass east of the strip's edge line: %d clumps" % east_of_line)
 	_check(on_driveway == 0, "no grass on the driveway: %d clumps" % on_driveway)
 	_check(in_road == 0, "no grass on the road or its shoulders: %d clumps" % in_road)
