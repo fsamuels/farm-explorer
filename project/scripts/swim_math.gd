@@ -1,5 +1,5 @@
 extends RefCounted
-## Pure maths for swimming (D-151), kept free of scene access so
+## Pure maths for swimming (D-152), kept free of scene access so
 ## tests/test_swim.gd can cover it headless.
 ##
 ## You swim once the water is deeper than `ENTER_DEPTH` where you stand and walk

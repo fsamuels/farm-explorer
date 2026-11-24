@@ -69,7 +69,7 @@ var _view_before_car := false
 var _boom_before_car := 0.0
 var _prompt_flash := ""
 var _prompt_flash_left := 0.0
-## True while swimming in the pond (D-151), and where the breaststroke is.
+## True while swimming in the pond (D-152), and where the breaststroke is.
 var swimming := false
 var swim_phase := 0.0
 var _water: Node

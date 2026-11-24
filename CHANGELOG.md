@@ -17,6 +17,11 @@ fails if the two disagree.
 - **Paddle and bobbing.** The paddle swings as you move and the kayak bobs on the water. It runs aground in the shallows and only crawls on dry land.
 - **Just a start.** The kayak shows no person in it yet, and there is no paddle boat or splash sound.
 
+## November 24: The clock runs
+> The sky clock now starts running at Day, so the sun moves and the day turns to night on its own.
+- **Time passes.** The game opens at Day (about 1 PM) with the clock already running: the sun crosses the sky, sunset and dusk arrive, then night and dawn. A full day takes 20 minutes.
+- **Same controls.** Y still pauses and restarts the clock, T jumps to the next time of day and stops it, and the sky menu (G) works as before.
+
 ## November 24: Drive the roads
 > The real roads for three miles around the farm are driveable, over real hills, asphalt or gravel, and the farm is open all round.
 - **The road is open.** The fence across Lowden-Gardena Road and the wall of trees around the farm are gone. Drive out of the driveway and keep going.
