@@ -145,6 +145,7 @@ farm-sim/
     │   ├── test_buildings.gd      # Sally's House and Front Barn shells: built, doors placed, the player walks in through doorways and not walls
     │   ├── test_sky_menu.gd       # start position / third person, constellation name labels, sky menu picks and pause
     │   ├── test_toast.gd          # toast queue, fade, de-duplication, works while paused — see D-142
+    │   ├── test_decisions.gd      # decisions.md: row IDs unique, in order, none skipped (catches parallel branches claiming the same D-number) — see D-146
     │   ├── test_water.gd          # route, pond basin table, flow row, pond step; the Water node: weir E, fill, drain, rain — see D-141
     │   ├── test_terrain.gd        # carve maths, slopes, data sync with the trace JSON, Terrain in main.tscn, posts and animals on the ground — see D-140
     │   ├── test_weather.gd        # weather/overcast helpers + Weather switching rain/snow on R in main.tscn
