@@ -30,6 +30,12 @@ fails if the two disagree.
 - **The pond.** A long pond with three lobes stretches from beside the dirt arena out past the Back Barn, with sloping banks you can walk down.
 - **Pipes underground.** The ditch goes under the driveway and into the pond through buried pipes.
 - **Fence posts and animals** follow the ground, so a post in the ditch stands on its floor and the geese walk down the bank.
+## November 23: Cars on the map
+> The map (M) now shows the TR6, BMW and Cub Cadet UTV; double-click one to jump to it.
+- **Driveable vehicles on the map.** The Triumph TR6, BMW 2002tii and Cub Cadet 550 show
+  as orange cars with their names, pointing the way they face and moving when they do.
+- **Jump to a car.** Double-click one to land beside it, ready to press E and get in.
+
 ## November 23: Map teleports in the pastures
 > Double-click a named marker in the back pastures on the map (M) to jump there, just like a building.
 - **Pasture teleports on the map.** Five spots in the back pastures now show as

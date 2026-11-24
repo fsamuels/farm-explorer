@@ -70,6 +70,7 @@ func _run() -> void:
 
 	await _test_teleport(main, map)
 	await _test_places(main, map)
+	await _test_vehicles(main, map)
 
 	print("map_scene: %s" % ("OK" if _failures == 0 else "%d FAILED" % _failures))
 	quit(1 if _failures else 0)
@@ -144,6 +145,42 @@ func _test_places(main: Node, map) -> void:
 	map._full.center = places[0].at
 	_double_click(map, map._full.to_screen(places[0].at))
 	_check(map.is_open() and player.global_position.x == 0.0, "no point teleport while driving")
+	player.set("vehicle", null)
+	map.set_open(false)
+
+## The driveable vehicles are on the open map (D-140) and double-clicking one
+## puts you beside it, facing the way it points, with the map closed.
+func _test_vehicles(main: Node, map) -> void:
+	var player: Node3D = main.get_node("Player")
+	var cars: Array = map._data.vehicles
+	_check(cars.size() == 3, "map lists the three driveable vehicles: %d" % cars.size())
+	for index in cars.size():
+		var car: Node3D = cars[index]
+		var car_at := MapMath.flatten(car.global_position)
+		map.set_open(true)
+		player.global_position = Vector3(0, 1, 0)
+		map._full.center = car_at
+		map._full.scale_px = 4.0
+		_check(map._vehicle_at(map._full.to_screen(car_at)) == index, "%s: found under the cursor" % car.label)
+		_double_click(map, map._full.to_screen(car_at))
+		await process_frame
+		var here := MapMath.flatten(player.global_position)
+		_check(not map.is_open() and not paused, "%s: teleport closes the map" % car.label)
+		var dist := here.distance_to(car_at)
+		_check(dist > 0.5 and dist < 8.0, "%s: lands beside it (%.1f m)" % [car.label, dist])
+		_check(absf(angle_difference(player.global_rotation.y, car.global_rotation.y)) < 0.01, "%s: faces the way it points" % car.label)
+	# Not while driving, and not into a car someone else is driving.
+	map.set_open(true)
+	player.global_position = Vector3(0, 1, 0)
+	var first: Node3D = cars[0]
+	map._full.center = MapMath.flatten(first.global_position)
+	first.driver = player
+	_double_click(map, map._full.to_screen(MapMath.flatten(first.global_position)))
+	_check(map.is_open() and player.global_position.x == 0.0, "no teleport to a car that is being driven")
+	first.driver = null
+	player.set("vehicle", main.get_node("TR6"))
+	_double_click(map, map._full.to_screen(MapMath.flatten(first.global_position)))
+	_check(map.is_open() and player.global_position.x == 0.0, "no vehicle teleport while driving")
 	player.set("vehicle", null)
 	map.set_open(false)
 

@@ -91,6 +91,7 @@ var _playback: AudioStreamGeneratorPlayback
 var frames_pushed := 0
 
 func _ready() -> void:
+	add_to_group("map_vehicle")
 	_build_wheels()
 	_build_engine_sound()
 	_build_headlights()
@@ -286,6 +287,12 @@ func find_exit_spot() -> Variant:
 		if space.intersect_shape(query, 1).is_empty():
 			return spot
 	return null
+
+## Where the map's teleport puts you (D-140): the spot beside the car that
+## find_exit_spot() picks, or a few metres to its right if it is boxed in.
+func map_arrival_spot() -> Vector3:
+	var found: Variant = find_exit_spot()
+	return found if found != null else to_global(Vector3(half_width + 2.0, 0.0, 0.0))
 
 ## Frees the seat once the player has been put at a spot from find_exit_spot().
 func release() -> void:
