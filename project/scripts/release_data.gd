@@ -67,6 +67,8 @@ const DATA := {
 		},
 		{
 			"bullets": [
+				"**Hay staircase.** The hay pile moved to the back (south) of the Front Barn and now climbs like a staircase, up to four bales high, leaving the middle aisle clear.",
+				"**A solid south wall.** The stall on the Front Barn's south-east corner now has a siding wall with a blue metal bottom across its south end, like the west side.",
 				"**The south stall is closed in,** and the Front Barn's roof now reads as a middle section with a side section each side, about a foot lower, as in the photo.",
 				"**Open stalls.** The stall walls are now four spaced boards instead of solid walls, so you can see through them like in the photo.",
 				"**Fences meet the barn.** Three fences that stopped just short of the Front Barn now join it."
@@ -134,14 +136,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 10846,
-		"commits": 274,
-		"decisions": 134,
+		"code_lines": 10875,
+		"commits": 169,
+		"decisions": 136,
 		"models": 13,
 		"scenes": 26,
 		"scripts": 47,
-		"size_kb": 111330,
-		"test_lines": 2800,
+		"size_kb": 111325,
+		"test_lines": 2811,
 		"textures": 48,
 		"vehicles": 3
 	}
