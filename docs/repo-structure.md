@@ -29,6 +29,7 @@ farm-sim/
 │   ├── build_release_notes.gd    # regenerates project/scripts/release_data.gd from CHANGELOG.md and a count of the game (D-130)
 │   ├── build_player_model.py     # Blender (bpy) script that builds project/models/player.glb
 │   │                              from Quaternius's CC0 base-character + animation packs (D-89)
+│   ├── build_ranger_model.py     # builds project/models/ranger_xp.glb from the Sketchfab download: recolours it, cuts the rear tank away, splits the wheels out (numpy only, D-138)
 │   ├── make_corrugated_texture.py # generates the tileable blue corrugated-metal albedo + normal textures for the Shop walls (D-98)
 │   ├── make_barn_textures.py     # generates the tileable tan siding (albedo + normal) and post-wood textures for the Front Barn (D-125)
 │   ├── ortho_fence_trace.py      # Python (Pillow + numpy) helpers to trace white fence
@@ -61,7 +62,7 @@ farm-sim/
     │   ├── tree_line_segment.tscn # procedurally-scattered treeline + invisible collision wall, instanced 11x, 20m outside the boundary — see D-11, D-82
     │   ├── tree.tscn              # wraps models/tree.glb, instanced by tree_line_segment.gd
     │   ├── transport_pad.tscn    # a glowing transport pad (script only), instanced 5x under `TransportPads` in main.tscn, linked in a ring — see D-131
-    │   ├── cub_cadet_utv.tscn    # the drivable Cub Cadet 550 UTV (tuning only; utv.gd builds the body), instanced once in the Front Barn — see D-127
+    │   ├── cub_cadet_utv.tscn    # the drivable Cub Cadet 550 UTV (tuning only; the body is models/ranger_xp.glb and utv.gd adds the bed), instanced once in the Front Barn — see D-127
     │   ├── building.tscn         # one unit building box, instanced 7x (footprint placeholders)
     │   ├── horse.tscn            # wraps models/horse.glb with wander-AI script, instanced 2x, roams a shared rectangle (D-27)
     │   ├── hen.tscn               # wraps models/hen.glb with wander.gd, instanced 6x inside flock.tscn
@@ -101,8 +102,8 @@ farm-sim/
     │   ├── whats_new.gd           # the What's New dialog (C key): the changelog and game-size stats, from release_data.gd — see D-130
     │   ├── release_notes.gd       # parses CHANGELOG.md, counts the game's size; pure, covered by tests/ — see D-130
     │   ├── release_data.gd        # GENERATED from CHANGELOG.md by tools/build_release_notes.gd; do not edit — see D-130
-    │   ├── utv.gd                 # the Cub Cadet 550 UTV: vehicle.gd plus a body built by utv_builder.gd and a dump bed — see D-127
-    │   ├── utv_builder.gd         # builds the UTV's yellow body, cage, wheels and tipping bed from primitives — see D-127
+    │   ├── utv.gd                 # the Cub Cadet 550 UTV: vehicle.gd plus a dump bed built by utv_builder.gd — see D-127, D-138
+    │   ├── utv_builder.gd         # builds the UTV's tipping dump bed (yellow box on a hinge) over the Ranger body — see D-127, D-138
     │   ├── vehicle_math.gd        # pure driving maths (speed, mph, turn rate, exit spots), covered by tests/ — see D-106
     │   ├── wheel_builder.gd       # splits a car model's wheel meshes into four wheels that spin and steer, covered by tests/ — see D-107
     │   ├── engine_sound.gd        # synthesized engine note: gears, revs, harmonics; covered by tests/ — see D-107
@@ -149,6 +150,8 @@ farm-sim/
     │   ├── quail.glb               # CC-BY static mesh (Poly by Google) — see D-17, credits.md
     │   ├── player.glb              # CC0 rigged/animated player character (Quaternius base, dressed by
     │   │                            # tools/build_player_model.py; textures embedded) — see D-89
+    │   ├── ranger_xp.glb           # CC-BY (Buthull, Sketchfab) Polaris Ranger XP 1000 body, recoloured Cub Cadet yellow/black
+    │   │                            # by tools/build_ranger_model.py (2 MB, 47k tris; no textures) — see D-138, credits.md
     │   └── tr6.glb                 # CC-BY static mesh (Configcars, Sketchfab), simplified from a 32MB/879k-tri
     │                                # download to 7.7MB — see D-25, credits.md
     └── textures/

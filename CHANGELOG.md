@@ -10,6 +10,13 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 23: A real UTV
+> The Front Barn's Cub Cadet UTV is now a detailed side-by-side with a roll cage, still with a dump bed.
+- **A proper utility vehicle.** The yellow-and-black Cub Cadet 550 is now a full
+  side-by-side with a roll cage and chunky tyres, in place of the boxy stand-in.
+- **Same dump bed.** Press B while driving to tip the yellow bed up or back down,
+  slowing down first as before.
+
 ## November 23: A readable News window
 > The What's New window (C) now has much larger text and resizes itself to fit your window.
 - **Much bigger text.** The News window's writing is about twice the size it was.
