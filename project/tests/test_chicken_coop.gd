@@ -99,16 +99,21 @@ func _run() -> void:
 	# The run's fence leaves the house, runs round the coop and joins the back-yard
 	# fence; the old back-yard fence no longer passes the coop.
 	var run := _fence_points(main, "ChickenRun_Fence")
-	_check(run.size() == 4, "the run fence has four points")
 	_check(run[0].distance_to(Vector2(61.2, -18.2)) < 1.0, "the run fence starts at the house")
-	_check(run[1].distance_to(Vector2(56.6, -2.9)) < 0.05 and run[2].distance_to(Vector2(35.2, -10.4)) < 0.05, "the run fence turns at 56.6, -2.9 and 35.2, -10.4")
-	_check(run[3].distance_to(Vector2(37.5, -18.4)) < 0.3, "the run fence ends near 37.5, -18.4")
+	for corner in [Vector2(56.6, -2.9), Vector2(35.2, -10.4)]:
+		var near := false
+		for p in run:
+			near = near or p.distance_to(corner) < 0.05
+		_check(near, "the run fence has a post at the corner %s" % corner)
+	_check(run.back().distance_to(Vector2(37.5, -18.4)) < 0.3, "the run fence ends near 37.5, -18.4")
+	for i in run.size() - 1:
+		_check(run[i].distance_to(run[i + 1]) < 3.6, "the run fence has a post at least every 3.6 m (span %d)" % i)
 	var yard := _fence_points(main, "BackYard_South")
-	_check(yard.back().distance_to(run[3]) < 0.05, "the back-yard fence ends where the run fence joins it")
+	_check(yard.back().distance_to(run.back()) < 0.05, "the back-yard fence ends where the run fence joins it")
 	for p in yard:
 		_check(p.x < 38.0, "no back-yard fence point stays east of the join")
 	var here := Vector2(coop.global_position.x, coop.global_position.z)
-	_check(Geometry2D.is_point_in_polygon(here, PackedVector2Array([run[0], run[1], run[2], run[3]])), "the coop stands inside the run fence")
+	_check(Geometry2D.is_point_in_polygon(here, PackedVector2Array(run)), "the coop stands inside the run fence")
 
 	print("chicken_coop: %s" % ("OK" if _failures == 0 else "%d FAILED" % _failures))
 	quit(1 if _failures else 0)
