@@ -159,14 +159,19 @@ func _walk_local(player: CharacterBody3D, interior: Node3D, from: Vector3, towar
 ## from each, no door), and the west side is a wall.
 func _open_side_tests(player: CharacterBody3D, shell: Node3D) -> void:
 	_check(shell.open_walls.size() == 3 and not shell.open_walls.has("west"), "the barn is open on three sides")
-	# From 4 m outside the middle of each side, walk in. The south and north runs
-	# stop at the hay stack, the east run at a stall front; both are inside.
+	# From 4 m outside the middle of each side, walk in. The north run reaches the
+	# aisle and the east run a stall front. The hay pile fills the south end's
+	# middle (D-136), so the south run comes in through its open west bay.
 	for wall in ["south", "north", "east", "west"]:
 		var spec: Dictionary = Shell.WALLS[wall]
 		var out: Vector3 = spec.out
 		var half: float = shell.depth / 2.0 if spec.along_x else shell.width / 2.0
 		var start := out * (half + 4.0)
-		var at: Vector3 = await _walk_local(player, shell, start, Vector3.ZERO, 120)
+		var aim := Vector3.ZERO
+		if wall == "south":
+			start.x = -3.2
+			aim = Vector3(-3.2, 0.0, 0.0)
+		var at: Vector3 = await _walk_local(player, shell, start, aim, 120)
 		var inside: bool = absf(at.x) < shell.width / 2.0 - 0.3 and absf(at.z) < shell.depth / 2.0 - 0.3
 		if wall == "west":
 			_check(not inside, "the west wall stops the player (at %s)" % at)
@@ -181,7 +186,7 @@ func _facade_tests(main: Node, shell: Node3D) -> void:
 	_check(facade.posts.size() >= 10 and facade.posts.size() % 2 == 0, "the same posts on each end (%d)" % facade.posts.size())
 	var Interior := preload("res://scripts/barn_interior.gd")
 	_check(Interior.new().tack_height + 0.04 < Profile.WING_LOW - 0.12, "the tack room ceiling stays under the wing roof")
-	_check(facade.siding_pieces >= 10 and facade.skirt_pieces >= 3, "siding and skirt are built (%d, %d)" % [facade.siding_pieces, facade.skirt_pieces])
+	_check(facade.siding_pieces >= 10 and facade.skirt_pieces >= 4, "siding and skirt are built (%d, %d)" % [facade.siding_pieces, facade.skirt_pieces])
 	_check(facade.get_node_or_null("RoofMiddle") != null and facade.get_node_or_null("RoofWing_East") != null and facade.get_node_or_null("RoofWing_West") != null, "the roof is three sections")
 	_check(absf((Profile.EAVE - Profile.WING_HIGH) - 0.3) < 0.01, "each wing roof stands about a foot below the middle roof's eave")
 	_check(((facade.get_node("RoofMiddle") as MeshInstance3D).mesh as ArrayMesh).get_surface_count() == 2, "the middle roof has an east and a west slope")
@@ -214,12 +219,18 @@ func _interior_tests(main: Node, player: CharacterBody3D) -> void:
 	_check(boards >= 4 * 5, "the stall fronts and dividers are runs of boards (%d)" % boards)
 	_check(interior.board_count == 4 and 0.2 + 4.0 * interior.BOARD_H < interior.stall_wall_height - 0.3, "four boards leave gaps between them")
 	_check(interior.tack_door != null, "a tack room door")
-	_check(interior.hay_size.y > 3.0, "the hay stack is tall: %s" % interior.hay_size)
+	_check(interior.hay_size.y >= 3.0 * 0.45 and interior.hay_size.y <= 4.0 * 0.45 + 0.01, "the hay pile is 3-4 bales high: %s" % interior.hay_size)
+	_check(interior.hay_center.z - interior.hay_size.z / 2.0 >= interior.depth / 6.0 - 0.01, "the hay pile is in the southern third (north edge z %s)" % (interior.hay_center.z - interior.hay_size.z / 2.0))
+	_check(interior.hay_step_tiers == PackedInt32Array([1, 2, 3, 4]), "the pile climbs one bale a step")
 	var front_x: float = interior.width / 2.0 - interior.wall_t - interior.side_depth
 	var tack_front: float = -interior.width / 2.0 + interior.wall_t + interior.side_depth
-	# The hay is solid: walking at it from the north stops short.
-	var at: Vector3 = await _walk_local(player, interior, Vector3(0, 0, -4.5), Vector3(0, 0, 4.0), 120)
-	_check(at.z < -interior.hay_size.z / 2.0 + 0.1, "the hay stack stops the player (z %s)" % at.z)
+	# The middle of the barn is clear now: walking through it from the north reaches the pile.
+	var north_edge: float = interior.hay_center.z - interior.hay_size.z / 2.0
+	var at: Vector3 = await _walk_local(player, interior, Vector3(0, 0, -4.5), Vector3(0, 0, 14.0), 160)
+	_check(at.z > 0.0, "the aisle is clear of hay (z %s)" % at.z)
+	# The tallest step is solid: walking at it from the north of the pile ends up on it or short of it.
+	_check(at.z < interior.hay_center.z + interior.hay_size.z / 2.0, "the pile stops the player at the south wall (z %s)" % at.z)
+	_check(north_edge > interior.depth / 6.0 - 0.01, "the pile starts in the southern third")
 	# The tack room: a closed door blocks, an open one lets you in.
 	var aisle := Vector3(tack_front + 2.0, 0, 0)
 	at = await _walk_local(player, interior, aisle, Vector3(-8, 0, 0), 100)

@@ -10,6 +10,20 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 23: A readable News window
+> The What's New window (C) now has much larger text and resizes itself to fit your window.
+- **Much bigger text.** The News window's writing is about twice the size it was.
+- **Fits any window.** It shrinks to fit a small window and grows to fill a big one,
+  so it is always whole on screen.
+
+## November 23: A tidier screen
+> One hint bar along the bottom, a HUD that scales on big screens, a resizable minimap, and hints that fade when you're idle.
+- **One hint bar.** Map, Sky, News and Help hints now sit together in a dark bar along the bottom instead of scattered over the minimap.
+- **Fits big screens.** Text and panels grow on large and high-resolution windows so they stay easy to read.
+- **Resize the minimap.** Press Tab to cycle it between medium, large and small.
+- **Cleaner view.** The hint bar fades away after a few quiet seconds and comes back when you press a key or click.
+- **Matching dialogs.** The Sky, News and Map panels now share one look.
+
 ## November 23: Mountains on the horizon
 > The Blue Mountains now rise in the east and the wind-farm ridges in the west, with turbines that spin and blink red at night.
 - **The land beyond the fence.** Real hills and plains reach out 80 km in every direction, built from USGS elevation data. They shift against the farm as you walk.
@@ -55,6 +69,10 @@ fails if the two disagree.
 
 ## November 23: Front Barn stalls and fences
 > The Front Barn's stalls, roof and neighbouring fences now match the photo.
+- **Hay staircase.** The hay pile moved to the back (south) of the Front Barn and now
+  climbs like a staircase, up to four bales high, leaving the middle aisle clear.
+- **A solid south wall.** The stall on the Front Barn's south-east corner now has a
+  siding wall with a blue metal bottom across its south end, like the west side.
 - **The south stall is closed in,** and the Front Barn's roof now reads as a middle
   section with a side section each side, about a foot lower, as in the photo.
 - **Open stalls.** The stall walls are now four spaced boards instead of solid

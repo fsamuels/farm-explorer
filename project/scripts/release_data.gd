@@ -6,6 +6,25 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**Much bigger text.** The News window's writing is about twice the size it was.",
+				"**Fits any window.** It shrinks to fit a small window and grows to fill a big one, so it is always whole on screen."
+			],
+			"summary": "The What's New window (C) now has much larger text and resizes itself to fit your window.",
+			"title": "November 23: A readable News window"
+		},
+		{
+			"bullets": [
+				"**One hint bar.** Map, Sky, News and Help hints now sit together in a dark bar along the bottom instead of scattered over the minimap.",
+				"**Fits big screens.** Text and panels grow on large and high-resolution windows so they stay easy to read.",
+				"**Resize the minimap.** Press Tab to cycle it between medium, large and small.",
+				"**Cleaner view.** The hint bar fades away after a few quiet seconds and comes back when you press a key or click.",
+				"**Matching dialogs.** The Sky, News and Map panels now share one look."
+			],
+			"summary": "One hint bar along the bottom, a HUD that scales on big screens, a resizable minimap, and hints that fade when you're idle.",
+			"title": "November 23: A tidier screen"
+		},
+		{
+			"bullets": [
 				"**The land beyond the fence.** Real hills and plains reach out 80 km in every direction, built from USGS elevation data. They shift against the farm as you walk.",
 				"**The Blue Mountains.** Snow-streaked ridges with dark forest on top, 35 to 65 km east, drawn a little taller than life so they stand out.",
 				"**Wind turbines.** About 1,100 turbines stand where they really are, most of them on the Stateline ridge to the west and south-west. Their blades turn, and at night some flash red in time with each other.",
@@ -56,6 +75,8 @@ const DATA := {
 		},
 		{
 			"bullets": [
+				"**Hay staircase.** The hay pile moved to the back (south) of the Front Barn and now climbs like a staircase, up to four bales high, leaving the middle aisle clear.",
+				"**A solid south wall.** The stall on the Front Barn's south-east corner now has a siding wall with a blue metal bottom across its south end, like the west side.",
 				"**The south stall is closed in,** and the Front Barn's roof now reads as a middle section with a side section each side, about a foot lower, as in the photo.",
 				"**Open stalls.** The stall walls are now four spaced boards instead of solid walls, so you can see through them like in the photo.",
 				"**Fences meet the barn.** Three fences that stopped just short of the Front Barn now join it."
@@ -123,14 +144,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 10694,
-		"commits": 272,
-		"decisions": 133,
+		"code_lines": 10891,
+		"commits": 273,
+		"decisions": 137,
 		"models": 13,
 		"scenes": 26,
 		"scripts": 47,
-		"size_kb": 111324,
-		"test_lines": 2761,
+		"size_kb": 111337,
+		"test_lines": 2819,
 		"textures": 48,
 		"vehicles": 3
 	}

@@ -108,8 +108,16 @@ func _build_end(end: float) -> void:
 	var jn := junction()
 	var ow := Profile.OPENING_W / 2.0
 	var z := end * (depth / 2.0 + SKIN)
-	# The east wing and the two side bays are open below the clearance line.
-	_band(z, end, jn, half, Profile.CLEARANCE, _siding)
+	# The east wing is open below the clearance line at the north end, but the
+	# south stall is closed in like the west wing: skirt below, siding above (D-135).
+	var closed_east := end > 0.0
+	if closed_east:
+		_band(z, end, jn, half, Profile.SKIRT, _siding)
+		_rect(z, end, jn, half, 0.05, Profile.SKIRT, _skirt)
+		skirt_pieces += 1
+	else:
+		_band(z, end, jn, half, Profile.CLEARANCE, _siding)
+	# The two side bays are open below the clearance line.
 	_band(z, end, ow, jn, Profile.CLEARANCE, _siding)
 	_band(z, end, -jn, -ow, Profile.CLEARANCE, _siding)
 	# Above the big opening: from its header to the roof.
@@ -121,7 +129,8 @@ func _build_end(end: float) -> void:
 	# Header beams, and the rail the siding sits on over the open bays.
 	var bz := end * (depth / 2.0 - BEAM / 2.0)
 	_box(Vector3(0.0, Profile.HEADER - BEAM / 2.0, bz), Vector3(Profile.OPENING_W + POST, BEAM, BEAM), _wood, false)
-	_box(Vector3((jn + half) / 2.0, Profile.CLEARANCE - BEAM / 2.0, bz), Vector3(half - jn, BEAM, BEAM), _wood, false)
+	if not closed_east:
+		_box(Vector3((jn + half) / 2.0, Profile.CLEARANCE - BEAM / 2.0, bz), Vector3(half - jn, BEAM, BEAM), _wood, false)
 	_box(Vector3((jn + ow) / 2.0, Profile.CLEARANCE - BEAM / 2.0, bz), Vector3(jn - ow, BEAM, BEAM), _wood, false)
 	_box(Vector3(-(jn + ow) / 2.0, Profile.CLEARANCE - BEAM / 2.0, bz), Vector3(jn - ow, BEAM, BEAM), _wood, false)
 	# Red trim along the roof edge of the face.
