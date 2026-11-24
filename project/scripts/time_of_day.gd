@@ -5,7 +5,7 @@ extends Node
 ## over `transition_seconds` and briefly naming the new time at the top of the
 ## screen. A lighting change only: nothing else in the scene reacts to the time.
 ##
-## A running clock (Y, `toggle_clock`) can instead advance the time on its own:
+## A running clock (Y, `toggle_clock`, on by default) can instead advance the time on its own:
 ## `hour` moves through the day and the lighting is blended between the presets
 ## placed on it by KEYFRAMES. T stops the clock and jumps to the next preset;
 ## Y starts it again from there. The clock starts running, at Day (13:00).
