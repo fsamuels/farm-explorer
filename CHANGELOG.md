@@ -11,8 +11,9 @@ regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
 ## November 24: Chicken coop
-> A red-and-tan chicken coop now stands near the house, with its door facing the porch.
-- **A new chicken coop.** A walk-in coop with a tan roosting house and window at one end, a white nest box, wire-mesh runs in a red frame and a dark corrugated tin roof stands at 48.7, -14.6. Its door is open and faces the house.
+> A red-and-tan chicken coop now stands near the house, in a new fenced yard, with a silver roof and its door on the house side.
+- **A new chicken coop.** A walk-in coop with a tan roosting house and window at one end, a white nest box, wire-mesh runs in a red frame and a silver galvanized steel roof that slopes down to the back stands behind the house, squared to its south wall. Its door is open and faces the house.
+- **A new fenced yard.** A fence now runs from the house out round the coop and back to the back-yard fence. The old stretch of back-yard fence that ran past the coop is gone.
 
 ## November 24: Burn the ditch
 > Burn the dry grass along the irrigation ditch with a propane torch, south to north with the wind, then open the weir to run the water.

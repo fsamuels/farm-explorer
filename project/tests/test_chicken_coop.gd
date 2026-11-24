@@ -14,12 +14,20 @@ func _check(cond: bool, what: String) -> void:
 		_failures += 1
 		push_error("FAIL: " + what)
 
-## Height of the roof's top surface at local x, by a ray from above.
-func _roof_y(coop: Node3D, space: PhysicsDirectSpaceState3D, x: float) -> float:
-	var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(coop.to_global(Vector3(x, 5.0, 0.0)), coop.to_global(Vector3(x, 0.0, 0.0))))
+## Height of the roof's top surface at local z, by a ray from above.
+func _roof_y(coop: Node3D, space: PhysicsDirectSpaceState3D, z: float) -> float:
+	var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(coop.to_global(Vector3(0.0, 5.0, z)), coop.to_global(Vector3(0.0, 0.0, z))))
 	if hit.is_empty():
 		return -1.0
 	return coop.to_local(hit.position).y
+
+func _fence_points(main: Node, name: String) -> Array[Vector2]:
+	var path := main.get_node("BackFences/%s" % name) as Path3D
+	var out: Array[Vector2] = []
+	for i in path.curve.point_count:
+		var p := path.global_transform * path.curve.get_point_position(i)
+		out.append(Vector2(p.x, p.z))
+	return out
 
 func _run() -> void:
 	var main: Node = load("res://scenes/main.tscn").instantiate()
@@ -36,9 +44,11 @@ func _run() -> void:
 	var house := main.get_node("Buildings/House") as Node3D
 	var front := Vector2(coop.global_transform.basis.z.x, coop.global_transform.basis.z.z).normalized()
 	var to_house := (Vector2(house.global_position.x, house.global_position.z) - Vector2(coop.global_position.x, coop.global_position.z)).normalized()
-	_check(front.dot(to_house) > 0.99, "the front (door side) faces the house")
-	var yaw := Coop.facing_yaw(Vector2(48.7, -14.6), Vector2(61.77, -31.3))
-	_check(absf(angle_difference(yaw, coop.rotation.y)) < 0.02, "its yaw matches facing_yaw toward the house")
+	_check(front.dot(to_house) > 0.9, "the front (door side) is on the house side")
+	var south_wall := Vector2(house.global_transform.basis.x.x, house.global_transform.basis.x.z).normalized()
+	var coop_x := Vector2(coop.global_transform.basis.x.x, coop.global_transform.basis.x.z).normalized()
+	_check(absf(coop_x.dot(south_wall)) > 0.999, "the coop is parallel to the house's south wall")
+	_check(front.dot(-Vector2(house.global_transform.basis.z.x, house.global_transform.basis.z.z).normalized()) > 0.999, "the door side is square to the south wall, on the house side")
 	_check(Coop.door_span().y - Coop.door_span().x >= 0.8, "the doorway is wide enough to walk through")
 	_check(coop.door_outside().distance_to(Vector2(house.global_position.x, house.global_position.z)) < Vector2(coop.global_position.x, coop.global_position.z).distance_to(Vector2(house.global_position.x, house.global_position.z)), "outside the door is nearer the house than the coop's middle")
 
@@ -64,12 +74,15 @@ func _run() -> void:
 	var d := coop.to_global(Vector3(Coop.WIDTH * 0.5 - 0.3, 0.9, 0.0))
 	_check(not space.intersect_ray(PhysicsRayQueryParameters3D.create(c, d)).is_empty(), "the front wall beside the door is solid")
 
-	# The roof is high over the roosting house (-X) and low over the run (+X).
+	# The roof is high at the front (the door side) and slopes down to the back.
 	var hx := Coop.WIDTH * 0.5
-	var top_hi := _roof_y(coop, space, -hx + 0.3)
-	var top_lo := _roof_y(coop, space, hx - 0.3)
-	_check(top_hi > top_lo + 0.05, "the roof is higher over the roosting house than over the run")
-	_check(absf(top_hi - Coop.roof_height(-hx + 0.3)) < 0.12 and absf(top_lo - Coop.roof_height(hx - 0.3)) < 0.12, "the roof sits on the walls")
+	var hz := Coop.DEPTH * 0.5
+	var top_hi := _roof_y(coop, space, hz - 0.3)
+	var top_lo := _roof_y(coop, space, -hz + 0.3)
+	_check(top_hi > top_lo + 0.1, "the roof is higher at the door side than at the back")
+	_check(absf(top_hi - Coop.roof_height(hz - 0.3)) < 0.12 and absf(top_lo - Coop.roof_height(-hz + 0.3)) < 0.12, "the roof sits on the walls")
+	var roof_mat := (walls.get_child(walls.get_child_count() - 2) as MeshInstance3D).material_override as StandardMaterial3D
+	_check(roof_mat.albedo_color.v > 0.6 and absf(roof_mat.albedo_color.r - roof_mat.albedo_color.b) < 0.12, "the roof is a light, silvery galvanized grey")
 	# The door leaf swings out the front, not into the run.
 	var leaf := coop.get_node("DoorLeaf") as Node3D
 	var free_end := leaf.to_global(Vector3(-Coop.DOOR_WIDTH + 0.04, 0.0, 0.0))
@@ -82,6 +95,20 @@ func _run() -> void:
 	_check(not end.is_empty(), "the outer end under the roosting house is closed")
 	# The footprint sits at the coop's ground.
 	_check(absf(footprint.global_position.y - (coop.global_position.y + 1.15)) < 0.3, "the footprint is at the coop's ground level")
+
+	# The run's fence leaves the house, runs round the coop and joins the back-yard
+	# fence; the old back-yard fence no longer passes the coop.
+	var run := _fence_points(main, "ChickenRun_Fence")
+	_check(run.size() == 4, "the run fence has four points")
+	_check(run[0].distance_to(Vector2(61.2, -18.2)) < 1.0, "the run fence starts at the house")
+	_check(run[1].distance_to(Vector2(56.6, -2.9)) < 0.05 and run[2].distance_to(Vector2(35.2, -10.4)) < 0.05, "the run fence turns at 56.6, -2.9 and 35.2, -10.4")
+	_check(run[3].distance_to(Vector2(37.5, -18.4)) < 0.3, "the run fence ends near 37.5, -18.4")
+	var yard := _fence_points(main, "BackYard_South")
+	_check(yard.back().distance_to(run[3]) < 0.05, "the back-yard fence ends where the run fence joins it")
+	for p in yard:
+		_check(p.x < 38.0, "no back-yard fence point stays east of the join")
+	var here := Vector2(coop.global_position.x, coop.global_position.z)
+	_check(Geometry2D.is_point_in_polygon(here, PackedVector2Array([run[0], run[1], run[2], run[3]])), "the coop stands inside the run fence")
 
 	print("chicken_coop: %s" % ("OK" if _failures == 0 else "%d FAILED" % _failures))
 	quit(1 if _failures else 0)
