@@ -10,6 +10,14 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 24: Swimming and a kayak
+> You can swim freestyle in a bigger pond that now reaches the trees all round, and there is a kayak on its east bank to paddle.
+- **Swimming.** Wade into the pond until the water is over your chest and you start to swim: you float at the surface and swim freestyle, arms alternating, legs kicking, body rolling with each stroke. Shift slows you down; you can't jump out of deep water. Walk to the shallows and you stand up again.
+- **A bigger pond.** The pond is about half as big again, out to the trees on the west and south and wider on the open north side. It holds more water, so it takes the same time to fill but is more to swim in.
+- **A kayak.** An orange kayak sits on the east bank of the pond. Press E to get in, W/S to paddle, A/D to steer and Space to brake. Drag it into the water first, or fill the pond from the sky menu (G).
+- **Paddle and bobbing.** The paddle swings as you move and the kayak bobs on the water. It runs aground in the shallows and only crawls on dry land.
+- **Just a start.** The kayak shows no person in it yet, and there is no paddle boat or splash sound.
+
 ## November 24: The clock runs
 > The sky clock now starts running at Day, so the sun moves and the day turns to night on its own.
 - **Time passes.** The game opens at Day (about 1 PM) with the clock already running: the sun crosses the sky, sunset and dusk arrive, then night and dawn. A full day takes 20 minutes.

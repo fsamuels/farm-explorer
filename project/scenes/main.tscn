@@ -28,6 +28,7 @@
 [ext_resource type="Texture2D" path="res://textures/buildings/red_shipping_container.png" id="29_container_tex"]
 [ext_resource type="PackedScene" path="res://scenes/bmw_2002_tii.tscn" id="30_bmw_scene"]
 [ext_resource type="PackedScene" path="res://scenes/cub_cadet_utv.tscn" id="61_utv_scene"]
+[ext_resource type="PackedScene" path="res://scenes/kayak.tscn" id="63_kayak_scene"]
 [ext_resource type="PackedScene" path="res://scenes/transport_pad.tscn" id="62_pad_scene"]
 [ext_resource type="Script" path="res://scripts/whats_new.gd" id="62_whats_new"]
 [ext_resource type="Texture2D" path="res://textures/buildings/sallys_house_north_wall.png" id="31_wall_sh_n"]
@@ -1383,10 +1384,13 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 218.8421, 0, -36.34435)
 [node name="CubCadetUTV" parent="." instance=ExtResource("61_utv_scene")]
 transform = Transform3D(0.996862, 0, -0.079155, 0, 1, 0, 0.079155, 0, 0.996862, 143.972, 0.06, 40.495)
 
+[node name="Kayak" parent="." instance=ExtResource("63_kayak_scene")]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 1.5, 0.05, 19)
+
 [node name="TransportPads" type="Node3D" parent="."]
 
 [node name="Pad_BackBarn" parent="TransportPads" instance=ExtResource("62_pad_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 24)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 20)
 pad_name = "Back Barn"
 
 [node name="Pad_South" parent="TransportPads" instance=ExtResource("62_pad_scene")]

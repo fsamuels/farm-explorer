@@ -42,6 +42,7 @@ pulls the latest `sdlc` version (applied on the next restart or `/reload-plugins
   godot --headless -s res://tests/test_horizon.gd
   godot --headless -s res://tests/test_terrain.gd
   godot --headless -s res://tests/test_water.gd
+  godot --headless -s res://tests/test_swim.gd
   godot --headless -s res://tests/test_world.gd
   godot --headless -s res://tests/test_toast.gd
   godot --headless -s res://tests/test_release_notes.gd

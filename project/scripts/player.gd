@@ -24,6 +24,8 @@ const MAX_ANIM_SPEED_SCALE := 2.0
 const LOOPING_ANIMS := ["Idle", "Walk", "Jog", "Sprint", "Jump_Loop"]
 const MODEL_TURN_RATE := 10.0
 const DriveHud := preload("res://scripts/drive_hud.gd")
+const SwimMath := preload("res://scripts/swim_math.gd")
+const SwimPose := preload("res://scripts/swim_pose.gd")
 
 ## Mouse-wheel camera distance (D-91). Scrolling back from first person drops
 ## into third person at the closest distance; scrolling forward past it returns
@@ -67,6 +69,13 @@ var _view_before_car := false
 var _boom_before_car := 0.0
 var _prompt_flash := ""
 var _prompt_flash_left := 0.0
+## True while swimming in the pond (D-152), and where the freestyle stroke is.
+var swimming := false
+var swim_phase := 0.0
+var _water: Node
+var _skeleton: Skeleton3D
+var _hip_local := Vector3.ZERO
+var _swim_time := 0.0
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -85,6 +94,12 @@ func _ready() -> void:
 		if anim_player.has_animation(anim_name):
 			anim_player.get_animation(anim_name).loop_mode = Animation.LOOP_LINEAR
 	anim_player.play("Idle")
+	var skeletons := model.find_children("*", "Skeleton3D", true, false)
+	if not skeletons.is_empty() and (skeletons[0] as Skeleton3D).find_bone("pelvis") >= 0:
+		_skeleton = skeletons[0] as Skeleton3D
+		var pelvis := _skeleton.find_bone("pelvis")
+		var to_model := model.global_transform.affine_inverse() * _skeleton.global_transform
+		_hip_local = to_model * _skeleton.get_bone_global_rest(pelvis).origin
 	_set_tp_distance(spring_arm.spring_length)
 	_apply_view()
 
@@ -162,7 +177,7 @@ func _process(delta: float) -> void:
 		# Driving: the big yellow prompt gives way to a quiet readout (D-113).
 		interact_prompt.visible = false
 		_prompt_flash_left -= delta
-		drive_hud.show_drive(vehicle.speed_mph(), vehicle.engine_rpm, _prompt_flash if _prompt_flash_left > 0.0 else "")
+		drive_hud.show_drive(vehicle.speed_mph(), vehicle.engine_rpm if vehicle.has_engine else -1.0, _prompt_flash if _prompt_flash_left > 0.0 else "")
 		return
 	drive_hud.hide_drive()
 	var target := _interact_target()
@@ -205,6 +220,7 @@ func _interactable_of(collider: Object) -> Node:
 ## Get into a car (vehicle.gd calls this from its `interact`): the player's
 ## capsule and body are switched off and the camera drops to the driver's eye.
 func enter_vehicle(car: Node3D) -> void:
+	_set_swimming(false)
 	vehicle = car
 	car.board(self)
 	velocity = Vector3.ZERO
@@ -258,6 +274,10 @@ func _physics_process(delta: float) -> void:
 	if vehicle:
 		global_transform = vehicle.seat_transform(drive_look_yaw)
 		return
+	_update_swimming()
+	if swimming:
+		_swim(delta)
+		return
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
@@ -276,6 +296,50 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 	_animate(input_dir, delta)
+
+## Start or stop swimming as the water under the player gets deep or shallow.
+func _update_swimming() -> void:
+	if not is_instance_valid(_water):
+		_water = get_tree().get_first_node_in_group("water")
+	var depth: float = _water.water_depth_at(global_position.x, global_position.z) if _water else 0.0
+	_set_swimming(SwimMath.is_swimming(depth, swimming))
+
+func _set_swimming(on: bool) -> void:
+	if on == swimming:
+		return
+	swimming = on
+	anim_player.active = not on
+	if on:
+		swim_phase = 0.0
+	else:
+		# Stand the body back up; the animation player takes the bones again.
+		model.rotation = Vector3(0.0, PI + model_yaw, 0.0)
+		model.position = Vector3.ZERO
+		if _skeleton:
+			_skeleton.reset_bone_poses()
+
+## Freestyle: float at the surface, move with the keys at stroke speed.
+func _swim(delta: float) -> void:
+	_swim_time += delta
+	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	var speed := SwimMath.swim_speed(Input.is_action_pressed("walk"))
+	velocity.x = direction.x * speed if direction else move_toward(velocity.x, 0, 4.0 * delta)
+	velocity.z = direction.z * speed if direction else move_toward(velocity.z, 0, 4.0 * delta)
+	var surface: float = _water.water_surface_at(global_position.x, global_position.z)
+	velocity.y = SwimMath.float_velocity(global_position.y, SwimMath.float_y(surface, _swim_time)) if not is_nan(surface) else 0.0
+	move_and_slide()
+	swim_phase = SwimMath.advance_phase(swim_phase, delta, direction != Vector3.ZERO)
+	var target_yaw := atan2(-input_dir.x, -input_dir.y) if input_dir != Vector2.ZERO else 0.0
+	model_yaw = lerp_angle(model_yaw, target_yaw, clamp(MODEL_TURN_RATE * delta, 0.0, 1.0))
+	# Lie flat, rolling with the stroke, pivoting about the hips so the body
+	# floats at the surface.
+	var tilt := Basis(Vector3.UP, PI + model_yaw) * Basis(Vector3.RIGHT, SwimMath.BODY_PITCH) \
+			* Basis(Vector3.UP, SwimMath.body_roll(swim_phase))
+	model.basis = tilt.scaled(model.basis.get_scale())
+	model.position = Vector3(0.0, SwimMath.DRAFT - 0.05, 0.0) - model.basis * _hip_local
+	if _skeleton:
+		SwimPose.apply(_skeleton, model, swim_phase)
 
 ## Face the body toward the movement direction (relative to the camera yaw) and
 ## pick the animation from ground speed / airborne state.

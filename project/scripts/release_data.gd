@@ -6,6 +6,17 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**Swimming.** Wade into the pond until the water is over your chest and you start to swim: you float at the surface and swim freestyle, arms alternating, legs kicking, body rolling with each stroke. Shift slows you down; you can't jump out of deep water. Walk to the shallows and you stand up again.",
+				"**A bigger pond.** The pond is about half as big again, out to the trees on the west and south and wider on the open north side. It holds more water, so it takes the same time to fill but is more to swim in.",
+				"**A kayak.** An orange kayak sits on the east bank of the pond. Press E to get in, W/S to paddle, A/D to steer and Space to brake. Drag it into the water first, or fill the pond from the sky menu (G).",
+				"**Paddle and bobbing.** The paddle swings as you move and the kayak bobs on the water. It runs aground in the shallows and only crawls on dry land.",
+				"**Just a start.** The kayak shows no person in it yet, and there is no paddle boat or splash sound."
+			],
+			"summary": "You can swim freestyle in a bigger pond that now reaches the trees all round, and there is a kayak on its east bank to paddle.",
+			"title": "November 24: Swimming and a kayak"
+		},
+		{
+			"bullets": [
 				"**Time passes.** The game opens at Day (about 1 PM) with the clock already running: the sun crosses the sky, sunset and dusk arrive, then night and dawn. A full day takes 20 minutes.",
 				"**Same controls.** Y still pauses and restarts the clock, T jumps to the next time of day and stops it, and the sky menu (G) works as before."
 			],
@@ -238,14 +249,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 14228,
-		"commits": 133,
-		"decisions": 152,
+		"code_lines": 14660,
+		"commits": 134,
+		"decisions": 154,
 		"models": 14,
-		"scenes": 25,
-		"scripts": 63,
-		"size_kb": 115310,
-		"test_lines": 4222,
+		"scenes": 26,
+		"scripts": 67,
+		"size_kb": 115341,
+		"test_lines": 4450,
 		"textures": 49,
 		"vehicles": 3
 	}
