@@ -6,6 +6,15 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**Water row in the sky menu.** Open or shut the weir, fill or drain the ditch, set the pond empty, half or full, and speed the water up (x5 or x20) so you don't have to wait.",
+				"**Toasts.** Short notices fade in at the top of the screen. The first two: \"The pond is full\" and \"The pond is empty\".",
+				"**Swimming birds.** Once the pond has water, the ducks and geese head for it and float about on it, then walk out again if it dries."
+			],
+			"summary": "The sky menu (G) now controls the weir, ditch and pond; a toast tells you when the pond is full or empty; ducks and geese swim.",
+			"title": "November 24: Water controls, toasts and swimming birds"
+		},
+		{
+			"bullets": [
 				"**Skim first.** Each update shows its headline, with a short bold line per change and the extra detail in smaller, dimmer text.",
 				"**Details on request.** Only the newest update starts open; older ones fold up, and \"Show details\" opens them.",
 				"**Right-sized.** The dialog no longer fills the whole window."
@@ -190,14 +199,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 12167,
-		"commits": 277,
-		"decisions": 142,
+		"code_lines": 12529,
+		"commits": 278,
+		"decisions": 143,
 		"models": 14,
 		"scenes": 26,
-		"scripts": 54,
-		"size_kb": 113348,
-		"test_lines": 3303,
+		"scripts": 55,
+		"size_kb": 113369,
+		"test_lines": 3482,
 		"textures": 48,
 		"vehicles": 3
 	}

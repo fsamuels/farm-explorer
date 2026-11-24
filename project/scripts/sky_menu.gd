@@ -46,13 +46,23 @@ const WEATHER_COLORS := {
 ## sends a Starlink train across the sky.
 const STARLINK_CODE := "starlink"
 
+## The Water row (D-142): jump the pond to a level, and how fast the water runs
+## compared with the clock.
+const POND_PRESETS := [["Empty pond", 0.0], ["Half full", 0.5], ["Full pond", 1.0]]
+const WATER_SPEEDS := [["Normal", 1.0], ["Fast  x5", 5.0], ["Very fast  x20", 20.0]]
+
 @export var time_of_day_path: NodePath = ^"../TimeOfDay"
 @export var weather_path: NodePath = ^"../Weather"
 @export var terrain_path: NodePath = ^"../DistantTerrain"
+@export var water_path: NodePath = ^"../Water"
 
 var _tod: Node
 var _weather: Node
 var _terrain: Node
+var _water: Node
+var _weir_button: Button
+var _water_status: Label
+var _speed_buttons := []
 var _season_button: Button
 var _time_buttons := {}
 var _weather_buttons := {}
@@ -72,6 +82,7 @@ func _ready() -> void:
 	_tod = get_node_or_null(time_of_day_path)
 	_weather = get_node_or_null(weather_path)
 	_terrain = get_node_or_null(terrain_path)
+	_water = get_node_or_null(water_path)
 	_build()
 	_panel.visible = false
 
@@ -184,6 +195,31 @@ func toggle_season() -> void:
 	if _terrain:
 		choose_season("summer" if _terrain.season == "winter" else "winter")
 
+## Open or shut the weir that feeds the ditch.
+func toggle_weir() -> void:
+	if _water:
+		_water.weir_open = not _water.weir_open
+	refresh()
+
+## Fill the whole ditch with water at once, or drain it.
+func set_ditch(full: bool) -> void:
+	if _water:
+		_water.set_ditch_full(full)
+	refresh()
+
+## Put the pond at `fraction` full (0 empty .. 1 full). The pond's own toast
+## ("The pond is full") announces it.
+func set_pond(fraction: float) -> void:
+	if _water:
+		_water.set_pond_fill(fraction)
+	refresh()
+
+## Pick how fast the water runs: index into WATER_SPEEDS.
+func choose_water_speed(index: int) -> void:
+	if _water:
+		_water.time_scale = WATER_SPEEDS[index][1]
+	refresh()
+
 ## The Starlink easter egg: close the menu and send a train across the sky, or
 ## say why not if the sky is too bright or cloudy to see one.
 func starlink() -> void:
@@ -217,6 +253,12 @@ func refresh() -> void:
 			var b := _weather_buttons[key] as Button
 			b.set_pressed_no_signal(key == _weather.current)
 			b.modulate = Color.WHITE if is_available(key) else UNAVAILABLE_TINT
+	if _water:
+		_weir_button.set_pressed_no_signal(_water.weir_open)
+		_weir_button.text = "Weir\n" + ("open" if _water.weir_open else "shut")
+		_water_status.text = "Pond %d%% full" % roundi(_water.pond_fill_fraction() * 100.0)
+		for i in _speed_buttons.size():
+			(_speed_buttons[i] as Button).set_pressed_no_signal(is_equal_approx(_water.time_scale, WATER_SPEEDS[i][1]))
 
 func _build() -> void:
 	_panel = PanelContainer.new()
@@ -310,10 +352,69 @@ func _build() -> void:
 		b.custom_minimum_size = Vector2(0, 62)
 		night.add_child(b)
 
+	if _water:
+		_build_water(box)
+
 	var close := _button("Close  (G or Esc)")
 	close.toggle_mode = false
 	close.pressed.connect(set_open.bind(false))
 	box.add_child(close)
+
+## The Water row: weir and ditch, the pond's level, and the water's speed.
+func _build_water(box: VBoxContainer) -> void:
+	var title := HBoxContainer.new()
+	box.add_child(title)
+	var heading := _heading("Water")
+	heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.add_child(heading)
+	_water_status = Label.new()
+	_water_status.add_theme_font_size_override("font_size", FONT_SIZE - 2)
+	_water_status.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
+	title.add_child(_water_status)
+
+	var ditch := HBoxContainer.new()
+	ditch.add_theme_constant_override("separation", 8)
+	box.add_child(ditch)
+	_weir_button = _button("")
+	_weir_button.pressed.connect(toggle_weir)
+	ditch.add_child(_weir_button)
+	var fill := _action_button("Fill ditch")
+	fill.pressed.connect(set_ditch.bind(true))
+	ditch.add_child(fill)
+	var drain := _action_button("Drain ditch")
+	drain.pressed.connect(set_ditch.bind(false))
+	ditch.add_child(drain)
+	for b in [_weir_button, fill, drain]:
+		b.custom_minimum_size = Vector2(0, 62)
+
+	var pond := HBoxContainer.new()
+	pond.add_theme_constant_override("separation", 8)
+	box.add_child(pond)
+	for preset in POND_PRESETS:
+		var b := _action_button(preset[0])
+		_paint_gradient(b, Color(0.18, 0.42, 0.55).lerp(Color(0.06, 0.14, 0.2), 1.0 - preset[1]), Color(0.3, 0.6, 0.75).lerp(Color(0.1, 0.2, 0.28), 1.0 - preset[1]), 6)
+		b.pressed.connect(set_pond.bind(preset[1]))
+		pond.add_child(b)
+
+	var speed := HBoxContainer.new()
+	speed.add_theme_constant_override("separation", 8)
+	box.add_child(speed)
+	var speed_label := Label.new()
+	speed_label.text = "Water speed"
+	speed_label.add_theme_font_size_override("font_size", FONT_SIZE - 2)
+	speed_label.add_theme_color_override("font_color", Color(0.7, 0.72, 0.78))
+	speed.add_child(speed_label)
+	for i in WATER_SPEEDS.size():
+		var b := _button(WATER_SPEEDS[i][0])
+		b.pressed.connect(choose_water_speed.bind(i))
+		speed.add_child(b)
+		_speed_buttons.append(b)
+
+## A button that does something when pressed rather than staying down.
+func _action_button(text: String) -> Button:
+	var b := _button(text)
+	b.toggle_mode = false
+	return b
 
 func _add_weather_button(parent: Container, key: String) -> void:
 	var b := _button(Weather.WEATHER[key].label)

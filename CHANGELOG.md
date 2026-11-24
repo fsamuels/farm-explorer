@@ -10,6 +10,12 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 24: Water controls, toasts and swimming birds
+> The sky menu (G) now controls the weir, ditch and pond; a toast tells you when the pond is full or empty; ducks and geese swim.
+- **Water row in the sky menu.** Open or shut the weir, fill or drain the ditch, set the pond empty, half or full, and speed the water up (x5 or x20) so you don't have to wait.
+- **Toasts.** Short notices fade in at the top of the screen. The first two: "The pond is full" and "The pond is empty".
+- **Swimming birds.** Once the pond has water, the ducks and geese head for it and float about on it, then walk out again if it dries.
+
 ## November 24: A calmer What's New
 > The What's New list is smaller, easier to skim, and tucks the details away until you want them.
 - **Skim first.** Each update shows its headline, with a short bold line per change and the extra detail in smaller, dimmer text.
