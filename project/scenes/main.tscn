@@ -1385,12 +1385,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 218.8421, 0, -36.34435)
 transform = Transform3D(0.996862, 0, -0.079155, 0, 1, 0, 0.079155, 0, 0.996862, 143.972, 0.06, 40.495)
 
 [node name="Kayak" parent="." instance=ExtResource("63_kayak_scene")]
-transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, -3, 0.05, 19)
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 1.5, 0.05, 19)
 
 [node name="TransportPads" type="Node3D" parent="."]
 
 [node name="Pad_BackBarn" parent="TransportPads" instance=ExtResource("62_pad_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 24)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 20)
 pad_name = "Back Barn"
 
 [node name="Pad_South" parent="TransportPads" instance=ExtResource("62_pad_scene")]

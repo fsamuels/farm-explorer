@@ -10,7 +10,7 @@ const BoatBuilder := preload("res://scripts/boat_builder.gd")
 
 ## Deep water in the pond's middle lobe, and dry ground east of its rim.
 const POND_MIDDLE := Vector2(-27.0, 19.0)
-const DRY_GROUND := Vector2(-3.0, 19.0)
+const DRY_GROUND := Vector2(2.0, 19.0)
 
 var _failures := 0
 
