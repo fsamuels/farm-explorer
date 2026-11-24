@@ -202,7 +202,7 @@ func _test_scene() -> void:
 	root.add_child(main)
 	for i in 3:
 		await process_frame
-	# Pin the plain Day look: the clock now runs from the start (D-149), which drifts the hour.
+	# Pin the plain Day look: the clock now runs from the start (D-150), which drifts the hour.
 	main.get_node("TimeOfDay").set_preset("day", true)
 	var weather = main.get_node("Weather")
 	# A script that fails to compile still loads as a bare node, and every
