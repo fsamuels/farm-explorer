@@ -71,6 +71,12 @@ func world_xz(local: Vector2) -> Vector2:
 	var p := to_global(Vector3(local.x, 0.0, local.y))
 	return Vector2(p.x, p.z)
 
+func pen_radius() -> float:
+	return PEN_RADIUS
+
+func roost_radius() -> float:
+	return ROOST_RADIUS
+
 func pen_point() -> Vector2:
 	return world_xz(PEN_SPOT)
 
