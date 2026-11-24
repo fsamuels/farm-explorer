@@ -1,7 +1,8 @@
 extends Control
-## Read-only controls help panel (D-90). Shown when the game starts; F1
-## (`toggle_help`) hides/shows it. While hidden, a small "F1 — Controls" hint
-## stays in the corner. Purely informational: it never takes the mouse.
+## Read-only controls help panel (D-90). F1 (`toggle_help`) hides/shows it. It no
+## longer opens at the start: the Things to Do list does (D-168). While hidden, a
+## small "F1 — Controls" hint stays in the corner. Purely informational: it never
+## takes the mouse.
 ##
 ## It also tucks itself away once you've been moving for AUTO_HIDE_MOVE_SECONDS
 ## (walking or driving), so it never sits over the view for long (D-132).
@@ -26,6 +27,7 @@ const CONTROLS := [
 	["M", "Open / close the map (pauses the game)"],
 	["Tab", "Change the minimap's size: medium, large, small"],
 	["C", "What's New: the changelog and the game's size (pauses the game)"],
+	["H", "Things to do: what to try on the farm, with buttons that take you there (pauses the game)"],
 	["G", "Sky menu: pick the time of day, weather, season and the water (weir, pond level, speed) and the fire (regrow, wind); pauses the game"],
 	["T", "Change the time of day: day, sunset, dusk, night, dawn, sunrise"],
 	["Y", "Start / stop the clock (time shown top right)"],
@@ -57,11 +59,15 @@ func _ready() -> void:
 	set_anchors_preset(Control.PRESET_TOP_LEFT)
 	_panel = _build_panel()
 	add_child(_panel)
-	_hint = _outlined_label("F1 — Controls")
+	_hint = _outlined_label("F1 — Controls   ·   H — Things to do")
 	_hint.position = Vector2(16, 16)
 	_hint.add_theme_stylebox_override("normal", HudStyle.backing())
 	add_child(_hint)
-	_set_open(true)
+	add_to_group("controls_overlay")
+	_set_open(false)
+
+func is_open() -> bool:
+	return _panel.visible
 
 ## True for a fresh key press that is something other than moving (or F1,
 ## which toggles the panel itself). Echoes from a held key don't count.

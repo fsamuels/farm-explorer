@@ -32,6 +32,7 @@
 [ext_resource type="PackedScene" path="res://scenes/kayak.tscn" id="63_kayak_scene"]
 [ext_resource type="PackedScene" path="res://scenes/transport_pad.tscn" id="62_pad_scene"]
 [ext_resource type="Script" path="res://scripts/whats_new.gd" id="62_whats_new"]
+[ext_resource type="Script" path="res://scripts/things_to_do.gd" id="64_things_to_do"]
 [ext_resource type="Texture2D" path="res://textures/buildings/sallys_house_north_wall.png" id="31_wall_sh_n"]
 [ext_resource type="Texture2D" path="res://textures/buildings/sallys_house_south_wall.png" id="32_wall_sh_s"]
 [ext_resource type="Texture2D" path="res://textures/buildings/sallys_house_garage_north_wall.png" id="33_wall_shg_n"]
@@ -1519,6 +1520,9 @@ player_path = NodePath("../../Player")
 
 [node name="WhatsNew" type="CanvasLayer" parent="."]
 script = ExtResource("62_whats_new")
+
+[node name="ThingsToDo" type="CanvasLayer" parent="."]
+script = ExtResource("64_things_to_do")
 
 [node name="SkyMenu" type="CanvasLayer" parent="."]
 script = ExtResource("57_sky_menu")

@@ -87,6 +87,7 @@ var _layer_labels: Array[Label] = []
 var _dragging := false
 
 func _ready() -> void:
+	add_to_group("minimap")
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_apply_hud_scale()
 	get_window().size_changed.connect(_apply_hud_scale)
@@ -310,6 +311,10 @@ func _clamp_center() -> void:
 ## keep the current height, which buried you wherever the land is higher.
 func _ground_y(x: float, z: float) -> float:
 	return WorldMath.height_at(x, z) + 0.2
+
+## Forget the breadcrumb trail, after the player is moved somewhere else.
+func clear_trail() -> void:
+	trail.clear()
 
 ## Moves the player to just outside a building's front door, facing it, and
 ## closes the map (D-118). Not while driving: the car would be left behind.
