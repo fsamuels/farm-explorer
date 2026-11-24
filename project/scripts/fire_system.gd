@@ -53,6 +53,10 @@ const STRIP_EAST_B := Vector2(261.3, 67.3)
 const STRIP_EDGE_MARGIN := 0.6
 ## How far a grass clump strays from the middle of its cell.
 const CLUMP_JITTER := 0.38
+## The strip ends at the property's south fence (z about 66.6); beyond it is
+## the gravel road. A cell whose centre is further south than this is bare, so
+## a clump and its blades stay on the right side of the fence.
+const STRIP_SOUTH := 66.0
 ## The driveway crosses the strip here (z): bare gravel, so the grass ends at
 ## each side of it and the fire has to be lit again on the far side.
 const DRIVEWAY_Z := Vector2(-54.0, -39.5)
@@ -229,7 +233,7 @@ static func strip_edge_x(z: float) -> float:
 ## route the cell is when it is the bed of the open ditch, else -1.
 static func classify(x: float, z: float, patch: float) -> Dictionary:
 	var out := {"fuel": 0.0, "zone": FireGrid.NONE, "ditch_s": -1.0}
-	if x < 253.0 and z > EAST_WEST_Z.x:
+	if z > STRIP_SOUTH or (x < 253.0 and z > EAST_WEST_Z.x):
 		return out
 	if not RoadMath.nearest(x, z, ROAD_CLEAR).is_empty():
 		return out
