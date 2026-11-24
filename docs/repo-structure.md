@@ -106,6 +106,8 @@ farm-sim/
     │   ├── shop_door.gd           # interactive door: swinging, sliding or roll-up leaf with collision, E to open — see D-98
     │   ├── vehicle.gd             # drivable car: E to get in/out, W/S/A/D/Space to drive, collides with the world — see D-106
     │   ├── transport_pad.gd       # transport point: invisible; the map lists it and `receive()` lands you beside it — see D-139
+    │   ├── activity_icon.gd       # the drawn icons and stars on the Things to Do card — see D-166
+    │   ├── things_to_do.gd        # the Things to Do card (H key): five things to try, teleport buttons, saved ticks — see D-165
     │   ├── whats_new.gd           # the What's New dialog (C key): the changelog and game-size stats, from release_data.gd — see D-130
     │   ├── release_notes.gd       # parses CHANGELOG.md, counts the game's size; pure, covered by tests/ — see D-130
     │   ├── release_data.gd        # GENERATED from CHANGELOG.md by tools/build_release_notes.gd; do not edit — see D-130
@@ -149,6 +151,7 @@ farm-sim/
     │   ├── test_time_of_day.gd    # preset helpers + TimeOfDay driving main.tscn's sun/environment on T
     │   ├── test_horizon.gd        # distant terrain: real geography in the data, the maths, DistantTerrain in main.tscn, Season button
     │   ├── test_buildings.gd      # Sally's House and Front Barn shells: built, doors placed, the player walks in through doorways and not walls
+    │   ├── test_things_to_do.gd   # the Things to Do card: list, saved ticks, teleports, what counts as done
     │   ├── test_sky_menu.gd       # start position / third person, constellation name labels, sky menu picks and pause
     │   ├── test_toast.gd          # toast queue, fade, de-duplication, works while paused — see D-142
     │   ├── test_decisions.gd      # decisions.md: row IDs unique, in order, none skipped (catches parallel branches claiming the same D-number) — see D-146
