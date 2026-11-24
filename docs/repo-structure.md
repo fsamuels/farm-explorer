@@ -28,7 +28,7 @@ farm-sim/
 │   ├── water_overlay.py          # draws the traced ditch/pond over the imagery with numbered vertices, for review (D-140)
 │   ├── build_water_data.py       # regenerates project/scripts/water_data.gd from docs/gis/water-features-*.json (D-140)
 │   ├── build_star_data.py        # regenerates project/scripts/star_data.gd from the Yale Bright Star Catalogue JSON (D-104)
-│   ├── build_world_data.py       # regenerates project/scripts/world_data.gd and road_data.gd and textures/world/naip_world.jpg from USGS 3DEP, Census TIGERweb roads and NAIP; cuts the road beds and marks each road point asphalt or gravel from the photo (D-148, D-150)
+│   ├── build_world_data.py       # regenerates project/scripts/world_data.gd and road_data.gd and textures/world/naip_world.jpg from USGS 3DEP, Census TIGERweb roads and NAIP; cuts the road beds and snaps roads to the photo, drops those with no road under them, and marks each point asphalt or gravel (D-148, D-150, D-152)
 │   ├── build_horizon_data.py     # regenerates project/scripts/horizon_data.gd from USGS 3DEP elevations and the US Wind Turbine Database (D-133)
 │   ├── build_release_notes.gd    # regenerates project/scripts/release_data.gd from CHANGELOG.md and a count of the game (D-130)
 │   ├── build_player_model.py     # Blender (bpy) script that builds project/models/player.glb
