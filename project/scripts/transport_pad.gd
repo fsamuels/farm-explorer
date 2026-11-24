@@ -9,6 +9,9 @@ const WorldMath := preload("res://scripts/world_math.gd")
 const ARRIVAL_DISTANCE := 2.2
 
 @export var pad_name := "Transport point"
+## Compass bearing (0 = north, 90 = east) you face on arrival; negative means
+## facing away from the point, along its local -Z.
+@export var facing_bearing := -1.0
 
 func _ready() -> void:
 	add_to_group("transport_pad")
@@ -20,7 +23,7 @@ func arrival_spot() -> Vector3:
 ## Puts `actor` at the arrival spot facing away from the point, and stops it dead.
 func receive(actor: Node3D) -> void:
 	var spot := arrival_spot()
-	var yaw := global_rotation.y + PI
+	var yaw := global_rotation.y + PI if facing_bearing < 0.0 else deg_to_rad(-facing_bearing)
 	actor.global_transform = Transform3D(Basis(Vector3.UP, yaw), Vector3(spot.x, WorldMath.height_at(spot.x, spot.z) + 0.2, spot.z))
 	if actor is CharacterBody3D:
 		(actor as CharacterBody3D).velocity = Vector3.ZERO

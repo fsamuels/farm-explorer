@@ -31,6 +31,8 @@ const PLACE_PICK_RADIUS := 24.0
 ## "Near <building>" shows within this many metres of a footprint.
 const NEARBY_DISTANCE := 20.0
 const FONT_SIZE := 22
+## The X / Z readout is bigger than the other minimap text (it is read all the time while placing things).
+const COORDS_FONT_SIZE := 34
 const KEY_COLOR := Color(1.0, 0.86, 0.55)
 ## Number keys that toggle map layers while the map is open:
 ## [key, MapCanvas property, legend text].
@@ -67,6 +69,10 @@ var _data := {}
 var _minimap_box: VBoxContainer
 var _minimap: MapCanvas
 var _minimap_info: Label
+## Big X / Z readout above the info lines; click it (with a free mouse) to copy
+## "x, z facing N°" to the clipboard.
+var _coords: Label
+var _copied_until := 0.0
 ## The bottom key-hint bar, right of the minimap (M Map, G Sky, C News, F1 Help, Tab size).
 var _hint_bar: PanelContainer
 var _size_index := 0
@@ -119,6 +125,7 @@ func _process(delta: float) -> void:
 		_minimap.center = here
 		_minimap_info.text = _minimap_text(here)
 		_minimap_info.visible = _minimap_info.text != ""
+		_coords.text = _coords_text(here)
 		_minimap.queue_redraw()
 
 ## Keeps the HUD readable on big or high-DPI windows (never shrinks it).
@@ -422,11 +429,31 @@ func _update_full_map(here: Vector2) -> void:
 
 func _minimap_text(here: Vector2) -> String:
 	var heading := MapMath.yaw_to_bearing(player.global_rotation.y)
-	var lines := ["X %.1f   Z %.1f   ·   %s %d°" % [here.x, here.y, MapMath.cardinal(heading), roundi(heading)]]
+	var lines := ["Facing %s %d°" % [MapMath.cardinal(heading), roundi(heading)]]
 	lines.append(_location_text(here))
 	if waypoint != null:
 		lines.append(_waypoint_text(here))
 	return "\n".join(lines)
+
+## The big readout: "X 12.9   Z 17.6", with a hint when a click would copy it.
+func _coords_text(here: Vector2) -> String:
+	var text := "X %.1f   Z %.1f" % [here.x, here.y]
+	if Time.get_ticks_msec() / 1000.0 < _copied_until:
+		return text + "   (copied)"
+	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+		return text + "   (click to copy)"
+	return text
+
+## What a click copies: the spot and the way you face, e.g. "12.9, 17.6 facing 333°".
+func coords_clipboard_text() -> String:
+	var here := MapMath.flatten(player.global_position)
+	var heading := MapMath.yaw_to_bearing(player.global_rotation.y)
+	return "%.1f, %.1f facing %d°" % [here.x, here.y, roundi(heading)]
+
+func _on_coords_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT and player != null:
+		DisplayServer.clipboard_set(coords_clipboard_text())
+		_copied_until = Time.get_ticks_msec() / 1000.0 + 1.5
 
 func _location_text(here: Vector2) -> String:
 	var inside := MapMath.footprint_at(here, _data.footprints)
@@ -454,6 +481,12 @@ func _build_minimap() -> void:
 	_minimap_box.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_minimap_box.add_theme_constant_override("separation", 6)
 	add_child(_minimap_box)
+
+	_coords = _outlined_label("", COORDS_FONT_SIZE)
+	_coords.add_theme_stylebox_override("normal", HudStyle.backing(8.0, 2.0))
+	_coords.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_coords.gui_input.connect(_on_coords_input)
+	_minimap_box.add_child(_coords)
 
 	_minimap_info = _outlined_label("", FONT_SIZE - 4)
 	_minimap_info.add_theme_stylebox_override("normal", HudStyle.backing(8.0, 2.0))
@@ -485,6 +518,9 @@ func _build_minimap() -> void:
 	_minimap.add_child(north)
 	_ignore_mouse(_minimap_box)
 	_ignore_mouse(_hint_bar)
+	# The coordinates click to copy (with a free mouse), like the icons below.
+	_coords.mouse_filter = Control.MOUSE_FILTER_STOP
+	_coords.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	# The icons are the only clickable things here (with a free mouse).
 	sky_button.mouse_filter = Control.MOUSE_FILTER_STOP
 	news_button.mouse_filter = Control.MOUSE_FILTER_STOP

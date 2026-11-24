@@ -9,7 +9,10 @@ const DRAFT := 0.12
 const FREEBOARD := 0.24
 const STATIONS := 15
 const RING := 10
-const HULL_COLOR := Color(0.92, 0.38, 0.08)
+## The hull colours used on the farm (D-159): the first kayak is green, the second yellow.
+const HULL_GREEN := Color(0.16, 0.52, 0.22)
+const HULL_YELLOW := Color(0.98, 0.8, 0.1)
+const HULL_COLOR := HULL_GREEN
 const SEAT_COLOR := Color(0.15, 0.16, 0.17)
 const PADDLE_COLOR := Color(0.12, 0.14, 0.16)
 const BLADE_COLOR := Color(0.95, 0.85, 0.15)
@@ -23,13 +26,13 @@ static func half_beam(t: float) -> float:
 static func rim_height(t: float) -> float:
 	return FREEBOARD + 0.14 * pow(absf(t), 3.0)
 
-## Builds the hull, seat and paddle under `parent` and returns the paddle node
-## (pivoting at the seat) so the kayak can swing it.
-static func build(parent: Node3D) -> Node3D:
+## Builds the hull (in `hull_color`), seat and paddle under `parent` and returns
+## the paddle node (pivoting at the seat) so the kayak can swing it.
+static func build(parent: Node3D, hull_color := HULL_COLOR) -> Node3D:
 	var model := Node3D.new()
 	model.name = "Model"
 	parent.add_child(model)
-	model.add_child(_hull())
+	model.add_child(_hull(hull_color))
 	model.add_child(_seat())
 	return _paddle(model)
 
@@ -43,7 +46,7 @@ static func _material(color: Color, double_sided := false) -> StandardMaterial3D
 
 ## The hull skin: rings of points from the left rim down round the keel to the
 ## right rim at each station, joined with triangles.
-static func _hull() -> MeshInstance3D:
+static func _hull(hull_color: Color) -> MeshInstance3D:
 	var rings: Array = []
 	for i in STATIONS:
 		var t := -1.0 + 2.0 * float(i) / (STATIONS - 1)
@@ -68,7 +71,7 @@ static func _hull() -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
 	mi.name = "Hull"
 	mi.mesh = st.commit()
-	mi.material_override = _material(HULL_COLOR, true)
+	mi.material_override = _material(hull_color, true)
 	return mi
 
 static func _seat() -> MeshInstance3D:

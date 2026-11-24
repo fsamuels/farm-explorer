@@ -15,6 +15,9 @@ const DRAG_SPEED := 1.2
 const SETTLE_RATE := 8.0
 const BOB := 0.025
 
+## The hull's colour (D-159): green by default; the second kayak is yellow.
+@export var hull_color := BoatBuilder.HULL_GREEN
+
 var paddle: Node3D
 var afloat := false
 var _water: Node
@@ -23,7 +26,7 @@ var _bob_time := 0.0
 
 func _ready() -> void:
 	has_engine = false
-	paddle = BoatBuilder.build(self)
+	paddle = BoatBuilder.build(self, hull_color)
 	super._ready()
 
 ## Skip the engine and lamps entirely: just swing the paddle.
