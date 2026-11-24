@@ -67,6 +67,7 @@
 [ext_resource type="Script" path="res://scripts/fire_system.gd" id="fire_system_script"]
 [ext_resource type="Script" path="res://scripts/toast.gd" id="toast_script"]
 [ext_resource type="Script" path="res://scripts/bunker.gd" id="bunker_script"]
+[ext_resource type="Script" path="res://scripts/chicken_coop.gd" id="101_chicken_coop"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -968,6 +969,19 @@ disabled = true
 [node name="DuckHouse" type="Node3D" parent="Buildings"]
 transform = Transform3D(0.9563, 0, -0.2924, 0, 1, 0, 0.2924, 0, 0.9563, 8.689, 0, 13.966)
 script = ExtResource("100_duck_house")
+
+[node name="Chicken Coop" parent="Buildings" instance=ExtResource("4_building_scene")]
+transform = Transform3D(-1.9202, 0, 1.1271, 0, 2.3, 0, -1.5028, 0, -1.4402, 48.7, 1.15, -14.6)
+
+[node name="MeshInstance3D" parent="Buildings/Chicken Coop"]
+visible = false
+
+[node name="CollisionShape3D" parent="Buildings/Chicken Coop"]
+disabled = true
+
+[node name="ChickenCoop" type="Node3D" parent="Buildings"]
+transform = Transform3D(-0.7875, 0, 0.6163, 0, 1, 0, -0.6163, 0, -0.7875, 48.7, 0, -14.6)
+script = ExtResource("101_chicken_coop")
 
 [node name="Turn Out Shed 1" parent="Buildings" unique_id=863939474 instance=ExtResource("4_building_scene")]
 transform = Transform3D(4.411892, 0, -0.642147, 0, 4, 0, 0.4306271, 0, 6.630191, 151.3778, 2, 25.62595)

@@ -10,6 +10,10 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 24: Chicken coop
+> A red-and-tan chicken coop now stands near the house, with its door facing the porch.
+- **A new chicken coop.** A walk-in coop with a tan roosting house and window at one end, a white nest box, wire-mesh runs in a red frame and a dark corrugated tin roof stands at 48.7, -14.6. Its door is open and faces the house.
+
 ## November 24: Burn the ditch
 > Burn the dry grass along the irrigation ditch with a propane torch, south to north with the wind, then open the weir to run the water.
 - **A real fire.** Light the tall, dry bunch grass in the ditch and the strip between it and the road, and it spreads with the wind: fast downwind, slowly against it, faster uphill. Flames lean over, smoke rises and blows away, embers drift ahead, the grass blackens to stubble and the ground scorches. It crackles and roars, and lights up the dusk.
