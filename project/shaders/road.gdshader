@@ -1,4 +1,4 @@
-// Asphalt for the named roads (D-146). The ribbon's UV.x runs 0..1 across it
+// Asphalt for the named roads (D-148). The ribbon's UV.x runs 0..1 across it
 // (verge to verge) and UV.y is metres along the road; COLOR is
 // (kind / 2, half-width / 10, verge / 10), kind 0-1 being highways and 2 a
 // local road. Highways get a double yellow centre line, local roads a dashed

@@ -1,4 +1,4 @@
-// The ground beyond the farm (D-146): real 3DEP relief draped with one NAIP
+// The ground beyond the farm (D-148): real 3DEP relief draped with one NAIP
 // aerial photo of the whole 11.2 km world square, with a little fine-scale
 // noise on top so the 5.5 m pixels don't smear when you stand on them. The
 // farm's own ground (terrain.gdshader) is sharper and draws over the middle.

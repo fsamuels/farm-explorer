@@ -18,7 +18,7 @@ varying float v_elev;
 varying float v_rand;
 varying vec3 v_world_normal;
 
-// The driveable world (D-146) has its own fine ground out to ~2.3 km around the
+// The driveable world (D-148) has its own fine ground out to ~2.3 km around the
 // camera, inside this square. The coarse land under it is sunk out of the way
 // there (fully inside SINK_NEAR, fading out by SINK_FAR) so it can't poke through.
 const float SINK_DEPTH = 12.0;

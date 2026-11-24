@@ -1,5 +1,5 @@
 extends RefCounted
-## The pure maths behind the driveable world beyond the farm (D-146), kept apart
+## The pure maths behind the driveable world beyond the farm (D-148), kept apart
 ## from the node that builds it so tests can check it without a scene.
 ##
 ## world_data.gd holds real USGS 3DEP ground elevation on a 20 m grid over an

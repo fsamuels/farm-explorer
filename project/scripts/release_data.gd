@@ -17,6 +17,13 @@ const DATA := {
 		},
 		{
 			"bullets": [
+				"**UTV fixed.** Since the ditch and pond went in, the UTV fell out of the world at startup. It now stays on the barn floor where it belongs."
+			],
+			"summary": "The Cub Cadet UTV no longer drops through the ground when the game starts; it is parked in the Front Barn again.",
+			"title": "November 24: The UTV is back"
+		},
+		{
+			"bullets": [
 				"**The House opens up.** Its front door on the east side opens (E) into one big white room.",
 				"**A trap door.** A wooden trap door in the white room's floor lifts to show concrete stairs going down.",
 				"**A bomb shelter.** At the foot of the stairs a steel blast door opens onto a corridor with three rooms: a munitions store with ammo racks, a gun rack and crates; a bunk room with a kitchenette; and a utility room with a generator, water tanks and air filters.",
@@ -221,14 +228,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 14175,
-		"commits": 127,
-		"decisions": 146,
+		"code_lines": 14178,
+		"commits": 128,
+		"decisions": 148,
 		"models": 14,
 		"scenes": 25,
 		"scripts": 63,
-		"size_kb": 115245,
-		"test_lines": 4076,
+		"size_kb": 115250,
+		"test_lines": 4188,
 		"textures": 49,
 		"vehicles": 3
 	}

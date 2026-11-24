@@ -83,7 +83,7 @@ static func collect(tree: SceneTree) -> Dictionary:
 		imagery.append({"texture": material.albedo_texture, "xform": xform, "size": plane.size})
 		bounds_points.append_array(MapMath.box_footprint(xform.scaled_local(Vector3(plane.size.x, 1, plane.size.y))))
 
-	# The aerial photo of the whole driveable world (D-146) goes under the farm's
+	# The aerial photo of the whole driveable world (D-148) goes under the farm's
 	# imagery. It only widens how far the map can pan and zoom out: the zoom the
 	# map opens at still fits the farm, so it isn't counted in `bounds`.
 	var world_points := PackedVector2Array()

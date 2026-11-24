@@ -1,5 +1,5 @@
 extends Node3D
-## The driveable world beyond the farm (D-146): real 3DEP ground with the named
+## The driveable world beyond the farm (D-148): real 3DEP ground with the named
 ## roads laid on it, out to 5.6 km each way, built in 320 m chunks around the
 ## camera and dropped behind it. The maths is in world_math.gd and road_math.gd;
 ## this node only decides which chunks exist.

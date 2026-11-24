@@ -1,5 +1,5 @@
 extends SceneTree
-## Tests for the driveable world (D-146): real ground and named roads out to
+## Tests for the driveable world (D-148): real ground and named roads out to
 ## 5.6 km. scripts/world_math.gd, road_math.gd, the generated world_data.gd /
 ## road_data.gd, the World node's chunks, and the opened-up boundary. Run
 ## headless from project/:

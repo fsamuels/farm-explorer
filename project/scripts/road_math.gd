@@ -1,5 +1,5 @@
 extends RefCounted
-## The named roads around the farm (D-146): road_data.gd holds each road's
+## The named roads around the farm (D-148): road_data.gd holds each road's
 ## centreline from Census TIGERweb; this resamples them and builds the ribbon of
 ## asphalt for one road piece, draped on the ground with world_math.gd.
 ##

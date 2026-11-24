@@ -33,7 +33,7 @@ func _run() -> void:
 	_check(data.fences.size() > 20, "fence paths collected: %d" % data.fences.size())
 	_check(data.boundary.size() > 5, "boundary segments collected: %d" % data.boundary.size())
 	_check(data.horses.size() >= 10, "horses collected: %d" % data.horses.size())
-	# The property line is one loop with its east side open to the road (D-146):
+	# The property line is one loop with its east side open to the road (D-148):
 	# every segment end meets another segment's end, so a segment rotated the wrong
 	# way (a mirrored diagonal) shows up as a gap, except the two ends at the
 	# road-side line (x = 264) where the open side begins.

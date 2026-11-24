@@ -284,7 +284,7 @@ func _fit_scale() -> float:
 	return minf(view.x / bounds.size.x, view.y / bounds.size.y)
 
 func _min_scale() -> float:
-	# Zoomed out as far as the whole driveable world (D-146), if it's in the data.
+	# Zoomed out as far as the whole driveable world (D-148), if it's in the data.
 	var world: Rect2 = _data.get("world_bounds", Rect2())
 	if world.has_area():
 		var view := get_viewport().get_visible_rect().size

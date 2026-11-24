@@ -92,7 +92,7 @@ var frames_pushed := 0
 
 func _ready() -> void:
 	add_to_group("map_vehicle")
-	# Hills (D-146): hold the ground over crests and dips at speed, and keep the
+	# Hills (D-148): hold the ground over crests and dips at speed, and keep the
 	# speed along a slope rather than losing it to the slope's projection.
 	floor_snap_length = 0.6
 	floor_constant_speed = true

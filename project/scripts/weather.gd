@@ -396,7 +396,7 @@ func _build_surfaces() -> void:
 				_surface_meshes.append(node)
 	set_surfaces(start_wet, start_snow)
 
-## Give a mesh made after start-up (a chunk of the driveable world, D-146) the
+## Give a mesh made after start-up (a chunk of the driveable world, D-148) the
 ## wet / snow overlay too, and take it off the list again when it's freed.
 func add_surface(mesh: MeshInstance3D) -> void:
 	if mesh in _surface_meshes:

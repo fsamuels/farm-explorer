@@ -82,7 +82,7 @@ func _ready() -> void:
 				_on_lighting_changed(p)
 	_apply_season()
 
-## Inside the driveable world (D-146) the coarse land follows the same 20 m ground
+## Inside the driveable world (D-148) the coarse land follows the same 20 m ground
 ## the world is built from, rather than the polar grid's blend of mean and
 ## highest, so the two meet without a step where the fine ground ends. Rings
 ## beyond WORLD_RINGS_MAX keep the original data.

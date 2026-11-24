@@ -18,6 +18,11 @@ fails if the two disagree.
 - **The map goes wide.** The map (M) and minimap show the aerial photo of the whole area, so you can see where the roads go. It still opens on the farm.
 - **The edge of the world.** An invisible wall stops you 3.5 miles out from the farm; the distant mountains carry on past it.
 
+## November 24: The UTV is back
+> The Cub Cadet UTV no longer drops through the ground when the game starts; it is parked in the Front Barn again.
+- **UTV fixed.** Since the ditch and pond went in, the UTV fell out of the world at startup.
+  It now stays on the barn floor where it belongs.
+
 ## November 24: Water controls, swimming birds and a hidden bunker
 > The sky menu (G) runs the weir, ditch and pond; ducks and geese swim; and a trap door in the House leads down to a bomb shelter.
 - **The House opens up.** Its front door on the east side opens (E) into one big white room.

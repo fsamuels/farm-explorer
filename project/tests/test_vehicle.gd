@@ -309,7 +309,7 @@ func _test_utv(main: Node, player: CharacterBody3D) -> void:
 	player.leave_vehicle()
 	await _step(5)
 
-## Hills (D-146): heading, yaw and the tilt that settles a car onto the ground.
+## Hills (D-148): heading, yaw and the tilt that settles a car onto the ground.
 func _test_hill_math() -> void:
 	# Heading is flat and unit length, however the car is pitched.
 	var pitched := Basis(Vector3.UP, 0.7) * Basis(Vector3.RIGHT, 0.3)
