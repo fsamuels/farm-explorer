@@ -26,7 +26,7 @@ const DATA := {
 		{
 			"bullets": [
 				"**The road is open.** The fence across Lowden-Gardena Road and the wall of trees around the farm are gone. Drive out of the driveway and keep going.",
-				"**Real roads.** US 12, Lowden-Gardena Road and about 70 other named roads out to 3 miles are laid on the real ground, with edge lines, centre lines and gravel verges.",
+				"**Real roads.** Lowden-Gardena Road, McDonald Road and about 55 other named roads out to 3 miles are laid on the real ground and lined up with the aerial photo, with edge lines, centre lines and gravel verges. Roads on the map that have no road under them in the photo are left out.",
 				"**Gravel and asphalt.** Roads the aerial photo shows as paved get edge and centre lines; the rest are narrower gravel roads with two worn tracks and no markings. Gravel is a best guess where the photo is unclear.",
 				"**Real hills.** The ground out there follows the real land, and cars lean into slopes and hold their speed on them. The farm itself stays level.",
 				"**The map goes wide.** The map (M) and minimap show the aerial photo of the whole area, so you can see where the roads go. It still opens on the farm.",
@@ -249,14 +249,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 14648,
-		"commits": 292,
-		"decisions": 153,
+		"code_lines": 14660,
+		"commits": 134,
+		"decisions": 154,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 67,
-		"size_kb": 115471,
-		"test_lines": 4447,
+		"size_kb": 115341,
+		"test_lines": 4450,
 		"textures": 49,
 		"vehicles": 3
 	}

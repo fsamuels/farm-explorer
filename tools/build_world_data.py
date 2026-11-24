@@ -10,7 +10,8 @@ Three public-domain US Government sources, all fetched headlessly:
   written to project/scripts/world_data.gd.
 * Census TIGERweb roads (`TIGERweb/Transportation` MapServer, layers 2, 6 and 8), each
   point of which is also marked asphalt or gravel from the full-resolution NAIP photo
-  (see classify_surfaces):
+  (see classify_surfaces). The TIGER lines are first snapped to the road the photo shows and
+  the stretches with no road under them are dropped (see snap_roads):
   every road that has a name and is a highway or local road (MTFCC S1100, S1200,
   S1400), clipped to the square, projected to scene metres and written to
   project/scripts/road_data.gd. Unnamed roads, driveways, parking aisles and
@@ -323,6 +324,180 @@ def photo_planes(mosaic):
     return lum, sat
 
 
+# The TIGER centrelines are often tens of metres off the real road, and some have nothing
+# under them at all. Each road is snapped to what the photo shows: a path through the
+# lateral offsets -SNAP_REACH..+SNAP_REACH m (every SNAP_STEP m), at every point of the
+# road resampled to ROAD_SPACING, that maximises how much like a road the photo looks
+# there, while staying close to the TIGER line unless the photo says otherwise, and
+# changing offset gently from point to point (a dynamic-programming / Viterbi pass).
+SNAP_REACH = 64
+# What counts as a road-like strip when snapping and deciding what to keep: nearly colourless
+# (saturation under RIBBON_SAT) and under RIBBON_LUM bright, which takes in pale grey gravel as
+# well as asphalt. (Telling the two apart is paved_points' job, with stricter limits.)
+RIBBON_SAT = 0.2
+RIBBON_LUM = 200.0
+SNAP_STEP = 2
+SNAP_MAX_JUMP = 3          # states (6 m) the offset may change between neighbouring points
+SNAP_WEIGHT = 1.5          # how much a ribbon in the photo counts against the prior below
+SNAP_PRIOR = 0.25          # cost of sitting at the edge of the band, per (offset / reach)^2
+SNAP_STAY = 0.12           # bonus for staying on TIGER's own line: the photo must beat it by this much
+SNAP_SMOOTH = 0.05         # cost of changing offset, per (states changed)^2
+SNAP_BLEND = 5             # the snapped offsets are averaged over this many points
+EVIDENCE = 0.2             # ribbon score that counts as the photo showing a road
+
+
+def box_blur(a, r):
+    """Mean over a (2r+1) square window, same size as `a` (edges padded by repeating)."""
+    pad = np.pad(a, r + 1, mode="edge").astype(np.float64)
+    c = pad.cumsum(0).cumsum(1)
+    n = 2 * r + 1
+    h, w = a.shape
+    tot = c[n:n + h, n:n + w] - c[:h, n:n + w] - c[n:n + h, :w] + c[:h, :w]
+    return (tot / (n * n)).astype(np.float32)
+
+
+def ribbon_score(mosaic_crop):
+    """0..1 'looks like a road' for each pixel of an RGB crop (1 m pixels): a strip about a road wide
+    that is nearly colourless (asphalt or pale grey gravel) against land that is coloured. Brightness
+    or darkness alone is not used: it finds field edges, tramlines and tree lines as readily as roads."""
+    band = mosaic_crop.astype(np.float32)
+    lum = 0.299 * band[..., 0] + 0.587 * band[..., 1] + 0.114 * band[..., 2]
+    sat = (band.max(-1) - band.min(-1)) / np.maximum(band.max(-1), 1.0)
+    neutral = np.clip(1.0 - sat / RIBBON_SAT, 0.0, 1.0) * (lum < RIBBON_LUM)
+    # The inner window is about a road wide, so the score peaks on the road's centre, not an edge.
+    asphalt = np.clip(box_blur(neutral, 2) - box_blur(neutral, 9), 0.0, 1.0)
+    # Where the land beside the road is bare and pale (so nearly as colourless), asphalt is still
+    # darker than it: a darker colourless strip counts too.
+    darker = np.clip((box_blur(lum, 9) - box_blur(lum, 2)) / 35.0, 0.0, 1.0) * box_blur(neutral, 2)
+    return np.maximum(asphalt, 0.8 * darker)
+
+
+def lateral_scores(mosaic, pts, offsets):
+    """For each point of `pts` (resampled road), the ribbon score at each lateral offset in
+    `offsets` (m, positive to the right of travel): an array [len(pts), len(offsets)]."""
+    n = len(pts)
+    arr = np.array(pts, dtype=np.float64)
+    tang = np.zeros_like(arr)
+    for k in range(n):
+        d = arr[min(k + 2, n - 1)] - arr[max(k - 2, 0)]
+        nm = np.linalg.norm(d)
+        tang[k] = d / nm if nm > 1e-6 else (1.0, 0.0)
+    right = np.stack([-tang[:, 1], tang[:, 0]], axis=1)
+    out = np.zeros((n, len(offsets)), dtype=np.float32)
+    margin = SNAP_REACH + 12
+    for c0 in range(0, n, 40):
+        c1 = min(c0 + 40, n)
+        lo = arr[c0:c1].min(0) - margin
+        hi = arr[c0:c1].max(0) + margin
+        col0, row0 = int(math.floor(lo[0] + HALF)), int(math.floor(lo[1] + HALF))
+        col1, row1 = int(math.ceil(hi[0] + HALF)), int(math.ceil(hi[1] + HALF))
+        col0, row0 = max(col0, 0), max(row0, 0)
+        col1, row1 = min(col1, mosaic.shape[1]), min(row1, mosaic.shape[0])
+        if col1 - col0 < 8 or row1 - row0 < 8:
+            continue
+        score = ribbon_score(mosaic[row0:row1, col0:col1])
+        for k in range(c0, c1):
+            acc = np.zeros(len(offsets), dtype=np.float32)
+            for al in (-3.0, 0.0, 3.0):
+                px = arr[k][0] + tang[k][0] * al + right[k][0] * np.array(offsets)
+                pz = arr[k][1] + tang[k][1] * al + right[k][1] * np.array(offsets)
+                col = np.clip(np.round(px + HALF).astype(int) - col0, 0, score.shape[1] - 1)
+                row = np.clip(np.round(pz + HALF).astype(int) - row0, 0, score.shape[0] - 1)
+                acc += score[row, col]
+            out[k] = acc / 3.0
+    return out, right
+
+
+def snap_part(mosaic, part):
+    """`part` resampled and moved onto the road the photo shows. Returns (points, on): `on` has
+    a flag per point, True where the snapped point sits on something road-like."""
+    pts = resample_part(part)
+    if len(pts) < 3:
+        return pts, [False] * len(pts)
+    states = list(range(-SNAP_REACH, SNAP_REACH + 1, SNAP_STEP))
+    offsets = [float(s) for s in states]
+    score, right = lateral_scores(mosaic, pts, offsets)
+    n, m = len(pts), len(states)
+    prior = SNAP_PRIOR * (np.array(offsets) / SNAP_REACH) ** 2
+    cost = -SNAP_WEIGHT * score + prior[None, :]
+    cost[:, SNAP_REACH // SNAP_STEP] -= SNAP_STAY * SNAP_WEIGHT
+    best = np.zeros((n, m))
+    back = np.zeros((n, m), dtype=int)
+    best[0] = cost[0]
+    jumps = range(-SNAP_MAX_JUMP, SNAP_MAX_JUMP + 1)
+    for k in range(1, n):
+        cand = np.full((len(jumps), m), np.inf)
+        for ji, j in enumerate(jumps):
+            lo, hi = max(0, j), min(m, m + j)
+            cand[ji, lo:hi] = best[k - 1, lo - j:hi - j] + SNAP_SMOOTH * j * j
+        pick = cand.argmin(0)
+        best[k] = cand[pick, np.arange(m)] + cost[k]
+        back[k] = np.arange(m) - np.array(list(jumps))[pick]
+    path = np.zeros(n, dtype=int)
+    path[-1] = best[-1].argmin()
+    for k in range(n - 1, 0, -1):
+        path[k - 1] = back[k, path[k]]
+    off = np.array([offsets[i] for i in path])
+    half = SNAP_BLEND // 2
+    smooth = np.array([off[max(k - half, 0):k + half + 1].mean() for k in range(n)])
+    # Keep the ends where they were, so roads still meet at the junctions TIGER gives them.
+    smooth[0] = off[0] * 0.5
+    smooth[-1] = off[-1] * 0.5
+    snapped = [(pts[k][0] + right[k][0] * smooth[k], pts[k][1] + right[k][1] * smooth[k]) for k in range(n)]
+    on = np.array([score[k, path[k]] for k in range(n)])
+    return snapped, [bool(v > EVIDENCE) for v in on]
+
+
+# Spans of road where the photo shows nothing road-like over KEEP_WINDOW points (about
+# 200 m of road at 8 m: fewer than KEEP_MIN of them on a ribbon) are dropped, and a
+# piece that is left shorter than KEEP_RUN points is dropped too. These are the TIGER
+# lines that run across fields with no road under them (and any gravel road too faint to
+# see, which the photo can't tell from the field it crosses).
+KEEP_WINDOW = 25
+KEEP_MIN = 0.06
+KEEP_RUN = 8
+# The farm's own ground photo shows the road beside it exactly, and the farm is the
+# point of the game: roads within KEEP_NEAR_FARM m of the farm square are always kept.
+FARM = (-210.6, -293.7, 309.4, 226.3)
+KEEP_NEAR_FARM = 250.0
+
+
+def near_farm(p):
+    dx = max(FARM[0] - p[0], p[0] - FARM[2], 0.0)
+    dz = max(FARM[1] - p[1], p[1] - FARM[3], 0.0)
+    return math.hypot(dx, dz) <= KEEP_NEAR_FARM
+
+
+def keep_spans(pts, on):
+    """The runs of `pts` worth keeping, given the per-point road-like flags `on`."""
+    n, half = len(pts), KEEP_WINDOW // 2
+    keep = [sum(on[max(i - half, 0):i + half + 1]) / len(on[max(i - half, 0):i + half + 1]) >= KEEP_MIN for i in range(n)]
+    runs, start = [], None
+    for i, k in enumerate(keep + [False]):
+        if k and start is None:
+            start = i
+        elif not k and start is not None:
+            if i - start >= KEEP_RUN:
+                runs.append(pts[start:i])
+            start = None
+    return runs
+
+
+def snap_roads(rs, mosaic):
+    """`rs` snapped to the photo and cut down to the spans that sit on something road-like.
+    Returns (roads, dropped_km), roads in the same (name, kind, points) form, resampled."""
+    out, dropped = [], 0.0
+    for name, kind, part in rs:
+        pts, on = snap_part(mosaic, part)
+        on = [o or near_farm(p) for o, p in zip(on, pts)]
+        runs = keep_spans(pts, on)
+        kept = sum(len(r) for r in runs)
+        dropped += (len(pts) - kept) * ROAD_SPACING / 1000.0
+        for run in runs:
+            out.append((name, kind, run))
+    return out, dropped
+
+
 def paved_points(lum, sat, pts):
     """True for each point of the resampled road `pts` that has a grey ribbon on it."""
     n = len(pts)
@@ -384,7 +559,7 @@ def write_roads(rs):
         surfaces.extend(surface)
     blob = base64.b64encode(np.array(pts, dtype="<f4").tobytes()).decode()
     lines = [
-        "## Generated by tools/build_world_data.py (D-148, D-150). Do not edit by hand.",
+        "## Generated by tools/build_world_data.py (D-148, D-150, D-154). Do not edit by hand.",
         "## The named roads within the world square, from Census TIGERweb (US",
         "## Government, public domain): highways and local roads that have a name,",
         "## resampled to a point every %d m, with each point's surface read off the" % ROAD_SPACING,
@@ -420,9 +595,12 @@ def main():
     fetch(DEM_URL.format(*BBOX, DEM_PX, DEM_PX), tif)
     grid, origin = dem_grid(tif)
     rs = roads(args.cache)
+    mosaic = naip_mosaic(args.cache)
+    before = sum(math.dist(p[i], p[i + 1]) for _, _, p in rs for i in range(len(p) - 1)) / 1000
+    rs, dropped = snap_roads(rs, mosaic)
     grid, deepest, touched = carve_roads(grid, rs)
     write_world(grid, origin)
-    classified = classify_surfaces(rs, naip_mosaic(args.cache))
+    classified = classify_surfaces(rs, mosaic)
     write_roads(classified)
 
     os.makedirs(os.path.dirname(OUT_NAIP), exist_ok=True)
@@ -435,6 +613,7 @@ def main():
     print("origin %.1f m, relief %.0f..%.0f m; %d roads (%d names), %.1f km; road beds touch %d nodes, "
           "deepest cut or fill %.1f m; %.0f km of the roads read as gravel; imagery %d KB"
           % (origin, grid.min(), grid.max(), len(rs), len({r[0] for r in rs}), km, touched, deepest, gravel_km, len(naip) // 1024))
+    print("snapped to the photo: %.0f km of TIGER roads in, %.0f km dropped for having no road under them, %.0f km kept" % (before, dropped, km))
 
 
 if __name__ == "__main__":
