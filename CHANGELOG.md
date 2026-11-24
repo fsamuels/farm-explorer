@@ -16,9 +16,10 @@ fails if the two disagree.
 - **Same controls.** Y still pauses and restarts the clock, T jumps to the next time of day and stops it, and the sky menu (G) works as before.
 
 ## November 24: Drive the roads
-> The real roads for three miles around the farm are driveable, over real hills, and the farm is open all round.
+> The real roads for three miles around the farm are driveable, over real hills, asphalt or gravel, and the farm is open all round.
 - **The road is open.** The fence across Lowden-Gardena Road and the wall of trees around the farm are gone. Drive out of the driveway and keep going.
 - **Real roads.** US 12, Lowden-Gardena Road and about 70 other named roads out to 3 miles are laid on the real ground, with edge lines, centre lines and gravel verges.
+- **Gravel and asphalt.** Roads the aerial photo shows as paved get edge and centre lines; the rest are narrower gravel roads with two worn tracks and no markings. Gravel is a best guess where the photo is unclear.
 - **Real hills.** The ground out there follows the real land, and cars lean into slopes and hold their speed on them. The farm itself stays level.
 - **The map goes wide.** The map (M) and minimap show the aerial photo of the whole area, so you can see where the roads go. It still opens on the farm.
 - **Teleports land on the ground.** Double-clicking a building, car or pasture spot on the map no longer drops you underground when the land there is higher.
