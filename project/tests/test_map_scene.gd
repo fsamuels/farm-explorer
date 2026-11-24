@@ -69,6 +69,7 @@ func _run() -> void:
 	_check(not map.is_open() and not paused, "M again closes it and unpauses")
 
 	await _test_teleport(main, map)
+	await _test_places(main, map)
 
 	print("map_scene: %s" % ("OK" if _failures == 0 else "%d FAILED" % _failures))
 	quit(1 if _failures else 0)
@@ -115,6 +116,34 @@ func _test_teleport(main: Node, map) -> void:
 	map._full.center = shop.center
 	_double_click(map, map._full.to_screen(shop.center))
 	_check(map.is_open() and player.global_position.x == 0.0, "no teleport while driving")
+	player.set("vehicle", null)
+	map.set_open(false)
+
+## Transport points in the back pastures (D-139) are drawn on the open map and
+## double-clicking one lands you there, the same as a building.
+func _test_places(main: Node, map) -> void:
+	var player: Node3D = main.get_node("Player")
+	var places: Array = map._data.places
+	_check(places.size() >= 4, "map offers the transport points: %d" % places.size())
+	for index in places.size():
+		var place: Dictionary = places[index]
+		map.set_open(true)
+		player.global_position = Vector3(0, 1, 0)
+		map._full.center = place.at
+		map._full.scale_px = 4.0
+		_check(map._place_at(map._full.to_screen(place.at)) == index, "%s: found under the cursor" % place.name)
+		_double_click(map, map._full.to_screen(place.at))
+		await process_frame
+		var here := MapMath.flatten(player.global_position)
+		var want := MapMath.flatten(place.node.arrival_spot())
+		_check(not map.is_open() and not paused, "%s: teleport closes the map" % place.name)
+		_check(here.distance_to(want) < 0.01, "%s: lands at its arrival spot" % place.name)
+	map.set_open(true)
+	player.global_position = Vector3(0, 1, 0)
+	player.set("vehicle", main.get_node("TR6"))
+	map._full.center = places[0].at
+	_double_click(map, map._full.to_screen(places[0].at))
+	_check(map.is_open() and player.global_position.x == 0.0, "no point teleport while driving")
 	player.set("vehicle", null)
 	map.set_open(false)
 

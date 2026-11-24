@@ -19,6 +19,7 @@ const HORSE_COLOR := Color(0.62, 0.38, 0.18)
 const TRAIL_COLOR := Color(0.35, 0.82, 1.0, 0.8)
 const WAYPOINT_COLOR := Color(0.25, 0.95, 0.45)
 const PLAYER_COLOR := Color(1.0, 0.22, 0.15)
+const PLACE_COLOR := Color(0.35, 0.85, 1.0)
 const LABEL_COLOR := Color(1, 1, 1)
 const OUTLINE_COLOR := Color(0, 0, 0)
 ## Half-angle of the view cone drawn in front of the player arrow.
@@ -54,6 +55,10 @@ var font_size := 20
 var marker_scale := 1.0
 ## Index into data.buildings to highlight, or -1.
 var highlighted_building := -1
+## Index into data.places to highlight, or -1.
+var highlighted_place := -1
+## Draw the transport-point markers (the full map only; the minimap is too small).
+var show_places := false
 
 ## Screen rects of the labels drawn so far this frame, to avoid overlaps.
 var _placed_labels: Array[Rect2] = []
@@ -93,6 +98,12 @@ static func collect(tree: SceneTree) -> Dictionary:
 			"front": door_spots.get(building_name, MapMath.front_spot(poly, FRONT_CLEARANCE)),
 		})
 
+	# Invisible transport points in the back pastures (D-139): named spots the
+	# map can teleport to, drawn as markers rather than footprints.
+	var places := []
+	for node in tree.get_nodes_in_group("transport_pad"):
+		places.append({"name": node.pad_name, "at": MapMath.flatten(node.global_position), "node": node})
+
 	var fences := []
 	for node in tree.get_nodes_in_group("map_fence"):
 		var path := node as Path3D
@@ -113,6 +124,7 @@ static func collect(tree: SceneTree) -> Dictionary:
 		"imagery": imagery,
 		"bounds": MapMath.bounds_of(bounds_points),
 		"buildings": buildings,
+		"places": places,
 		"footprints": buildings.map(func(b): return b.poly),
 		"fences": fences,
 		"boundary": boundary,
@@ -148,6 +160,8 @@ func _draw() -> void:
 	_placed_labels.clear()
 	if show_labels:
 		_draw_building_labels()
+	if show_places:
+		_draw_places()
 	if show_horses:
 		_draw_horses()
 	if waypoint != null:
@@ -193,6 +207,26 @@ func _draw_horses() -> void:
 			var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, label_size)
 			if _try_place(Rect2(at - text_size * 0.5, text_size)):
 				_draw_label(font, text, at, label_size, Color(1, 0.9, 0.75))
+
+## A diamond and name for each transport point, brighter under the cursor.
+func _draw_places() -> void:
+	var font := get_theme_default_font()
+	var r := 7.0 * marker_scale
+	for i in data.places.size():
+		var place: Dictionary = data.places[i]
+		var p := to_screen(place.at)
+		var hot: bool = i == highlighted_place
+		var diamond := PackedVector2Array([p + Vector2(0, -r), p + Vector2(r, 0), p + Vector2(0, r), p + Vector2(-r, 0)])
+		var outline := PackedVector2Array()
+		for v in diamond:
+			outline.append(p + (v - p) * 1.35)
+		draw_colored_polygon(outline, OUTLINE_COLOR)
+		draw_colored_polygon(diamond, Color(1.0, 0.85, 0.35) if hot else PLACE_COLOR)
+		if show_labels:
+			var text_size := font.get_string_size(place.name, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
+			var at := p + Vector2(0, -r - 6 - text_size.y * 0.5)
+			if _try_place(Rect2(at - text_size * 0.5, text_size)):
+				_draw_label(font, place.name, at, font_size, PLACE_COLOR)
 
 ## Building names, nudged above or below their footprint center when they'd
 ## overlap a name already drawn (House / House Garage / House South Wing sit

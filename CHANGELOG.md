@@ -10,6 +10,14 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 23: Map teleports in the pastures
+> Double-click a named marker in the back pastures on the map (M) to jump there, just like a building.
+- **Pasture teleports on the map.** Five spots west and south of the Back Barn now show as
+  blue diamonds with names on the full map. Double-click one to go there, as you can with
+  any building.
+- **No more glowing pads.** The pads and pillars of light are gone; the spots are
+  invisible in the world and only exist on the map.
+
 ## November 23: A real UTV
 > The Front Barn's Cub Cadet UTV is now a detailed side-by-side with a roll cage, still with a dump bed.
 - **A proper utility vehicle.** The yellow-and-black Cub Cadet 550 is now a full
