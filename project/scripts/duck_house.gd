@@ -1,5 +1,5 @@
 extends Node3D
-## The duck and geese house (D-155, reoriented in D-156): a small wood-and-tin
+## The duck and geese house (D-155, reoriented in D-157): a small wood-and-tin
 ## shed built from primitives, after the photos in Downloads/Duck and Geese House.
 ## It is 16 ft long (local Z, +Z = south) by 10 ft deep (local X, +X = toward the
 ## pen). The long east side is the front, facing the pen: boards low and chain

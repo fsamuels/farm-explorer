@@ -82,7 +82,7 @@ func _run() -> void:
 	var bearing := rad_to_deg((back.back() - back.front()).angle_to(Vector2(0.0, -1.0)))
 	_check(absf(bearing) < 16.0, "the west fence runs almost due north: %.1f degrees off" % bearing)
 
-	# Two closed areas (D-156): the duck pen with the willows north of it, and the
+	# Two closed areas (D-157): the duck pen with the willows north of it, and the
 	# Back Barn pen, with a little alley between them that has a gate at each end
 	# and is open to the east.
 	# Each joint below is a shared post.

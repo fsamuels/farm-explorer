@@ -9,7 +9,7 @@ const DRAFT := 0.12
 const FREEBOARD := 0.24
 const STATIONS := 15
 const RING := 10
-## The hull colours used on the farm (D-158): the first kayak is green, the second yellow.
+## The hull colours used on the farm (D-159): the first kayak is green, the second yellow.
 const HULL_GREEN := Color(0.16, 0.52, 0.22)
 const HULL_YELLOW := Color(0.98, 0.8, 0.1)
 const HULL_COLOR := HULL_GREEN

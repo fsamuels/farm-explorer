@@ -64,6 +64,7 @@
 [ext_resource type="Script" path="res://scripts/world_terrain.gd" id="world_terrain_script"]
 [ext_resource type="Script" path="res://scripts/terrain.gd" id="terrain_script"]
 [ext_resource type="Script" path="res://scripts/water_system.gd" id="water_system_script"]
+[ext_resource type="Script" path="res://scripts/fire_system.gd" id="fire_system_script"]
 [ext_resource type="Script" path="res://scripts/toast.gd" id="toast_script"]
 [ext_resource type="Script" path="res://scripts/bunker.gd" id="bunker_script"]
 
@@ -623,6 +624,9 @@ script = ExtResource("world_terrain_script")
 
 [node name="Water" type="Node3D" parent="."]
 script = ExtResource("water_system_script")
+
+[node name="Fire" type="Node3D" parent="."]
+script = ExtResource("fire_system_script")
 
 [node name="FrontSectionOrthomosaic" type="MeshInstance3D" parent="." unique_id=2847193061 groups=["map_imagery"]]
 transform = Transform3D(0.9998, 0, 0.020012, 0, 1, 0, -0.020012, 0, 0.9998, 155.02, 0.03, -13.24)

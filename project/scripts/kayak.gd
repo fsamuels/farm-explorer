@@ -15,7 +15,7 @@ const DRAG_SPEED := 1.2
 const SETTLE_RATE := 8.0
 const BOB := 0.025
 
-## The hull's colour (D-158): green by default; the second kayak is yellow.
+## The hull's colour (D-159): green by default; the second kayak is yellow.
 @export var hull_color := BoatBuilder.HULL_GREEN
 
 var paddle: Node3D
