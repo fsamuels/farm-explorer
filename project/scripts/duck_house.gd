@@ -83,6 +83,40 @@ func door_inside() -> Vector2:
 func roost_point() -> Vector2:
 	return world_xz(Vector2(-0.3, 0.3))
 
+## How far outside a corner the birds keep when they walk round the house.
+const CORNER_CLEARANCE := 0.8
+
+## World (x, z) point `p` in this house's local x, z.
+func local_xz(p: Vector2) -> Vector2:
+	var q := to_local(Vector3(p.x, global_position.y, p.y))
+	return Vector2(q.x, q.z)
+
+## True if world point `p` is within the house's walls.
+func is_inside(p: Vector2) -> bool:
+	var q := local_xz(p)
+	return absf(q.x) < DEPTH * 0.5 and absf(q.y) < LENGTH * 0.5
+
+## Waypoints (world x, z) that bring a bird at `p` round to the open front of the
+## house without walking through its walls: out through the doorway if it is
+## inside; round the nearer end (both corners) if it is behind the back wall; round
+## the front corner if it is off an end or beside the front. Empty if it is already in front.
+func route_to_front(p: Vector2) -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	if is_inside(p):
+		out.append(door_inside())
+		out.append(door_outside())
+		return out
+	var q := local_xz(p)
+	var hx := DEPTH * 0.5 + CORNER_CLEARANCE
+	var hz := LENGTH * 0.5 + CORNER_CLEARANCE
+	if q.x >= hx:
+		return out
+	var end_z := -hz if q.y < 0.0 else hz
+	if q.x < -DEPTH * 0.5 and absf(q.y) < hz:
+		out.append(world_xz(Vector2(-hx, end_z)))   # behind: to the back corner first
+	out.append(world_xz(Vector2(hx, end_z)))    # then the front corner
+	return out
+
 func _ready() -> void:
 	add_to_group("duck_house")
 	# Sit on the ground; the foot of the walls follows the carved terrain.

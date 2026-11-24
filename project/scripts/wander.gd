@@ -50,6 +50,7 @@ var _house: Node
 var _phase := Phase.FREE
 ## Waypoints (world x, z) still to walk before wandering inside the house.
 var _route: Array[Vector2] = []
+var _warned := false
 var _bob_phase := 0.0
 
 func _ready() -> void:
@@ -72,7 +73,11 @@ func _find_routine_nodes() -> bool:
 		_tod = get_parent().get_node_or_null("TimeOfDay") if get_parent() else null
 	if _house == null or not is_instance_valid(_house):
 		_house = get_tree().get_first_node_in_group("duck_house")
-	return _tod != null and _house != null
+	var found := _tod != null and _house != null
+	if not found and not _warned:
+		_warned = true
+		push_warning("%s: evening_routine needs a TimeOfDay sibling and a duck_house; staying out" % name)
+	return found
 
 ## Follow the clock into a new phase: head for the pen or the house, or go back to wandering.
 func _update_phase() -> void:
@@ -83,14 +88,21 @@ func _update_phase() -> void:
 		return
 	_phase = phase
 	_route.clear()
+	# Walk round the house, not through it, then on to the pen or in at the door.
+	var here := Vector2(global_position.x, global_position.z)
 	match phase:
 		Phase.PEN:
-			_go_to(_house.pen_point())
+			_route = _house.route_to_front(here)
+			_route.append(_house.pen_point())
 		Phase.ROOST:
-			_route = [_house.door_outside(), _house.door_inside()]
-			_go_to(_route.pop_front())
+			if not _house.is_inside(here):
+				_route = _house.route_to_front(here)
+				_route.append(_house.door_outside())
+				_route.append(_house.door_inside())
 		Phase.FREE:
-			_pick_new_target()
+			if _house.is_inside(here):
+				_route = _house.route_to_front(here)   # out through the door first
+	_pick_new_target()
 
 func _go_to(spot: Vector2) -> void:
 	var world := Vector3(spot.x, global_position.y, spot.y)
@@ -144,11 +156,11 @@ func _follow_ground() -> void:
 	position.y = _level_y + y
 
 func _pick_new_target() -> void:
+	if not _route.is_empty():
+		_go_to(_route.pop_front())
+		return
 	if evening_routine and _phase != Phase.FREE:
-		if not _route.is_empty():
-			_go_to(_route.pop_front())
-		else:
-			_routine_target()
+		_routine_target()
 		return
 	if swims and _pick_swim_target():
 		return
@@ -172,8 +184,8 @@ func _process(delta: float) -> void:
 	to_target.y = 0.0
 	var distance := to_target.length()
 	if distance <= arrival_distance:
-		if evening_routine and _phase != Phase.FREE and not _route.is_empty():
-			_go_to(_route.pop_front())   # keep going: pen, door, in
+		if not _route.is_empty():
+			_go_to(_route.pop_front())   # keep going: round the house, to the door, in
 		else:
 			_start_idle()
 		return
