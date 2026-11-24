@@ -48,7 +48,43 @@ static func door_span() -> Vector2:
 static func roof_height(x: float) -> float:
 	return EAVE_BACK - (x + DEPTH * 0.5) / DEPTH * (EAVE_BACK - EAVE_FRONT)
 
+## Where the birds spend the early evening, in the pen, as a point in front of the
+## doorway (local x toward the pen, z from the middle), and how far they spread.
+const PEN_SPOT := Vector2(4.5, -2.0)
+const PEN_RADIUS := 2.5
+## How far inside the front wall the roost spreads, and how far outside the doorway
+## the birds line up before they go in.
+const ROOST_RADIUS := 0.9
+const DOOR_OUTSIDE := 0.9
+
+## Local point just outside, and just inside, the middle of the doorway.
+static func door_outside_local() -> Vector2:
+	var span := door_span()
+	return Vector2(DEPTH * 0.5 + DOOR_OUTSIDE, (span.x + span.y) * 0.5)
+
+static func door_inside_local() -> Vector2:
+	var span := door_span()
+	return Vector2(DEPTH * 0.5 - 0.7, (span.x + span.y) * 0.5)
+
+## World (x, z) of a local (x, z) point on this house.
+func world_xz(local: Vector2) -> Vector2:
+	var p := to_global(Vector3(local.x, 0.0, local.y))
+	return Vector2(p.x, p.z)
+
+func pen_point() -> Vector2:
+	return world_xz(PEN_SPOT)
+
+func door_outside() -> Vector2:
+	return world_xz(door_outside_local())
+
+func door_inside() -> Vector2:
+	return world_xz(door_inside_local())
+
+func roost_point() -> Vector2:
+	return world_xz(Vector2(-0.3, 0.3))
+
 func _ready() -> void:
+	add_to_group("duck_house")
 	# Sit on the ground; the foot of the walls follows the carved terrain.
 	position.y = TerrainMath.height_at(global_position.x, global_position.z)
 	_build()

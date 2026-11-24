@@ -20,6 +20,14 @@ const DATA := {
 		},
 		{
 			"bullets": [
+				"**Evening in the pen.** A little after sunset the ducks and geese leave the pond and field and gather in the pen in front of their house.",
+				"**Bedtime.** A little after dusk they file through the doorway into the house, and stay there all night until just after sunrise, when they come out to wander and swim again."
+			],
+			"summary": "The ducks and geese now come into their pen at sunset and go inside their house at dusk.",
+			"title": "November 24: Bedtime for the birds"
+		},
+		{
+			"bullets": [
 				"**The house.** A small wood-and-tin shed stands by the pond: 16 feet long with its long side facing the pen, boards below and chain link above, tin walls, a roof sloping down to the back and sawdust underfoot. You can walk in through the open bay at the north end of its front.",
 				"**Its pen.** White-line fences run from just past the house's south-east corner to the south-east corner of the pen, then up to the Back Barn pen, and a second fence runs nearly north from the house's west side to the middle of the Back Barn. A gate on the pen's north-east corner opens into a small alley, and a second, parallel gate at its far end opens into the Back Barn pen; both hang on their eastern posts. The fences now close in the duck pen (with the willows north of it) and the Back Barn pen. There is a gap about 4 feet wide between the fence and the house.",
 				"**Water tanks.** Two grey tanks, one bigger, sit side by side by the fence, where they show in the aerial photo.",
@@ -276,14 +284,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 16585,
-		"commits": 294,
-		"decisions": 160,
+		"code_lines": 16693,
+		"commits": 293,
+		"decisions": 161,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 75,
-		"size_kb": 115450,
-		"test_lines": 5123,
+		"size_kb": 115460,
+		"test_lines": 5186,
 		"textures": 49,
 		"vehicles": 3
 	}
