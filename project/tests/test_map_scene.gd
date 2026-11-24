@@ -178,7 +178,7 @@ func _test_places(main: Node, map) -> void:
 func _test_vehicles(main: Node, map) -> void:
 	var player: Node3D = main.get_node("Player")
 	var cars: Array = map._data.vehicles
-	_check(cars.size() == 4, "map lists the three cars and the kayak: %d" % cars.size())
+	_check(cars.size() == 5, "map lists the three cars and the two kayaks: %d" % cars.size())
 	for index in cars.size():
 		var car: Node3D = cars[index]
 		var car_at := MapMath.flatten(car.global_position)

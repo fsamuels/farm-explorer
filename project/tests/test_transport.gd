@@ -65,8 +65,9 @@ func _run() -> void:
 			_check(nearest >= BOUNDARY_MARGIN, "%s is %.1f m from the property line" % [pad.pad_name, nearest])
 			_check(crossings % 2 == 1, "%s is inside the property (%d crossings)" % [pad.pad_name, crossings])
 
-	# receive() lands you at the arrival spot, stopped, level, facing away.
-	var point = pads[1]
+	# receive() lands you at the arrival spot, stopped, level, facing away (for a
+	# point with no facing of its own; some, like Back Barn, set facing_bearing).
+	var point = pads.filter(func(p): return p.facing_bearing < 0.0)[0]
 	player.velocity = Vector3(5, 0, 5)
 	player.get_node("Head").rotation.x = -1.0
 	point.receive(player)

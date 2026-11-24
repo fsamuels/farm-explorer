@@ -82,40 +82,52 @@ func _run() -> void:
 	var bearing := rad_to_deg((back.back() - back.front()).angle_to(Vector2(0.0, -1.0)))
 	_check(absf(bearing) < 16.0, "the west fence runs almost due north: %.1f degrees off" % bearing)
 
-	# The cross fence runs from the post at 20.1, 9.0 west to the barn fence, and
-	# two gates run north from it and from the pen's corner.
-	var cross := _fence_points(main, "DuckPen_Cross")
-	_check(cross.front().distance_to(Vector2(23.6, 9.6)) < 0.05, "the cross fence starts at the second gate's latch post, 23.6, 9.6")
-	var has_post := false
-	for p in cross:
-		if p.distance_to(Vector2(20.1, 9.0)) < 0.05:
-			has_post = true
-	_check(has_post, "the cross fence has the post at 20.1, 9.0")
-	var best := INF
-	for i in range(back.size() - 1):
-		var ab := back[i + 1] - back[i]
-		var u := clampf((cross.back() - back[i]).dot(ab) / ab.length_squared(), 0.0, 1.0)
-		best = minf(best, cross.back().distance_to(back[i] + ab * u))
-	_check(best < 0.1, "the cross fence ends on the barn fence: %.2f m away" % best)
-	for i in range(cross.size() - 1):
-		_check(cross[i].distance_to(cross[i + 1]) < 3.6, "cross fence posts are at most 3.6 m apart (%d)" % i)
-	var post := Vector3(20.1, 0.0, 9.0)
-	var on_cross := false
-	for p in cross:
-		if p.distance_to(Vector2(22.7, 9.6)) < 0.05:
-			on_cross = true
-	_check(on_cross, "the cross fence runs through the end of the pen fence at 22.7, 9.6")
-	var north_gate := main.get_node("BackFences/DuckPen_Gate_North") as Node3D
-	_check(absf(north_gate.global_position.x - post.x) < 0.1 and north_gate.global_position.z < post.z - 2.0, "the north gate's hinge is directly north of the post")
-	var north_latch := north_gate.to_global(Vector3(north_gate.get("width"), 0.0, 0.0))
-	_check(Vector2(north_latch.x, north_latch.z).distance_to(Vector2(post.x, post.z)) < 0.2, "the north gate latches on the post")
-	var east_gate := main.get_node("BackFences/DuckPen_Gate_East") as Node3D
-	_check(Vector2(east_gate.global_position.x, east_gate.global_position.z).distance_to(Vector2(23.6, 5.9)) < 0.05, "the second gate is hinged on the post at 23.6, 5.9")
-	var east_dir := (east_gate.global_transform.basis.x).normalized()
-	var north_dir := (north_gate.global_transform.basis.x).normalized()
-	_check(east_dir.dot(north_dir) > 0.999, "the two gates are parallel")
-	var east_latch := east_gate.to_global(Vector3(east_gate.get("width"), 0.0, 0.0))
-	_check(Vector2(east_latch.x, east_latch.z).distance_to(cross.front()) < 0.2, "the second gate latches on the end of the cross fence")
+	# Two closed areas (D-156): the duck pen with the willows north of it, and the
+	# Back Barn pen, with a little alley between them that has a gate at each end
+	# and is open to the east.
+	# Each joint below is a shared post.
+	_check(main.get_node_or_null("BackFences/DuckPen_Cross") == null, "no fence from the 20.1, 9.0 post west to the barn fence")
+	var pen_east_end: Vector2 = pen.back()
+	var duck_gate := main.get_node("BackFences/DuckPen_Gate") as Node3D
+	var barn_gate := main.get_node("BackFences/BackBarnPen_Gate") as Node3D
+	var alley_w := _fence_points(main, "DuckPen_Alley_West")
+	var barn_n := _fence_points(main, "BackBarnPen_North")
+	var barn_e := _fence_points(main, "BackBarnPen_East")
+	var barn_s := _fence_points(main, "BackBarnPen_South")
+	var duck_hinge := _flat(duck_gate.global_position)
+	var duck_latch := _flat(duck_gate.to_global(Vector3(duck_gate.get("width"), 0.0, 0.0)))
+	var barn_hinge := _flat(barn_gate.global_position)
+	var barn_latch := _flat(barn_gate.to_global(Vector3(barn_gate.get("width"), 0.0, 0.0)))
+
+	# The two gates: parallel, hinged on the eastern posts, open ends to the west.
+	_check(duck_hinge.distance_to(Vector2(22.7, 9.6)) < 0.05, "the duck pen gate hangs on the post at 22.7, 9.6")
+	_check(duck_latch.distance_to(Vector2(20.1, 9.0)) < 0.1, "the duck pen gate's open end is on the post at 20.1, 9.0")
+	_check(barn_hinge.distance_to(Vector2(23.6, 5.8)) < 0.15, "the Back Barn pen gate hangs on the post at 23.6, 5.9")
+	_check(absf(barn_latch.x - 20.1) < 0.2 and barn_latch.y < 9.0 - 3.0, "the Back Barn pen gate's open end is directly north of the 20.1, 9.0 post")
+	_check((duck_latch - duck_hinge).normalized().dot((barn_latch - barn_hinge).normalized()) > 0.99, "the two gates are parallel")
+	_check(duck_hinge.x > duck_latch.x and barn_hinge.x > barn_latch.x, "both hinges are on the eastern posts")
+	_check(pen_east_end.distance_to(duck_hinge) < 0.05, "duck pen: the east fence meets the gate")
+
+	# Alley: a gate at each end, a fence on its west side, open to the east.
+	_check(main.get_node_or_null("BackFences/DuckPen_Alley_East") == null, "alley: no fence between the two hinge posts")
+	_check(alley_w.front().distance_to(barn_latch) < 0.1 and alley_w.back().distance_to(duck_latch) < 0.1, "alley: the west side joins the two open-end posts")
+
+	# Back Barn pen: barn -> north -> east -> gate -> south -> west fence -> barn.
+	var barn_se := barn.global_transform * Vector3(0.5, 0.0, 0.5)
+	for q in barn_n:
+		_check(q.distance_to(Vector2(26.3, -10.3)) > 0.5, "no stray post at 26.3, -10.3 (an artifact in the image)")
+	_check(barn_n.front().distance_to(_flat(barn_se)) < 0.6, "Back Barn pen: the north fence starts at the barn's SE corner")
+	_check(_dist_to_line(barn_e.front(), barn_n) < 0.05, "Back Barn pen: the north and east fences meet (no gap)")
+	_check(barn_e.back().distance_to(barn_hinge) < 0.05, "Back Barn pen: the east fence meets the gate")
+	_check(barn_s.front().distance_to(barn_latch) < 0.1, "Back Barn pen: the gate closes on the south fence")
+	_check(_dist_to_line(barn_s.back(), back) < 0.1, "Back Barn pen: the south fence meets the west fence")
+
+	# The Front Pond teleport point lands you at 109.4, -18.6 facing 150 degrees.
+	var pond_pad := main.get_node("TransportPads/Pad_FrontPond")
+	var player_ := main.get_node("Player") as Node3D
+	pond_pad.receive(player_)
+	_check(_flat(player_.global_position).distance_to(Vector2(109.4, -18.6)) < 0.05, "Front Pond: you land at 109.4, -18.6")
+	_check(absf(fposmod(rad_to_deg(-player_.global_rotation.y), 360.0) - 150.0) < 0.5, "Front Pond: you face 150 degrees")
 
 	# The Back Barn teleport point faces 333 degrees.
 	var pad := main.get_node("TransportPads/Pad_BackBarn")
@@ -156,6 +168,18 @@ func _run() -> void:
 	_check(DuckHouse.roof_height(-DuckHouse.DEPTH * 0.5) < DuckHouse.roof_height(DuckHouse.DEPTH * 0.5), "the roof is low at the back, high at the front")
 
 	_done()
+
+func _flat(v: Vector3) -> Vector2:
+	return Vector2(v.x, v.z)
+
+## Distance from `p` to the nearest point of polyline `line`.
+func _dist_to_line(p: Vector2, line: Array[Vector2]) -> float:
+	var best := INF
+	for i in range(line.size() - 1):
+		var ab := line[i + 1] - line[i]
+		var u := clampf((p - line[i]).dot(ab) / ab.length_squared(), 0.0, 1.0)
+		best = minf(best, p.distance_to(line[i] + ab * u))
+	return best
 
 func _ray(space: PhysicsDirectSpaceState3D, house: Node3D, from_local: Vector3, to_local: Vector3) -> Dictionary:
 	var q := PhysicsRayQueryParameters3D.create(house.to_global(from_local), house.to_global(to_local))

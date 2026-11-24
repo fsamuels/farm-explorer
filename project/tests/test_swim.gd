@@ -167,7 +167,17 @@ func _test_scene() -> void:
 
 func _test_kayak(main: Node, player: CharacterBody3D, water: Node) -> void:
 	var kayak: CharacterBody3D = main.get_node("Kayak")
-	_check(kayak.is_in_group("map_vehicle") and kayak.label == "kayak", "the kayak is on the map")
+	_check(kayak.is_in_group("map_vehicle") and kayak.label == "green kayak", "the kayak is on the map")
+	var hull_mat := (kayak.get_node("Model/Hull") as MeshInstance3D).material_override as StandardMaterial3D
+	_check(hull_mat.albedo_color.is_equal_approx(BoatBuilder.HULL_GREEN), "the first kayak is green")
+	# A second kayak just like it, in yellow, parked beside it on the bank.
+	var yellow: CharacterBody3D = main.get_node("KayakYellow")
+	_check(yellow.is_in_group("map_vehicle") and yellow.label == "yellow kayak", "the yellow kayak is on the map")
+	var yellow_mat := (yellow.get_node("Model/Hull") as MeshInstance3D).material_override as StandardMaterial3D
+	_check(yellow_mat.albedo_color.is_equal_approx(BoatBuilder.HULL_YELLOW), "the second kayak is yellow")
+	_check(not yellow.has_engine and yellow.paddle != null, "the yellow kayak has a paddle too")
+	_check(not yellow.afloat and absf(yellow.global_position.y) < 0.3, "the yellow kayak rests on dry land: %s" % yellow.global_position)
+	_check(yellow.global_position.distance_to(kayak.global_position) > 1.0 and yellow.global_position.distance_to(kayak.global_position) < 3.0, "the two kayaks lie side by side")
 	_check(not kayak.has_engine and kayak.paddle != null, "the kayak has a paddle and no engine")
 	_check(kayak.get_node("Model/Hull") != null and kayak.get_node("Model/Paddle/BladeL") != null, "hull and paddle are built")
 
