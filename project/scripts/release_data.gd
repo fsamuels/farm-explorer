@@ -6,6 +6,16 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**The house.** A small wood-and-tin shed stands by the pond: boards below, chain link above, a sloping roof, sawdust underfoot. You can walk in through the doorway on the pen side.",
+				"**Its pen.** White-line fences run from just past the house's corner to the south-east corner of the pen, then up to the Back Barn pen, and a second fence runs from the back of the house to the barn. There is a gap about 4 feet wide between the fence and the house.",
+				"**Water tanks.** Two grey tanks stand outside the doorway.",
+				"**Just a start.** The house's size is a guess (16 by 10 feet), the other pen fences are still to come, and the ducks and geese do not live there yet."
+			],
+			"summary": "The duck and geese house is built, with its pen fences, a doorway and two water tanks.",
+			"title": "November 24: Duck and geese house"
+		},
+		{
+			"bullets": [
 				"**Swimming.** Wade into the pond until the water is over your chest and you start to swim: you float at the surface and swim freestyle, arms alternating, legs kicking, body rolling with each stroke. Shift slows you down; you can't jump out of deep water. Walk to the shallows and you stand up again.",
 				"**A bigger pond.** The pond is about half as big again, out to the trees on the west and south and wider on the open north side. It holds more water, so it takes the same time to fill but is more to swim in.",
 				"**A kayak.** An orange kayak sits on the east bank of the pond. Press E to get in, W/S to paddle, A/D to steer and Space to brake. Drag it into the water first, or fill the pond from the sky menu (G).",
@@ -249,14 +259,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 14660,
-		"commits": 134,
-		"decisions": 154,
+		"code_lines": 14803,
+		"commits": 289,
+		"decisions": 155,
 		"models": 14,
 		"scenes": 26,
-		"scripts": 67,
-		"size_kb": 115341,
-		"test_lines": 4450,
+		"scripts": 68,
+		"size_kb": 115358,
+		"test_lines": 4555,
 		"textures": 49,
 		"vehicles": 3
 	}
