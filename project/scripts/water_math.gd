@@ -1,5 +1,5 @@
 extends RefCounted
-## Pure maths for the ditch and pond water (D-139), kept free of scene access so
+## Pure maths for the ditch and pond water (D-141), kept free of scene access so
 ## tests/test_water.gd can cover it headless.
 ##
 ## The ditch is a one-dimensional channel: `ROUTE_SEGMENTS` is the whole run from

@@ -53,7 +53,7 @@ func _rebuild() -> void:
 		var p := curve.get_point_position(i)
 		positions.append(Vector3(p.x, 0.0, p.z))
 
-	# Posts stand on the carved ground (D-138): one that lands in the ditch or the
+	# Posts stand on the carved ground (D-140): one that lands in the ditch or the
 	# pond goes down to the floor and keeps its top at the usual height, so the
 	# wires still run level across the channel.
 	for pos in positions:

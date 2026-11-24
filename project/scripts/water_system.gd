@@ -1,5 +1,5 @@
 extends Node3D
-## The water in the irrigation ditch and the pond (D-139).
+## The water in the irrigation ditch and the pond (D-141).
 ##
 ## The weir at the north-east corner lets water into the ditch while it is open
 ## (look at the weir and press E to open or shut it). The water runs along the

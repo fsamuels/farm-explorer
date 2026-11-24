@@ -1,5 +1,5 @@
 extends RefCounted
-## Pure maths for the carved ground (D-138): how deep the ditch and the pond cut
+## Pure maths for the carved ground (D-140): how deep the ditch and the pond cut
 ## into the otherwise level farm, kept free of scene access so
 ## tests/test_terrain.gd can cover it headless.
 ##

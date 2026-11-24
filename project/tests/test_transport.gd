@@ -1,11 +1,11 @@
 extends SceneTree
-## Tests for the super sprint and the transport pads (D-131). Run headless from
+## Tests for the super sprint and the transport points (D-131, D-139). Run headless from
 ## project/ (after the editor has imported assets once):
 ##   godot --headless -s res://tests/test_transport.gd
 
 const PlayerScript := preload("res://scripts/player.gd")
 
-## The pads must sit this far inside the property line, metres.
+## The points must sit this far inside the property line, metres.
 const BOUNDARY_MARGIN := 15.0
 
 var _failures := 0
@@ -38,7 +38,7 @@ func _run() -> void:
 		await physics_frame
 	var player = main.get_node("Player")
 	var pads: Array = main.get_node("TransportPads").get_children()
-	_check(pads.size() >= 4, "several pads: %d" % pads.size())
+	_check(pads.size() >= 4, "several points: %d" % pads.size())
 
 	# Boundary segments, for the "well inside the property" check.
 	var segments: Array = []
@@ -47,13 +47,12 @@ func _run() -> void:
 		segments.append([Vector2(fence.global_position.x - half.x, fence.global_position.z - half.z),
 				Vector2(fence.global_position.x + half.x, fence.global_position.z + half.z)])
 
-	var seen := {}
+	var names := {}
 	for pad in pads:
-		var dest = pad.get_destination()
-		_check(dest != null and dest != pad, "%s has another pad as its destination" % pad.pad_name)
-		_check(not seen.has(dest), "%s: only one pad leads to %s" % [pad.pad_name, dest.pad_name if dest else "?"])
-		seen[dest] = true
-		_check(pad.get_interact_prompt() == "Transport to " + dest.pad_name, "%s prompt names its destination" % pad.pad_name)
+		_check(not names.has(pad.pad_name), "%s: name is unique" % pad.pad_name)
+		names[pad.pad_name] = true
+		for child in pad.find_children("*", "", true, false):
+			_check(not (child is VisualInstance3D or child is CollisionObject3D), "%s is invisible: no meshes, lights or colliders" % pad.pad_name)
 		for point in [pad.global_position, pad.arrival_spot()]:
 			var here := Vector2(point.x, point.z)
 			var nearest := INF
@@ -66,34 +65,17 @@ func _run() -> void:
 			_check(nearest >= BOUNDARY_MARGIN, "%s is %.1f m from the property line" % [pad.pad_name, nearest])
 			_check(crossings % 2 == 1, "%s is inside the property (%d crossings)" % [pad.pad_name, crossings])
 
-	# The pads form one loop that visits all of them.
-	var visited := 0
-	var at = pads[0]
-	while visited <= pads.size():
-		at = at.get_destination()
-		visited += 1
-		if at == pads[0]:
-			break
-	_check(visited == pads.size(), "pads form a single ring (%d hops for %d pads)" % [visited, pads.size()])
-
-	# Looking at a pad's pillar offers it, and E sends you to the next one.
-	var first = pads[0]
-	var next = first.get_destination()
-	player.global_transform = Transform3D(Basis(Vector3.UP, first.global_rotation.y), first.arrival_spot() + Vector3(0, 1.0, 0))
-	player.velocity = Vector3.ZERO
-	for i in 3:
-		await physics_frame
-	_check(player._interact_target() == first, "the pad's pillar is what the player is looking at")
-	var target = player._interact_target()
+	# receive() lands you at the arrival spot, stopped, level, facing away.
+	var point = pads[1]
 	player.velocity = Vector3(5, 0, 5)
 	player.get_node("Head").rotation.x = -1.0
-	target.interact(player)
+	point.receive(player)
 	var landed := Vector2(player.global_position.x, player.global_position.z)
-	var want := Vector2(next.arrival_spot().x, next.arrival_spot().z)
-	_check(landed.distance_to(want) < 0.01, "E lands beside the destination pad")
+	var want := Vector2(point.arrival_spot().x, point.arrival_spot().z)
+	_check(landed.distance_to(want) < 0.01, "receive lands at the arrival spot")
 	_check(player.velocity == Vector3.ZERO, "arrival stops you dead")
 	_check(player.get_node("Head").rotation.x == 0.0, "arrival looks level")
 	var facing := Vector2(-sin(player.global_rotation.y), -cos(player.global_rotation.y))
-	var away := (landed - Vector2(next.global_position.x, next.global_position.z)).normalized()
-	_check(facing.dot(away) > 0.99, "you arrive facing away from the pad")
+	var away := (landed - Vector2(point.global_position.x, point.global_position.z)).normalized()
+	_check(facing.dot(away) > 0.99, "you arrive facing away from the point")
 	_done()

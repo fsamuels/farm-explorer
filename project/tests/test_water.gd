@@ -1,5 +1,5 @@
 extends SceneTree
-## Tests for the ditch and pond water (D-139): scripts/water_math.gd (pure), and
+## Tests for the ditch and pond water (D-141): scripts/water_math.gd (pure), and
 ## the Water node in main.tscn (scripts/water_system.gd). Run headless from project/:
 ##   godot --headless -s res://tests/test_water.gd
 

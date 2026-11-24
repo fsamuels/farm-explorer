@@ -24,6 +24,20 @@ fails if the two disagree.
 - **The pond.** A long pond with three lobes stretches from beside the dirt arena out past the Back Barn, with sloping banks you can walk down.
 - **Pipes underground.** The ditch goes under the driveway and into the pond through buried pipes.
 - **Fence posts and animals** follow the ground, so a post in the ditch stands on its floor and the geese walk down the bank.
+## November 23: Map teleports in the pastures
+> Double-click a named marker in the back pastures on the map (M) to jump there, just like a building.
+- **Pasture teleports on the map.** Five spots in the back pastures now show as
+  blue diamonds with names on the full map. Double-click one to go there, as you can with
+  any building.
+- **No more glowing pads.** The pads and pillars of light are gone; the spots are
+  invisible in the world and only exist on the map.
+
+## November 23: A real UTV
+> The Front Barn's Cub Cadet UTV is now a detailed side-by-side with a roll cage, still with a dump bed.
+- **A proper utility vehicle.** The yellow-and-black Cub Cadet 550 is now a full
+  side-by-side with a roll cage and chunky tyres, in place of the boxy stand-in.
+- **Same dump bed.** Press B while driving to tip the yellow bed up or back down,
+  slowing down first as before.
 
 ## November 23: A readable News window
 > The What's New window (C) now has much larger text and resizes itself to fit your window.

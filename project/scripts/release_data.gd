@@ -27,6 +27,22 @@ const DATA := {
 		},
 		{
 			"bullets": [
+				"**Pasture teleports on the map.** Five spots in the back pastures now show as blue diamonds with names on the full map. Double-click one to go there, as you can with any building.",
+				"**No more glowing pads.** The pads and pillars of light are gone; the spots are invisible in the world and only exist on the map."
+			],
+			"summary": "Double-click a named marker in the back pastures on the map (M) to jump there, just like a building.",
+			"title": "November 23: Map teleports in the pastures"
+		},
+		{
+			"bullets": [
+				"**A proper utility vehicle.** The yellow-and-black Cub Cadet 550 is now a full side-by-side with a roll cage and chunky tyres, in place of the boxy stand-in.",
+				"**Same dump bed.** Press B while driving to tip the yellow bed up or back down, slowing down first as before."
+			],
+			"summary": "The Front Barn's Cub Cadet UTV is now a detailed side-by-side with a roll cage, still with a dump bed.",
+			"title": "November 23: A real UTV"
+		},
+		{
+			"bullets": [
 				"**Much bigger text.** The News window's writing is about twice the size it was.",
 				"**Fits any window.** It shrinks to fit a small window and grows to fill a big one, so it is always whole on screen."
 			],
@@ -165,14 +181,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 12222,
-		"commits": 171,
-		"decisions": 139,
-		"models": 13,
+		"code_lines": 12121,
+		"commits": 172,
+		"decisions": 141,
+		"models": 14,
 		"scenes": 26,
 		"scripts": 54,
-		"size_kb": 111415,
-		"test_lines": 3269,
+		"size_kb": 113345,
+		"test_lines": 3297,
 		"textures": 48,
 		"vehicles": 3
 	}

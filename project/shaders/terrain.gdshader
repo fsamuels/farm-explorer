@@ -1,4 +1,4 @@
-// The farm's ground (D-138): the NAIP base image with the two drone orthomosaic
+// The farm's ground (D-140): the NAIP base image with the two drone orthomosaic
 // patches blended over it, all projected straight down from world position onto
 // the carved terrain mesh. Replaces the three flat imagery planes, which would
 // have floated over the ditch and pond; they stay in the scene, hidden, because

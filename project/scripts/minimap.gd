@@ -25,6 +25,8 @@ const TRAIL_SPACING := 3.0
 const TRAIL_MAX_POINTS := 4000
 ## How close (px) a right-click must be to the waypoint to remove it.
 const WAYPOINT_PICK_RADIUS := 28.0
+## How close (screen px) a double-click must be to a transport point's marker.
+const PLACE_PICK_RADIUS := 24.0
 ## "Near <building>" shows within this many metres of a footprint.
 const NEARBY_DISTANCE := 20.0
 const FONT_SIZE := 22
@@ -250,7 +252,11 @@ func _on_full_map_input(event: InputEvent) -> void:
 			MOUSE_BUTTON_LEFT:
 				_dragging = button.pressed
 				if button.pressed and button.double_click:
-					_teleport_to(MapMath.footprint_at(_full.to_world(button.position), _data.footprints))
+					var place := _place_at(button.position)
+					if place != -1:
+						_teleport_to_place(place)
+					else:
+						_teleport_to(MapMath.footprint_at(_full.to_world(button.position), _data.footprints))
 			MOUSE_BUTTON_RIGHT when button.pressed:
 				_toggle_waypoint(button.position)
 	elif event is InputEventMouseMotion and _dragging:
@@ -298,6 +304,26 @@ func _teleport_to(index: int) -> void:
 	trail.clear()
 	set_open(false)
 
+## Index into data.places of the transport-point marker under `screen`, or -1.
+func _place_at(screen: Vector2) -> int:
+	var best := -1
+	var best_dist := PLACE_PICK_RADIUS
+	for i in _data.places.size():
+		var d: float = _full.to_screen(_data.places[i].at).distance_to(screen)
+		if d <= best_dist:
+			best = i
+			best_dist = d
+	return best
+
+## Moves the player to a transport point in the back pastures and closes the
+## map (D-139). Not while driving, like building teleports.
+func _teleport_to_place(index: int) -> void:
+	if index == -1 or player.get("vehicle") != null:
+		return
+	_data.places[index].node.receive(player)
+	trail.clear()
+	set_open(false)
+
 func _toggle_waypoint(screen: Vector2) -> void:
 	if waypoint != null and _full.to_screen(waypoint).distance_to(screen) <= WAYPOINT_PICK_RADIUS:
 		waypoint = null
@@ -317,6 +343,12 @@ func _update_full_map(here: Vector2) -> void:
 	var cursor := _full.to_world(_full.get_local_mouse_position())
 	var hovered := MapMath.footprint_at(cursor, _data.footprints)
 	_full.highlighted_building = hovered
+	var hovered_place := _place_at(_full.get_local_mouse_position())
+	_full.highlighted_place = hovered_place
+	# A marker wins over a building under it, as it does on double-click.
+	if hovered_place != -1:
+		hovered = -1
+		_full.highlighted_building = -1
 
 	var heading := MapMath.yaw_to_bearing(player.global_rotation.y)
 	var location := "%s  ·  facing %s (%d°)" % [_location_text(here), MapMath.cardinal(heading), roundi(heading)]
@@ -332,6 +364,9 @@ func _update_full_map(here: Vector2) -> void:
 	if hovered != -1:
 		var hint := "get out of the car to teleport" if player.get("vehicle") != null else "double-click to teleport"
 		cursor_text = "%s  (%s)   ·   %s" % [_data.buildings[hovered].name, hint, cursor_text]
+	if hovered_place != -1:
+		var hint := "get out of the car to teleport" if player.get("vehicle") != null else "double-click to teleport"
+		cursor_text = "%s  (%s)   ·   %s" % [_data.places[hovered_place].name, hint, cursor_text]
 	_cursor_label.text = cursor_text
 
 func _minimap_text(here: Vector2) -> String:
@@ -483,6 +518,7 @@ func _build_full_map() -> void:
 	_full.mouse_filter = Control.MOUSE_FILTER_STOP
 	_full.show_compass = true
 	_full.show_scale_bar = true
+	_full.show_places = true
 	_full.font_size = FONT_SIZE
 	_full.marker_scale = 1.4
 	_full.gui_input.connect(_on_full_map_input)

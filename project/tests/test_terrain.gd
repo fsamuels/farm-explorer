@@ -1,5 +1,5 @@
 extends SceneTree
-## Tests for the carved ground (D-138): scripts/terrain_math.gd, the generated
+## Tests for the carved ground (D-140): scripts/terrain_math.gd, the generated
 ## scripts/water_data.gd and the Terrain node in main.tscn. Run headless from project/:
 ##   godot --headless -s res://tests/test_terrain.gd
 

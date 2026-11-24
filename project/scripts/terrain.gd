@@ -1,5 +1,5 @@
 extends StaticBody3D
-## The farm's ground with the ditch and pond cut into it (D-138).
+## The farm's ground with the ditch and pond cut into it (D-140).
 ##
 ## Builds one mesh and one trimesh collider for the whole 520 m ground square.
 ## Level ground is a handful of big quads; only the tiles the ditch or pond reach

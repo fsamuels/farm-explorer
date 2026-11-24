@@ -11,7 +11,7 @@ const TerrainMath := preload("res://scripts/terrain_math.gd")
 
 var home_position: Vector3
 ## Height of the level ground this animal stands on; it follows the carved
-## ground (the ditch and pond, D-138) down from there.
+## ground (the ditch and pond, D-140) down from there.
 var _level_y := 0.0
 var target_position: Vector3
 var idle_timer := 0.0
