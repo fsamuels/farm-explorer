@@ -6,6 +6,16 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**Swimming.** Wade into the pond until the water is over your chest and you start to swim: you float at the surface and do a breaststroke. Shift slows you down; you can't jump out of deep water. Walk to the shallows and you stand up again.",
+				"**A kayak.** An orange kayak sits on the east bank of the pond. Press E to get in, W/S to paddle, A/D to steer and Space to brake. Drag it into the water first, or fill the pond from the sky menu (G).",
+				"**Paddle and bobbing.** The paddle swings as you move and the kayak bobs on the water. It runs aground in the shallows and only crawls on dry land.",
+				"**Just a start.** The kayak shows no person in it yet, and there is no paddle boat or splash sound."
+			],
+			"summary": "Deep water now lets you swim a breaststroke, and there is a kayak on the pond's east bank to paddle around in.",
+			"title": "November 24: Swimming and a kayak"
+		},
+		{
+			"bullets": [
 				"**The road is open.** The fence across Lowden-Gardena Road and the wall of trees around the farm are gone. Drive out of the driveway and keep going.",
 				"**Real roads.** US 12, Lowden-Gardena Road and about 70 other named roads out to 3 miles are laid on the real ground, with edge lines, centre lines and gravel verges.",
 				"**Real hills.** The ground out there follows the real land, and cars lean into slopes and hold their speed on them. The farm itself stays level.",
@@ -229,14 +239,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 14598,
-		"commits": 284,
-		"decisions": 149,
+		"code_lines": 14600,
+		"commits": 285,
+		"decisions": 150,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 67,
 		"size_kb": 115282,
-		"test_lines": 4401,
+		"test_lines": 4402,
 		"textures": 49,
 		"vehicles": 3
 	}

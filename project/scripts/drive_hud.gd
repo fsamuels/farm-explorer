@@ -72,6 +72,7 @@ func _label(size: int, color: Color) -> Label:
 func show_drive(mph: float, rpm: float, notice: String) -> void:
 	visible = true
 	_speed.text = speed_text(mph)
+	_rpm.visible = rpm >= 0.0  # a paddled boat passes -1: no rev counter
 	_rpm.text = rpm_text(rpm)
 	var text := notice if notice != "" else _get_out_hint()
 	if _hint.text != text:

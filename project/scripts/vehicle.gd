@@ -26,6 +26,8 @@ const BED_RAISE_MAX_SPEED := 2.0
 const BED_UP_MAX_SPEED := 3.0
 
 @export var label := "car"
+## False for a paddled boat (D-149): no engine note, and no rev counter in the HUD.
+@export var has_engine := true
 @export var wheelbase := 2.6
 @export var max_speed := 22.0
 @export var max_reverse := 6.0
@@ -320,7 +322,7 @@ func _physics_process(delta: float) -> void:
 	var steer_input := 0.0
 	var handbrake := driver == null
 	_update_bed(delta)
-	if handbrake and speed == 0.0 and steer == 0.0 and is_on_floor():
+	if handbrake and speed == 0.0 and steer == 0.0 and _settled():
 		return  # parked and settled: nothing to simulate
 	if driver != null:
 		throttle = Input.get_axis("move_back", "move_forward")
@@ -337,10 +339,7 @@ func _physics_process(delta: float) -> void:
 	var heading := VehicleMath.heading(-global_basis.z)
 	velocity.x = heading.x * speed
 	velocity.z = heading.z * speed
-	if is_on_floor():
-		velocity.y = 0.0
-	else:
-		velocity.y -= gravity * delta
+	_apply_vertical(delta)
 	move_and_slide()
 	# Whatever the slide took off the car's motion (hitting a wall) is lost. A hill
 	# doesn't count: slopes are followed at constant speed (floor_constant_speed).
@@ -349,6 +348,18 @@ func _physics_process(delta: float) -> void:
 	if is_on_floor():
 		global_basis = VehicleMath.settle_basis(global_basis, get_floor_normal(), delta)
 	_turn_wheels(delta)
+
+## Whether a parked car has nothing left to simulate. A boat (kayak.gd) keeps
+## bobbing on the water, so it overrides this.
+func _settled() -> bool:
+	return is_on_floor()
+
+## The car's vertical motion for one frame: it sits on the ground, or falls.
+func _apply_vertical(delta: float) -> void:
+	if is_on_floor():
+		velocity.y = 0.0
+	else:
+		velocity.y -= gravity * delta
 
 ## Roll every wheel by the distance travelled and turn the front pair with the
 ## steering. Forward is -Z, so a wheel rolling forward turns negatively about X.
