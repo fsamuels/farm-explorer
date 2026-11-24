@@ -10,6 +10,11 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 24: The UTV is back
+> The Cub Cadet UTV no longer drops through the ground when the game starts; it is parked in the Front Barn again.
+- **UTV fixed.** Since the ditch and pond went in, the UTV fell out of the world at startup.
+  It now stays on the barn floor where it belongs.
+
 ## November 24: Water controls, swimming birds and a hidden bunker
 > The sky menu (G) runs the weir, ditch and pond; ducks and geese swim; and a trap door in the House leads down to a bomb shelter.
 - **The House opens up.** Its front door on the east side opens (E) into one big white room.

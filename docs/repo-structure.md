@@ -150,6 +150,7 @@ farm-sim/
     │   ├── test_terrain.gd        # carve maths, slopes, data sync with the trace JSON, Terrain in main.tscn, posts and animals on the ground — see D-140
     │   ├── test_weather.gd        # weather/overcast helpers + Weather switching rain/snow on R in main.tscn
     │   ├── test_night_sky.gd      # sky maths, star data + baked maps, and the sky shader driven by TimeOfDay
+    │   ├── test_parked_cars.gd    # the three parked cars stay on the ground at startup (the UTV used to fall through the barn floor), see D-147
     │   ├── test_transport.gd      # super-sprint speed choice, and the transport points: invisible, inside the property, `receive()` lands you facing away
     │   └── test_vehicle.gd        # driving maths, then both cars driven in main.tscn: board, throttle, steer, brake, reverse, wall, exit
     ├── models/
