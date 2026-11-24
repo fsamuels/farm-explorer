@@ -69,7 +69,7 @@ var _view_before_car := false
 var _boom_before_car := 0.0
 var _prompt_flash := ""
 var _prompt_flash_left := 0.0
-## True while swimming in the pond (D-152), and where the breaststroke is.
+## True while swimming in the pond (D-152), and where the freestyle stroke is.
 var swimming := false
 var swim_phase := 0.0
 var _water: Node
@@ -313,12 +313,12 @@ func _set_swimming(on: bool) -> void:
 		swim_phase = 0.0
 	else:
 		# Stand the body back up; the animation player takes the bones again.
-		model.rotation.x = 0.0
+		model.rotation = Vector3(0.0, PI + model_yaw, 0.0)
 		model.position = Vector3.ZERO
 		if _skeleton:
 			_skeleton.reset_bone_poses()
 
-## Breaststroke: float at the surface, move with the keys at stroke speed.
+## Freestyle: float at the surface, move with the keys at stroke speed.
 func _swim(delta: float) -> void:
 	_swim_time += delta
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
@@ -332,8 +332,11 @@ func _swim(delta: float) -> void:
 	swim_phase = SwimMath.advance_phase(swim_phase, delta, direction != Vector3.ZERO)
 	var target_yaw := atan2(-input_dir.x, -input_dir.y) if input_dir != Vector2.ZERO else 0.0
 	model_yaw = lerp_angle(model_yaw, target_yaw, clamp(MODEL_TURN_RATE * delta, 0.0, 1.0))
-	# Lie flat, pivoting about the hips so the body floats at the surface.
-	model.rotation = Vector3(SwimMath.BODY_PITCH, PI + model_yaw, 0.0)
+	# Lie flat, rolling with the stroke, pivoting about the hips so the body
+	# floats at the surface.
+	var tilt := Basis(Vector3.UP, PI + model_yaw) * Basis(Vector3.RIGHT, SwimMath.BODY_PITCH) \
+			* Basis(Vector3.UP, SwimMath.body_roll(swim_phase))
+	model.basis = tilt.scaled(model.basis.get_scale())
 	model.position = Vector3(0.0, SwimMath.DRAFT - 0.05, 0.0) - model.basis * _hip_local
 	if _skeleton:
 		SwimPose.apply(_skeleton, model, swim_phase)

@@ -6,12 +6,12 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
-				"**Swimming.** Wade into the pond until the water is over your chest and you start to swim: you float at the surface and do a breaststroke. Shift slows you down; you can't jump out of deep water. Walk to the shallows and you stand up again.",
+				"**Swimming.** Wade into the pond until the water is over your chest and you start to swim: you float at the surface and swim freestyle, arms alternating, legs kicking, body rolling with each stroke. Shift slows you down; you can't jump out of deep water. Walk to the shallows and you stand up again.",
 				"**A kayak.** An orange kayak sits on the east bank of the pond. Press E to get in, W/S to paddle, A/D to steer and Space to brake. Drag it into the water first, or fill the pond from the sky menu (G).",
 				"**Paddle and bobbing.** The paddle swings as you move and the kayak bobs on the water. It runs aground in the shallows and only crawls on dry land.",
 				"**Just a start.** The kayak shows no person in it yet, and there is no paddle boat or splash sound."
 			],
-			"summary": "Deep water now lets you swim a breaststroke, and there is a kayak on the pond's east bank to paddle around in.",
+			"summary": "Deep water now lets you swim freestyle, and there is a kayak on the pond's east bank to paddle around in.",
 			"title": "November 24: Swimming and a kayak"
 		},
 		{
@@ -248,14 +248,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 14639,
-		"commits": 289,
+		"code_lines": 14648,
+		"commits": 291,
 		"decisions": 152,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 67,
-		"size_kb": 115469,
-		"test_lines": 4431,
+		"size_kb": 115471,
+		"test_lines": 4447,
 		"textures": 49,
 		"vehicles": 3
 	}

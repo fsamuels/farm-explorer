@@ -11,8 +11,8 @@ regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
 ## November 24: Swimming and a kayak
-> Deep water now lets you swim a breaststroke, and there is a kayak on the pond's east bank to paddle around in.
-- **Swimming.** Wade into the pond until the water is over your chest and you start to swim: you float at the surface and do a breaststroke. Shift slows you down; you can't jump out of deep water. Walk to the shallows and you stand up again.
+> Deep water now lets you swim freestyle, and there is a kayak on the pond's east bank to paddle around in.
+- **Swimming.** Wade into the pond until the water is over your chest and you start to swim: you float at the surface and swim freestyle, arms alternating, legs kicking, body rolling with each stroke. Shift slows you down; you can't jump out of deep water. Walk to the shallows and you stand up again.
 - **A kayak.** An orange kayak sits on the east bank of the pond. Press E to get in, W/S to paddle, A/D to steer and Space to brake. Drag it into the water first, or fill the pond from the sky menu (G).
 - **Paddle and bobbing.** The paddle swings as you move and the kayak bobs on the water. It runs aground in the shallows and only crawls on dry land.
 - **Just a start.** The kayak shows no person in it yet, and there is no paddle boat or splash sound.

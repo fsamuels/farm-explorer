@@ -1,6 +1,6 @@
 extends SceneTree
 ## Tests for swimming and the kayak (D-152): scripts/swim_math.gd (pure), the
-## breaststroke pose (swim_pose.gd) on the real player skeleton, then the player
+## freestyle pose (swim_pose.gd) on the real player skeleton, then the player
 ## and the kayak in main.tscn on a full pond. Run headless from project/:
 ##   godot --headless -s res://tests/test_swim.gd
 
@@ -45,18 +45,27 @@ func _test_math() -> void:
 	_check(absf(p - 0.05) < 0.001, "the stroke phase wraps: %s" % p)
 	_check(SwimMath.advance_phase(0.0, 1.0, false) < SwimMath.advance_phase(0.0, 1.0, true), "treading water ticks slower")
 
-	# Glide: both arms stretched ahead and close together; pull: wide and
-	# folded; the sides mirror each other.
-	var glide := SwimMath.arm_dirs(0.0, 1.0)
-	var pull := SwimMath.arm_dirs(0.4, 1.0)
-	_check(glide.upper.y > 0.9 and glide.lower.y > 0.9, "arms reach forward in the glide")
-	_check(pull.upper.x > 0.9, "the pull sweeps the arm out to the side: %s" % pull.upper)
-	_check(pull.lower.z > 0.5, "the forearm folds toward the floor: %s" % pull.lower)
-	var right := SwimMath.arm_dirs(0.4, -1.0)
-	_check(is_equal_approx(right.upper.x, -pull.upper.x) and is_equal_approx(right.upper.y, pull.upper.y), "the right arm mirrors the left")
-	_check(SwimMath.leg_dirs(0.0, 1.0).thigh.y < -0.95, "legs trail straight behind in the glide")
-	var drawn := SwimMath.leg_dirs(0.8, 1.0)
-	_check(drawn.thigh.z > 0.2 and drawn.calf.z < -0.3, "knees draw up and heels fold back: %s" % drawn)
+	# Freestyle: at phase 0 the left arm reaches ahead while the right, half a
+	# cycle behind, is finishing its pull back by the hip; a quarter on, the left
+	# arm is pulling down under the body and the right is swinging up over the water.
+	var reach := SwimMath.arm_dirs(0.0, 1.0)
+	var finish := SwimMath.arm_dirs(0.0, -1.0)
+	_check(reach.upper.y > 0.9, "the left arm reaches forward: %s" % reach.upper)
+	_check(finish.upper.y < -0.9, "the right arm is back by the hip: %s" % finish.upper)
+	var pull := SwimMath.arm_dirs(0.25, 1.0)
+	var recover := SwimMath.arm_dirs(0.25, -1.0)
+	_check(pull.upper.z > 0.9, "mid-pull the arm points down at the floor: %s" % pull.upper)
+	_check(recover.upper.z < -0.8 and recover.upper.x < -0.2, "mid-recovery the elbow is high and out to the side: %s" % recover.upper)
+	var half_cycle: Vector3 = SwimMath.arm_dirs(0.75, -1.0).upper
+	_check(absf(half_cycle.y - pull.upper.y) < 0.001 and absf(half_cycle.z - pull.upper.z) < 0.001, "the arms are half a cycle apart")
+	_check(SwimMath.arm_dirs(0.999, 1.0).upper.distance_to(SwimMath.arm_dirs(0.0, 1.0).upper) < 0.05, "the stroke repeats smoothly")
+	_check(SwimMath.elbow_bend(0.75) > SwimMath.elbow_bend(0.5) + 0.5, "the elbow bends in the recovery")
+	var kick_l := SwimMath.leg_dirs(1.0 / 12.0, 1.0)
+	var kick_r := SwimMath.leg_dirs(1.0 / 12.0, -1.0)
+	_check(kick_l.thigh.z > 0.2 and kick_r.thigh.z < -0.2, "the legs flutter in opposition: %s %s" % [kick_l.thigh, kick_r.thigh])
+	_check(SwimMath.leg_dirs(0.0, 1.0).thigh.y < -0.95, "the legs trail behind between kicks")
+	_check(SwimMath.body_roll(0.0) > 0.5 and SwimMath.body_roll(0.5) < -0.5, "the body rolls side to side with the arms")
+	_check(SwimMath.body_roll(0.25) == 0.0 or absf(SwimMath.body_roll(0.25)) < 0.001, "and is level between rolls")
 	for i in 41:
 		var ph := float(i) / 40.0
 		for side in [-1.0, 1.0]:
@@ -75,23 +84,30 @@ func _bone_pos(skeleton: Skeleton3D, model: Node3D, bone: String) -> Vector3:
 func _test_pose(player: Node) -> void:
 	var model: Node3D = player.get_node("Model")
 	var sk: Skeleton3D = model.find_children("*", "Skeleton3D", true, false).front()
+	var head: Vector3
+	var pelvis: Vector3
+	# Phase 0: left arm reaching ahead, right arm back by the hip.
 	SwimPose.apply(sk, model, 0.0)
-	var head := _bone_pos(sk, model, "Head")
-	var hand := _bone_pos(sk, model, "hand_l")
-	var hand_r := _bone_pos(sk, model, "hand_r")
-	var foot := _bone_pos(sk, model, "foot_l")
-	var pelvis := _bone_pos(sk, model, "pelvis")
-	_check(hand.y > head.y + 0.2 and hand_r.y > head.y + 0.2, "glide: both hands reach past the head (%s vs %s)" % [hand, head])
-	_check(hand.x > 0.0 and hand_r.x < 0.0, "glide: left hand left of right hand")
-	_check(foot.y < pelvis.y - 0.5, "glide: feet trail behind the hips")
-	SwimPose.apply(sk, model, 0.4)
-	hand = _bone_pos(sk, model, "hand_l")
-	_check(hand.x > 0.35, "pull: the hand is out wide: %s" % hand)
-	_check(hand.y < head.y + 0.1, "pull: the hand is no longer far ahead of the head: %s" % hand)
-	SwimPose.apply(sk, model, 0.8)
-	foot = _bone_pos(sk, model, "foot_l")
-	var glide_foot := _bone_pos(sk, model, "foot_r")
-	_check(foot.y > pelvis.y - 0.9 or glide_foot.y > pelvis.y - 0.9, "kick: the feet are drawn up toward the hips: %s" % foot)
+	head = _bone_pos(sk, model, "Head")
+	pelvis = _bone_pos(sk, model, "pelvis")
+	var left := _bone_pos(sk, model, "hand_l")
+	var right := _bone_pos(sk, model, "hand_r")
+	_check(left.y > head.y + 0.2, "reach: the left hand is past the head (%s vs %s)" % [left, head])
+	_check(right.y < pelvis.y + 0.2, "reach: the right hand is back by the hip (%s)" % right)
+	# A quarter on: the left hand is pulling under the body (belly side, +Z),
+	# the right is up over the water (back side, -Z).
+	SwimPose.apply(sk, model, 0.25)
+	left = _bone_pos(sk, model, "hand_l")
+	right = _bone_pos(sk, model, "hand_r")
+	var shoulder := _bone_pos(sk, model, "upperarm_l")
+	_check(left.z > shoulder.z + 0.3, "pull: the left hand is down under the body: %s vs %s" % [left, shoulder])
+	var elbow := _bone_pos(sk, model, "lowerarm_r")
+	_check(elbow.z < shoulder.z - 0.2, "recovery: the right elbow is high over the water: %s vs %s" % [elbow, shoulder])
+	# The kick: at 1/12 the left foot is swung toward the floor, the right up.
+	SwimPose.apply(sk, model, 1.0 / 12.0)
+	var foot_l := _bone_pos(sk, model, "foot_l")
+	var foot_r := _bone_pos(sk, model, "foot_r")
+	_check(foot_l.z > foot_r.z + 0.05, "kick: the feet are on opposite sides of each other: %s %s" % [foot_l, foot_r])
 	sk.reset_bone_poses()
 
 func _test_scene() -> void:
@@ -123,7 +139,7 @@ func _test_scene() -> void:
 	_check(not player.anim_player.active, "the walking animation steps aside for the stroke")
 	_check(absf(player.global_position.y - (surface - SwimMath.DRAFT)) < 0.15,
 			"floats at the surface: y %s, surface %s" % [player.global_position.y, surface])
-	_check(player.model.rotation.x > 1.4, "the body lies flat: %s" % player.model.rotation.x)
+	_check(absf(player.model.global_basis.y.normalized().y) < 0.2, "the body lies flat: %s" % player.model.global_basis.y)
 	# Swim forward: moves at stroke speed, stays at the surface, the stroke runs.
 	var start := player.global_position
 	var phase: float = player.swim_phase
@@ -145,7 +161,7 @@ func _test_scene() -> void:
 	player.velocity = Vector3.ZERO
 	await _step(30)
 	_check(not player.swimming and player.anim_player.active, "back on land the player walks again")
-	_check(absf(player.model.rotation.x) < 0.01 and player.model.position.length() < 0.01, "and stands up straight")
+	_check(absf(player.model.global_basis.y.normalized().y) > 0.99 and player.model.position.length() < 0.01, "and stands up straight")
 
 	await _test_kayak(main, player, water)
 
