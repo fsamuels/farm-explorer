@@ -288,7 +288,7 @@ func find_exit_spot() -> Variant:
 			return spot
 	return null
 
-## Where the map's teleport puts you (D-143): the spot beside the car that
+## Where the map's teleport puts you (D-144): the spot beside the car that
 ## find_exit_spot() picks, or a few metres to its right if it is boxed in.
 func map_arrival_spot() -> Vector3:
 	var found: Variant = find_exit_spot()

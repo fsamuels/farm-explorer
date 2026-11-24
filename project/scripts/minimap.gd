@@ -333,7 +333,7 @@ func _vehicle_at(screen: Vector2) -> int:
 	return best
 
 ## Moves the player beside a vehicle, facing the way it points, and closes the
-## map (D-143). Not while driving, and not into a car someone is driving.
+## map (D-144). Not while driving, and not into a car someone is driving.
 func _teleport_to_vehicle(index: int) -> void:
 	if index == -1 or player.get("vehicle") != null:
 		return

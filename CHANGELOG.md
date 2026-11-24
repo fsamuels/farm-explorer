@@ -16,6 +16,12 @@ fails if the two disagree.
 - **Toasts.** Short notices fade in at the top of the screen. The first two: "The pond is full" and "The pond is empty".
 - **Swimming birds.** Once the pond has water, the ducks and geese head for it and float about on it, then walk out again if it dries.
 
+## November 24: A calmer What's New
+> The What's New list is smaller, easier to skim, and tucks the details away until you want them.
+- **Skim first.** Each update shows its headline, with a short bold line per change and the extra detail in smaller, dimmer text.
+- **Details on request.** Only the newest update starts open; older ones fold up, and "Show details" opens them.
+- **Right-sized.** The dialog no longer fills the whole window.
+
 ## November 24: Water in the ditch and pond
 > Open the weir (E) and water runs down the ditch and fills the pond. Rain tops them up; shut the weir and it slowly drains.
 - **A working weir.** Walk up to the weir in the north-east corner and press E to open or shut its gate. The wheel turns and the gate slides up.

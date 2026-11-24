@@ -214,7 +214,7 @@ func _draw_horses() -> void:
 				_draw_label(font, text, at, label_size, Color(1, 0.9, 0.75))
 
 ## Each driveable vehicle as a rotated box with its name; vehicles move, so
-## they are read from the nodes every frame (D-143).
+## they are read from the nodes every frame (D-144).
 func _draw_vehicles() -> void:
 	var font := get_theme_default_font()
 	for i in data.vehicles.size():
