@@ -43,6 +43,7 @@ pulls the latest `sdlc` version (applied on the next restart or `/reload-plugins
   godot --headless -s res://tests/test_water.gd
   godot --headless -s res://tests/test_toast.gd
   godot --headless -s res://tests/test_release_notes.gd
+  godot --headless -s res://tests/test_decisions.gd
   ```
 
   Each prints `OK` and exits 0, or prints the failures and exits 1. The scene test
