@@ -8,8 +8,8 @@ const DITCH_DEPTH := 0.76
 const DITCH_TOP_WIDTH := 2.7
 const DITCH_BOTTOM_WIDTH := 0.4
 ## Pond: depth at the deepest, and the horizontal run of the bank from rim to floor.
-const POND_DEPTH := 3.8
-const POND_BANK_RUN := 9.0
+const POND_DEPTH := 4.3
+const POND_BANK_RUN := 7.5
 ## Where the water enters the ditch.
 const WEIR := Vector2(259.5, -87.0)
 
@@ -88,7 +88,7 @@ static var ROUTE_SEGMENTS := PackedFloat32Array([
 ## Pond outline: x, z, half-width per spine point, drawn as a union of tapered circles.
 static var POND_SPINE := PackedFloat32Array([
 	131.0, -11.0, 7.5,
-	119.0, -4.0, 12.0,
+	119.0, -6.0, 14.0,
 	108.0, 2.0, 13.0,
 	96.0, 7.0, 13.0,
 	82.0, 15.0, 10.5,

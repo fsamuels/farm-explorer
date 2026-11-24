@@ -89,7 +89,7 @@ func _test_walkable_slopes() -> void:
 			worst_pond = maxf(worst_pond, absf(TerrainMath.height_at(px, pz + step) - h) / step)
 			pz += 0.5
 		px += 0.5
-	_check(worst_pond < 0.85, "pond banks are under 40 degrees: slope %s" % worst_pond)
+	_check(worst_pond < 1.0, "pond banks are under 45 degrees: slope %s" % worst_pond)
 
 func _test_buried_runs_are_not_carved() -> void:
 	# The driveway culvert and the pipe to the pond run under level ground.

@@ -3,7 +3,7 @@
   "_crs": "scene meters, +X east, +Z south, origin at the parcel centroid (D-6)",
   "_how_to_review": "python3 tools/water_overlay.py  (draws this file over the imagery with numbered vertices); correct by vertex id, e.g. 'D7 -> (251, 12)', then python3 tools/build_water_data.py",
   "_units": "dimensions are the owner's figures converted from feet, midpoint of the stated range",
-  "_v6_changes": ["pond enlarged a little more (D-165): half-widths up 1-2.5 m under the trees, most at the north-east end (x 96-131); west tip unchanged"],
+  "_v6_changes": ["pond enlarged a little more (D-165): half-widths up 1-2.5 m under the trees, most at the north-east end (x 96-131); west tip unchanged; then the spine point at x=119 moved north to z -6 with half-width 14 so the full pond reaches (121.2, -16.5) (owner, from the full-pond aerials); pond depth 3.8 -> 4.3 m and bank run 9 -> 7.5 m for a deeper, flatter floor with steeper (max ~41 deg) sides"],
   "_v5_changes": ["pond enlarged (D-153): the rim now sits just inside the tree line in the aerial imagery all round (west lobe, south bank, east tip) and 6-8 m out on the open meadow to the north of the east half; the west tip stays at x~-54 so the track's inner fence still stands on level ground"],
   "_v4_changes": [
     "south run re-routed after checking the scene fences: the fence line is at z~67 (not 63), so east of x~140 the ditch runs on the bare brown strip just south of it (z~69.5) and crosses the track team corner at x~135-140 to run inside the triangle at z~66.4; it ends at x=67. Fence posts follow the carved ground, so a post at a crossing stands in the channel",
@@ -50,14 +50,14 @@
   },
 
   "pond": {
-    "depth_m": 3.8,
+    "depth_m": 4.3,
     "depth_note": "owner wrote '10-15' (read as feet of depth); midpoint 12.5 ft",
-    "bank_run_m": 9.0,
+    "bank_run_m": 7.5,
     "bank_run_note": "horizontal distance over which the bank falls from the rim to full depth (steepest ~32 degrees); narrow necks are shallower because they are narrower than two runs",
     "shape_note": "long three-lobed peanut, NE to W, larger to the west; bright green areas are dried-out pond bed; spine with half-width at each point, drawn as a union of tapered circles",
     "confidence": "low",
     "spine_x_z_halfwidth_m": [
-      [131, -11, 7.5],[119, -4, 12],[108, 2, 13],[96, 7, 13],[82, 15, 10.5],[66, 26, 16.5],[46, 35, 7.5],[22, 36, 7],[2, 32, 9],[-14, 26, 14.5],[-28, 19, 17],[-40, 14, 15],[-47,13,6.5]
+      [131, -11, 7.5],[119, -6, 14],[108, 2, 13],[96, 7, 13],[82, 15, 10.5],[66, 26, 16.5],[46, 35, 7.5],[22, 36, 7],[2, 32, 9],[-14, 26, 14.5],[-28, 19, 17],[-40, 14, 15],[-47,13,6.5]
     ]
   }
 }
