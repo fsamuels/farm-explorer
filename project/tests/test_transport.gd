@@ -51,7 +51,8 @@ func _run() -> void:
 	for pad in pads:
 		_check(not names.has(pad.pad_name), "%s: name is unique" % pad.pad_name)
 		names[pad.pad_name] = true
-		_check(pad.get_child_count() == 0, "%s is invisible: no meshes or colliders" % pad.pad_name)
+		for child in pad.find_children("*", "", true, false):
+			_check(not (child is VisualInstance3D or child is CollisionObject3D), "%s is invisible: no meshes, lights or colliders" % pad.pad_name)
 		for point in [pad.global_position, pad.arrival_spot()]:
 			var here := Vector2(point.x, point.z)
 			var nearest := INF

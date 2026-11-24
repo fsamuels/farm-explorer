@@ -345,6 +345,10 @@ func _update_full_map(here: Vector2) -> void:
 	_full.highlighted_building = hovered
 	var hovered_place := _place_at(_full.get_local_mouse_position())
 	_full.highlighted_place = hovered_place
+	# A marker wins over a building under it, as it does on double-click.
+	if hovered_place != -1:
+		hovered = -1
+		_full.highlighted_building = -1
 
 	var heading := MapMath.yaw_to_bearing(player.global_rotation.y)
 	var location := "%s  ·  facing %s (%d°)" % [_location_text(here), MapMath.cardinal(heading), roundi(heading)]

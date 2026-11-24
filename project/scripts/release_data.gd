@@ -6,7 +6,7 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
-				"**Pasture teleports on the map.** Five spots west and south of the Back Barn now show as blue diamonds with names on the full map. Double-click one to go there, as you can with any building.",
+				"**Pasture teleports on the map.** Five spots in the back pastures now show as blue diamonds with names on the full map. Double-click one to go there, as you can with any building.",
 				"**No more glowing pads.** The pads and pillars of light are gone; the spots are invisible in the world and only exist on the map."
 			],
 			"summary": "Double-click a named marker in the back pastures on the map (M) to jump there, just like a building.",
@@ -160,14 +160,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 10786,
-		"commits": 275,
+		"code_lines": 10790,
+		"commits": 276,
 		"decisions": 139,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 47,
 		"size_kb": 113270,
-		"test_lines": 2846,
+		"test_lines": 2847,
 		"textures": 48,
 		"vehicles": 3
 	}

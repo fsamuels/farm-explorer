@@ -12,7 +12,7 @@ fails if the two disagree.
 
 ## November 23: Map teleports in the pastures
 > Double-click a named marker in the back pastures on the map (M) to jump there, just like a building.
-- **Pasture teleports on the map.** Five spots west and south of the Back Barn now show as
+- **Pasture teleports on the map.** Five spots in the back pastures now show as
   blue diamonds with names on the full map. Double-click one to go there, as you can with
   any building.
 - **No more glowing pads.** The pads and pillars of light are gone; the spots are
