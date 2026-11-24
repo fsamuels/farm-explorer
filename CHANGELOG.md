@@ -10,6 +10,12 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 24: A calmer What's New
+> The What's New list is smaller, easier to skim, and tucks the details away until you want them.
+- **Skim first.** Each update shows its headline, with a short bold line per change and the extra detail in smaller, dimmer text.
+- **Details on request.** Only the newest update starts open; older ones fold up, and "Show details" opens them.
+- **Right-sized.** The dialog no longer fills the whole window.
+
 ## November 24: Water in the ditch and pond
 > Open the weir (E) and water runs down the ditch and fills the pond. Rain tops them up; shut the weir and it slowly drains.
 - **A working weir.** Walk up to the weir in the north-east corner and press E to open or shut its gate. The wheel turns and the gate slides up.

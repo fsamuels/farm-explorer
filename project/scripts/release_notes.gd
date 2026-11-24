@@ -60,6 +60,26 @@ static func bullet_bbcode(text: String) -> String:
 		bold = not bold
 	return out
 
+## Splits a bullet into its bold lead-in and the rest: "**Weir.** Press E." ->
+## ["Weir.", "Press E."]. A bullet with no leading bold has an empty lead-in.
+static func bullet_parts(text: String) -> Array[String]:
+	if text.begins_with("**"):
+		var end := text.find("**", 2)
+		if end > 2:
+			return [text.substr(2, end - 2).strip_edges(), text.substr(end + 2).strip_edges()]
+	return ["", text.replace("**", "")]
+
+## A bullet as BBCode for the What's New list: the lead-in bold at the normal
+## size, the detail smaller and dimmer so it reads as a footnote.
+static func bullet_list_bbcode(text: String, detail_size: int, detail_color: Color) -> String:
+	var parts := bullet_parts(text)
+	var out := ""
+	if parts[0] != "":
+		out += "[b]%s[/b]" % parts[0].replace("[", "[lb]")
+	if parts[1] != "":
+		out += "%s[font_size=%d][color=#%s]%s[/color][/font_size]" % ["  " if out != "" else "", detail_size, detail_color.to_html(false), parts[1].replace("[", "[lb]")]
+	return out
+
 ## 1234567 -> "1,234,567".
 static func with_commas(n: int) -> String:
 	var s := str(absi(n))

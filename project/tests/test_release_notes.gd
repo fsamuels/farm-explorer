@@ -46,6 +46,10 @@ func _test_parse() -> void:
 func _test_format() -> void:
 	_check(ReleaseNotes.with_commas(0) == "0" and ReleaseNotes.with_commas(999) == "999", "small numbers get no commas")
 	_check(ReleaseNotes.with_commas(1000) == "1,000" and ReleaseNotes.with_commas(1234567) == "1,234,567", "thousands get commas")
+	_check(ReleaseNotes.bullet_parts("**Weir.** Press E.") == ["Weir.", "Press E."], "bullet splits into lead-in and detail")
+	_check(ReleaseNotes.bullet_parts("Plain **x** bit") == ["", "Plain x bit"], "a bullet with no leading bold has no lead-in")
+	var listed := ReleaseNotes.bullet_list_bbcode("**A.** b [c]", 20, Color.WHITE)
+	_check(listed.begins_with("[b]A.[/b]") and "[font_size=20]" in listed and "[lb]c]" in listed, "list BBCode: %s" % listed)
 	_check(ReleaseNotes.bullet_bbcode("a **b** c") == "a [b]b[/b] c", "bold becomes BBCode: %s" % ReleaseNotes.bullet_bbcode("a **b** c"))
 	_check(ReleaseNotes.bullet_bbcode("see [x]") == "see [lb]x]", "a literal bracket is escaped")
 	var a := {"n": 1000, "m": 3}
@@ -81,7 +85,9 @@ func _test_scene() -> void:
 	_check(not dialog.is_open() and not paused, "the dialog starts closed")
 	_check(dialog.heading_labels.size() == entries.size(), "one heading per release: %d" % dialog.heading_labels.size())
 	_check(dialog.heading_labels[0].text == entries[0].title, "the newest release is first")
-	_check(dialog.latest_label.text == entries[0].summary and dialog.latest_label.text != "", "the top line is the newest summary")
+	_check(dialog.summary_labels[0].text == entries[0].summary and entries[0].summary != "", "the newest summary is shown first")
+	_check(dialog.detail_boxes[0] != null and dialog.detail_boxes[0].visible, "the newest release's details start open")
+	_check(dialog.detail_boxes.size() < 2 or dialog.detail_boxes[1] == null or not dialog.detail_boxes[1].visible, "older releases' details start folded")
 	for i in entries.size():
 		_check(dialog.summary_labels[i].text == entries[i].summary, "summary %d shown" % i)
 	_check(dialog.stat_values.has("Lines of code") and dialog.stat_values["Lines of code"].text.length() >= 4, "lines of code shown")
@@ -118,12 +124,12 @@ func _test_scene() -> void:
 	_check(dialog.is_open(), "the news icon opens the dialog")
 	_check(dialog._panel.get_combined_minimum_size().y > 0 and dialog.FONT_SIZE >= 40, "the dialog's text is large")
 	# It shrinks to a small window and grows (to a limit) in a big one.
-	var panel_size := Vector2(1900, 1500)
+	var panel_size := Vector2(1700, 1500)
 	var small: float = dialog.ui_scale(Vector2(1280, 720), panel_size)
 	var big: float = dialog.ui_scale(Vector2(3072, 1728), panel_size)
 	var huge: float = dialog.ui_scale(Vector2(10000, 10000), panel_size)
 	_check(small < 1.0 and big > small and huge == dialog.MAX_SCALE, "scale shrinks for a small window, grows for a big one, and is capped: %s %s %s" % [small, big, huge])
-	_check(Vector2(1900, 1500) * small <= Vector2(1280, 720), "a small window still shows the whole dialog")
+	_check(Vector2(1700, 1500) * small <= Vector2(1280, 720), "a small window still shows the whole dialog")
 	dialog.set_open(false)
 	var listed := false
 	for row in preload("res://scripts/controls_overlay.gd").CONTROLS:

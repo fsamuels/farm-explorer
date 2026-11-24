@@ -6,6 +6,15 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**Skim first.** Each update shows its headline, with a short bold line per change and the extra detail in smaller, dimmer text.",
+				"**Details on request.** Only the newest update starts open; older ones fold up, and \"Show details\" opens them.",
+				"**Right-sized.** The dialog no longer fills the whole window."
+			],
+			"summary": "The What's New list is smaller, easier to skim, and tucks the details away until you want them.",
+			"title": "November 24: A calmer What's New"
+		},
+		{
+			"bullets": [
 				"**A working weir.** Walk up to the weir in the north-east corner and press E to open or shut its gate. The wheel turns and the gate slides up.",
 				"**Water you can watch.** It runs the length of the ditch, through the pipes, and fills the pond from the deepest part first. Fills take a few minutes.",
 				"**Rain.** Rain adds water to the pond and leaves puddles in the ditch, which dry up afterwards.",
@@ -181,14 +190,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 12121,
-		"commits": 172,
-		"decisions": 141,
+		"code_lines": 12167,
+		"commits": 277,
+		"decisions": 142,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 54,
-		"size_kb": 113345,
-		"test_lines": 3297,
+		"size_kb": 113348,
+		"test_lines": 3303,
 		"textures": 48,
 		"vehicles": 3
 	}
