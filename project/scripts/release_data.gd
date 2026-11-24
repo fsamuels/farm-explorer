@@ -6,6 +6,7 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**A bigger pond.** The pond is a little wider where it runs under the trees, most of all at the north-east end.",
 				"**A new chicken coop.** A walk-in coop with a tan roosting house and window at one end, a white nest box, wire-mesh runs in a red frame and a dark corrugated tin roof stands at 48.7, -14.6. Its door is open and faces the house."
 			],
 			"summary": "A red-and-tan chicken coop now stands near the house, with its door facing the porch.",
@@ -293,14 +294,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 17085,
-		"commits": 296,
-		"decisions": 164,
+		"code_lines": 17090,
+		"commits": 297,
+		"decisions": 165,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 76,
-		"size_kb": 115484,
-		"test_lines": 5346,
+		"size_kb": 115489,
+		"test_lines": 5372,
 		"textures": 49,
 		"vehicles": 3
 	}
