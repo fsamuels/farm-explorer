@@ -69,7 +69,7 @@ var _view_before_car := false
 var _boom_before_car := 0.0
 var _prompt_flash := ""
 var _prompt_flash_left := 0.0
-## True while swimming in the pond (D-149), and where the breaststroke is.
+## True while swimming in the pond (D-151), and where the breaststroke is.
 var swimming := false
 var swim_phase := 0.0
 var _water: Node
@@ -94,8 +94,9 @@ func _ready() -> void:
 		if anim_player.has_animation(anim_name):
 			anim_player.get_animation(anim_name).loop_mode = Animation.LOOP_LINEAR
 	anim_player.play("Idle")
-	_skeleton = model.find_children("*", "Skeleton3D", true, false).front() as Skeleton3D
-	if _skeleton:
+	var skeletons := model.find_children("*", "Skeleton3D", true, false)
+	if not skeletons.is_empty() and (skeletons[0] as Skeleton3D).find_bone("pelvis") >= 0:
+		_skeleton = skeletons[0] as Skeleton3D
 		var pelvis := _skeleton.find_bone("pelvis")
 		var to_model := model.global_transform.affine_inverse() * _skeleton.global_transform
 		_hip_local = to_model * _skeleton.get_bone_global_rest(pelvis).origin

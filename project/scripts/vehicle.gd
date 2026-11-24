@@ -26,7 +26,8 @@ const BED_RAISE_MAX_SPEED := 2.0
 const BED_UP_MAX_SPEED := 3.0
 
 @export var label := "car"
-## False for a paddled boat (D-149): no engine note, and no rev counter in the HUD.
+## False for a paddled boat (D-151): the HUD hides the rev counter. (The engine
+## note and headlights are skipped by the boat overriding `_process`, kayak.gd.)
 @export var has_engine := true
 @export var wheelbase := 2.6
 @export var max_speed := 22.0

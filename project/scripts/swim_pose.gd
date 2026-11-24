@@ -32,7 +32,10 @@ static func apply(skeleton: Skeleton3D, model: Node3D, phase: float) -> void:
 	for side: float in LEG_CHAINS:
 		var dirs := SwimMath.leg_dirs(phase, side)
 		var chain: Array = LEG_CHAINS[side]
-		_aim_chain(skeleton, skeleton.get_bone_name(skeleton.get_bone_parent(skeleton.find_bone(chain[0]))),
+		var thigh := skeleton.find_bone(chain[0])
+		if thigh < 0 or skeleton.get_bone_parent(thigh) < 0:
+			continue
+		_aim_chain(skeleton, skeleton.get_bone_name(skeleton.get_bone_parent(thigh)),
 				[chain[0], chain[1]], [chain[1], chain[2]], [to_skeleton * dirs.thigh, to_skeleton * dirs.calf])
 
 ## Point each bone in `bones` at the matching direction in `dirs`, one after the
@@ -40,7 +43,10 @@ static func apply(skeleton: Skeleton3D, model: Node3D, phase: float) -> void:
 ## `bones[i]` gives that bone's own axis. `anchor` is the bone above the first,
 ## left at its rest pose.
 static func _aim_chain(skeleton: Skeleton3D, anchor: String, bones: Array, children: Array, dirs: Array) -> void:
-	var parent_global := _global_basis(skeleton, skeleton.find_bone(anchor))
+	var anchor_bone := skeleton.find_bone(anchor)
+	if anchor_bone < 0:
+		return
+	var parent_global := _global_basis(skeleton, anchor_bone)
 	for i in bones.size():
 		var bone := skeleton.find_bone(bones[i])
 		var child := skeleton.find_bone(children[i])
