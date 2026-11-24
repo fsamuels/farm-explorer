@@ -187,6 +187,7 @@ func _test_scene() -> void:
 	for i in 3:
 		await process_frame
 	var tod = main.get_node("TimeOfDay")
+	tod.set_preset("day", true)  # pin the plain Day look: the running clock drifts the hour (D-149)
 	var env: Environment = main.get_node("WorldEnvironment").environment
 	_check(env.background_mode == Environment.BG_SKY and env.sky != null, "the environment uses the sky shader")
 	_check(env.sky.sky_material is ShaderMaterial, "the sky has a shader material")

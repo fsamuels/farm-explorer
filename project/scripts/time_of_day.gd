@@ -8,7 +8,7 @@ extends Node
 ## A running clock (Y, `toggle_clock`) can instead advance the time on its own:
 ## `hour` moves through the day and the lighting is blended between the presets
 ## placed on it by KEYFRAMES. T stops the clock and jumps to the next preset;
-## Y starts it again from there. The clock starts stopped.
+## Y starts it again from there. The clock starts running, at Day (13:00).
 ##
 ## The world is laid out with +x east and -z north (see map_math.gd), so the
 ## sunset sun sits low in the west, the moon rises in the southeast and the
@@ -152,6 +152,8 @@ const CLOCK_STEP_HOURS := 0.5
 @export var sun_path: NodePath = ^"../DirectionalLight3D"
 @export var transition_seconds := 1.5
 @export var start_preset := "day"
+## Whether the clock is running from the first frame (Y toggles it).
+@export var start_clock_running := true
 ## Real seconds one 24 h clock day takes while the clock runs.
 @export var day_seconds := 1200.0
 ## Width of the baked star map in pixels (the height is half). Lower it for a
@@ -342,6 +344,11 @@ func _ready() -> void:
 	_build_clock_label()
 	_build_name_labels()
 	set_preset(start_preset, true)
+	# Picking a preset stops the clock; start it quietly (no toast) from there.
+	if start_clock_running:
+		clock_running = true
+		sky_hour = hour
+		_refresh_clock_label()
 
 func _process(delta: float) -> void:
 	_update_name_labels()
