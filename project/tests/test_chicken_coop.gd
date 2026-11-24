@@ -14,6 +14,13 @@ func _check(cond: bool, what: String) -> void:
 		_failures += 1
 		push_error("FAIL: " + what)
 
+## Height of the roof's top surface at local x, by a ray from above.
+func _roof_y(coop: Node3D, space: PhysicsDirectSpaceState3D, x: float) -> float:
+	var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(coop.to_global(Vector3(x, 5.0, 0.0)), coop.to_global(Vector3(x, 0.0, 0.0))))
+	if hit.is_empty():
+		return -1.0
+	return coop.to_local(hit.position).y
+
 func _run() -> void:
 	var main: Node = load("res://scenes/main.tscn").instantiate()
 	root.add_child(main)
@@ -56,6 +63,25 @@ func _run() -> void:
 	var c := coop.to_global(Vector3(Coop.WIDTH * 0.5 - 0.3, 0.9, Coop.DEPTH * 0.5 + 0.6))
 	var d := coop.to_global(Vector3(Coop.WIDTH * 0.5 - 0.3, 0.9, 0.0))
 	_check(not space.intersect_ray(PhysicsRayQueryParameters3D.create(c, d)).is_empty(), "the front wall beside the door is solid")
+
+	# The roof is high over the roosting house (-X) and low over the run (+X).
+	var hx := Coop.WIDTH * 0.5
+	var top_hi := _roof_y(coop, space, -hx + 0.3)
+	var top_lo := _roof_y(coop, space, hx - 0.3)
+	_check(top_hi > top_lo + 0.05, "the roof is higher over the roosting house than over the run")
+	_check(absf(top_hi - Coop.roof_height(-hx + 0.3)) < 0.12 and absf(top_lo - Coop.roof_height(hx - 0.3)) < 0.12, "the roof sits on the walls")
+	# The door leaf swings out the front, not into the run.
+	var leaf := coop.get_node("DoorLeaf") as Node3D
+	var free_end := leaf.to_global(Vector3(-Coop.DOOR_WIDTH + 0.04, 0.0, 0.0))
+	_check(coop.to_local(free_end).z > Coop.DEPTH * 0.5 + 0.2, "the open door leaf is outside the front wall")
+	# Under the roosting house the back and outer end are closed.
+	var xh := -hx + Coop.HOUSE_WIDTH * 0.5
+	var back := space.intersect_ray(PhysicsRayQueryParameters3D.create(coop.to_global(Vector3(xh, 0.5, -Coop.DEPTH * 0.5 - 0.5)), coop.to_global(Vector3(xh, 0.5, 0.0))))
+	_check(not back.is_empty(), "the back under the roosting house is closed")
+	var end := space.intersect_ray(PhysicsRayQueryParameters3D.create(coop.to_global(Vector3(-hx - 0.5, 0.5, 0.0)), coop.to_global(Vector3(0.0, 0.5, 0.0))))
+	_check(not end.is_empty(), "the outer end under the roosting house is closed")
+	# The footprint sits at the coop's ground.
+	_check(absf(footprint.global_position.y - (coop.global_position.y + 1.15)) < 0.3, "the footprint is at the coop's ground level")
 
 	print("chicken_coop: %s" % ("OK" if _failures == 0 else "%d FAILED" % _failures))
 	quit(1 if _failures else 0)

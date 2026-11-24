@@ -72,7 +72,9 @@ func door_outside() -> Vector2:
 
 func _ready() -> void:
 	add_to_group("chicken_coop")
-	position.y = TerrainMath.height_at(global_position.x, global_position.z)
+	# Stand at AT facing the farmhouse, on the ground.
+	rotation.y = facing_yaw(AT, FACES)
+	position = Vector3(AT.x, TerrainMath.height_at(AT.x, AT.y), AT.y)
 	_build()
 
 func _build() -> void:
@@ -138,6 +140,8 @@ func _run_walls(body: StaticBody3D, hx: float, hz: float) -> void:
 	var xl := -hx + HOUSE_WIDTH
 	# Under the roosting house: front, back and outer end (house boards stand above).
 	_mesh_panel(body, Vector3(xl - -hx, HOUSE_FLOOR - 0.12, 0.03), Vector3((xl - hx) * 0.5, 0.12 + (HOUSE_FLOOR - 0.12) * 0.5, hz - 0.03))
+	_mesh_panel(body, Vector3(HOUSE_WIDTH, HOUSE_FLOOR - 0.12, 0.03), Vector3((xl - hx) * 0.5, 0.12 + (HOUSE_FLOOR - 0.12) * 0.5, -hz + 0.03))
+	_mesh_panel(body, Vector3(0.03, HOUSE_FLOOR - 0.12, DEPTH - 0.2), Vector3(-hx + 0.03, 0.12 + (HOUSE_FLOOR - 0.12) * 0.5, 0.0))
 	# Run front: beside the door, and over it.
 	var right_w := hx - door.y
 	var h_right := roof_height((door.y + hx) * 0.5) - 0.06
@@ -167,7 +171,7 @@ func _door(_hx: float, hz: float) -> void:
 	var hinge := Node3D.new()
 	hinge.name = "DoorLeaf"
 	hinge.position = Vector3(span.y, 0.0, hz)
-	hinge.rotation.y = deg_to_rad(-100.0)
+	hinge.rotation.y = deg_to_rad(100.0)
 	add_child(hinge)
 	var w := DOOR_WIDTH - 0.04
 	_box(hinge, Vector3(w, DOOR_HEIGHT - 0.1, 0.03), Vector3(-w * 0.5, 0.05 + (DOOR_HEIGHT - 0.1) * 0.5, 0.0), MESH)
@@ -182,7 +186,8 @@ func _door(_hx: float, hz: float) -> void:
 ## down over the run, with an overhang, and red brackets under it at the front.
 func _roof(body: StaticBody3D) -> void:
 	var rise := EAVE_LOW - EAVE_HIGH
-	var slope := -atan2(rise, WIDTH)
+	# rise is negative (high at -X, low at +X); a negative z rotation lowers +X.
+	var slope := atan2(rise, WIDTH)
 	var length := sqrt(WIDTH * WIDTH + rise * rise) + 0.5
 	var roof := _box(body, Vector3(length, 0.06, DEPTH + 0.5), Vector3(0.0, (EAVE_HIGH + EAVE_LOW) * 0.5 + 0.03, 0.0), TIN, true)
 	roof.rotation.z = slope
