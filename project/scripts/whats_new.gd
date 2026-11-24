@@ -12,17 +12,21 @@ const ReleaseData := preload("res://scripts/release_data.gd")
 ## The dialog is laid out at this large size (it was 22 px and far too small to
 ## read) and then scaled as a whole to fit the window, so a small window shrinks
 ## it rather than cutting it off.
-const FONT_SIZE := 46
-const PANEL_WIDTH := 1900.0
+const FONT_SIZE := 40
+const PANEL_WIDTH := 1700.0
 ## Text room inside the panel (margins and the scroll bar), px.
 const TEXT_INSET := 120.0
-const LIST_HEIGHT := 700.0
+const LIST_HEIGHT := 760.0
 ## The most of the window the dialog fills, and how far it may scale.
-const WINDOW_FILL := 0.96
+const WINDOW_FILL := 0.8
 const MIN_SCALE := 0.3
-const MAX_SCALE := 2.5
+const MAX_SCALE := 1.8
 const KEY_COLOR := Color(1.0, 0.86, 0.55)
 const MUTED := Color(0.7, 0.72, 0.78)
+## The bold lead-in of a bullet, and its smaller, dimmer detail text.
+const LEAD_SIZE := FONT_SIZE - 8
+const DETAIL_SIZE := FONT_SIZE - 16
+const DETAIL_COLOR := Color(0.62, 0.65, 0.72)
 
 var _panel: PanelContainer
 var _mouse_before := Input.MOUSE_MODE_CAPTURED
@@ -30,7 +34,8 @@ var _mouse_before := Input.MOUSE_MODE_CAPTURED
 var heading_labels: Array[Label] = []
 var summary_labels: Array[Label] = []
 var stat_values: Dictionary = {}
-var latest_label: Label
+## Each release's bullet list, newest first; only the newest starts open.
+var detail_boxes: Array[Control] = []
 var _scroll: ScrollContainer
 
 func _ready() -> void:
@@ -97,13 +102,10 @@ func _build(data: Dictionary) -> void:
 
 	var title := Label.new()
 	title.text = "What's New"
-	title.add_theme_font_size_override("font_size", FONT_SIZE + 10)
+	title.add_theme_font_size_override("font_size", FONT_SIZE + 6)
 	box.add_child(title)
 
 	var entries: Array = data.entries
-	latest_label = _wrapped(FONT_SIZE, KEY_COLOR)
-	latest_label.text = entries[0].summary if not entries.is_empty() else ""
-	box.add_child(latest_label)
 
 	var scroll := ScrollContainer.new()
 	_scroll = scroll
@@ -121,20 +123,36 @@ func _build(data: Dictionary) -> void:
 		heading.add_theme_color_override("font_color", Color(1, 1, 1))
 		list.add_child(heading)
 		heading_labels.append(heading)
-		var summary := _wrapped(FONT_SIZE - 4, KEY_COLOR)
+		var summary := _wrapped(FONT_SIZE - 10, KEY_COLOR)
 		summary.text = entry.summary
 		list.add_child(summary)
 		summary_labels.append(summary)
-		for bullet: String in entry.bullets:
-			var text := RichTextLabel.new()
-			text.bbcode_enabled = true
-			text.fit_content = true
-			text.scroll_active = false
-			text.add_theme_font_size_override("normal_font_size", FONT_SIZE - 6)
-			text.add_theme_font_size_override("bold_font_size", FONT_SIZE - 6)
-			text.add_theme_color_override("default_color", MUTED)
-			text.text = "•  " + ReleaseNotes.bullet_bbcode(bullet)
-			list.add_child(text)
+		if entry.bullets.is_empty():
+			detail_boxes.append(null)
+		else:
+			var details := VBoxContainer.new()
+			details.add_theme_constant_override("separation", 6)
+			for bullet: String in entry.bullets:
+				var text := RichTextLabel.new()
+				text.bbcode_enabled = true
+				text.fit_content = true
+				text.scroll_active = false
+				text.add_theme_font_size_override("normal_font_size", LEAD_SIZE)
+				text.add_theme_font_size_override("bold_font_size", LEAD_SIZE)
+				text.add_theme_color_override("default_color", MUTED)
+				text.text = "[ul]" + ReleaseNotes.bullet_list_bbcode(bullet, DETAIL_SIZE, DETAIL_COLOR) + "[/ul]"
+				details.add_child(text)
+			var toggle := Button.new()
+			toggle.flat = true
+			toggle.focus_mode = Control.FOCUS_NONE
+			toggle.alignment = HORIZONTAL_ALIGNMENT_LEFT
+			toggle.add_theme_font_size_override("font_size", DETAIL_SIZE + 2)
+			toggle.add_theme_color_override("font_color", MUTED)
+			toggle.pressed.connect(_toggle_details.bind(toggle, details))
+			list.add_child(toggle)
+			list.add_child(details)
+			_show_details(toggle, details, detail_boxes.size() == 0)
+			detail_boxes.append(details)
 		list.add_child(HSeparator.new())
 
 	var stats_heading := Label.new()
@@ -165,6 +183,14 @@ func _build(data: Dictionary) -> void:
 	close.add_theme_font_size_override("font_size", FONT_SIZE - 4)
 	close.pressed.connect(set_open.bind(false))
 	box.add_child(close)
+
+func _toggle_details(toggle: Button, details: Control) -> void:
+	_show_details(toggle, details, not details.visible)
+	_fit_to_window()
+
+func _show_details(toggle: Button, details: Control, open: bool) -> void:
+	details.visible = open
+	toggle.text = "Hide details" if open else "Show details (%d)" % details.get_child_count()
 
 func _wrapped(size: int, color: Color) -> Label:
 	var label := Label.new()
