@@ -1421,27 +1421,22 @@ transform = Transform3D(0.996862, 0, -0.079155, 0, 1, 0, 0.079155, 0, 0.996862, 
 [node name="Pad_BackBarn" parent="TransportPads" instance=ExtResource("62_pad_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, 24)
 pad_name = "Back Barn"
-destination = NodePath("../Pad_South")
 
 [node name="Pad_South" parent="TransportPads" instance=ExtResource("62_pad_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, 100)
 pad_name = "South Pasture"
-destination = NodePath("../Pad_Southwest")
 
 [node name="Pad_Southwest" parent="TransportPads" instance=ExtResource("62_pad_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -115, 0, 60)
 pad_name = "Southwest Pasture"
-destination = NodePath("../Pad_West")
 
 [node name="Pad_West" parent="TransportPads" instance=ExtResource("62_pad_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -120, 0, -50)
 pad_name = "West Pasture"
-destination = NodePath("../Pad_Northwest")
 
 [node name="Pad_Northwest" parent="TransportPads" instance=ExtResource("62_pad_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -100, 0, -125)
 pad_name = "Northwest Pasture"
-destination = NodePath("../Pad_BackBarn")
 
 [node name="Player" parent="." unique_id=1542815032 instance=ExtResource("2_player_scene")]
 transform = Transform3D(-0.358368, 0, 0.933580, 0, 1, 0, -0.933580, 0, -0.358368, 232.6, 1, -48.4)
