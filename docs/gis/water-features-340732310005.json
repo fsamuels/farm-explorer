@@ -1,9 +1,10 @@
 {
-  "_status": "DRAFT v3 - revised from the owner's second-round corrections; still traced by eye and NOT yet confirmed. Do not build terrain from this until confirmed.",
+  "_status": "DRAFT v3.1 - revised from the owner's third-round corrections; still traced by eye and NOT yet confirmed. Do not build terrain from this until confirmed.",
   "_crs": "scene meters, +X east, +Z south, origin at the parcel centroid (D-6)",
   "_how_to_review": "python3 tools/water_overlay.py  (draws this file over the imagery with numbered vertices); correct by vertex id, e.g. 'D7 -> (251, 12)'",
   "_units": "dimensions are the owner's figures converted from feet, midpoint of the stated range",
   "_v3_changes": [
+    "pond extended east to x~131 (owner: almost 130, a little farther)",
     "ditch is mostly straight along the south fence line from the road westward",
     "two buried sections: a culvert at the driveway, then a pipe from the track team triangle's tip (where it becomes the narrow track, x~65) north to the pond inlet at x=60"
   ],
@@ -44,7 +45,7 @@
     "shape_note": "long three-lobed peanut, NE to W, larger to the west; bright green areas are dried-out pond bed; spine with half-width at each point",
     "confidence": "low",
     "spine_x_z_halfwidth_m": [
-      [118,-4,4],[108,2,7],[96,7,7],[82,15,6],[66,26,13],[46,35,5],[22,37,5],[2,32,7],[-14,26,11],[-28,19,15],[-42,13,13],[-54,9,8]
+      [131,-11,3],[119,-4,6],[108,2,7],[96,7,7],[82,15,6],[66,26,13],[46,35,5],[22,37,5],[2,32,7],[-14,26,11],[-28,19,15],[-42,13,13],[-54,9,8]
     ]
   }
 }

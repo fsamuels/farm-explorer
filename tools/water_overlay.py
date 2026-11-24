@@ -120,7 +120,7 @@ if __name__ == "__main__":
     out = Path(sys.argv[1] if len(sys.argv) > 1 else ".")
     out.mkdir(parents=True, exist_ok=True)
     render((-70, -100, 275, 85), 0.25, out / "overview.png", 20)
-    render((-70, -10, 130, 55), 0.1, out / "pond.png", 10)
+    render((-70, -20, 145, 55), 0.1, out / "pond.png", 10)
     render((225, -95, 270, 75), 0.1, out / "ditch_east.png", 10)
     render((30, 40, 270, 80), 0.15, out / "ditch_south.png", 10)
     print("wrote overlays to", out)
