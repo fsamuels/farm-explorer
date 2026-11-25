@@ -6,6 +6,13 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**A new Cub Cadet.** The Front Barn's UTV has a much more detailed body: fenders, a roll cage, seats, a dash and a steering wheel, headlamps and a proper cargo box, still in Cub Cadet yellow and black. It drives the same, and B still tips the bed."
+			],
+			"summary": "The Cub Cadet UTV is now a detailed Polaris Ranger EV in yellow and black, with a working dump bed.",
+			"title": "November 24: A better Cub Cadet"
+		},
+		{
+			"bullets": [
 				"**A smaller pond with an overflow.** The pond's north bank on the west side is cut back along a new, wavy shoreline, so the pond is a little smaller there. When the pond is full and water is still coming in, it now spills out of its west tip into an overflow channel. It runs through a culvert under the fenced track, then curves away south-west to the back of the property. It only runs while the pond is spilling, and dries up after.",
 				"**Swim fast.** Hold Ctrl while you swim to cross the pond at a fast crawl, about four times your normal stroke. It is the same key as the super sprint, and Shift still slows you down.",
 				"**Water from the inlet pipe.** While the ditch is running, water now pours out of the pipe where it reaches the pond and falls down the bank into the water.",
@@ -317,14 +324,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 19218,
-		"commits": 303,
-		"decisions": 181,
+		"code_lines": 19163,
+		"commits": 305,
+		"decisions": 182,
 		"models": 14,
 		"scenes": 26,
-		"scripts": 82,
-		"size_kb": 120861,
-		"test_lines": 6121,
+		"scripts": 81,
+		"size_kb": 123542,
+		"test_lines": 6125,
 		"textures": 49,
 		"vehicles": 3
 	}
