@@ -1490,6 +1490,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, 20)
 pad_name = "Back Barn"
 facing_bearing = 333.0
 
+[node name="Pad_BackYard" parent="TransportPads" instance=ExtResource("62_pad_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50.51, 0, -37.65)
+pad_name = "Back Yard"
+facing_bearing = 110.0
+
 [node name="Pad_FrontPond" parent="TransportPads" instance=ExtResource("62_pad_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 109.4, 0, -20.8)
 pad_name = "Front Pond"
@@ -1497,11 +1502,6 @@ facing_bearing = 150.0
 
 [node name="Pad_South" parent="TransportPads" instance=ExtResource("62_pad_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, 100)
-[node name="Pad_BackYard" parent="TransportPads" instance=ExtResource("62_pad_scene")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50.51, 0, -37.65)
-pad_name = "Back Yard"
-facing_bearing = 110.0
-
 pad_name = "South Pasture"
 
 [node name="Pad_Southwest" parent="TransportPads" instance=ExtResource("62_pad_scene")]
@@ -1540,6 +1540,7 @@ script = ExtResource("toast_script")
 script = ExtResource("58_building_shell")
 building_name = "House"
 skin_walls = PackedStringArray("north", "south", "east", "west")
+siding = true
 liner_color = Color(0.96, 0.96, 0.95, 1)
 floor_color = Color(0.9, 0.9, 0.88, 1)
 rise = 2.29095
@@ -1561,7 +1562,6 @@ doors = [{"wall": "north", "along": -3.91, "width": 2.0, "height": 2.45, "sill":
 [node name="HouseBackyard" type="Node3D" parent="Buildings"]
 script = ExtResource("102_house_backyard")
 
-siding = true
 [node name="HouseBunker" type="Node3D" parent="Buildings"]
 script = ExtResource("bunker_script")
 
