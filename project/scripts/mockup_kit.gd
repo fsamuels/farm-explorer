@@ -541,3 +541,21 @@ static func sauna_spot(parent: Node3D, r: Rect2, top := 0.0, gravel := true) -> 
 	box(parent, Vector3(stub.x, top + 0.85, stub.y + 0.07), Vector3(0.18, 0.24, 0.08), mat(Color(0.55, 0.57, 0.6), 0.5, 0.4))
 	var l := label(parent, Vector3(c.x, top + 0.1, c.y), "SAUNA HERE", 96, Color(1.0, 0.9, 0.7))
 	l.rotation.x = -PI / 2.0
+
+## A buried power line from the 50 A plug to a hot tub that stands away from
+## it: a narrow strip of trench cover along `pts` (x, z), the first point at
+## the plug, the last at the tub. Returns its length in metres.
+static func power_run(parent: Node3D, pts: Array) -> float:
+	var length := 0.0
+	var m := mat(Color(0.35, 0.30, 0.26), 1.0)
+	for i in pts.size() - 1:
+		var a: Vector2 = pts[i]
+		var b: Vector2 = pts[i + 1]
+		var d := b - a
+		var mid := (a + b) / 2.0
+		box(parent, Vector3(mid.x, 0.035, mid.y), Vector3(d.length() + 0.15, 0.02, 0.15), m, null, atan2(-d.y, d.x))
+		length += d.length()
+	var first: Vector2 = pts[0]
+	var last: Vector2 = pts[pts.size() - 1]
+	mark(parent, Vector3(first.x, 0, first.y), "power_run", {"from": first, "to": last, "length": length})
+	return length

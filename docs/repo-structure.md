@@ -123,7 +123,7 @@ farm-sim/
     │   ├── music_player.gd        # the looping soundtrack, P to toggle — see D-184
     │   ├── house_backyard.gd      # the House's back yard: deck and steps, concrete pad, AC unit, willows and mulch, siding on garage and gables — see D-170, D-171
     │   ├── willow.gd              # a tree-form willow grown in code from a seed (forking limbs, hanging leaf strands) — see D-171
-    │   ├── backyard_mockups.gd    # 48 back-yard ideas behind the House, O to step through them, a card and a hint — see D-184, D-185, D-187
+    │   ├── backyard_mockups.gd    # 48 back-yard ideas behind the House, O to step through them, a card and a hint — see D-184, D-185, D-187, D-188
     │   ├── mockup_kit.gd          # the mockups' building blocks: hot tubs on decks, fire tables, pavilions, kitchens, saunas, seating — see D-184
     │   ├── world_terrain.gd       # the driveable world: builds and drops 320 m chunks (ground mesh, collider, road ribbons) around the camera — see D-148
     │   ├── world_math.gd          # pure world-ground maths (grid heights on the mesh's own triangles, farm blend, chunk meshes), covered by tests/ — see D-148
