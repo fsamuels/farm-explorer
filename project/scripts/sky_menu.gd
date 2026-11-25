@@ -537,7 +537,7 @@ func _button(text: String) -> Button:
 	var b := Button.new()
 	b.text = text
 	b.toggle_mode = true
-	b.focus_mode = Control.FOCUS_ALL  # a controller steers by focus (D-182)
+	b.focus_mode = Control.FOCUS_ALL  # a controller steers by focus (D-185)
 	b.custom_minimum_size = Vector2(0, 44)
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	b.add_theme_font_size_override("font_size", FONT_SIZE - 2)

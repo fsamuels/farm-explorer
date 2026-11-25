@@ -33,7 +33,7 @@ farm-sim/
 │   ├── build_release_notes.gd    # regenerates project/scripts/release_data.gd from CHANGELOG.md and a count of the game (D-130)
 │   ├── build_player_model.py     # Blender (bpy) script that builds project/models/player.glb
 │   │                              from Quaternius's CC0 base-character + animation packs (D-89)
-│   ├── build_ranger_model.py     # builds project/models/ranger_xp.glb from the Sketchfab download: recolours it, cuts the rear tank away, splits the wheels out (numpy only, D-138)
+│   ├── build_ranger_ev_model.py  # builds project/models/ranger_ev.glb from the Sketchfab download: recolours it yellow/black, drops the textures, splits the wheels and cargo box out (numpy only, D-182)
 │   ├── make_corrugated_texture.py # generates the tileable blue corrugated-metal albedo + normal textures for the Shop walls (D-98)
 │   ├── make_music.py             # renders project/audio/farm_theme.wav, the game's looping techno theme (D-178)
 │   ├── make_music_groove.py      # the earlier relaxed electric-piano groove, to farm_theme_groove.wav (unused, D-176)
@@ -67,7 +67,7 @@ farm-sim/
     │   ├── gate.tscn              # swinging pipe-panel gate (hinge at the origin, panel along +X), opened/closed with E via player.gd — see D-76
     │   ├── tree.tscn              # wraps models/tree.glb; unused since the treeline wall went in D-148, kept for the trees to come
     │   ├── transport_pad.tscn    # an invisible map teleport point (script only), instanced 5x under `TransportPads` in main.tscn — see D-131, D-139
-    │   ├── cub_cadet_utv.tscn    # the drivable Cub Cadet 550 UTV (tuning only; the body is models/ranger_xp.glb and utv.gd adds the bed), instanced once in the Front Barn — see D-127
+    │   ├── cub_cadet_utv.tscn    # the drivable Cub Cadet 550 UTV (tuning only; the body is models/ranger_ev.glb, which has the bed), instanced once in the Front Barn — see D-127
     │   ├── building.tscn         # one unit building box, instanced 7x (footprint placeholders)
     │   ├── horse.tscn            # wraps models/horse.glb with wander-AI script, instanced 2x, roams a shared rectangle (D-27)
     │   ├── hen.tscn               # wraps models/hen.glb with wander.gd, instanced 6x inside flock.tscn
@@ -113,17 +113,18 @@ farm-sim/
     │   ├── whats_new.gd           # the What's New dialog (C key): the changelog and game-size stats, from release_data.gd — see D-130
     │   ├── release_notes.gd       # parses CHANGELOG.md, counts the game's size; pure, covered by tests/ — see D-130
     │   ├── release_data.gd        # GENERATED from CHANGELOG.md by tools/build_release_notes.gd; do not edit — see D-130
-    │   ├── utv.gd                 # the Cub Cadet 550 UTV: vehicle.gd plus a dump bed built by utv_builder.gd — see D-127, D-138
-    │   ├── utv_builder.gd         # builds the UTV's tipping dump bed (yellow box on a hinge) over the Ranger body — see D-127, D-138
+    │   ├── utv.gd                 # the Cub Cadet 550 UTV: vehicle.gd plus the model's tipping dump bed — see D-127, D-182
     │   ├── vehicle_math.gd        # pure driving maths (speed, mph, turn rate, exit spots), covered by tests/ — see D-106
     │   ├── wheel_builder.gd       # splits a car model's wheel meshes into four wheels that spin and steer, covered by tests/ — see D-107
     │   ├── engine_sound.gd        # synthesized engine note: gears, revs, harmonics; covered by tests/ — see D-107
     │   ├── wall_layout.gd         # pure helper that cuts a wall into boxes around openings, covered by tests/ — see D-98
     │   ├── corrugated.gd          # the shared blue corrugated-metal material (triplanar, mipmapped) — see D-98
     │   ├── siding.gd              # the farmhouse's pale blue lap siding, made in code (world triplanar) — see D-170
-    │   ├── music_player.gd        # the looping soundtrack, P to toggle — see D-173
+    │   ├── music_player.gd        # the looping soundtrack, P to toggle — see D-184
     │   ├── house_backyard.gd      # the House's back yard: deck and steps, concrete pad, AC unit, willows and mulch, siding on garage and gables — see D-170, D-171
     │   ├── willow.gd              # a tree-form willow grown in code from a seed (forking limbs, hanging leaf strands) — see D-171
+    │   ├── backyard_mockups.gd    # 23 back-yard ideas behind the House, O to step through them, a card and a hint — see D-184
+    │   ├── mockup_kit.gd          # the mockups' building blocks: hot tubs on decks, fire tables, pavilions, kitchens, saunas, seating — see D-184
     │   ├── world_terrain.gd       # the driveable world: builds and drops 320 m chunks (ground mesh, collider, road ribbons) around the camera — see D-148
     │   ├── world_math.gd          # pure world-ground maths (grid heights on the mesh's own triangles, farm blend, chunk meshes), covered by tests/ — see D-148
     │   ├── road_math.gd           # pure road maths (resample, ribbon geometry, nearest road), covered by tests/ — see D-148
@@ -158,6 +159,7 @@ farm-sim/
     │   ├── test_horizon.gd        # distant terrain: real geography in the data, the maths, DistantTerrain in main.tscn, Season button
     │   ├── test_buildings.gd      # Sally's House and Front Barn shells: built, doors placed, the player walks in through doorways and not walls
     │   ├── test_things_to_do.gd   # the Things to Do card: list, saved ticks, teleports, what counts as done
+    │   ├── test_backyard_mockups.gd # every back-yard idea meets the brief, stays in the yard, and the doors and sliders still let you out
     │   ├── test_sky_menu.gd       # start position / third person, constellation name labels, sky menu picks and pause
     │   ├── test_toast.gd          # toast queue, fade, de-duplication, works while paused — see D-142
     │   ├── test_decisions.gd      # decisions.md: row IDs unique, in order, none skipped (catches parallel branches claiming the same D-number) — see D-146
@@ -182,8 +184,8 @@ farm-sim/
     │   ├── quail.glb               # CC-BY static mesh (Poly by Google) — see D-17, credits.md
     │   ├── player.glb              # CC0 rigged/animated player character (Quaternius base, dressed by
     │   │                            # tools/build_player_model.py; textures embedded) — see D-89
-    │   ├── ranger_xp.glb           # CC-BY (Buthull, Sketchfab) Polaris Ranger XP 1000 body, recoloured Cub Cadet yellow/black
-    │   │                            # by tools/build_ranger_model.py (2 MB, 47k tris; no textures) — see D-138, credits.md
+    │   ├── ranger_ev.glb           # Sketchfab Standard (geyges) Polaris Ranger EV body, recoloured Cub Cadet yellow/black
+    │   │                            # by tools/build_ranger_ev_model.py (4.7 MB, 116k tris; no textures) — see D-182, credits.md
     │   └── tr6.glb                 # CC-BY static mesh (Configcars, Sketchfab), simplified from a 32MB/879k-tri
     │                                # download to 7.7MB — see D-25, credits.md
     └── textures/

@@ -6,7 +6,17 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**A new Cub Cadet.** The Front Barn's UTV has a much more detailed body: fenders, a roll cage, seats, a dash and a steering wheel, headlamps and a proper cargo box, still in Cub Cadet yellow and black. It drives the same, and B still tips the bed."
+			],
+			"summary": "The Cub Cadet UTV is now a detailed Polaris Ranger EV in yellow and black, with a working dump bed.",
+			"title": "November 24: A better Cub Cadet"
+		},
+		{
+			"bullets": [
 				"**Play with a controller.** Plug in or pair an Xbox, PlayStation or similar gamepad. Left stick moves (and gas and steer in a car), right stick looks, A jumps (handbrake in a car), X opens doors and gets in and out, the right trigger burns with the torch, and the left trigger super sprints. Y opens the sky menu, Start opens Things to do, Back opens the map, the bumpers zoom the camera, and the D-pad takes out the torch, tips the dump bed and changes the time of day and weather. B closes a menu, and the menus can be steered with the D-pad and A. Press the right stick for the controls list.",
+				"**Back yard ideas.** Walk up to the House's back deck and press O to try 23 ideas for a new back yard, from a simple hot-tub patio to a Roman bathhouse. Shift+O goes back.",
+				"**What's in them.** Every idea has a hot tub sunk into a deck by the plug on the south wing, a covered place to sit round a fire table and an outdoor kitchen. Many have a sauna. A card names each one and lists what is in it.",
+				"**The garage's back door.** The garage now has its door onto the back yard, by the deck. Press E to open it and walk inside.",
 				"**A smaller pond with an overflow.** The pond's north bank on the west side is cut back along a new, wavy shoreline, so the pond is a little smaller there. When the pond is full and water is still coming in, it now spills out of its west tip into an overflow channel. It runs through a culvert under the fenced track, then curves away south-west to the back of the property. It only runs while the pond is spilling, and dries up after.",
 				"**Swim fast.** Hold Ctrl while you swim to cross the pond at a fast crawl, about four times your normal stroke. It is the same key as the super sprint, and Shift still slows you down.",
 				"**Water from the inlet pipe.** While the ditch is running, water now pours out of the pipe where it reaches the pond and falls down the bank into the water.",
@@ -318,14 +328,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 19271,
-		"commits": 305,
-		"decisions": 182,
+		"code_lines": 20640,
+		"commits": 306,
+		"decisions": 185,
 		"models": 14,
 		"scenes": 26,
-		"scripts": 83,
-		"size_kb": 120872,
-		"test_lines": 6224,
+		"scripts": 84,
+		"size_kb": 123638,
+		"test_lines": 6477,
 		"textures": 49,
 		"vehicles": 3
 	}
