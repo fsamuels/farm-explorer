@@ -27,6 +27,8 @@ const OUTLINE_COLOR := Color(0, 0, 0)
 const VIEW_CONE_HALF_ANGLE := deg_to_rad(35.0)
 ## How far outside a building's front door a teleport puts you, metres.
 const FRONT_CLEARANCE := 2.5
+## Buildings drawn as a part of another one (see collect()).
+const PART_OF := {"House South Wing": "House"}
 ## Horse names only appear once zoomed in this far (px per metre).
 const HORSE_LABEL_MIN_SCALE := 4.0
 
@@ -104,20 +106,39 @@ static func collect(tree: SceneTree) -> Dictionary:
 	# Walk-in buildings know where their front door is (D-118); the rest get
 	# a spot outside the south wall.
 	var door_spots := {}
+	var door_yaws := {}
 	for shell in tree.get_nodes_in_group("front_door_spot"):
 		var at: Variant = shell.front_door_spot(FRONT_CLEARANCE)
 		if at != null:
 			door_spots[shell.spot_building()] = MapMath.flatten(at)
+			if shell.get("has_teleport_spot"):
+				door_yaws[shell.spot_building()] = -deg_to_rad(shell.teleport_bearing)
 	var buildings := []
 	for node in tree.get_nodes_in_group("map_building"):
 		var poly := MapMath.box_footprint((node as Node3D).global_transform)
 		var building_name := String(node.name)
-		buildings.append({
+		var entry := {
 			"name": building_name,
 			"poly": poly,
 			"center": MapMath.polygon_center(poly),
 			"front": door_spots.get(building_name, MapMath.front_spot(poly, FRONT_CLEARANCE)),
-		})
+		}
+		if door_yaws.has(building_name):
+			entry["yaw"] = door_yaws[building_name]
+		buildings.append(entry)
+	# Parts of a building (the House's south wing) click, teleport and read as
+	# the building itself, and are not labelled separately.
+	for part: Dictionary in buildings:
+		var whole := PART_OF.get(part.name, "") as String
+		if whole == "":
+			continue
+		for other: Dictionary in buildings:
+			if other.name == whole:
+				part["name"] = whole
+				part["front"] = other.front
+				part["center"] = other.center
+				part["part"] = true
+				break
 
 	# Invisible transport points in the back pastures (D-139): named spots the
 	# map can teleport to, drawn as markers rather than footprints.
@@ -175,7 +196,8 @@ func _draw() -> void:
 		draw_dashed_line(to_screen(seg[0]), to_screen(seg[1]), BOUNDARY_COLOR, 2.5 * marker_scale, 10.0 * marker_scale)
 	for i in data.buildings.size():
 		var pts := _screen_points(data.buildings[i].poly)
-		draw_colored_polygon(pts, BUILDING_HOVER_FILL if i == highlighted_building else BUILDING_FILL)
+		var hot_building: bool = highlighted_building != -1 and data.buildings[i].name == data.buildings[highlighted_building].name
+		draw_colored_polygon(pts, BUILDING_HOVER_FILL if hot_building else BUILDING_FILL)
 		pts.append(pts[0])
 		draw_polyline(pts, BUILDING_EDGE, 2.0 * marker_scale, true)
 	if show_trail and trail.size() >= 2:
@@ -286,6 +308,8 @@ func _draw_places() -> void:
 func _draw_building_labels() -> void:
 	var font := get_theme_default_font()
 	for building in data.buildings:
+		if building.get("part", false):
+			continue
 		var text: String = building.name
 		var text_size := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
 		var anchor := to_screen(building.center)
