@@ -6,6 +6,17 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**A long corridor.** Past the blast door the corridor now runs west under the back yard, with a yellow name plate over every door.",
+				"**Nine rooms.** Command room, pantry, armory and munitions store on one side; mess hall, medical bay, bathroom, bunk room and utility room on the other.",
+				"**No more sleeping where you eat.** The kitchen moved out of the bunk room into a mess hall with long tables; the bunk room now has four bunks and lockers.",
+				"**Command room.** A wall of screens over a console, a lit map table and a radio rack.",
+				"**Armory.** The gun rack moved here from the munitions store, with a pistol board, a workbench and a safe."
+			],
+			"summary": "The shelter under the House now runs under the back yard: nine rooms, including a mess hall well away from where you sleep.",
+			"title": "November 25: A bigger bomb shelter"
+		},
+		{
+			"bullets": [
 				"**A new Cub Cadet.** The Front Barn's UTV has a much more detailed body: fenders, a roll cage, seats, a dash and a steering wheel, headlamps and a proper cargo box, still in Cub Cadet yellow and black. It drives the same, and B still tips the bed."
 			],
 			"summary": "The Cub Cadet UTV is now a detailed Polaris Ranger EV in yellow and black, with a working dump bed.",
@@ -328,14 +339,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 20863,
-		"commits": 307,
-		"decisions": 185,
+		"code_lines": 21120,
+		"commits": 163,
+		"decisions": 186,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 83,
-		"size_kb": 123647,
-		"test_lines": 6395,
+		"size_kb": 123661,
+		"test_lines": 6422,
 		"textures": 49,
 		"vehicles": 3
 	}

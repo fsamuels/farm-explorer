@@ -253,9 +253,10 @@ func _process(_delta: float) -> void:
 			_hint_label.text = hint_text()
 
 ## Whether a point in this frame is in the back yard, low enough to be
-## standing (or driving) there rather than flying over.
+## standing (or driving) there rather than flying over, and not below the
+## ground in the bomb shelter that runs under it (bunker.gd, D-186).
 static func in_hint_area(p: Vector3) -> bool:
-	return HINT_AREA.has_point(Vector2(p.x, p.z)) and p.y < 6.0
+	return HINT_AREA.has_point(Vector2(p.x, p.z)) and p.y < 6.0 and p.y > -1.0
 
 ## The hint's words: an invitation as built, else the idea showing.
 func hint_text() -> String:

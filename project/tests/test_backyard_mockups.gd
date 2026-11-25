@@ -179,6 +179,7 @@ func _test_hint(mock: Node3D, player: CharacterBody3D) -> void:
 	_check(Mockups.in_hint_area(Vector3(-7.0, 1.6, 0.0)), "the deck is in the hint area")
 	_check(not Mockups.in_hint_area(Vector3(-7.0, 30.0, 0.0)), "not when flying high over it")
 	_check(not Mockups.in_hint_area(Vector3(10.0, 1.6, 0.0)), "not inside or east of the House")
+	_check(not Mockups.in_hint_area(Vector3(-7.0, -1.6, 0.0)), "not from the bomb shelter under the yard")
 	player.global_position = mock.to_global(Vector3(-9.0, 0.5, 0.0))
 	player.velocity = Vector3.ZERO
 	await process_frame
