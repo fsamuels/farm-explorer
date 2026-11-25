@@ -35,6 +35,8 @@ farm-sim/
 │   │                              from Quaternius's CC0 base-character + animation packs (D-89)
 │   ├── build_ranger_model.py     # builds project/models/ranger_xp.glb from the Sketchfab download: recolours it, cuts the rear tank away, splits the wheels out (numpy only, D-138)
 │   ├── make_corrugated_texture.py # generates the tileable blue corrugated-metal albedo + normal textures for the Shop walls (D-98)
+│   ├── make_music.py             # renders project/audio/farm_theme.wav, the game's looping techno theme (D-178)
+│   ├── make_music_groove.py      # the earlier relaxed electric-piano groove, to farm_theme_groove.wav (unused, D-176)
 │   ├── make_barn_textures.py     # generates the tileable tan siding (albedo + normal) and post-wood textures for the Front Barn (D-125)
 │   ├── ortho_fence_trace.py      # Python (Pillow + numpy) helpers to trace white fence
 │   │                              lines off the front-section orthomosaic and convert
@@ -119,6 +121,7 @@ farm-sim/
     │   ├── wall_layout.gd         # pure helper that cuts a wall into boxes around openings, covered by tests/ — see D-98
     │   ├── corrugated.gd          # the shared blue corrugated-metal material (triplanar, mipmapped) — see D-98
     │   ├── siding.gd              # the farmhouse's pale blue lap siding, made in code (world triplanar) — see D-170
+    │   ├── music_player.gd        # the looping soundtrack, P to toggle — see D-173
     │   ├── house_backyard.gd      # the House's back yard: deck and steps, concrete pad, AC unit, willows and mulch, siding on garage and gables — see D-170, D-171
     │   ├── willow.gd              # a tree-form willow grown in code from a seed (forking limbs, hanging leaf strands) — see D-171
     │   ├── world_terrain.gd       # the driveable world: builds and drops 320 m chunks (ground mesh, collider, road ribbons) around the camera — see D-148

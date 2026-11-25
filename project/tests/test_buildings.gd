@@ -82,6 +82,8 @@ func _test_back_barn(shell: Node3D) -> void:
 	_check(shell.corrugated_skin and shell._skin.albedo_texture != null, "Back Barn: corrugated skin")
 	_check(shell._skin.albedo_texture == Corr.material().albedo_texture, "Back Barn: same texture as the Shop")
 	_check(shell.live_doors().size() == 2, "Back Barn: two doors")
+	_check(shell.has_teleport_spot and is_equal_approx(shell.teleport_bearing, 285.0)
+			and shell.front_door_spot(2.5) == Vector3(30.6, 0, -14.5), "Back Barn: teleport spot 30.6, -14.5 facing 285")
 	for wall in ["east", "west"]:
 		var door := _door(shell, wall)
 		_check(door != null and door.kind == preload("res://scripts/shop_door.gd").Kind.SLIDE, "Back Barn: %s door slides" % wall)
@@ -117,7 +119,12 @@ func _walk_tests(player: CharacterBody3D, shell: Node3D, wall: String, nm: Strin
 	Input.action_press("move_forward")
 	await _step(80)
 	Input.action_release("move_forward")
-	_check(not _inside(shell, player.global_position), "%s: closed, it blocks the player" % nm)
+	if door.start_open:
+		_check(door.is_open and door.get_node_or_null("Pick") != null, "%s: starts open and can be closed" % nm)
+		door.set_open(false)
+		await _step(150)
+	else:
+		_check(not _inside(shell, player.global_position), "%s: closed, it blocks the player" % nm)
 	# Open it and the doorway must be clear.
 	door.set_open(true)
 	await _step(120)

@@ -70,6 +70,7 @@
 [ext_resource type="Script" path="res://scripts/bunker.gd" id="bunker_script"]
 [ext_resource type="Script" path="res://scripts/chicken_coop.gd" id="101_chicken_coop"]
 [ext_resource type="Script" path="res://scripts/house_backyard.gd" id="102_house_backyard"]
+[ext_resource type="Script" path="res://scripts/music_player.gd" id="103_music"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -1264,12 +1265,18 @@ rise = 3.52291
 [node name="BackBarnShell" type="Node3D" parent="Buildings"]
 script = ExtResource("58_building_shell")
 building_name = "Back Barn"
+has_teleport_spot = true
+teleport_spot = Vector3(30.6, 0, -14.5)
+teleport_bearing = 285.0
 skin_walls = PackedStringArray("south", "north", "east", "west")
 corrugated_skin = true
 floor_color = Color(0.5, 0.45, 0.4, 1)
 rise = 3.52291
 light_count = 3
-doors = [{"wall": "east", "u": 0.5, "width": 3.0, "height": 3.2, "kind": 1, "label": "barn door", "ribbed": true, "color": Color(0.9, 0.93, 1, 1)}, {"wall": "west", "u": 0.5, "width": 3.0, "height": 3.2, "kind": 1, "label": "barn door", "ribbed": true, "color": Color(0.9, 0.93, 1, 1)}]
+doors = [{"wall": "east", "u": 0.5, "width": 3.0, "height": 3.2, "kind": 1, "label": "barn door", "ribbed": true, "start_open": true, "color": Color(0.9, 0.93, 1, 1)}, {"wall": "west", "u": 0.5, "width": 3.0, "height": 3.2, "kind": 1, "label": "barn door", "ribbed": true, "start_open": true, "color": Color(0.9, 0.93, 1, 1)}]
+
+[node name="Music" type="Node" parent="."]
+script = ExtResource("103_music")
 
 [node name="Martha" parent="." instance=ExtResource("5_horse_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 185, 0, 53)

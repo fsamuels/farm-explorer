@@ -36,6 +36,9 @@ enum Kind { SWING, SLIDE, ROLLUP }
 ## the one at +X slides over it (set `slide` to minus its travel).
 @export var glass := false
 
+## Built already open (the Back Barn's doors); E still closes it.
+@export var start_open := false
+
 const GLASS_FRAME := 0.06
 const GLASS_GAP := 0.07
 
@@ -47,6 +50,11 @@ var _tween: Tween
 
 func _ready() -> void:
 	_build()
+	if start_open:
+		# Already slid aside, no animation and no collider.
+		is_open = true
+		_body.position.x = slide
+		_shape.disabled = true
 
 func get_interact_prompt() -> String:
 	return ("Close " if is_open else "Open ") + label
