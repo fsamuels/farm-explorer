@@ -23,6 +23,9 @@ const DRAFT := 1.45
 ## Ground speed of a steady stroke, and with Shift held.
 const SPEED := 2.0
 const SLOW_SPEED := 1.0
+## Ground speed with Ctrl held, a fast crawl (D-173), and how much faster the arms turn over for it.
+const FAST_SPEED := 8.0
+const FAST_STROKE_RATE := 2.2
 ## Seconds per full cycle (both arms) while swimming, and how much slower the stroke ticks over
 ## while just treading water.
 const STROKE_SECONDS := 1.8
@@ -38,8 +41,11 @@ const BODY_PITCH := deg_to_rad(86.0)
 static func is_swimming(depth: float, was_swimming: bool) -> bool:
 	return depth >= (EXIT_DEPTH if was_swimming else ENTER_DEPTH)
 
-static func swim_speed(slow: bool) -> float:
-	return SLOW_SPEED if slow else SPEED
+## Shift (slow) wins over Ctrl (fast), as it does for running.
+static func swim_speed(slow: bool, fast := false) -> float:
+	if slow:
+		return SLOW_SPEED
+	return FAST_SPEED if fast else SPEED
 
 ## The height the origin floats at: `DRAFT` under `surface`, with a small bob.
 static func float_y(surface: float, time: float) -> float:
@@ -52,8 +58,8 @@ static func float_velocity(y: float, target_y: float) -> float:
 
 ## Advance the stroke phase by `delta` seconds: full rate while moving through
 ## the water, a slow tread when still.
-static func advance_phase(phase: float, delta: float, moving: bool) -> float:
-	var rate := 1.0 if moving else IDLE_STROKE_RATE
+static func advance_phase(phase: float, delta: float, moving: bool, fast := false) -> float:
+	var rate := (FAST_STROKE_RATE if fast else 1.0) if moving else IDLE_STROKE_RATE
 	return fposmod(phase + delta * rate / STROKE_SECONDS, 1.0)
 
 ## Piecewise-smooth lookup: the value of `keys` (an array of [phase, value]

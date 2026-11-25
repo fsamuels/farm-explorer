@@ -32,75 +32,93 @@ const TABLE_STEPS := 96
 
 static var _route_starts := PackedFloat32Array()
 static var _route_length := 0.0
+static var _out_starts := PackedFloat32Array()
+static var _out_length := 0.0
 static var _basin := {}
 
-# --- the route -------------------------------------------------------------
+# --- the routes ------------------------------------------------------------
+# Each function takes `overflow`: false for the weir-to-pond ditch, true for the
+# overflow that leaves the pond (D-172). Both are chains of segments in flow order.
+
+static func _segments(overflow: bool) -> PackedFloat32Array:
+	return WaterData.OUTFLOW_SEGMENTS if overflow else WaterData.ROUTE_SEGMENTS
+
+static func _starts(overflow: bool) -> PackedFloat32Array:
+	_ensure_route()
+	return _out_starts if overflow else _route_starts
 
 static func _ensure_route() -> void:
 	if _route_starts.size() > 0:
 		return
-	var routes := WaterData.ROUTE_SEGMENTS
+	var measured := _measure(WaterData.ROUTE_SEGMENTS)
+	_route_starts = measured[0]
+	_route_length = measured[1]
+	measured = _measure(WaterData.OUTFLOW_SEGMENTS)
+	_out_starts = measured[0]
+	_out_length = measured[1]
+
+## [distance at the start of each segment, total length] of a chain of segments.
+static func _measure(routes: PackedFloat32Array) -> Array:
+	var starts := PackedFloat32Array()
 	var s := 0.0
 	var i := 0
 	while i < routes.size():
-		_route_starts.append(s)
+		starts.append(s)
 		s += Vector2(routes[i + 2] - routes[i], routes[i + 3] - routes[i + 1]).length()
 		i += 5
-	_route_length = s
+	return [starts, s]
 
-## Metres from the weir to the pond inlet along the route.
-static func route_length() -> float:
+## Metres from the weir to the pond inlet along the route (or along the overflow).
+static func route_length(overflow := false) -> float:
 	_ensure_route()
-	return _route_length
+	return _out_length if overflow else _route_length
 
-static func segment_count() -> int:
-	_ensure_route()
-	return _route_starts.size()
+static func segment_count(overflow := false) -> int:
+	return _starts(overflow).size()
 
 ## Distance along the route at the start of segment `i`.
-static func segment_start(i: int) -> float:
-	_ensure_route()
-	return _route_starts[i]
+static func segment_start(i: int, overflow := false) -> float:
+	return _starts(overflow)[i]
 
 ## The segment holding distance `s` along the route.
-static func segment_at(s: float) -> int:
-	_ensure_route()
-	var i := _route_starts.size() - 1
-	while i > 0 and _route_starts[i] > s:
+static func segment_at(s: float, overflow := false) -> int:
+	var starts := _starts(overflow)
+	var i := starts.size() - 1
+	while i > 0 and starts[i] > s:
 		i -= 1
 	return i
 
 ## The point (x, z) at distance `s` along the route.
-static func point_at(s: float) -> Vector2:
-	var i := segment_at(clampf(s, 0.0, _route_length))
-	var routes := WaterData.ROUTE_SEGMENTS
+static func point_at(s: float, overflow := false) -> Vector2:
+	var i := segment_at(clampf(s, 0.0, route_length(overflow)), overflow)
+	var routes := _segments(overflow)
 	var a := Vector2(routes[i * 5], routes[i * 5 + 1])
 	var b := Vector2(routes[i * 5 + 2], routes[i * 5 + 3])
 	var length := a.distance_to(b)
-	return a if length <= 0.0 else a.lerp(b, clampf((s - _route_starts[i]) / length, 0.0, 1.0))
+	return a if length <= 0.0 else a.lerp(b, clampf((s - _starts(overflow)[i]) / length, 0.0, 1.0))
 
 ## Which way the route runs at `s` (unit vector in x, z).
-static func direction_at(s: float) -> Vector2:
-	var i := segment_at(clampf(s, 0.0, _route_length))
-	var routes := WaterData.ROUTE_SEGMENTS
+static func direction_at(s: float, overflow := false) -> Vector2:
+	var i := segment_at(clampf(s, 0.0, route_length(overflow)), overflow)
+	var routes := _segments(overflow)
 	return (Vector2(routes[i * 5 + 2], routes[i * 5 + 3]) - Vector2(routes[i * 5], routes[i * 5 + 1])).normalized()
 
-static func is_buried_at(s: float) -> bool:
-	return WaterData.ROUTE_SEGMENTS[segment_at(clampf(s, 0.0, _route_length)) * 5 + 4] > 0.5
+static func is_buried_at(s: float, overflow := false) -> bool:
+	return _segments(overflow)[segment_at(clampf(s, 0.0, route_length(overflow)), overflow) * 5 + 4] > 0.5
 
 ## Distance along the route of the point nearest (x, z), and how far off it is.
-static func nearest_on_route(x: float, z: float) -> Vector2:
-	_ensure_route()
-	var routes := WaterData.ROUTE_SEGMENTS
+static func nearest_on_route(x: float, z: float, overflow := false) -> Vector2:
+	var routes := _segments(overflow)
+	var starts := _starts(overflow)
 	var best := Vector2(0.0, INF)
 	var p := Vector2(x, z)
-	for i in segment_count():
+	for i in segment_count(overflow):
 		var a := Vector2(routes[i * 5], routes[i * 5 + 1])
 		var b := Vector2(routes[i * 5 + 2], routes[i * 5 + 3])
 		var closest := Geometry2D.get_closest_point_to_segment(p, a, b)
 		var d := p.distance_to(closest)
 		if d < best.y:
-			best = Vector2(_route_starts[i] + a.distance_to(closest), d)
+			best = Vector2(starts[i] + a.distance_to(closest), d)
 	return best
 
 # --- the ditch water ------------------------------------------------------
@@ -144,8 +162,8 @@ static func ditch_water_depth(fill: float, rain_pool := 0.0) -> float:
 	return maxf(fill, rain_pool) * WaterData.DITCH_DEPTH * DITCH_MAX_FILL
 
 ## Water depth at distance `s` along the route.
-static func ditch_depth_at(flow: PackedFloat32Array, s: float, rain_pool := 0.0) -> float:
-	var f := clampf(s / maxf(route_length(), 0.001), 0.0, 1.0) * float(flow.size() - 1)
+static func ditch_depth_at(flow: PackedFloat32Array, s: float, rain_pool := 0.0, overflow := false) -> float:
+	var f := clampf(s / maxf(route_length(overflow), 0.001), 0.0, 1.0) * float(flow.size() - 1)
 	var lo := int(f)
 	var fill := lerpf(flow[lo], flow[mini(lo + 1, flow.size() - 1)], f - lo)
 	return ditch_water_depth(fill, rain_pool)
@@ -226,7 +244,15 @@ static func _interp(xs: PackedFloat32Array, ys: PackedFloat32Array, x: float) ->
 ## spill level. Rates are fractions of the pond's capacity per second.
 static func pond_step(volume: float, inflow: float, fill_per_second: float, rain_per_second: float, loss_per_second: float, dt: float) -> float:
 	var capacity := pond_capacity()
+	return clampf(volume + _pond_rate(volume, inflow, fill_per_second, rain_per_second, loss_per_second) * dt * capacity, 0.0, capacity)
+
+## Net change in the pond, as a fraction of its capacity per second.
+static func _pond_rate(volume: float, inflow: float, fill_per_second: float, rain_per_second: float, loss_per_second: float) -> float:
 	var level := pond_level_at(volume)
 	var wet_share := clampf(pond_area_at(level) / maxf(pond_area_at(POND_SPILL_LEVEL), 1.0), 0.25, 1.0)
-	var change := (inflow * fill_per_second + rain_per_second - loss_per_second * wet_share) * dt * capacity
-	return clampf(volume + change, 0.0, capacity)
+	return inflow * fill_per_second + rain_per_second - loss_per_second * wet_share
+
+## True while the pond is at its spill level with more water coming in than it
+## loses, so the extra runs out through the overflow (D-172). Same arguments as `pond_step`.
+static func pond_spills(volume: float, inflow: float, fill_per_second: float, rain_per_second: float, loss_per_second: float) -> bool:
+	return volume >= pond_capacity() * 0.999 and _pond_rate(volume, inflow, fill_per_second, rain_per_second, loss_per_second) > 0.0

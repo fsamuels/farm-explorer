@@ -92,7 +92,7 @@ func _classify(origin: Vector2, tiles: Vector2i) -> Dictionary:
 	var ditch_lists := {}
 	var pond_lists := {}
 	var half_diagonal := TILE * 0.5 * sqrt(2.0)
-	var segments := WaterData.DITCH_SEGMENTS
+	var segments := TerrainMath.carved_segments()
 	var capsules := TerrainMath.pond_capsules()
 
 	var i := 0

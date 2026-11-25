@@ -3,6 +3,7 @@
   "_crs": "scene meters, +X east, +Z south, origin at the parcel centroid (D-6)",
   "_how_to_review": "python3 tools/water_overlay.py  (draws this file over the imagery with numbered vertices); correct by vertex id, e.g. 'D7 -> (251, 12)', then python3 tools/build_water_data.py",
   "_units": "dimensions are the owner's figures converted from feet, midpoint of the stated range",
+  "_v7_changes": ["pond shrunk and an overflow built (D-172): the north shore of the west lobe is cut back to the owner's line from (-12.8, 11.0) to (-43.6, 4.0), wavy rather than straight (pond.cut_north_shore, read east to west, applied only between its first and last x); the pond spills at its start (-50.1, 2.5) into an open overflow channel that runs to (-74.6, 21.1), goes through a 11 m culvert under the fenced track, then sweeps in a big curve south-west to the back property line near (-133.5, 182). Water runs in it only while the pond is spilling"],
   "_v6_changes": ["pond enlarged a little more (D-169): half-widths up 1-2.5 m under the trees, most at the north-east end (x 96-131); west tip unchanged; then the spine point at x=119 moved north to z -6 with half-width 14 so the full pond reaches (121.2, -16.5) (owner, from the full-pond aerials); pond depth 3.8 -> 4.3 m and bank run 9 -> 7.5 m for a deeper, flatter floor with steeper (max ~41 deg) sides"],
   "_v5_changes": ["pond enlarged (D-153): the rim now sits just inside the tree line in the aerial imagery all round (west lobe, south bank, east tip) and 6-8 m out on the open meadow to the north of the east half; the west tip stays at x~-54 so the track's inner fence still stands on level ground"],
   "_v4_changes": [
@@ -58,6 +59,36 @@
     "confidence": "low",
     "spine_x_z_halfwidth_m": [
       [131, -11, 7.5],[119, -6, 14],[108, 2, 13],[96, 7, 13],[82, 15, 10.5],[66, 26, 16.5],[46, 35, 7.5],[22, 36, 7],[2, 32, 9],[-14, 26, 14.5],[-28, 19, 17],[-40, 14, 15],[-47,13,6.5]
+    ],
+    "cut_north_shore_note": "the owner's new north shore of the west lobe, east to west, from (-12.8, 11.0) to (-43.6, 4.0) but wavy, not straight; the pond is only the ground south of this line. It starts at (-8, 13.2) and ends at the overflow's start (-50.1, 2.5), both on the old rim, so the shore has no step. It cuts only between its first and last x.",
+    "cut_north_shore": [
+      [-8.0, 13.2],[-12.8, 11.0],[-16.5, 10.2],[-20.0, 10.9],[-23.5, 8.6],[-27.5, 8.9],[-31.0, 6.6],[-34.0, 6.9],[-37.0, 4.6],[-40.5, 5.1],[-43.6, 4.0],[-47.0, 3.3],[-50.1, 2.5]
+    ]
+  },
+  "overflow": {
+    "note": "where a full pond spills (D-172): water runs here only while the pond is at its spill level with water still coming in. Same channel as the ditch (depth, widths); carved where open.",
+    "segments": [
+      {
+        "name": "open channel from the pond's west tip to the track's inner fence",
+        "confidence": "medium",
+        "buried": false,
+        "note": "owner: starts at (-50.1, 2.5), then (-52.3, 2.1), then straight to (-74.6, 21.1)",
+        "points": [[-50.1, 2.5], [-52.3, 2.1], [-74.6, 21.1]]
+      },
+      {
+        "name": "culvert under the fenced track",
+        "confidence": "medium",
+        "buried": true,
+        "note": "continues the line of the channel for 11.3 m, under the track's inner fence, the lane and the outer fence (outer fence is about 6 m along)",
+        "points": [[-74.6, 21.1], [-83.2, 28.4]]
+      },
+      {
+        "name": "big curve south-west to the back property line",
+        "confidence": "low",
+        "buried": false,
+        "note": "owner: follows a big curve toward the back of the property line in a south-westerly direction. A 100 m radius arc turns the channel from south-west to south-south-west, then it runs straight to the property line at z~184 (2 m inside it). It passes about 7 m east of the Southwest Pasture teleport pad (-115, 60).",
+        "points": [[-83.2, 28.4], [-91.5, 36.4], [-98.9, 45.2], [-105.1, 54.8], [-110.3, 65.1], [-114.2, 76.0], [-116.8, 87.2], [-122.5, 119.4], [-128.0, 150.7], [-133.5, 182.0]]
+      }
     ]
   }
 }

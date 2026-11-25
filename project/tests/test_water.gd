@@ -11,6 +11,7 @@ var _failures := 0
 
 func _init() -> void:
 	_test_route()
+	_test_overflow_route()
 	_test_basin()
 	_test_flow()
 	_test_pond_step()
@@ -41,6 +42,22 @@ func _test_route() -> void:
 	for i in WaterMath.segment_count():
 		_check(WaterMath.segment_start(i) > last, "segment starts rise at %d" % i)
 		last = WaterMath.segment_start(i)
+
+## The overflow's own route (D-172): from the pond's west tip, under the track, to the back of the property.
+func _test_overflow_route() -> void:
+	var length := WaterMath.route_length(true)
+	_check(length > 150.0 and length < 400.0, "the overflow is a long channel: %s" % length)
+	_check(WaterMath.point_at(0.0, true).distance_to(Vector2(-50.1, 2.5)) < 0.01, "the overflow starts at the pond's west tip")
+	_check(TerrainMath.pond_sdf(-50.1, 2.5) < 2.0, "which is on the pond's rim")
+	_check(WaterMath.point_at(length, true).y > 175.0, "it ends at the back of the property")
+	var culvert := WaterMath.nearest_on_route(-79.0, 24.7, true)
+	_check(culvert.y < 0.2 and WaterMath.is_buried_at(culvert.x, true), "the culvert runs under the track")
+	_check(not WaterMath.is_buried_at(1.0, true) and not WaterMath.is_buried_at(length - 1.0, true), "open at both ends")
+	var last := -1.0
+	for i in WaterMath.segment_count(true):
+		_check(WaterMath.segment_start(i, true) > last, "overflow segment starts rise at %d" % i)
+		last = WaterMath.segment_start(i, true)
+	_check(WaterMath.route_length() > 100.0 and WaterMath.route_length() != length, "the ditch route is still its own")
 
 func _test_basin() -> void:
 	var capacity := WaterMath.pond_capacity()
@@ -98,6 +115,11 @@ func _test_pond_step() -> void:
 	_check(WaterMath.pond_step(capacity * 0.5, 0.0, 1.0 / 240.0, 0.0, 1.0 / 2700.0, 60.0) < capacity * 0.5, "with no inflow it slowly loses water")
 	_check(WaterMath.pond_step(5.0, 0.0, 1.0 / 240.0, 0.0, 1.0, 600.0) >= 0.0, "and never goes below empty")
 	_check(WaterMath.pond_step(0.0, 0.0, 1.0 / 240.0, 1.0 / 1200.0, 0.0, 60.0) > 0.0, "rain alone adds water")
+	# It spills only when full and still gaining (D-172).
+	_check(WaterMath.pond_spills(capacity, 1.0, 1.0 / 240.0, 0.0, 1.0 / 2700.0), "a full pond with the weir flowing spills")
+	_check(not WaterMath.pond_spills(capacity, 0.0, 1.0 / 240.0, 0.0, 1.0 / 2700.0), "a full pond with nothing coming in does not")
+	_check(not WaterMath.pond_spills(capacity * 0.9, 1.0, 1.0 / 240.0, 0.0, 1.0 / 2700.0), "a pond below its rim does not")
+	_check(WaterMath.pond_spills(capacity, 0.0, 1.0 / 240.0, 1.0 / 1200.0, 1.0 / 2700.0), "a full pond in steady rain spills")
 
 func _test_scene() -> void:
 	var main: Node = load("res://scenes/main.tscn").instantiate()
@@ -110,6 +132,9 @@ func _test_scene() -> void:
 		return
 	var weather := main.get_node("Weather")
 	_check(not water.weir_open, "the weir starts shut")
+	var outfall: MeshInstance3D = water.get_node_or_null("PipeOutfall")
+	_check(outfall != null, "there is a stream at the inlet pipe")
+	_check(outfall != null and not outfall.visible, "no stream from the pipe while the ditch is dry")
 	_check(water.pond_fill_fraction() == 0.0, "the pond starts empty")
 	var pond_surface: MeshInstance3D = water.get_node("PondSurface")
 	var ditch_surface: MeshInstance3D = water.get_node("DitchSurface")
@@ -123,7 +148,8 @@ func _test_scene() -> void:
 	for child in water.get_children():
 		if child is Node3D and child.get_child_count() == 2 and child.get_child(0) is MeshInstance3D and (child.get_child(0) as MeshInstance3D).mesh is CylinderMesh:
 			mouths += 1
-	_check(mouths == 4, "four pipe mouths: both ends of the culvert, the pipe's start and the pond inlet: %s" % mouths)
+	_check(mouths == 6, "six pipe mouths: both ends of the driveway culvert, the pipe's start and the pond inlet, and both ends of the track culvert: %s" % mouths)
+	_check(water.get_node_or_null("OverflowSurface") != null, "there is an overflow ribbon")
 
 	# The weir answers E: the ray finds the node, which reads "Open the weir" and toggles.
 	var space: PhysicsDirectSpaceState3D = water.get_world_3d().direct_space_state
@@ -142,17 +168,34 @@ func _test_scene() -> void:
 		water._step(1.0)
 	_check(WaterMath.outflow(water.flow) > 0.9, "the ditch is running to the pond after a minute: %s" % WaterMath.outflow(water.flow))
 	_check(water.pond_fill_fraction() > 0.0, "the pond has started to fill")
+	_check(outfall != null and outfall.visible, "the stream shows once water reaches the pond")
+	if outfall != null:
+		var verts: PackedVector3Array = outfall.mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+		_check(verts.size() >= 8, "the stream has some length: %s vertices" % verts.size())
+		_check(Vector2(verts[0].x, verts[0].z).distance_to(Vector2(59.4, 38.0)) < 4.0, "and starts at the pipe's mouth on the bank")
+		_check(verts[verts.size() - 1].y < verts[0].y - 1.0, "and runs down the bank")
 	var depth_in_ditch: float = water.water_depth_at(255.0, 10.0)
 	_near(depth_in_ditch, WaterMath.ditch_water_depth(1.0), "water in the ditch at the road", 0.05)
 	_check(is_nan(water.water_surface_at(0.0, -60.0)), "no water on dry ground")
 	_check(is_nan(water.water_surface_at(258.2, -46.0)), "no surface over the buried culvert")
 	var toast: Node = main.get_node("Toast")
 	toast.clear()
+	_check(not water.spilling and water.overflow_flow[0] == 0.0, "nothing spills while the pond is still filling")
+	_check(water.water_depth_at(-63.45, 11.6) == 0.0, "the overflow channel is dry")
 	for i in 330:
 		water._step(1.0)
 	_check(toast.current_text == "The pond is full", "a toast says the pond is full when it fills: '%s'" % toast.current_text)
 	_check(water.pond_fill_fraction() > 0.95, "the pond is full after a few minutes: %s" % water.pond_fill_fraction())
 	_check(pond_surface.visible and water.pond_level > -0.5, "the pond sheet is up near the rim: %s" % water.pond_level)
+	# A full pond with the weir open spills into the overflow, and the water runs its length.
+	_check(water.spilling, "the full pond spills while the weir is open")
+	for i in 60:
+		water._step(1.0)
+	_check(water.overflow_flow[0] > 0.9 and WaterMath.outflow(water.overflow_flow) > 0.9, "the overflow runs from the pond to the back of the property: %s" % WaterMath.outflow(water.overflow_flow))
+	_near(water.water_depth_at(-63.45, 11.6), WaterMath.ditch_water_depth(1.0), "water in the overflow channel", 0.05)
+	_near(water.water_depth_at(-98.9, 45.2), WaterMath.ditch_water_depth(1.0), "water in the overflow curve", 0.05)
+	_check(is_nan(water.water_surface_at(-79.0, 24.7)), "no surface over the culvert under the track")
+	_check((water.get_node("OverflowSurface") as MeshInstance3D).mesh.get_surface_count() == 1, "the overflow ribbon is built")
 	_near(pond_surface.position.y, water.pond_level, "the sheet sits at the pond's level", 0.001)
 	_near(water.water_depth_at(66.0, 26.0), water.pond_level + WaterData.POND_DEPTH, "depth in the middle lobe", 0.05)
 	_check(water.water_depth_at(66.0, 60.0) == 0.0, "dry bank just south of the pond")
@@ -162,10 +205,13 @@ func _test_scene() -> void:
 	for i in 120:
 		water._step(1.0)
 	_check(WaterMath.outflow(water.flow) < 0.05 and water.flow[0] < 0.05, "the ditch has drained")
+	_check(outfall != null and not outfall.visible, "the stream stops once the ditch has drained")
 	var held: float = water.pond_volume
 	for i in 600:
 		water._step(1.0)
 	_check(water.pond_volume < held and water.pond_volume > 0.0, "the pond loses water slowly with the weir shut")
+	_check(not water.spilling and water.overflow_flow[0] < 0.05 and WaterMath.outflow(water.overflow_flow) < 0.05, "the overflow has run dry once the pond stops spilling")
+	_check(water.water_depth_at(-63.45, 11.6) == 0.0, "and its channel is empty")
 
 	# Rain: puddles in the ditch and a rising pond, then they fade.
 	water.set_pond_fill(0.2)

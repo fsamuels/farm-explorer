@@ -14,7 +14,7 @@ extends Control
 const CONTROLS := [
 	["W A S D", "Move (sprint by default)"],
 	["Hold Shift", "Walk"],
-	["Hold Ctrl", "Super sprint: run three times as fast"],
+	["Hold Ctrl", "Super sprint: run three times as fast, or swim fast"],
 	["Mouse", "Look around"],
 	["Space", "Jump"],
 	["E", "Open / close a gate or door you're looking at; get in or out of a car; at the propane tank by the road, refill the torch and start the ditch burn"],

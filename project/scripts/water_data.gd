@@ -101,3 +101,56 @@ static var POND_SPINE := PackedFloat32Array([
 	-40.0, 14.0, 15.0,
 	-47.0, 13.0, 6.5
 ])
+
+## The pond's cut-back north shore (D-172), x, z per point from east to west: the
+## pond is only the ground south of this line, between its first and last x.
+static var POND_CUT := PackedFloat32Array([
+	-8.0, 13.2,
+	-12.8, 11.0,
+	-16.5, 10.2,
+	-20.0, 10.9,
+	-23.5, 8.6,
+	-27.5, 8.9,
+	-31.0, 6.6,
+	-34.0, 6.9,
+	-37.0, 4.6,
+	-40.5, 5.1,
+	-43.6, 4.0,
+	-47.0, 3.3,
+	-50.1, 2.5
+])
+
+## The overflow (D-172): where a full pond spills, from the pond to the back of
+## the property, in flow order, five numbers per segment (ax, az, bx, bz, buried).
+static var OUTFLOW_SEGMENTS := PackedFloat32Array([
+	-50.1, 2.5, -52.3, 2.1, 0.0,
+	-52.3, 2.1, -74.6, 21.1, 0.0,
+	-74.6, 21.1, -83.2, 28.4, 1.0,
+	-83.2, 28.4, -91.5, 36.4, 0.0,
+	-91.5, 36.4, -98.9, 45.2, 0.0,
+	-98.9, 45.2, -105.1, 54.8, 0.0,
+	-105.1, 54.8, -110.3, 65.1, 0.0,
+	-110.3, 65.1, -114.2, 76.0, 0.0,
+	-114.2, 76.0, -116.8, 87.2, 0.0,
+	-116.8, 87.2, -122.5, 119.4, 0.0,
+	-122.5, 119.4, -128.0, 150.7, 0.0,
+	-128.0, 150.7, -133.5, 182.0, 0.0
+])
+
+## The overflow's open runs (carved like the ditch) and buried culvert.
+static var OUTFLOW_DITCH_SEGMENTS := PackedFloat32Array([
+	-50.1, 2.5, -52.3, 2.1,
+	-52.3, 2.1, -74.6, 21.1,
+	-83.2, 28.4, -91.5, 36.4,
+	-91.5, 36.4, -98.9, 45.2,
+	-98.9, 45.2, -105.1, 54.8,
+	-105.1, 54.8, -110.3, 65.1,
+	-110.3, 65.1, -114.2, 76.0,
+	-114.2, 76.0, -116.8, 87.2,
+	-116.8, 87.2, -122.5, 119.4,
+	-122.5, 119.4, -128.0, 150.7,
+	-128.0, 150.7, -133.5, 182.0
+])
+static var OUTFLOW_PIPE_SEGMENTS := PackedFloat32Array([
+	-74.6, 21.1, -83.2, 28.4
+])
