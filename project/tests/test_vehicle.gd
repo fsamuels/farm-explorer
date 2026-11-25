@@ -230,12 +230,12 @@ func _test_utv(main: Node, player: CharacterBody3D) -> void:
 	var utv: CharacterBody3D = main.get_node("CubCadetUTV")
 	_check(utv.bed != null and utv.bed.name == "Bed" and utv.wheels.size() == 4, "the UTV has a bed and four wheels")
 	_check(utv.max_speed < 14.0 and utv.label == "Cub Cadet 550", "the UTV is tuned slower than the cars")
-	# Cub Cadet yellow and black: the Ranger body has yellow and none of its red, and
-	# the bed is yellow too.
+	# Cub Cadet yellow and black: the Ranger EV body has yellow and no red
+	# panels (the tail lamps stay red), and the bed is yellow too.
 	var has_yellow := false
 	var has_red := false
 	var meshes := utv.get_node("Model").find_children("*", "MeshInstance3D", true, false)
-	_check(utv.get_node_or_null("Model/Body") != null, "the Ranger body mesh loaded")
+	_check(utv.get_node_or_null("Model/Body") != null, "the Ranger EV body mesh loaded")
 	for mi: MeshInstance3D in meshes:
 		if mi.mesh == null:
 			continue
@@ -244,13 +244,17 @@ func _test_utv(main: Node, player: CharacterBody3D) -> void:
 			if m == null:
 				continue
 			var c := m.albedo_color
-			var yellow_here := c.r > 0.9 and c.g > 0.7 and c.b < 0.2
-			if yellow_here and mi.name == "Body":
-				has_yellow = true
+			if mi.name != "Body":
+				continue
+			has_yellow = has_yellow or (c.r > 0.9 and c.g > 0.7 and c.b < 0.2)
 			has_red = has_red or (c.r > 0.5 and c.g < 0.3 and c.b < 0.3)
 	_check(has_yellow and not has_red, "the UTV body is yellow, with no red (yellow %s, red %s)" % [has_yellow, has_red])
-	var side := utv.get_node("Model/Bed/BedSide") as MeshInstance3D
-	_check((side.material_override as StandardMaterial3D).albedo_color.r > 0.9, "the dump bed is yellow")
+	var shell := utv.get_node("Model/Bed/BedShell") as MeshInstance3D
+	var bed_yellow := false
+	for s in shell.mesh.get_surface_count():
+		var bm := shell.get_active_material(s) as StandardMaterial3D
+		bed_yellow = bed_yellow or (bm.albedo_color.r > 0.9 and bm.albedo_color.g > 0.7 and bm.albedo_color.b < 0.2)
+	_check(bed_yellow, "the dump bed is yellow")
 
 	utv.speed = 0.0
 	player.global_position = utv.to_global(Vector3(-2.0, 0.2, 0.0))
@@ -371,7 +375,7 @@ func _drive(main: Node, player: CharacterBody3D, car: CharacterBody3D, nm: Strin
 	await _step(60)
 	_check(is_equal_approx(car.headlight_level, 1.0), "%s headlights fully on at night (%s)" % [nm, car.headlight_level])
 	_check(car._lamps[0].visible and car._lamps[0].light_energy > 1.0 and car._lenses[0].visible, "%s lamps and lenses lit" % nm)
-	_check(car._lamps[0].position.z < -1.5 and car._lamps[0].position.x < 0.0 and car._lamps[1].position.x > 0.0,
+	_check(car._lamps[0].position.z < -1.0 and car._lamps[0].position.x < 0.0 and car._lamps[1].position.x > 0.0,
 			"%s lamps sit at the front, one each side" % nm)
 	tod.set_preset("day", true)
 	await _step(60)

@@ -10,6 +10,10 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 24: A better Cub Cadet
+> The Cub Cadet UTV is now a detailed Polaris Ranger EV in yellow and black, with a working dump bed.
+- **A new Cub Cadet.** The Front Barn's UTV has a much more detailed body: fenders, a roll cage, seats, a dash and a steering wheel, headlamps and a proper cargo box, still in Cub Cadet yellow and black. It drives the same, and B still tips the bed.
+
 ## November 24: Things to do
 > Start with a list of things to try, press H for buttons that take you to each one, and watch the stars fill in.
 - **A smaller pond with an overflow.** The pond's north bank on the west side is cut back along a new, wavy shoreline, so the pond is a little smaller there. When the pond is full and water is still coming in, it now spills out of its west tip into an overflow channel. It runs through a culvert under the fenced track, then curves away south-west to the back of the property. It only runs while the pond is spilling, and dries up after.
