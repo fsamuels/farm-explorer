@@ -53,6 +53,15 @@ extends Node3D
 ## `hatch_rect()`; the floor is then cut around it and made solid, since the
 ## ground under it has a hole (the House's cellar stairs, bunker.gd).
 
+## `teleport_spot` (when `has_teleport_spot`) is a fixed world spot (x, y
+## unused, z) where the map's teleport puts you, facing compass bearing
+## `teleport_bearing`, instead of outside a door.
+##
+## A door entry with `"start_open": true` is built open (E still closes it).
+@export var has_teleport_spot := false
+@export var teleport_spot := Vector3.ZERO
+@export var teleport_bearing := 0.0
+
 const WallLayout := preload("res://scripts/wall_layout.gd")
 const DoorScript := preload("res://scripts/shop_door.gd")
 const Corrugated := preload("res://scripts/corrugated.gd")
@@ -185,6 +194,8 @@ func live_doors() -> Array:
 ## labelled "front door" if there is one, else `front_wall` (when set), else
 ## the first door, else the middle of the first open wall; null with none.
 func front_door_spot(clearance: float) -> Variant:
+	if has_teleport_spot:
+		return teleport_spot
 	var live := live_doors()
 	var d: Dictionary = {}
 	for candidate: Dictionary in live:
@@ -323,6 +334,7 @@ func _add_door(d: Dictionary, c: float, w: float, h: float) -> void:
 	door.rotation_degrees.y = float(spec.yaw)
 	door.name = "Door_%s_%d" % [d.wall, get_child_count()]
 	door.set_meta("wall", d.wall)
+	door.start_open = d.get("start_open", false)
 	add_child(door)
 
 ## A point in this frame from wall coordinates: `along` the wall, `inward`

@@ -44,6 +44,11 @@ func _run() -> void:
 	var names: Array = data.buildings.map(func(b): return b.name)
 	_check(names.size() == main.get_node("Buildings").get_children().filter(func(n): return n.is_in_group("map_building")).size(), "every building collected")
 	_check("Front Barn" in names and "Sally's House" in names, "building names come from node names: %s" % [names])
+	var back_barn: Dictionary = data.buildings.filter(func(b): return b.name == "Back Barn")[0]
+	_check(back_barn.front.distance_to(Vector2(30.6, -14.5)) < 0.01 and is_equal_approx(MapMath.yaw_to_bearing(back_barn.yaw), 285.0), "the Back Barn teleport lands at 30.6, -14.5 facing 285")
+	var house_parts: Array = data.buildings.filter(func(b): return b.name == "House")
+	_check(house_parts.size() == 2 and house_parts.all(func(b): return b.front == house_parts[0].front), "the south wing is part of the House: %d" % house_parts.size())
+	_check(not names.has("House South Wing"), "the south wing has no name of its own")
 	_check(data.imagery.size() == 4, "world photo + ground + two orthomosaic sections: %d" % data.imagery.size())
 	_check(data.world_bounds.size.x >= 11000.0 and data.bounds.size.x < 1000.0, "the map pans over the whole world but opens fitted to the farm: %s vs %s" % [data.world_bounds, data.bounds])
 	_check(data.bounds.size.x >= 520.0, "bounds cover the ground plane: %s" % data.bounds)

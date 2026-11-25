@@ -61,6 +61,7 @@ const CONTROLS := [
 var sky_button: Button
 ## The "C — News" icon button beside it (D-130).
 var news_button: Button
+var music_button: Button
 var trail := PackedVector2Array()
 ## Vector2 world position, or null when no waypoint is set.
 var waypoint = null
@@ -108,6 +109,7 @@ func is_open() -> bool:
 
 func _process(delta: float) -> void:
 	_idle += delta
+	_refresh_music_button()
 	# A free mouse (menus, Esc) means someone is reaching for the buttons.
 	_hint_bar.modulate.a = 1.0 if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED else HudStyle.fade_alpha(_idle)
 	if player == null or _data.is_empty():
@@ -174,6 +176,8 @@ func _build_hint_bar() -> void:
 	_hint_bar.add_child(row)
 	row.add_child(_chip("M", "Map"))
 	row.add_child(_chip("1", "Torch"))
+	music_button = _build_music_button()
+	row.add_child(music_button)
 	sky_button = _build_sky_button()
 	row.add_child(sky_button)
 	news_button = _build_news_button()
@@ -323,7 +327,7 @@ func _teleport_to(index: int) -> void:
 		return
 	var building: Dictionary = _data.buildings[index]
 	var spot: Vector2 = building.front
-	var yaw := MapMath.yaw_facing(spot, building.center)
+	var yaw: float = building.get("yaw", MapMath.yaw_facing(spot, building.center))
 	player.global_transform = Transform3D(Basis(Vector3.UP, yaw), Vector3(spot.x, _ground_y(spot.x, spot.y), spot.y))
 	player.velocity = Vector3.ZERO
 	player.model_yaw = 0.0
@@ -530,6 +534,7 @@ func _build_minimap() -> void:
 	# The icons are the only clickable things here (with a free mouse).
 	sky_button.mouse_filter = Control.MOUSE_FILTER_STOP
 	news_button.mouse_filter = Control.MOUSE_FILTER_STOP
+	music_button.mouse_filter = Control.MOUSE_FILTER_STOP
 
 ## The sun-and-cloud icon (and "G") that opens the sky menu (D-110). It needs a
 ## free mouse to click (Esc), so the key is the main way in.
@@ -547,6 +552,26 @@ func _build_sky_button() -> Button:
 	return button
 
 ## The star icon (and "C") that opens the What's New dialog (D-130).
+## "P — Music: Off" in the bottom bar; click it or press P. It shows the volume
+## keys once the music is on (music_player.gd owns the state and the text).
+func _build_music_button() -> Button:
+	var button := Button.new()
+	button.flat = true
+	button.focus_mode = Control.FOCUS_NONE
+	button.text = "P — Music: Off"
+	button.add_theme_font_size_override("font_size", FONT_SIZE - 2)
+	button.add_theme_color_override("font_color", KEY_COLOR)
+	button.add_theme_color_override("font_hover_color", Color(1, 1, 1))
+	button.tooltip_text = "Music on / off (P); [ and ] change the volume"
+	button.pressed.connect(func() -> void: get_tree().call_group("music", "toggle"))
+	return button
+
+func _refresh_music_button() -> void:
+	var music := get_tree().get_first_node_in_group("music")
+	if music != null and music_button.text != music.chip_text():
+		music_button.text = music.chip_text()
+		_fit_hint_bar()
+
 func _build_news_button() -> Button:
 	var button := Button.new()
 	button.flat = true
