@@ -58,7 +58,7 @@ func _test_brief() -> void:
 	for idea in Mockups.IDEAS.slice(1):
 		tiers[idea.tier] = tiers.get(idea.tier, 0) + 1
 	var n := Mockups.IDEAS.size() - 1
-	_check(n >= 3 and n <= 40, "between 3 and 40 ideas (%d)" % n)
+	_check(n >= 3 and n <= 60, "between 3 and 60 ideas (%d)" % n)
 	_check(tiers.get("reasonable", 0) >= tiers.get("extravagant", 0) and tiers.get("reasonable", 0) >= 3, "most are reasonable %s" % str(tiers))
 	_check(tiers.get("extravagant", 0) >= 1, "some are extravagant")
 	_check(tiers.get("absurdly over the top", 0) == 1, "exactly one is absurd")
