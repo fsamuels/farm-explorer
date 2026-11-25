@@ -23,6 +23,20 @@ extends Node3D
 ##   kind    DoorScript.Kind (SWING default, SLIDE for big barn doors)
 ##   label   shown in the prompt ("Open <label>")
 ##   ribbed, color   optional leaf look
+##   along   optional: the centre's offset along the wall from the footprint's
+##           centre, metres, in this node's frame (instead of `u`)
+##   glass   a patio slider (shop_door.gd's `glass`): the opening is glazed in
+##           two panels and the right-hand one slides over the other (D-170)
+##   sill    height of the threshold, metres (default 0): the wall stays up to
+##           it and an inside ramp runs down from it to the floor, for a door
+##           onto a deck that stands above the ground
+##
+## `windows` (D-170) are openings with a white frame and glass, each a
+## Dictionary: wall, `along` (or `u`), width, y0 (sill), y1 (head) and
+## optionally `panes` (2 for a twin window with a centre mullion).
+##
+## `siding` dresses the skin in the farmhouse's pale blue lap siding
+## (siding.gd) instead of `skin_color`.
 ##
 ## `open_walls` names walls that are not there at all (a pole barn's open
 ## sides, D-121): no liner, skin, collision or doors, just the roof above.
@@ -51,6 +65,7 @@ const FLOOR_TOP := 0.05  # above the 0.03-0.04 ortho patches
 ## right (seen from outside) runs along that axis, the door yaw and the
 ## direction of a door's local +X along the axis.
 const WALLS := {
+const Siding := preload("res://scripts/siding.gd")
 	"south": {out = Vector3.BACK, along_x = true, sign = 1.0, yaw = 180.0, dir = -1.0},
 	"north": {out = Vector3.FORWARD, along_x = true, sign = -1.0, yaw = 0.0, dir = 1.0},
 	"east": {out = Vector3.RIGHT, along_x = false, sign = 1.0, yaw = -90.0, dir = 1.0},
@@ -71,6 +86,7 @@ const WALLS := {
 @export var front_u := 0.5
 @export var ridge_along_z := false
 @export var light_count := 1
+@export var siding := false
 @export var doors: Array = []
 
 var width := 1.0
@@ -81,6 +97,11 @@ var _walls_body: StaticBody3D
 var _liner: StandardMaterial3D
 var _skin: StandardMaterial3D
 var _floor: StandardMaterial3D
+@export var windows: Array = []
+
+## How far into the room a sill ramp runs (D-170).
+const RAMP_RUN := 0.9
+const TRIM := 0.08
 var _lights: Array[OmniLight3D] = []
 
 ## Where a door's centre sits along a wall's axis (local x or z, from the
@@ -110,7 +131,12 @@ func _ready() -> void:
 		# frame, straight down through the thin terrain collider (D-147).
 		box_shape.disabled = true
 	_liner = _material(liner_color, true)
-	_skin = Corrugated.material() if corrugated_skin else _material(skin_color, false)
+	if siding:
+		_skin = Siding.material()
+	elif corrugated_skin:
+		_skin = Corrugated.material()
+	else:
+		_skin = _material(skin_color, false)
 	_floor = _material(floor_color, false)
 	_walls_body = StaticBody3D.new()
 	_walls_body.name = "Walls"
@@ -199,6 +225,8 @@ func _door_along(d: Dictionary) -> float:
 func _build() -> void:
 	var by_wall := {}
 	for wall in WALLS:
+	if d.has("along"):
+		return float(d.along)
 		by_wall[wall] = []
 	for d: Dictionary in doors:
 		if open_walls.has(d.wall):
@@ -207,7 +235,8 @@ func _build() -> void:
 		var w := float(d.get("width", 0.9))
 		var h := float(d.get("height", 2.1))
 		var c := _door_along(d)
-		by_wall[d.wall].append({c = c, w = w + 0.04, y0 = 0.0, y1 = h})
+		var sill := float(d.get("sill", 0.0))
+		by_wall[d.wall].append({c = c, w = w + 0.04, y0 = sill, y1 = h})
 		if d.has("plane"):
 			_cut_hole(d, c, w, h)
 		_add_door(d, c, w, h)
@@ -222,6 +251,15 @@ func _build() -> void:
 
 ## One wall's inside liner (and, when asked, an outside skin), cut around the
 ## openings.
+		if sill > 0.0:
+			_add_sill_ramp(d.wall, c, w + 0.04, sill)
+	for win: Dictionary in windows:
+		if open_walls.has(win.wall):
+			continue
+		var c := _door_along(win)
+		var w := float(win.width)
+		by_wall[win.wall].append({c = c, w = w, y0 = float(win.y0), y1 = float(win.y1)})
+		_add_window(win, c)
 func _build_wall(wall: String, openings: Array, with_skin: bool) -> void:
 	var spec: Dictionary = WALLS[wall]
 	var outward: Vector3 = spec.out
@@ -259,7 +297,18 @@ func _add_door(d: Dictionary, c: float, w: float, h: float) -> void:
 	var out: Vector3 = spec.out
 	var slide: bool = door.kind == DoorScript.Kind.SLIDE
 	var perp := half if slide else half - WALL_T / 2.0
-	if slide:
+	var sill := float(d.get("sill", 0.0))
+	if d.get("glass", false):
+		# A patio slider sits in the wall's thickness, over its sill.
+		door.kind = DoorScript.Kind.SLIDE
+		door.glass = true
+		door.color = d.get("color", Color(0.95, 0.95, 0.93))
+		door.height = h - sill - 0.02
+		door.thickness = 0.045
+		door.swing_time = 0.6
+		door.slide = -(door.width / 2.0 - DoorScript.GLASS_FRAME / 2.0)
+		perp = half - WALL_T / 2.0
+	elif slide:
 		door.thickness = 0.06
 		door.offset_z = -0.04
 		door.slide = float(spec.dir) * (w + 0.1)
@@ -268,9 +317,9 @@ func _add_door(d: Dictionary, c: float, w: float, h: float) -> void:
 	else:
 		door.window_pane = d.get("window_pane", true)
 	if spec.along_x:
-		door.position = Vector3(start, 0.0, out.z * perp)
+		door.position = Vector3(start, sill, out.z * perp)
 	else:
-		door.position = Vector3(out.x * perp, 0.0, start)
+		door.position = Vector3(out.x * perp, sill, start)
 	door.rotation_degrees.y = float(spec.yaw)
 	door.name = "Door_%s_%d" % [d.wall, get_child_count()]
 	door.set_meta("wall", d.wall)
@@ -288,6 +337,78 @@ func _cut_hole(d: Dictionary, c: float, w: float, h: float) -> void:
 	if image == null:
 		push_warning("building_shell: could not read the texture of %s" % d.plane)
 		return
+## A point in this frame from wall coordinates: `along` the wall, `inward`
+## metres in from its outside face, at height `y`.
+func _wall_point(wall: String, along: float, inward: float, y: float) -> Vector3:
+	var spec: Dictionary = WALLS[wall]
+	var out: Vector3 = spec.out
+	var face: float = (depth if spec.along_x else width) / 2.0 - inward
+	return Vector3(along, y, out.z * face) if spec.along_x else Vector3(out.x * face, y, along)
+
+## A wedge inside a raised doorway, from the sill down to the ground, so the
+## player can walk in off a deck and back out again (D-170).
+func _add_sill_ramp(wall: String, c: float, w: float, sill: float) -> void:
+	var pts := PackedVector3Array()
+	for a in [c - w / 2.0, c + w / 2.0]:
+		pts.append(_wall_point(wall, a, WALL_T, sill))
+		pts.append(_wall_point(wall, a, WALL_T, 0.0))
+		pts.append(_wall_point(wall, a, WALL_T + RAMP_RUN, 0.0))
+	var shape := ConvexPolygonShape3D.new()
+	shape.points = pts
+	var cs := CollisionShape3D.new()
+	cs.name = "SillRamp"
+	cs.shape = shape
+	_walls_body.add_child(cs)
+	# Its visible top and sides, in the floor's colour.
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for tri in [[0, 3, 5], [0, 5, 2], [0, 2, 1], [3, 4, 5]]:
+		for i in tri:
+			st.add_vertex(pts[i])
+	st.generate_normals()
+	var mi := MeshInstance3D.new()
+	mi.name = "SillRampMesh"
+	mi.mesh = st.commit()
+	var m := _floor.duplicate() as StandardMaterial3D
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mi.material_override = m
+	add_child(mi)
+
+## A window in a cut opening: white trim proud of the outside face, a sill,
+## tinted glass in the middle of the wall and a meeting rail (or, for a twin,
+## a centre mullion).
+func _add_window(win: Dictionary, c: float) -> void:
+	var wall: String = win.wall
+	var w := float(win.width)
+	var y0 := float(win.y0)
+	var y1 := float(win.y1)
+	var trim := _material(Color(0.95, 0.95, 0.93), false)
+	var t := TRIM
+	var spec: Dictionary = WALLS[wall]
+	# Trim: head, sill (deeper), jambs, all just outside the skin.
+	var parts := [
+		[c, y1 + t / 2.0, w + 2 * t, t, 0.04],
+		[c, y0 - t / 2.0, w + 2 * t + 0.06, t, 0.07],
+		[c - w / 2.0 - t / 2.0, (y0 + y1) / 2.0, t, y1 - y0, 0.04],
+		[c + w / 2.0 + t / 2.0, (y0 + y1) / 2.0, t, y1 - y0, 0.04],
+	]
+	if int(win.get("panes", 1)) == 2:
+		parts.append([c, (y0 + y1) / 2.0, 0.07, y1 - y0, 0.04])
+	else:
+		parts.append([c, (y0 + y1) / 2.0, w, 0.05, 0.04])
+	for p in parts:
+		var proud: float = p[4]
+		var pos := _wall_point(wall, p[0], -proud / 2.0 + 0.005, p[1])
+		var size := Vector3(p[2], p[3], proud) if spec.along_x else Vector3(proud, p[3], p[2])
+		_add_box(pos, size, trim, false)
+	var glass := StandardMaterial3D.new()
+	glass.albedo_color = Color(0.12, 0.16, 0.18, 0.65)
+	glass.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	glass.metallic = 0.5
+	glass.roughness = 0.05
+	var size := Vector3(w, y1 - y0, 0.02) if spec.along_x else Vector3(0.02, y1 - y0, w)
+	_add_box(_wall_point(wall, c, WALL_T / 2.0, (y0 + y1) / 2.0), size, glass, true)
+
 	if image.is_compressed() and image.decompress() != OK:
 		push_warning("building_shell: could not decompress the texture of %s, so its doorway is not cut" % d.plane)
 		return

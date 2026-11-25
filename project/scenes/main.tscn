@@ -69,6 +69,7 @@
 [ext_resource type="Script" path="res://scripts/toast.gd" id="toast_script"]
 [ext_resource type="Script" path="res://scripts/bunker.gd" id="bunker_script"]
 [ext_resource type="Script" path="res://scripts/chicken_coop.gd" id="101_chicken_coop"]
+[ext_resource type="Script" path="res://scripts/house_backyard.gd" id="102_house_backyard"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -1496,6 +1497,11 @@ facing_bearing = 150.0
 
 [node name="Pad_South" parent="TransportPads" instance=ExtResource("62_pad_scene")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, 100)
+[node name="Pad_BackYard" parent="TransportPads" instance=ExtResource("62_pad_scene")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 50.51, 0, -37.65)
+pad_name = "Back Yard"
+facing_bearing = 110.0
+
 pad_name = "South Pasture"
 
 [node name="Pad_Southwest" parent="TransportPads" instance=ExtResource("62_pad_scene")]
@@ -1539,8 +1545,23 @@ floor_color = Color(0.9, 0.9, 0.88, 1)
 rise = 2.29095
 ridge_along_z = true
 light_count = 3
-doors = [{"wall": "east", "u": 0.637, "width": 0.95, "height": 2.1, "label": "front door"}]
+doors = [{"wall": "east", "u": 0.637, "width": 0.95, "height": 2.1, "label": "front door"}, {"wall": "west", "along": -0.3, "width": 2.44, "height": 2.45, "sill": 0.36, "glass": true, "label": "sliding door"}]
+windows = [{"wall": "west", "along": -5.99, "width": 0.95, "y0": 1.15, "y1": 2.35}, {"wall": "west", "along": -4.14, "width": 1.0, "y0": 1.15, "y1": 2.35}, {"wall": "west", "along": 3.2, "width": 1.9, "y0": 0.95, "y1": 2.35, "panes": 2}, {"wall": "west", "along": 6.0, "width": 0.85, "y0": 1.15, "y1": 2.35}]
 
+[node name="WingShell" type="Node3D" parent="Buildings"]
+script = ExtResource("58_building_shell")
+building_name = "House South Wing"
+skin_walls = PackedStringArray("north", "south", "east", "west")
+siding = true
+liner_color = Color(0.96, 0.96, 0.95, 1)
+floor_color = Color(0.9, 0.9, 0.88, 1)
+rise = 1.27905
+doors = [{"wall": "north", "along": -3.91, "width": 2.0, "height": 2.45, "sill": 0.36, "glass": true, "label": "sliding door"}]
+
+[node name="HouseBackyard" type="Node3D" parent="Buildings"]
+script = ExtResource("102_house_backyard")
+
+siding = true
 [node name="HouseBunker" type="Node3D" parent="Buildings"]
 script = ExtResource("bunker_script")
 
