@@ -24,8 +24,9 @@ const DATA := {
 		},
 		{
 			"bullets": [
-				"**Back yard ideas.** Walk up to the House's back deck and press O to try 48 ideas for a new back yard, from a simple hot-tub patio to a Roman bathhouse. Shift+O goes back.",
+				"**Back yard ideas.** Walk up to the House's back deck and press O to try 53 ideas for a new back yard, from a simple hot-tub patio to a Roman bathhouse. Shift+O goes back.",
 				"**New kinds of back yard.** A ranch corral with a chuckwagon, a games lawn with bocce, an outdoor cinema, a glasshouse lounge, a shipping-container spa, a Viking longhouse and more.",
+				"**Different layouts.** Five ideas move the hot tub and everything else round the yard: by the slider, out on the lawn, at the garage end, under the willows, or at the end of a long walk.",
 				"**Room for a sauna.** Twelve of the simpler ideas leave a gravel pad marked SAUNA HERE, with a power post, so a sauna can be added later.",
 				"**What's in them.** Every idea has a hot tub sunk into a deck by the plug on the south wing, a covered place to sit round a fire table and an outdoor kitchen. Many have a sauna. A card names each one and lists what is in it.",
 				"**The garage's back door.** The garage now has its door onto the back yard, by the deck. Press E to open it and walk inside.",
@@ -340,14 +341,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 21561,
-		"commits": 309,
-		"decisions": 187,
+		"code_lines": 21715,
+		"commits": 310,
+		"decisions": 188,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 83,
-		"size_kb": 123690,
-		"test_lines": 6422,
+		"size_kb": 123700,
+		"test_lines": 6432,
 		"textures": 49,
 		"vehicles": 3
 	}

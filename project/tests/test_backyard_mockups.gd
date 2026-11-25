@@ -100,7 +100,17 @@ func _test_idea(mock: Node3D, yard: Node3D, holder: Node3D, i: int, leaves: Pack
 				over += 1
 		_check(over == 0, "%s: no willow leaves over the tub at %s (%d)" % [name, p, over])
 		near_plug = near_plug or p.distance_to(PLUG) < 6.0
-	_check(near_plug, "%s: a tub within 6 m of the 50 A plug" % name)
+	# A tub by the plug, or a power line from the plug to a tub that stands
+	# further off.
+	if not near_plug:
+		var fed := false
+		for run in _marks(holder, "power_run"):
+			var from: Vector2 = run.get_meta("from")
+			var to: Vector2 = run.get_meta("to")
+			for t in tubs:
+				var tp := Vector2((t as Node3D).position.x, (t as Node3D).position.z)
+				fed = fed or (from.distance_to(PLUG) < 1.0 and to.distance_to(tp) < 2.5)
+		_check(fed, "%s: a tub within 6 m of the 50 A plug, or a power line out to one" % name)
 	# Every tub stands in a deck: a tub-deck marker at its centre, its rim at
 	# sitting height above the deck.
 	var decks := _marks(holder, "tub_deck")

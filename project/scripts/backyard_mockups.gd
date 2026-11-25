@@ -166,6 +166,22 @@ const IDEAS := [
 		"notes": ["A raised yoga deck under a white shade sail",
 			"Barrel sauna, cold plunge and shower among the willows",
 			"A flat-roofed pavilion with a fire table; grill and sink; tub deck by the plug"]},
+	{"name": "Layout: Tub by the Slider", "tier": "reasonable", "build": "_tub_by_slider",
+		"notes": ["Step out of the slider onto a deck with the tub sunk into it, right by the door",
+			"The hangout and kitchen out on the lawn under one gable roof",
+			"A power line runs about 12 m from the 50 A plug to the tub"]},
+	{"name": "Layout: Tub on the Lawn", "tier": "reasonable", "build": "_tub_on_lawn",
+		"notes": ["The tub as a centrepiece out on the open lawn, on a wide deck with loungers",
+			"Stepping stones out to it; a small pergola and kitchen by the house",
+			"A power line runs about 16 m from the 50 A plug to the tub"]},
+	{"name": "Layout: Garage End", "tier": "reasonable", "build": "_garage_end",
+		"notes": ["Everything at the garage end, a few steps from its door: tub, kitchen, fire table",
+			"The rest of the lawn left open",
+			"A power line runs about 18 m from the 50 A plug to the tub"]},
+	{"name": "Layout: Under the Willows", "tier": "reasonable", "build": "_under_willows",
+		"notes": ["The house end left as open lawn; a stone path out to the willows",
+			"Under them: a pavilion with a fire table and two sofas, the kitchen and a barrel sauna",
+			"The tub at the edge of the trees, clear of the leaves; a 10 m power line"]},
 	{"name": "Barn Pavilion", "tier": "extravagant", "build": "_barn_pavilion",
 		"notes": ["A 10 m timber-frame pole barn to match the farm: red posts, galvanised roof",
 			"Kitchen along its back: smoker, grill, flat-top, sink, fridge; a long farm table",
@@ -229,6 +245,10 @@ const IDEAS := [
 		"notes": ["An open-sided longhouse with a steep turf roof, dragon heads and painted shields",
 			"A long stone hearth down the middle with benches either side",
 			"A turf-roofed sauna; a stone kitchen with grill and smoker"]},
+	{"name": "Layout: Spa Compound", "tier": "extravagant", "build": "_spa_compound",
+		"notes": ["A long lantern-lit walk from the slider to a spa at the west end of the yard",
+			"There: the tub, a cedar sauna, a cold plunge, a shower, a pavilion and a kitchen",
+			"A power line runs about 23 m from the 50 A plug to the tub"]},
 	{"name": "Thermae Salicis (Willow Baths)", "tier": "absurdly over the top", "build": "_thermae",
 		"notes": ["A Roman bathhouse: the hot tub is the caldarium, on a marble deck",
 			"The frigidarium: a 16 m pool in a colonnade, with the giant rubber duck",
@@ -1578,3 +1598,119 @@ func _viking_longhouse(root: Node3D, body: StaticBody3D) -> void:
 	K.cabin_sauna(root, body, Rect2(-23.6, 0.6, 3.2, 3.0), 2.2)
 	K.box(root, Vector3(-22.0, 2.55, 2.1), Vector3(3.8, 0.25, 3.8), turf)
 	K.tub_on_deck(root, body, TUB, 2.3, K.boards(Color(0.4, 0.28, 0.18)), ["north", "west"], Color(0.4, 0.28, 0.18))
+
+# --- different layouts: the big pieces moved -------------------------------------
+
+## Where the 50 A plug is, on the Wing's west wall, for the power runs.
+const PLUG := Vector2(-9.69, 8.0)
+
+func _tub_by_slider(root: Node3D, body: StaticBody3D) -> void:
+	_garage_strip(root, K.mat(K.CONCRETE))
+	_stoops(root, body, K.mat(K.CONCRETE), false, true)
+	var deck := K.boards(Color(0.56, 0.44, 0.34))
+	# A deck you step out onto from the slider, the tub sunk into its north
+	# end right beside the door.
+	K.landing(root, body, Rect2(-11.6, -5.2, _wall + 11.6, 7.4), SILL, deck, ["west", "south"])
+	var tub := Vector2(-9.6, -3.4)
+	K.tub_on_deck(root, body, tub, 2.3, deck, ["south", "west"], K.CEDAR_DARK)
+	K.power_run(root, [PLUG, Vector2(-10.0, 7.6), Vector2(-12.2, 2.6), Vector2(-10.4, -2.6)])
+	var on := _raised(root, SILL)
+	K.chair(on, Vector2(-8.0, 1.4), Vector2(0, -1))
+	K.chair(on, Vector2(-9.2, 1.4), Vector2(0, -1))
+	# The hangout and kitchen out on the lawn under one roof.
+	var pav := Rect2(-18.4, -6.2, 5.0, 4.6)
+	K.slab(root, pav.grow(0.6), 0.05, K.paving(Color(0.64, 0.6, 0.55), 0.6, "byslider"))
+	K.pavilion(root, body, pav, 2.7, "gable", K.CEDAR, K.SLATE, 2)
+	K.kitchen(root, body, Vector2(pav.position.x + 0.3, pav.position.y + 0.7), Vector2(1, 0), Vector2(0, 1), 3.6, ["grill", "sink", "counter"])
+	K.fire_table(root, body, Vector2(pav.get_center().x, -3.4), Vector2(1.3, 0.8))
+	K.sofa(root, Vector2(pav.get_center().x, -2.1), Vector2(0, -1), 2.4)
+	for p in [Vector2(-12.6, -1.2), Vector2(-13.6, -2.0), Vector2(-14.6, -2.8)]:
+		K.cyl(root, Vector3(p.x, 0.05, p.y), 0.32, 0.06, K.mat(K.STONE, 0.95))
+
+func _tub_on_lawn(root: Node3D, body: StaticBody3D) -> void:
+	_garage_strip(root, K.mat(K.CONCRETE))
+	_stoops(root, body, K.mat(K.STONE))
+	# The tub as a centrepiece out on the open lawn, on a wide deck with steps
+	# all round and paths out to it.
+	var tub := Vector2(-24.0, -1.0)
+	K.tub_on_deck(root, body, tub, 2.3, K.boards(K.CEDAR), ["north", "east", "south", "west"], K.CEDAR_DARK, 2.0)
+	for p in [Vector2(-21.6, -2.6), Vector2(-21.6, 0.6), Vector2(-26.4, -2.6), Vector2(-26.4, 0.6)]:
+		K.box(_raised(root, 0.5), Vector3(p.x, 0.25, p.y), Vector3(0.6, 0.12, 1.6), K.mat(K.WHITE, 0.6))
+	K.power_run(root, [PLUG, Vector2(-10.2, 7.4), Vector2(-20.0, 3.6), Vector2(-23.2, -0.4)])
+	for k in 8:
+		var t := float(k + 1) / 9.0
+		var p := Vector2(-8.6, -0.3).lerp(Vector2(-19.2, -1.0), t)
+		K.cyl(root, Vector3(p.x, 0.05, p.y), 0.3, 0.06, K.mat(K.STONE, 0.95))
+	# A modest hangout and kitchen by the house.
+	_patio(root, -14.8, -7.42, K.paving(Color(0.62, 0.6, 0.56), 0.6, "onlawn"))
+	K.pavilion(root, body, Rect2(-14.4, -6.6, 4.6, 4.0), 2.6, "flat", K.CEDAR, Color(0.85, 0.9, 0.95, 0.55))
+	K.fire_table(root, body, Vector2(-12.1, -4.6))
+	K.chair(root, Vector2(-12.1, -5.8), Vector2(0, 1))
+	K.chair(root, Vector2(-13.5, -4.6), Vector2(1, 0))
+	K.chair(root, Vector2(-10.7, -4.6), Vector2(-1, 0))
+	K.kitchen(root, body, Vector2(_wall - 0.7, -5.6), Vector2(0, 1), Vector2(-1, 0), 2.2, ["grill", "sink"])
+	K.string_lights(root, body, [Vector2(-28.6, -5.2), Vector2(-19.4, 3.2)], 3.2)
+
+func _garage_end(root: Node3D, body: StaticBody3D) -> void:
+	var pavers := K.paving(Color(0.60, 0.58, 0.56), 0.6, "garageend")
+	_patio(root, -17.0, -13.2, pavers)
+	_garage_strip(root, pavers)
+	_stoops(root, body, K.mat(K.STONE))
+	# Everything at the garage end, a few steps from its door, leaving the rest
+	# of the lawn open: the tub beside the garage, the kitchen and fire table
+	# under one pavilion.
+	var tub := Vector2(-12.8, -10.4)
+	K.tub_on_deck(root, body, tub, 2.3, K.boards(K.CEDAR), ["south", "west"], K.CEDAR_DARK)
+	K.power_run(root, [PLUG, Vector2(-10.1, 7.4), Vector2(-10.1, -6.2), Vector2(-12.0, -9.2)])
+	var pav := Rect2(-16.2, -6.4, 5.2, 4.0)
+	K.pavilion(root, body, pav, 2.7, "gable", K.CEDAR, K.SLATE, 2)
+	K.kitchen(root, body, Vector2(pav.position.x + 0.3, pav.position.y + 0.7), Vector2(1, 0), Vector2(0, 1), 4.0, ["fridge", "sink", "grill", "counter"])
+	K.fire_table(root, body, Vector2(pav.get_center().x, -3.6), Vector2(1.3, 0.8))
+	K.sofa(root, Vector2(pav.get_center().x, -1.9), Vector2(0, -1), 2.4)
+	K.screen(root, body, Vector2(-15.4, -13.0), Vector2(-15.4, -8.6), 2.2)
+
+func _under_willows(root: Node3D, body: StaticBody3D) -> void:
+	_garage_strip(root, K.mat(K.CONCRETE))
+	_stoops(root, body, K.mat(K.STONE))
+	# The house end stays open lawn; the hangout, kitchen and sauna move out
+	# under the willows, the tub at their edge, clear of the leaves.
+	var tub := Vector2(-20.0, 2.6)
+	K.tub_on_deck(root, body, tub, 2.3, K.boards(K.CEDAR), ["north", "east"], K.CEDAR_DARK)
+	K.power_run(root, [PLUG, Vector2(-10.4, 7.0), Vector2(-16.6, 4.6), Vector2(-18.4, 3.2)])
+	var gravel := K.paving(Color(0.58, 0.54, 0.48), 0.15, "willowfloor")
+	K.slab(root, Rect2(-25.0, 6.2, 14.2, 6.4), 0.04, gravel)
+	var pav := Rect2(-17.6, 7.8, 6.4, 4.4)
+	K.pavilion(root, body, pav, 2.7, "flat", K.CEDAR_DARK, Color(0.3, 0.4, 0.3), 3)
+	K.fire_table(root, body, pav.get_center(), Vector2(1.6, 0.8), false, 0.45, K.STONE)
+	K.sofa(root, pav.get_center() + Vector2(0, -1.4), Vector2(0, 1), 2.6)
+	K.sofa(root, pav.get_center() + Vector2(0, 1.4), Vector2(0, -1), 2.6)
+	K.kitchen(root, body, Vector2(-24.0, 6.6), Vector2(0, 1), Vector2(1, 0), 3.4, ["grill", "sink", "counter"])
+	K.barrel_sauna(root, body, Vector2(-24.0, 13.0), 0.0, 2.4)
+	K.string_lights(root, body, [Vector2(-24.6, 11.8), Vector2(-18.2, 6.6)], 3.0)
+	for k in 7:
+		var t := float(k + 1) / 8.0
+		var p := Vector2(-8.6, 0.8).lerp(Vector2(-16.0, 5.8), t)
+		K.cyl(root, Vector3(p.x, 0.05, p.y), 0.3, 0.06, K.mat(K.STONE, 0.95))
+
+func _spa_compound(root: Node3D, body: StaticBody3D) -> void:
+	_garage_strip(root, K.mat(K.CONCRETE))
+	_stoops(root, body, K.mat(K.STONE))
+	# A long lantern-lit walk from the slider to a spa compound at the west
+	# end of the yard: tub, sauna, plunge, shower, pavilion and kitchen.
+	var path := K.paving(Color(0.66, 0.62, 0.56), 0.5, "walk")
+	K.slab(root, Rect2(-27.0, -1.0, 18.7, 1.4), 0.05, path)
+	for x in [-11.0, -14.5, -18.0, -21.5, -25.0]:
+		K.lantern(root, Vector2(x, -1.6))
+		K.lantern(root, Vector2(x, 0.8))
+	K.slab(root, Rect2(-38.5, -5.5, 11.5, 12.0), 0.05, K.paving(Color(0.58, 0.56, 0.54), 0.75, "compound"))
+	var tub := Vector2(-31.5, 3.0)
+	K.tub_on_deck(root, body, tub, 2.3, K.boards(K.CEDAR), ["north", "east"], K.CEDAR_DARK)
+	K.power_run(root, [PLUG, Vector2(-10.4, 7.4), Vector2(-26.0, 1.2), Vector2(-30.6, 2.4)])
+	K.cabin_sauna(root, body, Rect2(-38.0, 2.0, 3.0, 3.0), 2.4)
+	K.cold_plunge(root, body, Vector2(-35.4, 6.0), 0.7)
+	K.shower(root, body, Vector2(-34.6, 0.0))
+	var pav := Rect2(-36.0, -5.0, 6.0, 4.4)
+	K.pavilion(root, body, pav, 2.8, "gable", K.CEDAR, K.SLATE, 3)
+	K.kitchen(root, body, Vector2(pav.position.x + 0.3, pav.position.y + 0.7), Vector2(1, 0), Vector2(0, 1), 4.0, ["fridge", "sink", "grill", "counter"])
+	K.fire_table(root, body, Vector2(pav.get_center().x, -2.0), Vector2(1.4, 0.8))
+	K.sofa(root, Vector2(pav.get_center().x, -0.7), Vector2(0, -1), 2.4)
