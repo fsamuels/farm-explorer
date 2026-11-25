@@ -80,13 +80,13 @@ static var POND_SPINE := PackedFloat32Array([
 {flat(spine)}
 ])
 
-## The pond's cut-back north shore (D-172), x, z per point from east to west: the
+## The pond's cut-back north shore (D-180), x, z per point from east to west: the
 ## pond is only the ground south of this line, between its first and last x.
 static var POND_CUT := PackedFloat32Array([
 {flat(cut)}
 ])
 
-## The overflow (D-172): where a full pond spills, from the pond to the back of
+## The overflow (D-180): where a full pond spills, from the pond to the back of
 ## the property, in flow order, five numbers per segment (ax, az, bx, bz, buried).
 static var OUTFLOW_SEGMENTS := PackedFloat32Array([
 {flat(out_route)}

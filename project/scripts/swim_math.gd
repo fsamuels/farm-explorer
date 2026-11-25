@@ -23,7 +23,7 @@ const DRAFT := 1.45
 ## Ground speed of a steady stroke, and with Shift held.
 const SPEED := 2.0
 const SLOW_SPEED := 1.0
-## Ground speed with Ctrl held, a fast crawl (D-173), and how much faster the arms turn over for it.
+## Ground speed with Ctrl held, a fast crawl (D-181), and how much faster the arms turn over for it.
 const FAST_SPEED := 8.0
 const FAST_STROKE_RATE := 2.2
 ## Seconds per full cycle (both arms) while swimming, and how much slower the stroke ticks over

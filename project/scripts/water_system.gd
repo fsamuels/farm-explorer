@@ -6,7 +6,7 @@ extends Node3D
 ## ditch, through the buried culvert and pipe, and into the pond, which rises
 ## until it spills, then slowly falls again once the weir is shut. A pond that is
 ## full with water still coming in spills out of its west tip into the overflow
-## channel (D-172), which runs under the track and away to the back of the property. Rain tops up
+## channel (D-180), which runs under the track and away to the back of the property. Rain tops up
 ## the pond and leaves standing water in the ditch. All the maths is in
 ## water_math.gd; this node steps it each frame, draws it (shaders/water.gdshader)
 ## and builds the little structures: the weir, and the mouths of the pipes.

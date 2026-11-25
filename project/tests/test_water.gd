@@ -43,7 +43,7 @@ func _test_route() -> void:
 		_check(WaterMath.segment_start(i) > last, "segment starts rise at %d" % i)
 		last = WaterMath.segment_start(i)
 
-## The overflow's own route (D-172): from the pond's west tip, under the track, to the back of the property.
+## The overflow's own route (D-180): from the pond's west tip, under the track, to the back of the property.
 func _test_overflow_route() -> void:
 	var length := WaterMath.route_length(true)
 	_check(length > 150.0 and length < 400.0, "the overflow is a long channel: %s" % length)
@@ -115,7 +115,7 @@ func _test_pond_step() -> void:
 	_check(WaterMath.pond_step(capacity * 0.5, 0.0, 1.0 / 240.0, 0.0, 1.0 / 2700.0, 60.0) < capacity * 0.5, "with no inflow it slowly loses water")
 	_check(WaterMath.pond_step(5.0, 0.0, 1.0 / 240.0, 0.0, 1.0, 600.0) >= 0.0, "and never goes below empty")
 	_check(WaterMath.pond_step(0.0, 0.0, 1.0 / 240.0, 1.0 / 1200.0, 0.0, 60.0) > 0.0, "rain alone adds water")
-	# It spills only when full and still gaining (D-172).
+	# It spills only when full and still gaining (D-180).
 	_check(WaterMath.pond_spills(capacity, 1.0, 1.0 / 240.0, 0.0, 1.0 / 2700.0), "a full pond with the weir flowing spills")
 	_check(not WaterMath.pond_spills(capacity, 0.0, 1.0 / 240.0, 0.0, 1.0 / 2700.0), "a full pond with nothing coming in does not")
 	_check(not WaterMath.pond_spills(capacity * 0.9, 1.0, 1.0 / 240.0, 0.0, 1.0 / 2700.0), "a pond below its rim does not")

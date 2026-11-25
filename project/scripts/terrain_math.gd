@@ -58,7 +58,7 @@ static func ditch_profile(r: float) -> float:
 static func pond_profile(sdf: float) -> float:
 	return WaterData.POND_DEPTH * smooth(0.0, WaterData.POND_BANK_RUN, -sdf)
 
-## Signed distance to the pond's cut-back north shore (D-172), a polyline `cut`
+## Signed distance to the pond's cut-back north shore (D-180), a polyline `cut`
 ## of x, z pairs running east to west: positive on the north side (cut away),
 ## negative on the south side (pond). It applies only between the line's first
 ## and last x; elsewhere it is -INF, which leaves the pond as it was.
@@ -79,7 +79,7 @@ static func cut_sdf_in(x: float, z: float, cut: PackedFloat32Array) -> float:
 	return best if z < line_z else -best
 
 ## Signed distance from (x, z) to the pond outline given as capsules: negative
-## inside, and with the north shore cut back (D-172).
+## inside, and with the north shore cut back (D-180).
 static func pond_sdf_in(x: float, z: float, capsules: PackedFloat32Array) -> float:
 	return maxf(_capsule_sdf(x, z, capsules), cut_sdf_in(x, z, WaterData.POND_CUT))
 

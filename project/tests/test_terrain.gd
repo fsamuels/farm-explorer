@@ -102,7 +102,7 @@ func _test_buried_runs_are_not_carved() -> void:
 	_check(TerrainMath.pond_sdf(59.4, 38.0) < 3.0, "the pipe meets the pond bank")
 	_check(WaterData.PIPE_SEGMENTS.size() == 12, "culvert + two pipe legs: %s numbers" % WaterData.PIPE_SEGMENTS.size())
 
-## The pond's north shore is cut back to the owner's line (D-172).
+## The pond's north shore is cut back to the owner's line (D-180).
 func _test_shore_cut() -> void:
 	var cut := WaterData.POND_CUT
 	_near(cut[0], -8.0, "the shore line starts in the east", 0.001)
@@ -133,7 +133,7 @@ func _test_shore_cut() -> void:
 	_check(TerrainMath.pond_sdf(-5.0, 20.0) < 0.0, "pond south-east of the line's east end untouched")
 	_check(TerrainMath.pond_sdf(-28.0, 19.0) < -7.4, "the west lobe is still deep at its middle")
 
-## The overflow channel (D-172): carved where open, level over the culvert.
+## The overflow channel (D-180): carved where open, level over the culvert.
 func _test_overflow_channel() -> void:
 	var depth := WaterData.DITCH_DEPTH
 	var routes := WaterData.OUTFLOW_SEGMENTS

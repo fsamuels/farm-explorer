@@ -3,7 +3,7 @@
   "_crs": "scene meters, +X east, +Z south, origin at the parcel centroid (D-6)",
   "_how_to_review": "python3 tools/water_overlay.py  (draws this file over the imagery with numbered vertices); correct by vertex id, e.g. 'D7 -> (251, 12)', then python3 tools/build_water_data.py",
   "_units": "dimensions are the owner's figures converted from feet, midpoint of the stated range",
-  "_v7_changes": ["pond shrunk and an overflow built (D-172): the north shore of the west lobe is cut back to the owner's line from (-12.8, 11.0) to (-43.6, 4.0), wavy rather than straight (pond.cut_north_shore, read east to west, applied only between its first and last x); the pond spills at its start (-50.1, 2.5) into an open overflow channel that runs to (-74.6, 21.1), goes through a 11 m culvert under the fenced track, then sweeps in a big curve south-west to the back property line near (-133.5, 182). Water runs in it only while the pond is spilling"],
+  "_v7_changes": ["pond shrunk and an overflow built (D-180): the north shore of the west lobe is cut back to the owner's line from (-12.8, 11.0) to (-43.6, 4.0), wavy rather than straight (pond.cut_north_shore, read east to west, applied only between its first and last x); the pond spills at its start (-50.1, 2.5) into an open overflow channel that runs to (-74.6, 21.1), goes through a 11 m culvert under the fenced track, then sweeps in a big curve south-west to the back property line near (-133.5, 182). Water runs in it only while the pond is spilling"],
   "_v6_changes": ["pond enlarged a little more (D-169): half-widths up 1-2.5 m under the trees, most at the north-east end (x 96-131); west tip unchanged; then the spine point at x=119 moved north to z -6 with half-width 14 so the full pond reaches (121.2, -16.5) (owner, from the full-pond aerials); pond depth 3.8 -> 4.3 m and bank run 9 -> 7.5 m for a deeper, flatter floor with steeper (max ~41 deg) sides"],
   "_v5_changes": ["pond enlarged (D-153): the rim now sits just inside the tree line in the aerial imagery all round (west lobe, south bank, east tip) and 6-8 m out on the open meadow to the north of the east half; the west tip stays at x~-54 so the track's inner fence still stands on level ground"],
   "_v4_changes": [
@@ -66,7 +66,7 @@
     ]
   },
   "overflow": {
-    "note": "where a full pond spills (D-172): water runs here only while the pond is at its spill level with water still coming in. Same channel as the ditch (depth, widths); carved where open.",
+    "note": "where a full pond spills (D-180): water runs here only while the pond is at its spill level with water still coming in. Same channel as the ditch (depth, widths); carved where open.",
     "segments": [
       {
         "name": "open channel from the pond's west tip to the track's inner fence",

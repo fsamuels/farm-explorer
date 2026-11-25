@@ -38,7 +38,7 @@ static var _basin := {}
 
 # --- the routes ------------------------------------------------------------
 # Each function takes `overflow`: false for the weir-to-pond ditch, true for the
-# overflow that leaves the pond (D-172). Both are chains of segments in flow order.
+# overflow that leaves the pond (D-180). Both are chains of segments in flow order.
 
 static func _segments(overflow: bool) -> PackedFloat32Array:
 	return WaterData.OUTFLOW_SEGMENTS if overflow else WaterData.ROUTE_SEGMENTS
@@ -253,6 +253,6 @@ static func _pond_rate(volume: float, inflow: float, fill_per_second: float, rai
 	return inflow * fill_per_second + rain_per_second - loss_per_second * wet_share
 
 ## True while the pond is at its spill level with more water coming in than it
-## loses, so the extra runs out through the overflow (D-172). Same arguments as `pond_step`.
+## loses, so the extra runs out through the overflow (D-180). Same arguments as `pond_step`.
 static func pond_spills(volume: float, inflow: float, fill_per_second: float, rain_per_second: float, loss_per_second: float) -> bool:
 	return volume >= pond_capacity() * 0.999 and _pond_rate(volume, inflow, fill_per_second, rain_per_second, loss_per_second) > 0.0
