@@ -56,6 +56,7 @@ extends Node3D
 const WallLayout := preload("res://scripts/wall_layout.gd")
 const DoorScript := preload("res://scripts/shop_door.gd")
 const Corrugated := preload("res://scripts/corrugated.gd")
+const Siding := preload("res://scripts/siding.gd")
 
 const WALL_T := 0.15
 const SKIN_T := 0.03
@@ -65,7 +66,6 @@ const FLOOR_TOP := 0.05  # above the 0.03-0.04 ortho patches
 ## right (seen from outside) runs along that axis, the door yaw and the
 ## direction of a door's local +X along the axis.
 const WALLS := {
-const Siding := preload("res://scripts/siding.gd")
 	"south": {out = Vector3.BACK, along_x = true, sign = 1.0, yaw = 180.0, dir = -1.0},
 	"north": {out = Vector3.FORWARD, along_x = true, sign = -1.0, yaw = 0.0, dir = 1.0},
 	"east": {out = Vector3.RIGHT, along_x = false, sign = 1.0, yaw = -90.0, dir = 1.0},
@@ -77,6 +77,7 @@ const Siding := preload("res://scripts/siding.gd")
 @export var open_walls := PackedStringArray()
 @export var skin_color := Color(0.6, 0.55, 0.5)
 @export var corrugated_skin := false
+@export var siding := false
 @export var liner_color := Color(0.84, 0.82, 0.78)
 @export var floor_color := Color(0.45, 0.36, 0.29)
 @export var rise := 0.0
@@ -86,8 +87,12 @@ const Siding := preload("res://scripts/siding.gd")
 @export var front_u := 0.5
 @export var ridge_along_z := false
 @export var light_count := 1
-@export var siding := false
 @export var doors: Array = []
+@export var windows: Array = []
+
+## How far into the room a sill ramp runs (D-170).
+const RAMP_RUN := 0.9
+const TRIM := 0.08
 
 var width := 1.0
 var depth := 1.0
@@ -97,11 +102,6 @@ var _walls_body: StaticBody3D
 var _liner: StandardMaterial3D
 var _skin: StandardMaterial3D
 var _floor: StandardMaterial3D
-@export var windows: Array = []
-
-## How far into the room a sill ramp runs (D-170).
-const RAMP_RUN := 0.9
-const TRIM := 0.08
 var _lights: Array[OmniLight3D] = []
 
 ## Where a door's centre sits along a wall's axis (local x or z, from the
@@ -214,6 +214,8 @@ func _wall_length(wall: String) -> float:
 ## a photo plane it follows that texture's `u`, else the wall's own.
 func _door_along(d: Dictionary) -> float:
 	var wall: String = d.wall
+	if d.has("along"):
+		return float(d.along)
 	if d.has("plane"):
 		var plane := get_node("../" + String(d.plane)) as MeshInstance3D
 		var size := (plane.mesh as PlaneMesh).size
@@ -225,8 +227,6 @@ func _door_along(d: Dictionary) -> float:
 func _build() -> void:
 	var by_wall := {}
 	for wall in WALLS:
-	if d.has("along"):
-		return float(d.along)
 		by_wall[wall] = []
 	for d: Dictionary in doors:
 		if open_walls.has(d.wall):
@@ -240,6 +240,15 @@ func _build() -> void:
 		if d.has("plane"):
 			_cut_hole(d, c, w, h)
 		_add_door(d, c, w, h)
+		if sill > 0.0:
+			_add_sill_ramp(d.wall, c, w + 0.04, sill)
+	for win: Dictionary in windows:
+		if open_walls.has(win.wall):
+			continue
+		var c := _door_along(win)
+		var w := float(win.width)
+		by_wall[win.wall].append({c = c, w = w, y0 = float(win.y0), y1 = float(win.y1)})
+		_add_window(win, c)
 	for wall in WALLS:
 		if open_walls.has(wall):
 			continue
@@ -251,15 +260,6 @@ func _build() -> void:
 
 ## One wall's inside liner (and, when asked, an outside skin), cut around the
 ## openings.
-		if sill > 0.0:
-			_add_sill_ramp(d.wall, c, w + 0.04, sill)
-	for win: Dictionary in windows:
-		if open_walls.has(win.wall):
-			continue
-		var c := _door_along(win)
-		var w := float(win.width)
-		by_wall[win.wall].append({c = c, w = w, y0 = float(win.y0), y1 = float(win.y1)})
-		_add_window(win, c)
 func _build_wall(wall: String, openings: Array, with_skin: bool) -> void:
 	var spec: Dictionary = WALLS[wall]
 	var outward: Vector3 = spec.out
@@ -325,18 +325,6 @@ func _add_door(d: Dictionary, c: float, w: float, h: float) -> void:
 	door.set_meta("wall", d.wall)
 	add_child(door)
 
-## Punch the doorway out of a photo wall plane: copy its texture, make the
-## door's rectangle transparent and switch the material to alpha scissor.
-func _cut_hole(d: Dictionary, c: float, w: float, h: float) -> void:
-	var plane := get_node("../" + String(d.plane)) as MeshInstance3D
-	var material := plane.get_surface_override_material(0) as StandardMaterial3D
-	if material == null or material.albedo_texture == null:
-		push_warning("building_shell: %s has no textured material to cut a doorway in" % d.plane)
-		return
-	var image := material.albedo_texture.get_image()
-	if image == null:
-		push_warning("building_shell: could not read the texture of %s" % d.plane)
-		return
 ## A point in this frame from wall coordinates: `along` the wall, `inward`
 ## metres in from its outside face, at height `y`.
 func _wall_point(wall: String, along: float, inward: float, y: float) -> Vector3:
@@ -409,6 +397,18 @@ func _add_window(win: Dictionary, c: float) -> void:
 	var size := Vector3(w, y1 - y0, 0.02) if spec.along_x else Vector3(0.02, y1 - y0, w)
 	_add_box(_wall_point(wall, c, WALL_T / 2.0, (y0 + y1) / 2.0), size, glass, true)
 
+## Punch the doorway out of a photo wall plane: copy its texture, make the
+## door's rectangle transparent and switch the material to alpha scissor.
+func _cut_hole(d: Dictionary, c: float, w: float, h: float) -> void:
+	var plane := get_node("../" + String(d.plane)) as MeshInstance3D
+	var material := plane.get_surface_override_material(0) as StandardMaterial3D
+	if material == null or material.albedo_texture == null:
+		push_warning("building_shell: %s has no textured material to cut a doorway in" % d.plane)
+		return
+	var image := material.albedo_texture.get_image()
+	if image == null:
+		push_warning("building_shell: could not read the texture of %s" % d.plane)
+		return
 	if image.is_compressed() and image.decompress() != OK:
 		push_warning("building_shell: could not decompress the texture of %s, so its doorway is not cut" % d.plane)
 		return

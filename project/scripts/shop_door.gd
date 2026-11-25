@@ -89,6 +89,9 @@ func _build() -> void:
 	_body.name = "Leaf"
 	_body.sync_to_physics = true
 	add_child(_body)
+	if glass:
+		_build_glass()
+		return
 
 	var material: StandardMaterial3D
 	if ribbed:
@@ -96,9 +99,6 @@ func _build() -> void:
 	else:
 		material = StandardMaterial3D.new()
 		material.albedo_color = color
-	if glass:
-		_build_glass()
-		return
 		material.roughness = 0.55
 		material.metallic = 0.3
 
