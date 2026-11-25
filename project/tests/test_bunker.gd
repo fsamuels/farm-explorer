@@ -79,7 +79,17 @@ func _test_built(main: Node, shell: Node3D, bunker: Node3D) -> void:
 	# The hatch and the whole shelter sit inside the House's walls.
 	var inner := Rect2(-shell.width / 2.0 + Shell.WALL_T, -shell.depth / 2.0 + Shell.WALL_T, shell.width - 2 * Shell.WALL_T, shell.depth - 2 * Shell.WALL_T)
 	_check(inner.encloses(bunker.hatch_rect().grow(0.5)), "the hatch is inside the House with room to stand round it")
-	_check(inner.encloses(Bunker.footprint()), "the shelter is under the House")
+	_check(inner.encloses(Bunker.ROOMS.stairwell), "the stairwell is under the House")
+	# The shelter has 6-10 rooms off its corridor, each with a door, and the
+	# bunk room is not the mess hall's neighbour (D-186).
+	var rooms := Bunker.ROOMS.keys().filter(func(k): return k != "stairwell" and k != "corridor")
+	_check(rooms.size() >= 6 and rooms.size() <= 10, "6 to 10 rooms (%d)" % rooms.size())
+	for room in rooms:
+		_check(bunker.doors().has(room), "%s has a door" % room)
+		_check(bunker.find_child("Sign_" + room, false, false) != null, "%s has a name plate" % room)
+	var bunks: Rect2 = Bunker.ROOMS.bunks
+	var mess: Rect2 = Bunker.ROOMS.mess
+	_check(not bunks.grow(0.01).intersects(mess), "the bunks and the mess hall do not share a wall")
 	_check(shell.floor_holes().size() == 1, "the House's floor is cut for the hatch")
 	_check(bunker.doors().size() == Bunker.DOORS.size(), "a door for every doorway (%d)" % bunker.doors().size())
 	_check(bunker.trap_door != null and not bunker.trap_door.is_open, "the trap door starts closed")
@@ -194,7 +204,7 @@ func _test_rooms(player: CharacterBody3D, bunker: Node3D) -> void:
 	await _step(120)
 	var p := await _walk(player, bunker, foot, Vector3(x, Bunker.FLOOR_Y, corridor.get_center().y), 50)
 	_check(_in_room(bunker, "corridor", p), "through the blast door into the corridor (at %s)" % p)
-	for room in ["munitions", "bunks", "utility"]:
+	for room in Bunker.ROOMS.keys().filter(func(k): return k != "stairwell" and k != "corridor"):
 		var d: Dictionary = {}
 		for entry: Dictionary in Bunker.DOORS:
 			if entry.room == room:
@@ -210,7 +220,7 @@ func _test_rooms(player: CharacterBody3D, bunker: Node3D) -> void:
 		p = await _walk(player, bunker, from, into, 60)
 		_check(_in_room(bunker, room, p), "%s: walk in through the open door (at %s)" % [room, p])
 		# A plain wall 1.5 m along from the door stops you.
-		var wall_from := from + Vector3(1.6 if room != "utility" else -1.6, 0, 0)
+		var wall_from := from + Vector3(_wall_offset(d), 0, 0)
 		p = await _walk(player, bunker, wall_from, wall_from + (into - from), 60)
 		_check(_in_room(bunker, "corridor", p), "%s: the wall beside the door blocks (at %s)" % [room, p])
 
@@ -224,3 +234,19 @@ func _test_back_up(player: CharacterBody3D, bunker: Node3D) -> void:
 	bunker.trap_door.set_open(false)
 	await _step(80)
 	_check(not bunker.trap_door.is_open, "the trap door closes")
+
+## How far along the corridor from door `d` there is plain wall on its side:
+## 1.6 m one way or the other, clear of other doors and inside the corridor.
+func _wall_offset(d: Dictionary) -> float:
+	var c: Rect2 = Bunker.inner("corridor")
+	for off: float in [1.6, -1.6]:
+		var x := float(d.x) + off
+		if x < c.position.x + 0.5 or x > c.end.x - 0.5:
+			continue
+		var clear := true
+		for other: Dictionary in Bunker.DOORS:
+			if other != d and absf(float(other.z) - float(d.z)) < 0.01 and absf(float(other.x) - x) < 1.1:
+				clear = false
+		if clear:
+			return off
+	return 1.6
