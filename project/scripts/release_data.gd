@@ -13,7 +13,8 @@ const DATA := {
 		},
 		{
 			"bullets": [
-				"**Back yard ideas.** Walk up to the House's back deck and press O to try 23 ideas for a new back yard, from a simple hot-tub patio to a Roman bathhouse. Shift+O goes back.",
+				"**Back yard ideas.** Walk up to the House's back deck and press O to try 35 ideas for a new back yard, from a simple hot-tub patio to a Roman bathhouse. Shift+O goes back.",
+				"**Room for a sauna.** Twelve of the simpler ideas leave a gravel pad marked SAUNA HERE, with a power post, so a sauna can be added later.",
 				"**What's in them.** Every idea has a hot tub sunk into a deck by the plug on the south wing, a covered place to sit round a fire table and an outdoor kitchen. Many have a sauna. A card names each one and lists what is in it.",
 				"**The garage's back door.** The garage now has its door onto the back yard, by the deck. Press E to open it and walk inside.",
 				"**A smaller pond with an overflow.** The pond's north bank on the west side is cut back along a new, wavy shoreline, so the pond is a little smaller there. When the pond is full and water is still coming in, it now spills out of its west tip into an overflow channel. It runs through a culvert under the fenced track, then curves away south-west to the back of the property. It only runs while the pond is spilling, and dries up after.",
@@ -327,14 +328,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 20587,
+		"code_lines": 20863,
 		"commits": 307,
-		"decisions": 184,
+		"decisions": 185,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 83,
-		"size_kb": 123628,
-		"test_lines": 6374,
+		"size_kb": 123647,
+		"test_lines": 6395,
 		"textures": 49,
 		"vehicles": 3
 	}

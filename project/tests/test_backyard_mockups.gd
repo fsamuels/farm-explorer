@@ -78,8 +78,17 @@ func _test_idea(mock: Node3D, yard: Node3D, holder: Node3D, i: int, leaves: Pack
 	for k in _marks(holder, "kitchen"):
 		grill = grill or (k.get_meta("items") as Array).has("grill")
 	_check(grill, "%s has an outdoor kitchen with a grill" % name)
-	# A sauna wherever the card promises one.
-	if " ".join(Mockups.IDEAS[i].notes).to_lower().contains("sauna") or name.to_lower().contains("sauna"):
+	# A sauna wherever the card promises one, or room left for one: a spot
+	# at least 2.4 m square with nothing solid standing in it.
+	var card := " ".join(Mockups.IDEAS[i].notes).to_lower()
+	if card.contains("room for a sauna"):
+		var spots := _marks(holder, "sauna_spot")
+		_check(spots.size() >= 1, "%s leaves room for a sauna" % name)
+		for sp in spots:
+			var r: Rect2 = sp.get_meta("rect")
+			_check(r.size.x >= 2.4 and r.size.y >= 2.4, "%s: the sauna spot is at least 2.4 m square (%s)" % [name, r.size])
+			_check(_clear(holder, r.grow(-0.1), float(sp.get_meta("top"))), "%s: nothing stands in the sauna spot" % name)
+	elif card.contains("sauna") or name.to_lower().contains("sauna"):
 		_check(_marks(holder, "sauna").size() >= 1, "%s has the sauna its card lists" % name)
 	var near_plug := false
 	for t in tubs:
@@ -179,6 +188,18 @@ func _test_hint(mock: Node3D, player: CharacterBody3D) -> void:
 	await process_frame
 	await process_frame
 	_check(not mock.hint_visible(), "far away, no hint")
+
+## Whether the idea's own collision leaves plan rectangle `r` empty from
+## 0.3 m above `top` to head height.
+func _clear(holder: Node3D, r: Rect2, top: float) -> bool:
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(r.size.x, 2.0, r.size.y)
+	var q := PhysicsShapeQueryParameters3D.new()
+	q.shape = shape
+	q.transform = holder.global_transform * Transform3D(Basis(), Vector3(r.get_center().x, top + 1.3, r.get_center().y))
+	var body := holder.get_node("Body")
+	var hits := holder.get_world_3d().direct_space_state.intersect_shape(q, 16)
+	return hits.filter(func(h: Dictionary) -> bool: return h.collider == body).is_empty()
 
 ## Nothing solid stands outside the garage door (bar the low foot of a step
 ## hull): a box query over the patch every idea keeps clear.
