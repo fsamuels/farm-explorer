@@ -12,6 +12,9 @@ fails if the two disagree.
 
 ## November 24: Things to do
 > Start with a list of things to try, press H for buttons that take you to each one, and watch the stars fill in.
+- **The House's back yard.** The House, its garage and its south wing now wear pale blue lap siding, like the real one. Round the back (the west side) a concrete pad runs the length of the House and along the garage, with the air conditioner on it, and on it sits a low wooden deck with two steps along its front and end. The map has a new Back Yard spot to teleport to.
+- **Willows in the back yard.** Seven big willows, about 20 m tall and not quite in line, stand in a bed of brown mulch inside the chicken run: a row along the south fence behind the coop that turns and runs north up the west side toward the house. Their leaves hang in long strands you can walk under.
+- **Sliding glass doors.** Two patio sliders open onto the deck, one into the House's big room and one into the south wing, which you can now walk into. Walk up the steps and press E to slide one open. The back wall has its four windows too.
 - **A bigger, deeper pond.** The pond is wider where it runs under the trees, most of all at the north-east end, and now reaches well up the north bank there. It is also a little deeper, with a flatter bottom and steeper sides.
 - **A list to start with.** When the game starts, a small picture list of things to try shows in the top left instead of the controls. It tucks away after about two seconds of moving, or when you press another key. The controls are still on F1.
 - **A Things to Do card.** Press H (it pauses the game) for the full card: burn the ditch, open the weir, go for a paddle, drive the Cub Cadet and take a car for a drive, each with a little picture and a row of stars that fill in as you go.
