@@ -80,6 +80,7 @@ var _typed := ""
 var _hint: Label
 var _panel: PanelContainer
 var _mouse_before := Input.MOUSE_MODE_CAPTURED
+var _close_button: Button
 
 func _ready() -> void:
 	layer = 11
@@ -135,6 +136,7 @@ func set_open(open: bool) -> void:
 		Input.mouse_mode = _mouse_before
 	if open:
 		refresh()
+		_close_button.grab_focus.call_deferred()
 
 ## Pick a time of day. A rainbow or aurora that can't be seen at the new time
 ## is dropped (weather goes back to clear).
@@ -369,6 +371,7 @@ func _build() -> void:
 		_build_fire(box)
 
 	var close := _button("Close  (G or Esc)")
+	_close_button = close
 	close.toggle_mode = false
 	close.pressed.connect(set_open.bind(false))
 	box.add_child(close)
@@ -534,7 +537,7 @@ func _button(text: String) -> Button:
 	var b := Button.new()
 	b.text = text
 	b.toggle_mode = true
-	b.focus_mode = Control.FOCUS_NONE
+	b.focus_mode = Control.FOCUS_ALL  # a controller steers by focus (D-182)
 	b.custom_minimum_size = Vector2(0, 44)
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	b.add_theme_font_size_override("font_size", FONT_SIZE - 2)

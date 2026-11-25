@@ -26,6 +26,7 @@ const MODEL_TURN_RATE := 10.0
 const DriveHud := preload("res://scripts/drive_hud.gd")
 const SwimMath := preload("res://scripts/swim_math.gd")
 const SwimPose := preload("res://scripts/swim_pose.gd")
+const GamepadMath := preload("res://scripts/gamepad_math.gd")
 
 ## Mouse-wheel camera distance (D-91). Scrolling back from first person drops
 ## into third person at the closest distance; scrolling forward past it returns
@@ -121,7 +122,10 @@ func _apply_view() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		# B on a controller is also ui_cancel (it closes menus); it must not
+		# free the mouse, which a controller player has no way to recapture.
+		if not event is InputEventJoypadButton:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	elif event is InputEventMouseButton and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
 		# A click recaptures the mouse; scrolling over the window doesn't.
 		var button := (event as InputEventMouseButton).button_index
@@ -172,7 +176,23 @@ func _flash_prompt(text: String) -> void:
 	_prompt_flash = text
 	_prompt_flash_left = 1.5
 
+## Turn the view with the controller's right stick, the same way the mouse does.
+func _gamepad_look(delta: float) -> void:
+	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED or get_tree().paused:
+		return
+	var stick := Input.get_vector("look_left", "look_right", "look_up", "look_down")
+	if stick == Vector2.ZERO:
+		return
+	var step := GamepadMath.look_step(stick, delta)
+	if vehicle:
+		drive_look_yaw = clamp(drive_look_yaw - step.x, -DRIVE_LOOK_LIMIT, DRIVE_LOOK_LIMIT)
+	else:
+		rotate_y(-step.x)
+	head.rotate_x(-step.y)
+	head.rotation.x = clamp(head.rotation.x, deg_to_rad(-89.0), deg_to_rad(89.0))
+
 func _process(delta: float) -> void:
+	_gamepad_look(delta)
 	if vehicle:
 		# Driving: the big yellow prompt gives way to a quiet readout (D-113).
 		interact_prompt.visible = false

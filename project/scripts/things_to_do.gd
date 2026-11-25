@@ -87,6 +87,7 @@ var _hud_rows := {}
 var _moved := 0.0
 var _notice: Label
 var _mouse_before := Input.MOUSE_MODE_CAPTURED
+var _close_button: Button
 var _since_watch := 0.0
 ## Each activity's widgets, by id, for the tests.
 var status_labels := {}
@@ -163,6 +164,7 @@ func set_open(open: bool) -> void:
 		_notice.text = ""
 		refresh()
 		_fit_to_window()
+		_close_button.grab_focus.call_deferred()  # a controller steers by focus (D-182)
 		_mouse_before = Input.mouse_mode
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	else:
@@ -432,6 +434,7 @@ func _build() -> void:
 	close.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	close.add_theme_font_size_override("font_size", FONT_SIZE - 4)
 	close.pressed.connect(set_open.bind(false))
+	_close_button = close
 	bottom.add_child(close)
 	reset_button = Button.new()
 	reset_button.text = RESET_TEXT

@@ -30,6 +30,7 @@ const DETAIL_COLOR := Color(0.62, 0.65, 0.72)
 
 var _panel: PanelContainer
 var _mouse_before := Input.MOUSE_MODE_CAPTURED
+var _close_button: Button
 ## Each release's heading, for the tests.
 var heading_labels: Array[Label] = []
 var summary_labels: Array[Label] = []
@@ -69,6 +70,7 @@ func set_open(open: bool) -> void:
 	get_tree().paused = open
 	if open:
 		_fit_to_window()
+		_close_button.grab_focus.call_deferred()  # a controller steers by focus (D-182)
 		_mouse_before = Input.mouse_mode
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	else:
@@ -182,6 +184,7 @@ func _build(data: Dictionary) -> void:
 	close.text = "Close  (C or Esc)"
 	close.add_theme_font_size_override("font_size", FONT_SIZE - 4)
 	close.pressed.connect(set_open.bind(false))
+	_close_button = close
 	box.add_child(close)
 
 func _toggle_details(toggle: Button, details: Control) -> void:
