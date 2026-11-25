@@ -159,6 +159,16 @@ recognizable, shareable version.
 - [ ] Task list matching real farm chores (feeding, turnout, mucking, pasture rotation)
 - [ ] Simple time-of-day / task-scheduling loop
 
+## Ideas for later (not scheduled)
+
+- [ ] **Walk-a-line placement capture.** Today the way to say "build it here" is copying the player's location to the clipboard, which has been enough so far. If it stops being enough, a capture mode would let the owner walk a line and export the points for an AI to build features at set places, sizes and paths. Ideas gathered so far:
+  - **Recording:** one key drops a point at the player's feet (or auto-drop every N feet); undo last point; name and end a line. Tag each line as path, closed polygon, single point, or rectangle (two corners plus a width). Record heading at each point, so "stand here facing the front door" gives position and orientation together (the duck house turn, D-156, needed this).
+  - **Numbers:** export game-local x/y/z and real-world lat/lon for every point, ground height, and segment lengths and bearings in feet, plus total length and area for closed shapes. Optional snapping to existing fence ends, building corners and roads.
+  - **Context for the AI:** nearest-landmark note per point ("12 ft west of the duck house NW corner"), a free-text label per point or line, intent fields (feature type, height, width, solid), and a top-down image with the points drawn on it.
+  - **Output and round trip:** JSON to a file and the clipboard, plus a Markdown table for chat; named, versioned captures; a preview mode that loads the JSON back and draws markers in the world to compare against what the AI built. Fences already use `Path3D` points, so a capture could feed `fence_path.gd` directly.
+  - **Smaller options:** a live distance-and-bearing measuring tool with no export; a vertical profile for slopes and ramps; a ruler overlay on the minimap.
+  - Suggested first version: capture mode, line types, heading, feet-based lengths, game plus lat/lon coordinates, JSON and clipboard export; preview/reload next.
+
 ## Fallback
 
 If this becomes too involved before Phase 3's milestone, fall back to a smaller
