@@ -16,6 +16,9 @@ fails if the two disagree.
 
 ## November 24: Things to do
 > Start with a list of things to try, press H for buttons that take you to each one, and watch the stars fill in.
+- **Back yard ideas.** Walk up to the House's back deck and press O to try 23 ideas for a new back yard, from a simple hot-tub patio to a Roman bathhouse. Shift+O goes back.
+- **What's in them.** Every idea has a hot tub sunk into a deck by the plug on the south wing, a covered place to sit round a fire table and an outdoor kitchen. Many have a sauna. A card names each one and lists what is in it.
+- **The garage's back door.** The garage now has its door onto the back yard, by the deck. Press E to open it and walk inside.
 - **A smaller pond with an overflow.** The pond's north bank on the west side is cut back along a new, wavy shoreline, so the pond is a little smaller there. When the pond is full and water is still coming in, it now spills out of its west tip into an overflow channel. It runs through a culvert under the fenced track, then curves away south-west to the back of the property. It only runs while the pond is spilling, and dries up after.
 - **Swim fast.** Hold Ctrl while you swim to cross the pond at a fast crawl, about four times your normal stroke. It is the same key as the super sprint, and Shift still slows you down.
 - **Water from the inlet pipe.** While the ditch is running, water now pours out of the pipe where it reaches the pond and falls down the bank into the water.

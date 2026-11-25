@@ -81,6 +81,9 @@ const GABLES := ["House_Gable_South", "House_Gable_North", "HouseGarage_Gable_No
 
 var wall_x := -5.67
 var _body: StaticBody3D
+## The deck, its steps' hulls and the concrete pad: what a back-yard mockup
+## (backyard_mockups.gd) tears out.
+var _as_built: Array[Node] = []
 
 func _ready() -> void:
 	var house := get_node_or_null("../House") as Node3D
@@ -101,6 +104,18 @@ func _ready() -> void:
 ## Plan rectangles in this frame's (x, z) of each level, top first: the deck,
 ## then one per step. Each step is the deck grown by TREAD per step on the
 ## west and north; the south side is against the Wing.
+## Show or tear out the deck, its steps and the concrete pad (a mockup builds
+## its own ground). The AC unit, the willows and the mulch stay.
+func set_as_built(on: bool) -> void:
+	for node in _as_built:
+		if node is CollisionShape3D:
+			(node as CollisionShape3D).disabled = not on
+		else:
+			(node as Node3D).visible = on
+
+func is_as_built() -> bool:
+	return _as_built.is_empty() or (_as_built[0] as Node3D).visible
+
 static func levels(wall: float) -> Array:
 	var out := []
 	var x0 := wall - REACH
@@ -133,6 +148,7 @@ func _build_deck() -> void:
 	mi.mesh = st.commit()
 	mi.material_override = deck_material()
 	add_child(mi)
+	_as_built.append(mi)
 	# A sloped hull from the deck top's edges to the ground past the bottom
 	# step (about 19 degrees, its toe still on the concrete), so the player
 	# walks up instead of being stopped by each riser. It stops at the Wing's
@@ -150,6 +166,7 @@ func _hull(points: Array) -> void:
 	cs.name = "DeckHull"
 	cs.shape = shape
 	_body.add_child(cs)
+	_as_built.append(cs)
 
 ## A box of deck from the ground to `top` over plan rectangle `r`: boards along
 ## the wall on top, running round the sides.
@@ -217,6 +234,7 @@ func _build_pad() -> void:
 		mesh.size = Vector3(r.size.x, PAD_TOP, r.size.y)
 		var mi := MeshInstance3D.new()
 		mi.name = "Pad"
+		_as_built.append(mi)
 		mi.mesh = mesh
 		mi.material_override = m
 		mi.position = Vector3(r.get_center().x, PAD_TOP / 2.0, r.get_center().y)
