@@ -34,6 +34,7 @@ const CONTROLS := [
 	["N", "Show / hide constellation lines (and, at night, their names)"],
 	["R", "Change the weather: rain, storm, fog, snow, rainbow, aurora, clear"],
 	["P", "Music on / off (it starts off); [ and ] turn it down and up. There is a button for it in the bottom bar"],
+	["O", "Back yard ideas: step through mockups of a new outdoor space behind the House (Shift+O goes back)"],
 	["Esc", "Release the mouse (click to recapture)"],
 	["F1", "Show / hide this help (it hides itself after a few seconds of moving, or when you press another key)"],
 ]

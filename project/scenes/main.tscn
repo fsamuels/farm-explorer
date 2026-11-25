@@ -71,6 +71,7 @@
 [ext_resource type="Script" path="res://scripts/chicken_coop.gd" id="101_chicken_coop"]
 [ext_resource type="Script" path="res://scripts/house_backyard.gd" id="102_house_backyard"]
 [ext_resource type="Script" path="res://scripts/music_player.gd" id="103_music"]
+[ext_resource type="Script" path="res://scripts/backyard_mockups.gd" id="104_backyard_mockups"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -1566,8 +1567,22 @@ floor_color = Color(0.9, 0.9, 0.88, 1)
 rise = 1.27905
 doors = [{"wall": "north", "along": -3.91, "width": 2.0, "height": 2.45, "sill": 0.36, "glass": true, "label": "sliding door"}]
 
+[node name="GarageShell" type="Node3D" parent="Buildings"]
+script = ExtResource("58_building_shell")
+building_name = "House Garage"
+skin_walls = PackedStringArray("north", "south", "east", "west")
+siding = true
+liner_color = Color(0.86, 0.85, 0.82, 1)
+floor_color = Color(0.55, 0.55, 0.53, 1)
+rise = 1.68652
+ridge_along_z = true
+doors = [{"wall": "south", "along": -2.43, "width": 0.9, "height": 2.05, "label": "door", "color": Color(0.93, 0.93, 0.91, 1)}]
+
 [node name="HouseBackyard" type="Node3D" parent="Buildings"]
 script = ExtResource("102_house_backyard")
+
+[node name="BackyardMockups" type="Node3D" parent="Buildings"]
+script = ExtResource("104_backyard_mockups")
 
 [node name="HouseBunker" type="Node3D" parent="Buildings"]
 script = ExtResource("bunker_script")
