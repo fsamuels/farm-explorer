@@ -22,6 +22,14 @@ const DITCH_BOTTOM_HALF := WaterData.DITCH_BOTTOM_WIDTH * 0.5
 ## The pond as capsules, six numbers each: x0, z0, r0, x1, z1, r1 (built once).
 static var _pond_capsules := capsules_from_spine(WaterData.POND_SPINE)
 
+## Every open channel that is carved: the irrigation ditch and the pond's overflow.
+static var _carved_segments := _joined(WaterData.DITCH_SEGMENTS, WaterData.OUTFLOW_DITCH_SEGMENTS)
+
+static func _joined(a: PackedFloat32Array, b: PackedFloat32Array) -> PackedFloat32Array:
+	var out := a.duplicate()
+	out.append_array(b)
+	return out
+
 static func smooth(edge0: float, edge1: float, x: float) -> float:
 	var t := clampf((x - edge0) / (edge1 - edge0), 0.0, 1.0)
 	return t * t * (3.0 - 2.0 * t)
@@ -50,8 +58,32 @@ static func ditch_profile(r: float) -> float:
 static func pond_profile(sdf: float) -> float:
 	return WaterData.POND_DEPTH * smooth(0.0, WaterData.POND_BANK_RUN, -sdf)
 
-## Signed distance from (x, z) to the pond outline given as capsules: negative inside.
+## Signed distance to the pond's cut-back north shore (D-180), a polyline `cut`
+## of x, z pairs running east to west: positive on the north side (cut away),
+## negative on the south side (pond). It applies only between the line's first
+## and last x; elsewhere it is -INF, which leaves the pond as it was.
+static func cut_sdf_in(x: float, z: float, cut: PackedFloat32Array) -> float:
+	var n := cut.size() / 2
+	if n < 2 or x > cut[0] or x < cut[(n - 1) * 2]:
+		return -INF
+	var p := Vector2(x, z)
+	var best := INF
+	var line_z := cut[1]
+	for k in n - 1:
+		var a := Vector2(cut[k * 2], cut[k * 2 + 1])
+		var b := Vector2(cut[k * 2 + 2], cut[k * 2 + 3])
+		best = minf(best, p.distance_to(Geometry2D.get_closest_point_to_segment(p, a, b)))
+		if x <= a.x and x >= b.x:
+			var span := a.x - b.x
+			line_z = lerpf(a.y, b.y, (a.x - x) / span) if span > 0.0 else a.y
+	return best if z < line_z else -best
+
+## Signed distance from (x, z) to the pond outline given as capsules: negative
+## inside, and with the north shore cut back (D-180).
 static func pond_sdf_in(x: float, z: float, capsules: PackedFloat32Array) -> float:
+	return maxf(_capsule_sdf(x, z, capsules), cut_sdf_in(x, z, WaterData.POND_CUT))
+
+static func _capsule_sdf(x: float, z: float, capsules: PackedFloat32Array) -> float:
 	var best := INF
 	var i := 0
 	while i < capsules.size():
@@ -101,7 +133,7 @@ static func height_in(x: float, z: float, ditch_segments: PackedFloat32Array, ca
 
 ## Ground height at (x, z): 0 on the level farm, negative in the ditch and pond.
 static func height_at(x: float, z: float) -> float:
-	return height_in(x, z, WaterData.DITCH_SEGMENTS, _pond_capsules)
+	return height_in(x, z, _carved_segments, _pond_capsules)
 
 ## Signed distance to the pond outline at (x, z): negative inside.
 static func pond_sdf(x: float, z: float) -> float:
@@ -109,13 +141,17 @@ static func pond_sdf(x: float, z: float) -> float:
 
 ## Distance to the open (carved) ditch at (x, z).
 static func ditch_distance(x: float, z: float) -> float:
-	return ditch_distance_in(x, z, WaterData.DITCH_SEGMENTS)
+	return ditch_distance_in(x, z, _carved_segments)
 
 ## Surface normal of the carved ground at (x, z), from a small central difference.
 static func normal_at(x: float, z: float, eps := 0.1) -> Vector3:
 	var dx := height_at(x - eps, z) - height_at(x + eps, z)
 	var dz := height_at(x, z - eps) - height_at(x, z + eps)
 	return Vector3(dx, 2.0 * eps, dz).normalized()
+
+## The open channels that are carved (ditch and overflow), ax, az, bx, bz each.
+static func carved_segments() -> PackedFloat32Array:
+	return _carved_segments
 
 ## The pond's capsules (x0, z0, r0, x1, z1, r1 each), for callers that filter them.
 static func pond_capsules() -> PackedFloat32Array:

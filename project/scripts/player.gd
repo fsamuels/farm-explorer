@@ -323,13 +323,15 @@ func _swim(delta: float) -> void:
 	_swim_time += delta
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
-	var speed := SwimMath.swim_speed(Input.is_action_pressed("walk"))
+	var slow := Input.is_action_pressed("walk")
+	var fast := Input.is_action_pressed("super_sprint") and not slow
+	var speed := SwimMath.swim_speed(slow, fast)
 	velocity.x = direction.x * speed if direction else move_toward(velocity.x, 0, 4.0 * delta)
 	velocity.z = direction.z * speed if direction else move_toward(velocity.z, 0, 4.0 * delta)
 	var surface: float = _water.water_surface_at(global_position.x, global_position.z)
 	velocity.y = SwimMath.float_velocity(global_position.y, SwimMath.float_y(surface, _swim_time)) if not is_nan(surface) else 0.0
 	move_and_slide()
-	swim_phase = SwimMath.advance_phase(swim_phase, delta, direction != Vector3.ZERO)
+	swim_phase = SwimMath.advance_phase(swim_phase, delta, direction != Vector3.ZERO, fast)
 	var target_yaw := atan2(-input_dir.x, -input_dir.y) if input_dir != Vector2.ZERO else 0.0
 	model_yaw = lerp_angle(model_yaw, target_yaw, clamp(MODEL_TURN_RATE * delta, 0.0, 1.0))
 	# Lie flat, rolling with the stroke, pivoting about the hips so the body

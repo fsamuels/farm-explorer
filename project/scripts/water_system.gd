@@ -4,7 +4,9 @@ extends Node3D
 ## The weir at the north-east corner lets water into the ditch while it is open
 ## (look at the weir and press E to open or shut it). The water runs along the
 ## ditch, through the buried culvert and pipe, and into the pond, which rises
-## until it spills, then slowly falls again once the weir is shut. Rain tops up
+## until it spills, then slowly falls again once the weir is shut. A pond that is
+## full with water still coming in spills out of its west tip into the overflow
+## channel (D-180), which runs under the track and away to the back of the property. Rain tops up
 ## the pond and leaves standing water in the ditch. All the maths is in
 ## water_math.gd; this node steps it each frame, draws it (shaders/water.gdshader)
 ## and builds the little structures: the weir, and the mouths of the pipes.
@@ -78,6 +80,10 @@ signal weir_changed(open: bool)
 
 ## How full the ditch is at each station along the route (0 empty .. 1 flowing).
 var flow := WaterMath.new_flow()
+## The same for the overflow channel, which runs only while the pond spills.
+var overflow_flow := WaterMath.new_flow()
+## True while the pond is full with more coming in than it loses.
+var spilling := false
 ## Cubic metres in the pond, and the level (m, 0 = the rim's level ground) that makes.
 var pond_volume := 0.0
 var pond_level := -WaterData.POND_DEPTH
@@ -96,6 +102,15 @@ var _ditch_material: ShaderMaterial
 var _flow_image: Image
 var _flow_texture: ImageTexture
 var _flow_active := false
+var _overflow_surface: MeshInstance3D
+var _overflow_material: ShaderMaterial
+var _overflow_image: Image
+var _overflow_texture: ImageTexture
+var _overflow_active := false
+var _outfall: MeshInstance3D
+var _outfall_material: ShaderMaterial
+var _inlet_mouth := Vector2.INF
+var _inlet_dir := Vector2.ZERO
 var _gate: Node3D
 var _gate_tween: Tween
 var _wheel: Node3D
@@ -113,8 +128,10 @@ func _ready() -> void:
 		_flow_active = true
 	_build_pond_surface()
 	_build_ditch_surface()
+	_build_overflow_surface()
 	_build_weir()
 	_build_pipe_mouths()
+	_build_outfall()
 	_upload_flow()
 	_update_pond_surface()
 	if weir_open:
@@ -140,12 +157,34 @@ func _step(dt: float) -> void:
 	if rain_pool < 0.002 and rain[0] <= 0.0:
 		rain_pool = 0.0
 	_ditch_material.set_shader_parameter("rain_pool", rain_pool)
+	_overflow_material.set_shader_parameter("rain_pool", rain_pool)
 
 	var rain_per_second: float = rain[1] / (maxf(rain_fill_minutes, 0.01) * 60.0)
-	pond_volume = WaterMath.pond_step(pond_volume, WaterMath.outflow(flow), 1.0 / (maxf(fill_minutes, 0.01) * 60.0), rain_per_second, 1.0 / (maxf(drain_minutes, 0.01) * 60.0), dt)
+	var inflow := WaterMath.outflow(flow)
+	var fill_rate := 1.0 / (maxf(fill_minutes, 0.01) * 60.0)
+	var loss_rate := 1.0 / (maxf(drain_minutes, 0.01) * 60.0)
+	pond_volume = WaterMath.pond_step(pond_volume, inflow, fill_rate, rain_per_second, loss_rate, dt)
 	pond_level = WaterMath.pond_level_at(pond_volume)
+	spilling = WaterMath.pond_spills(pond_volume, inflow, fill_rate, rain_per_second, loss_rate)
+	_step_overflow(dt)
 	_update_pond_surface()
+	_update_outfall()
 	_announce_pond()
+
+## Slide the overflow's water downstream, feeding it while the pond spills.
+func _step_overflow(dt: float) -> void:
+	if not (spilling or _overflow_active):
+		return
+	# It runs at the same pace as the ditch, so a longer channel takes longer.
+	var travel := travel_seconds * WaterMath.route_length(true) / maxf(WaterMath.route_length(), 0.001)
+	overflow_flow = WaterMath.advect(overflow_flow, float(overflow_flow.size()) * dt / maxf(travel, 0.01), 1.0 if spilling else 0.0)
+	_overflow_active = false
+	for i in overflow_flow.size():
+		if overflow_flow[i] < 0.004:
+			overflow_flow[i] = 0.0
+		else:
+			_overflow_active = true
+	_upload_overflow_flow()
 
 ## Post a toast when the pond has just become full or empty.
 func _announce_pond() -> void:
@@ -197,6 +236,13 @@ func set_ditch_full(full: bool) -> void:
 	flow = WaterMath.new_flow(1.0 if full else 0.0)
 	_flow_active = full
 	_upload_flow()
+	_update_outfall()
+
+## Set the whole overflow channel running full (or empty) at once.
+func set_overflow_full(full: bool) -> void:
+	overflow_flow = WaterMath.new_flow(1.0 if full else 0.0)
+	_overflow_active = full
+	_upload_overflow_flow()
 
 ## How deep the pond's water is above its floor at (x, z), 0 where there is none
 ## (the ditch is left out). Cheap enough for a flock to ask every frame.
@@ -249,6 +295,10 @@ func water_depth_at(x: float, z: float) -> float:
 	if near.y < TerrainMath.DITCH_TOP_HALF and not WaterMath.is_buried_at(near.x):
 		var surface := -WaterData.DITCH_DEPTH + WaterMath.ditch_depth_at(flow, near.x, rain_pool)
 		depth = maxf(depth, surface - ground)
+	var out_near := WaterMath.nearest_on_route(x, z, true)
+	if out_near.y < TerrainMath.DITCH_TOP_HALF and not WaterMath.is_buried_at(out_near.x, true):
+		var out_surface := -WaterData.DITCH_DEPTH + WaterMath.ditch_depth_at(overflow_flow, out_near.x, rain_pool, true)
+		depth = maxf(depth, out_surface - ground)
 	return depth
 
 # --- drawing ---------------------------------------------------------------
@@ -288,31 +338,43 @@ func _build_ditch_surface() -> void:
 	_flow_texture = ImageTexture.create_from_image(_flow_image)
 	_ditch_material = _water_material(true)
 	_ditch_material.set_shader_parameter("flow_tex", _flow_texture)
+	_ditch_surface = _build_ribbon(false, _ditch_material, "DitchSurface")
+
+func _build_overflow_surface() -> void:
+	_overflow_image = Image.create(WaterMath.STATIONS, 1, false, Image.FORMAT_R8)
+	_overflow_texture = ImageTexture.create_from_image(_overflow_image)
+	_overflow_material = _water_material(true)
+	_overflow_material.set_shader_parameter("flow_tex", _overflow_texture)
+	_overflow_surface = _build_ribbon(true, _overflow_material, "OverflowSurface")
+	_upload_overflow_flow()
+
+## The water ribbon along a route's open runs: the ditch, or the overflow.
+func _build_ribbon(overflow: bool, material: ShaderMaterial, node_name: String) -> MeshInstance3D:
 	var vertices := PackedVector3Array()
 	var uvs := PackedVector2Array()
 	var normals := PackedVector3Array()
 	var indices := PackedInt32Array()
-	var length := WaterMath.route_length()
-	var count := WaterMath.segment_count()
+	var length := WaterMath.route_length(overflow)
+	var count := WaterMath.segment_count(overflow)
 	var i := 0
 	while i < count:
-		if WaterMath.is_buried_at(WaterMath.segment_start(i) + 0.01):
+		if WaterMath.is_buried_at(WaterMath.segment_start(i, overflow) + 0.01, overflow):
 			i += 1
 			continue
 		# One open run: consecutive open segments become one strip.
 		var run: Array[Vector3] = []   # (x, z, route distance)
 		var j := i
-		while j < count and not WaterMath.is_buried_at(WaterMath.segment_start(j) + 0.01):
-			var s0 := WaterMath.segment_start(j)
-			var s1 := WaterMath.segment_start(j + 1) if j + 1 < count else length
+		while j < count and not WaterMath.is_buried_at(WaterMath.segment_start(j, overflow) + 0.01, overflow):
+			var s0 := WaterMath.segment_start(j, overflow)
+			var s1 := WaterMath.segment_start(j + 1, overflow) if j + 1 < count else length
 			var steps := maxi(1, ceili((s1 - s0) / RIBBON_STEP))
 			for k in steps:
 				var s := s0 + (s1 - s0) * float(k) / steps
-				var p := WaterMath.point_at(s)
+				var p := WaterMath.point_at(s, overflow)
 				run.append(Vector3(p.x, p.y, s))
 			j += 1
-		var end_s := WaterMath.segment_start(j) if j < count else length
-		var end := WaterMath.point_at(end_s)
+		var end_s := WaterMath.segment_start(j, overflow) if j < count else length
+		var end := WaterMath.point_at(end_s, overflow)
 		run.append(Vector3(end.x, end.y, end_s))
 		_add_strip(run, length, vertices, uvs, normals, indices)
 		i = j
@@ -326,12 +388,13 @@ func _build_ditch_surface() -> void:
 	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	# The vertex stage lifts the surface, so the box must reach up to the full-ditch level.
 	mesh.custom_aabb = mesh.get_aabb().grow(1.5)
-	_ditch_surface = MeshInstance3D.new()
-	_ditch_surface.name = "DitchSurface"
-	_ditch_surface.mesh = mesh
-	_ditch_surface.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_ditch_surface.material_override = _ditch_material
-	add_child(_ditch_surface)
+	var surface := MeshInstance3D.new()
+	surface.name = node_name
+	surface.mesh = mesh
+	surface.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	surface.material_override = material
+	add_child(surface)
+	return surface
 
 ## A strip of water along `run` ((x, z, route distance) points), mitred at the corners.
 func _add_strip(run: Array[Vector3], length: float, vertices: PackedVector3Array, uvs: PackedVector2Array, normals: PackedVector3Array, indices: PackedInt32Array) -> void:
@@ -356,6 +419,13 @@ func _add_strip(run: Array[Vector3], length: float, vertices: PackedVector3Array
 	for k in range(run.size() - 1):
 		var a := base + k * 2
 		indices.append_array(PackedInt32Array([a, a + 1, a + 2, a + 1, a + 3, a + 2]))
+
+func _upload_overflow_flow() -> void:
+	if _overflow_image == null:
+		return
+	for i in overflow_flow.size():
+		_overflow_image.set_pixel(i, 0, Color(overflow_flow[i], 0.0, 0.0))
+	_overflow_texture.update(_overflow_image)
 
 func _upload_flow() -> void:
 	if _flow_image == null:
@@ -464,33 +534,38 @@ func _move_gate(instant := false) -> void:
 ## A concrete ring with a dark opening where each buried run starts or ends: both
 ## ends of the driveway culvert, the start of the pipe, and where it meets the pond.
 func _build_pipe_mouths() -> void:
-	var routes := WaterData.ROUTE_SEGMENTS
 	var concrete := _concrete_material()
 	var dark := StandardMaterial3D.new()
 	dark.albedo_color = Color(0.02, 0.02, 0.02)
-	var mouths: Array = []   # [position (x, z), direction (x, z)]
-	var i := 0
-	while i < routes.size():
-		var a := Vector2(routes[i], routes[i + 1])
-		var b := Vector2(routes[i + 2], routes[i + 3])
-		var buried: bool = routes[i + 4] > 0.5
-		var was_buried: bool = i > 0 and routes[i - 1] > 0.5
-		var next_buried: bool = i + 9 < routes.size() and routes[i + 9] > 0.5
-		var dir := (b - a).normalized()
-		if buried and not was_buried:
-			mouths.append([a, dir])
-		if buried and not next_buried:
-			mouths.append([b, dir])
-		i += 5
+	var mouths: Array = []   # [position (x, z), direction (x, z), meets the pond bank]
+	for overflow in [false, true]:
+		var routes := WaterData.OUTFLOW_SEGMENTS if overflow else WaterData.ROUTE_SEGMENTS
+		var i := 0
+		while i < routes.size():
+			var a := Vector2(routes[i], routes[i + 1])
+			var b := Vector2(routes[i + 2], routes[i + 3])
+			var buried: bool = routes[i + 4] > 0.5
+			var was_buried: bool = i > 0 and routes[i - 1] > 0.5
+			var next_buried: bool = i + 9 < routes.size() and routes[i + 9] > 0.5
+			var dir := (b - a).normalized()
+			# The ditch's last pipe ends on the pond's bank.
+			var at_pond: bool = not overflow and i + 5 >= routes.size()
+			if buried and not was_buried:
+				mouths.append([a, dir, false])
+			if buried and not next_buried:
+				mouths.append([b, dir, at_pond])
+			i += 5
 	for mouth in mouths:
 		var at: Vector2 = mouth[0]
 		var dir: Vector2 = mouth[1]
 		# The pipe that reaches the pond ends on its bank: come in until the ground has fallen away.
-		if at.distance_to(Vector2(WaterData.ROUTE_SEGMENTS[WaterData.ROUTE_SEGMENTS.size() - 3], WaterData.ROUTE_SEGMENTS[WaterData.ROUTE_SEGMENTS.size() - 2])) < 0.01:
+		if mouth[2]:
 			var step := 0
 			while TerrainMath.height_at(at.x, at.y) > -0.8 and step < 200:
 				at -= dir * 0.2
 				step += 1
+			_inlet_mouth = at
+			_inlet_dir = dir
 		var ring := Node3D.new()
 		# Cylinders stand on Y; turn this one so its axis runs along the pipe.
 		var along := Vector3(dir.x, 0.0, dir.y)
@@ -514,3 +589,90 @@ func _build_pipe_mouths() -> void:
 		hole_node.material_override = dark
 		ring.add_child(hole_node)
 		add_child(ring)
+
+# --- the stream out of the inlet pipe ----------------------------------------
+
+## Metres a stream out of the pipe runs before it is let down the bank, and its width.
+const OUTFALL_HALF_WIDTH := 0.4
+const OUTFALL_STEP := 0.25
+const OUTFALL_MAX_LENGTH := 16.0
+## How fast the water leaves the pipe (m/s), which sets how far it arcs out before it falls.
+const OUTFALL_SPEED := 1.6
+
+const OUTFALL_SHADER := """
+shader_type spatial;
+render_mode blend_mix, cull_disabled, specular_schlick_ggx;
+uniform float amount : hint_range(0.0, 1.0) = 0.0;
+void fragment() {
+	float along = UV.y * 3.0 - TIME * 2.2;
+	float streak = sin(UV.x * 18.0 + sin(along * 2.0) * 1.5) * 0.5 + 0.5;
+	float ripple = sin(along * 5.0 + UV.x * 7.0) * 0.5 + 0.5;
+	float edge = smoothstep(0.0, 0.18, UV.x) * smoothstep(1.0, 0.82, UV.x);
+	ALBEDO = mix(vec3(0.22, 0.34, 0.36), vec3(0.78, 0.9, 0.95), streak * 0.5 + ripple * 0.3);
+	ROUGHNESS = 0.15;
+	ALPHA = amount * edge * (0.6 + 0.3 * ripple);
+}
+"""
+
+## A stream of water from the mouth of the pipe that reaches the pond: it arcs
+## out of the pipe, lands on the bank and runs down it to the water, whatever
+## the pond's level. Shown only while water is reaching the pond.
+func _build_outfall() -> void:
+	if _inlet_mouth == Vector2.INF:
+		return
+	var vertices := PackedVector3Array()
+	var uvs := PackedVector2Array()
+	var normals := PackedVector3Array()
+	var indices := PackedInt32Array()
+	var side := Vector2(-_inlet_dir.y, _inlet_dir.x)
+	var start_y := TerrainMath.height_at(_inlet_mouth.x, _inlet_mouth.y) + 0.12
+	var s := 0.0
+	var k := 0
+	while s <= OUTFALL_MAX_LENGTH:
+		var at := _inlet_mouth + _inlet_dir * s
+		var ground := TerrainMath.height_at(at.x, at.y) + 0.05
+		var fall := 0.5 * 9.8 * pow(s / OUTFALL_SPEED, 2.0)
+		var y := maxf(start_y - fall, ground)
+		var left := at + side * OUTFALL_HALF_WIDTH
+		var right := at - side * OUTFALL_HALF_WIDTH
+		vertices.append(Vector3(left.x, y, left.y))
+		vertices.append(Vector3(right.x, y, right.y))
+		uvs.append(Vector2(0.0, s))
+		uvs.append(Vector2(1.0, s))
+		normals.append(Vector3.UP)
+		normals.append(Vector3.UP)
+		if k > 0:
+			var a := (k - 1) * 2
+			indices.append_array(PackedInt32Array([a, a + 1, a + 2, a + 1, a + 3, a + 2]))
+		k += 1
+		# Stop once the bank has reached the pond's floor.
+		if ground <= -WaterData.POND_DEPTH + 0.1:
+			break
+		s += OUTFALL_STEP
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_TEX_UV] = uvs
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	arrays[Mesh.ARRAY_INDEX] = indices
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	var shader := Shader.new()
+	shader.code = OUTFALL_SHADER
+	_outfall_material = ShaderMaterial.new()
+	_outfall_material.shader = shader
+	_outfall = MeshInstance3D.new()
+	_outfall.name = "PipeOutfall"
+	_outfall.mesh = mesh
+	_outfall.material_override = _outfall_material
+	_outfall.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_outfall)
+	_update_outfall()
+
+## Show the stream while the ditch is delivering water to the pond.
+func _update_outfall() -> void:
+	if _outfall == null:
+		return
+	var amount := clampf(WaterMath.outflow(flow) * 1.2, 0.0, 1.0)
+	_outfall.visible = amount > 0.03
+	_outfall_material.set_shader_parameter("amount", amount)

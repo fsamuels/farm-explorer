@@ -15,6 +15,8 @@ func _init() -> void:
 	_test_pond()
 	_test_walkable_slopes()
 	_test_buried_runs_are_not_carved()
+	_test_shore_cut()
+	_test_overflow_channel()
 	_test_data_matches_trace()
 	await _test_scene()
 	print("terrain: %s" % ("OK" if _failures == 0 else "%d FAILED" % _failures))
@@ -29,7 +31,7 @@ func _near(a: float, b: float, what: String, eps := 0.02) -> void:
 	_check(absf(a - b) <= eps, "%s: got %s, want %s" % [what, a, b])
 
 func _test_level_ground() -> void:
-	for p in [Vector2(0, -60), Vector2(200, 0), Vector2(150, 40), Vector2(-120, 100), Vector2(300, 150)]:
+	for p in [Vector2(0, -60), Vector2(200, 0), Vector2(150, 40), Vector2(-150, 100), Vector2(300, 150)]:
 		_near(TerrainMath.height_at(p.x, p.y), 0.0, "level ground at %s" % p, 0.0001)
 
 func _test_ditch() -> void:
@@ -100,6 +102,68 @@ func _test_buried_runs_are_not_carved() -> void:
 	_check(TerrainMath.pond_sdf(59.4, 38.0) < 3.0, "the pipe meets the pond bank")
 	_check(WaterData.PIPE_SEGMENTS.size() == 12, "culvert + two pipe legs: %s numbers" % WaterData.PIPE_SEGMENTS.size())
 
+## The pond's north shore is cut back to the owner's line (D-180).
+func _test_shore_cut() -> void:
+	var cut := WaterData.POND_CUT
+	_near(cut[0], -8.0, "the shore line starts in the east", 0.001)
+	_near(cut[2], -12.8, "the owner's east point", 0.001)
+	_near(cut[3], 11.0, "the owner's east point z", 0.001)
+	_near(cut[cut.size() - 2], -50.1, "the shore line ends at the overflow", 0.001)
+	_near(cut[cut.size() - 1], 2.5, "the shore line ends at the overflow z", 0.001)
+	var at_43 := -1
+	for k in cut.size() / 2:
+		if absf(cut[k * 2] + 43.6) < 0.01:
+			at_43 = k
+	_check(at_43 >= 0 and absf(cut[at_43 * 2 + 1] - 4.0) < 0.001, "the owner's west point (-43.6, 4.0) is on the line")
+	# Ground north of the line is level now; the old rim was well north of it at these x.
+	for x in [-20.0, -28.0, -35.0, -42.0]:
+		_near(TerrainMath.height_at(x, 1.0), 0.0, "level ground north of the new shore at x=%s" % x, 0.0001)
+		_check(TerrainMath.pond_sdf(x, 14.0) < 0.0, "still pond south of it at x=%s" % x)
+	# The line is wavy: it strays from the straight line between the owner's two points.
+	var worst := 0.0
+	for k in range(1, at_43 - 1):
+		var x := cut[k * 2]
+		var straight := 11.0 + (x + 12.8) * (7.0 / 30.8)
+		worst = maxf(worst, absf(cut[k * 2 + 1] - straight))
+	_check(worst > 0.8, "the shore is not a straight line: strays %s m" % worst)
+	# Across the line the pond goes from nothing to a bank: shore sdf is near zero on it.
+	_check(absf(TerrainMath.pond_sdf(-27.5, 8.9)) < 0.1, "the shore line is the pond's rim")
+	# The rest of the pond is as it was: the east lobe and the middle, and the east end of the west lobe.
+	_check(TerrainMath.pond_sdf(100.0, 0.0) < 0.0, "east lobe untouched")
+	_check(TerrainMath.pond_sdf(-5.0, 20.0) < 0.0, "pond south-east of the line's east end untouched")
+	_check(TerrainMath.pond_sdf(-28.0, 19.0) < -7.4, "the west lobe is still deep at its middle")
+
+## The overflow channel (D-180): carved where open, level over the culvert.
+func _test_overflow_channel() -> void:
+	var depth := WaterData.DITCH_DEPTH
+	var routes := WaterData.OUTFLOW_SEGMENTS
+	_near(routes[0], -50.1, "the overflow starts at the owner's point x", 0.001)
+	_near(routes[1], 2.5, "the overflow starts at the owner's point z", 0.001)
+	_near(routes[2], -52.3, "its second point x", 0.001)
+	_near(routes[3], 2.1, "its second point z", 0.001)
+	_near(routes[5 + 2], -74.6, "its third point x", 0.001)
+	_near(routes[5 + 3], 21.1, "its third point z", 0.001)
+	_check(routes[4] < 0.5 and routes[9] < 0.5 and routes[14] > 0.5 and routes[19] < 0.5, "open, open, culvert, then open again")
+	_check(WaterData.OUTFLOW_PIPE_SEGMENTS.size() == 4, "one culvert")
+	# Carved along its open runs.
+	_near(TerrainMath.height_at(-63.45, 11.6), -depth, "overflow channel bottom on the first run")
+	_near(TerrainMath.height_at(-98.9, 45.2), -depth, "overflow channel bottom on the curve")
+	_near(TerrainMath.height_at(-133.5, 182.0), -depth, "overflow channel bottom at the property line")
+	# Level over the culvert, and clear of the pad.
+	_near(TerrainMath.height_at(-79.0, 24.7), 0.0, "ground over the culvert under the track", 0.0001)
+	_check(TerrainMath.ditch_distance(-115.0, 60.0) > 4.0, "the channel keeps clear of the Southwest Pasture pad")
+	# Ends inside the property (the south boundary is z=184) and heads south-west overall.
+	var last := routes.size() - 5
+	_check(routes[last + 3] < 184.0 and routes[last + 3] > 175.0, "ends just inside the back property line: %s" % routes[last + 3])
+	_check(routes[last + 2] < routes[5 + 2], "ends well south-west of the track")
+	# Its banks are walkable too.
+	var worst := 0.0
+	var x := -66.0
+	while x < -60.0:
+		worst = maxf(worst, absf(TerrainMath.height_at(x + 0.05, 11.0) - TerrainMath.height_at(x, 11.0)) / 0.05)
+		x += 0.05
+	_check(worst < 0.95, "overflow banks are under 45 degrees: slope %s" % worst)
+
 ## water_data.gd is generated from docs/gis/water-features-*.json; fail if it drifts.
 func _test_data_matches_trace() -> void:
 	var path := ProjectSettings.globalize_path(TRACE)
@@ -124,6 +188,18 @@ func _test_data_matches_trace() -> void:
 	_check(WaterData.DITCH_SEGMENTS.size() == open_count * 4, "open ditch segments match the trace: %s vs %s" % [WaterData.DITCH_SEGMENTS.size() / 4, open_count])
 	_check(WaterData.PIPE_SEGMENTS.size() == buried_count * 4, "buried segments match the trace")
 	_check(WaterData.POND_SPINE.size() == trace["pond"]["spine_x_z_halfwidth_m"].size() * 3, "pond spine matches the trace")
+	_check(WaterData.POND_CUT.size() == trace["pond"]["cut_north_shore"].size() * 2, "pond shore cut matches the trace")
+	var out_open := 0
+	var out_buried := 0
+	for seg in trace["overflow"]["segments"]:
+		var n: int = seg["points"].size() - 1
+		if seg.get("buried", false):
+			out_buried += n
+		else:
+			out_open += n
+	_check(WaterData.OUTFLOW_DITCH_SEGMENTS.size() == out_open * 4, "open overflow segments match the trace")
+	_check(WaterData.OUTFLOW_PIPE_SEGMENTS.size() == out_buried * 4, "overflow culvert matches the trace")
+	_check(WaterData.OUTFLOW_SEGMENTS.size() == (out_open + out_buried) * 5, "overflow route matches the trace")
 	var first: Array = trace["pond"]["spine_x_z_halfwidth_m"][0]
 	_near(WaterData.POND_SPINE[0], first[0], "pond spine starts where the trace does", 0.001)
 

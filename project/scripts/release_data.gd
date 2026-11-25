@@ -6,6 +6,9 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**A smaller pond with an overflow.** The pond's north bank on the west side is cut back along a new, wavy shoreline, so the pond is a little smaller there. When the pond is full and water is still coming in, it now spills out of its west tip into an overflow channel. It runs through a culvert under the fenced track, then curves away south-west to the back of the property. It only runs while the pond is spilling, and dries up after.",
+				"**Swim fast.** Hold Ctrl while you swim to cross the pond at a fast crawl, about four times your normal stroke. It is the same key as the super sprint, and Shift still slows you down.",
+				"**Water from the inlet pipe.** While the ditch is running, water now pours out of the pipe where it reaches the pond and falls down the bank into the water.",
 				"**The House's back yard.** The House, its garage and its south wing now wear pale blue lap siding, like the real one. Round the back (the west side) a concrete pad runs the length of the House and along the garage, with the air conditioner on it, and on it sits a low wooden deck with two steps along its front and end. The map has a new Back Yard spot to teleport to.",
 				"**Willows in the back yard.** Seven big willows, about 20 m tall and not quite in line, stand in a bed of brown mulch inside the chicken run: a row along the south fence behind the coop that turns and runs north up the west side toward the house. Their leaves hang in long strands you can walk under.",
 				"**Sliding glass doors.** Two patio sliders open onto the deck, one into the House's big room and one into the south wing, which you can now walk into. Walk up the steps and press E to slide one open. The back wall has its four windows too.",
@@ -314,14 +317,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 18933,
-		"commits": 302,
-		"decisions": 179,
+		"code_lines": 19218,
+		"commits": 303,
+		"decisions": 181,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 82,
-		"size_kb": 120844,
-		"test_lines": 5995,
+		"size_kb": 120861,
+		"test_lines": 6121,
 		"textures": 49,
 		"vehicles": 3
 	}
