@@ -1,5 +1,5 @@
 extends Node3D
-## The front of the main House (D-192), after the owner's drone photos
+## The front of the main House (D-199), after the owner's drone photos
 ## (Downloads/RCR - Main House Front): the covered porch on the east wall, with
 ## the white front door in the middle of it.
 ##
@@ -13,7 +13,7 @@ extends Node3D
 ## The windows and the pale blue siding on that wall come from the House's
 ## building_shell node (`windows`, `siding`), as on the back.
 ##
-## The slab and steps are visual only (5 cm and 10 cm proud of the ground), so
+## The slab and steps are visual only (the slab 5 cm proud of the ground, the steps lower), so
 ## the player walks straight over them to the door; the posts are solid.
 
 const Shell := preload("res://scripts/building_shell.gd")
@@ -26,12 +26,11 @@ const STEP_WIDTH := 1.8
 ## door (about 61 px a metre on the wall; south, on your left as you face the
 ## house, is +z). The photo's porch reaches 4.5 m north of the door and, south of
 ## it, to the end of the wall; the southmost post is pulled in to stand on it.
-const POST_ZS := [7.0, 5.9, 3.6, 1.43, -1.3, -4.1]
+const POST_ZS := [7.0, 5.9, 3.6, 1.1, -1.3, -4.1]
 ## The slab's north end; its south end is the wall's own.
 const SPAN_NORTH := -4.6
 const REACH := 2.3
 const SLAB := 0.05
-const STEP_RISE := 0.05
 const STEP_TREAD := 0.35
 const POST := 0.13
 const POST_TOP := 2.4
@@ -115,7 +114,7 @@ func _build_steps() -> void:
 	var rects := step_rects(wall_x, wall_len)
 	for k in rects.size():
 		var r := rects[k]
-		var h := SLAB - (k + 1) * STEP_RISE * 0.5
+		var h := SLAB * float(2 - k) / 3.0
 		var c := r.get_center()
 		_box("PorchStep%d" % (k + 1), Vector3(c.x, h / 2.0, c.y), Vector3(r.size.x, h, r.size.y), _material(STEP_COLOR))
 
@@ -143,7 +142,7 @@ func _build_roof() -> void:
 	var run := REACH / cos(fall)
 	var roof := _box("PorchRoof", Vector3(wall_x + REACH / 2.0, (wall_h + POST_TOP) / 2.0 + ROOF_T / 2.0, r.get_center().y),
 			Vector3(run, ROOF_T, r.size.y), _material(ROOF_COLOR, 0.95))
-	roof.rotation.z = fall
+	roof.rotation.z = -fall
 	_box("PorchFascia", Vector3(wall_x + REACH, POST_TOP + ROOF_T / 2.0 - FASCIA / 2.0 + 0.04, r.get_center().y),
 			Vector3(0.05, FASCIA, r.size.y), _material(POST_COLOR, 0.6))
 

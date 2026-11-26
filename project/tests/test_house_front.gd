@@ -1,5 +1,5 @@
 extends SceneTree
-## Tests for the front of the main House (D-192): the covered porch, the four
+## Tests for the front of the main House (D-199): the covered porch, the
 ## front windows and the garage's two roll-up doors. Run headless from project/:
 ##   godot --headless -s res://tests/test_house_front.gd
 
@@ -36,17 +36,17 @@ func _run() -> void:
 	quit(1 if _failures else 0)
 
 func _test_pure() -> void:
-	var len := 14.24
+	var wall_len := 14.24
 	var zs := Porch.post_zs()
 	_check(zs.size() == 6, "six porch posts")
 	for i in zs.size() - 1:
 		_check(zs[i] > zs[i + 1], "post %d is south of post %d" % [i, i + 1])
-	var slab := Porch.slab_rect(5.9, len)
-	_check(is_equal_approx(slab.position.x, 5.9) and slab.size.y > len * 0.75, "the porch runs most of the front wall, against it")
+	var slab := Porch.slab_rect(5.9, wall_len)
+	_check(is_equal_approx(slab.position.x, 5.9) and slab.size.y > wall_len * 0.75, "the porch runs most of the front wall, against it")
 	for z in zs:
 		_check(z > slab.position.y and z < slab.end.y, "post at %.2f is on the slab" % z)
 	var door_z := Porch.DOOR_Z
-	for r in Porch.step_rects(5.9, len):
+	for r in Porch.step_rects(5.9, wall_len):
 		_check(r.position.y < door_z and r.end.y > door_z, "the steps are in front of the door")
 		_check(r.position.x >= slab.end.x - 0.001, "the steps start at the porch's edge")
 
@@ -55,7 +55,14 @@ func _test_porch(porch: Node3D, shell: Node3D) -> void:
 	_check(is_equal_approx(porch.wall_x, shell.width / 2.0), "the porch knows where the front wall is")
 	for n in ["PorchSlab", "PorchStep1", "PorchStep2", "PorchRoof", "PorchFascia", "Post1", "Post6", "GarageApron"]:
 		_check(porch.get_node_or_null(n) != null, "porch has %s" % n)
-	var roof := porch.get_node("PorchRoof") as Node3D
+	var roof := porch.get_node("PorchRoof") as MeshInstance3D
+	# The roof meets the wall at the eave and falls to the posts' top.
+	var half := (roof.mesh as BoxMesh).size.x / 2.0
+	var t := (roof.mesh as BoxMesh).size.y / 2.0
+	var at_wall := (roof.transform * Vector3(-half, -t, 0.0)).y
+	var at_posts := (roof.transform * Vector3(half, -t, 0.0)).y
+	_check(absf(at_wall - shell.height) < 0.05, "the porch roof meets the wall at the eave (%.2f vs %.2f)" % [at_wall, shell.height])
+	_check(at_posts < at_wall - 0.2 and absf(at_posts - 2.4) < 0.05, "the porch roof falls to the posts' top (%.2f)" % at_posts)
 	_check(roof.position.y > 2.3 and roof.position.y < shell.height + 0.5, "the porch roof sits under the eave (%.2f)" % roof.position.y)
 
 func _test_windows(shell: Node3D) -> void:
