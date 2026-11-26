@@ -6,6 +6,17 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**Kitchen.** In through the back slider, the kitchen is on your left: oak cabinets on green walls, a black stove and fridge, a sink under the window, a peninsula with a stool and a brown-and-beige tile floor.",
+				"**Dining and living.** The dining table and chairs stand on the right, under a navy accent wall. The living room is ahead and to the left, with a sofa, futon, rug, cedar chest and TV, all on wood floors with yellow walls.",
+				"**Front door.** The front door is slate blue now, with glass panels either side and more windows along the front wall.",
+				"**Pantry and garage.** A small pantry off the north side of the kitchen has shelves and a door into the garage.",
+				"**Shelter hatch moved.** The trap door to the bomb shelter is now in the garage floor. A short tunnel leads under the House to the same blast door and rooms."
+			],
+			"summary": "The House now has real rooms inside: a kitchen, dining area and living room. The bomb shelter's trap door has moved to the garage.",
+			"title": "November 26: Inside the House"
+		},
+		{
+			"bullets": [
 				"**A long corridor.** Past the blast door the corridor now runs west under the back yard, with a yellow name plate over every door.",
 				"**Nine rooms.** Command room, pantry, armory and munitions store on one side; mess hall, medical bay, bathroom, bunk room and utility room on the other.",
 				"**No more sleeping where you eat.** The kitchen moved out of the bunk room into a mess hall with long tables; the bunk room now has four bunks and lockers.",
@@ -340,14 +351,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 21561,
-		"commits": 309,
-		"decisions": 187,
+		"code_lines": 22048,
+		"commits": 57,
+		"decisions": 188,
 		"models": 14,
 		"scenes": 26,
-		"scripts": 83,
-		"size_kb": 123690,
-		"test_lines": 6422,
+		"scripts": 84,
+		"size_kb": 123720,
+		"test_lines": 6550,
 		"textures": 49,
 		"vehicles": 3
 	}
