@@ -15,6 +15,10 @@ fails if the two disagree.
 - **A covered porch.** White posts hold up a shallow shingle roof over a porch the length of the front, with two steps down to the front door.
 - **More windows.** The front wall gets the windows the real one has, either side of the door, on the same pale blue siding as the back.
 - **Two garage doors.** The garage's north end has two ribbed roll-up doors; press E at one to roll it up. A strip of concrete runs out in front of them.
+## November 26: An old Russian olive forest
+> North of the House and its back yard, the Russian olives are now a thick old forest of tall trees with young ones growing up between.
+- **Old-growth olives.** Along the north side by the House the scattered trees are now a deep stand of about seventy, most of them big old 20 to 25 foot trees, with younger ones coming up underneath. From the back yard they make a solid wall of crooked trunks and silvery leaves.
+- **Still thick to the east.** The band toward the round corral is a little denser too, and the west end is unchanged.
 
 ## November 26: Thirty back-yard ideas under open sky
 > Thirty new back-yard ideas to step through with O, and not one puts a roof over the hot tub, so you can soak under the stars.

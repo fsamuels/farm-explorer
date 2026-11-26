@@ -1,5 +1,5 @@
 extends SceneTree
-## Tests for the front of the main House (D-199): the covered porch, the
+## Tests for the front of the main House (D-200): the covered porch, the
 ## front windows and the garage's two roll-up doors. Run headless from project/:
 ##   godot --headless -s res://tests/test_house_front.gd
 
