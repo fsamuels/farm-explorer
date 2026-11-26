@@ -12,7 +12,18 @@ const DATA := {
 				"**Fuller yards.** Each idea now fills the whole yard: a vegetable garden, a greenhouse or a firewood and propane corner by the garage; Adirondack chairs round a fire ring, cornhole, horseshoes or hay bales on the lawn; a long table, picnic tables or a pergola in the middle; and loungers, a towel line or a hammock to the south. Every tub has a towel post, step lights and a side table."
 			],
 			"summary": "Thirty new back-yard ideas to step through with O, and not one puts a roof over the hot tub, so you can soak under the stars.",
-			"title": "November 25: Thirty back-yard ideas under open sky"
+			"title": "November 26: Thirty back-yard ideas under open sky"
+		},
+		{
+			"bullets": [
+				"**Kitchen.** In through the back slider, the kitchen is on your left: oak cabinets on green walls, a black stove and fridge, a sink under the window, a peninsula with a stool and a brown-and-beige tile floor.",
+				"**Dining and living.** The dining table and chairs stand on the right, under a navy accent wall. The living room is ahead and to the left, with a sofa, futon, rug, cedar chest and TV, all on wood floors with yellow walls.",
+				"**Front door.** The front door is slate blue now, with glass panels either side and more windows along the front wall.",
+				"**Pantry and garage.** A small pantry off the north side of the kitchen has shelves and a door into the garage.",
+				"**Shelter hatch moved.** The trap door to the bomb shelter is now in the garage floor. A short tunnel leads under the House to the same blast door and rooms."
+			],
+			"summary": "The House now has real rooms inside: a kitchen, dining area and living room. The bomb shelter's trap door has moved to the garage.",
+			"title": "November 26: Inside the House"
 		},
 		{
 			"bullets": [
@@ -379,14 +390,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 22729,
-		"commits": 319,
-		"decisions": 196,
+		"code_lines": 23216,
+		"commits": 320,
+		"decisions": 197,
 		"models": 14,
 		"scenes": 26,
-		"scripts": 90,
-		"size_kb": 123757,
-		"test_lines": 6928,
+		"scripts": 91,
+		"size_kb": 123788,
+		"test_lines": 7059,
 		"textures": 49,
 		"vehicles": 3
 	}

@@ -1,21 +1,23 @@
 extends Node3D
-## The bomb shelter under the House (D-145, D-186): a wooden trap door in the
-## House's floor opens on concrete stairs down to a modern shelter. A steel
-## blast door at the foot of the stairs gives onto a long corridor that runs
-## west under the back yard, with nine rooms off it, each behind a steel door
-## with a name plate: on the north side the command room, pantry, armory and
-## munitions store; on the south side the mess hall, medical bay, bathroom,
-## bunk room and utility room. Sleeping and eating are kept rooms apart.
+## The bomb shelter under the House (D-145, D-186, D-195): a wooden trap door
+## in the House Garage's floor opens on concrete stairs down to a short tunnel
+## that turns east and then south, under the House's north end, to a steel
+## blast door. Past it a long corridor runs west under the back yard, with nine
+## rooms off it, each behind a steel door with a name plate: on the north side
+## the command room, pantry, armory and munitions store; on the south side the
+## mess hall, medical bay, bathroom, bunk room and utility room. Sleeping and
+## eating are kept rooms apart.
 ##
 ## Everything is built in code from boxes and cylinders, in the same frame as
-## the House's shell (building_shell.gd `frame_for`): x across the House, z along
-## it, y up from the ground. Layout numbers are in the constants below. Rooms are
-## Rect2s in (x, z), each with its own four walls set just inside its edges, so
-## two rooms that share an edge stand back to back. A door on a shared edge cuts
-## both walls and hangs on the edge line.
+## the garage's shell (building_shell.gd `frame_for`): x across the garage, z
+## along it (south is +z), y up from the ground. The garage is turned about 2.8
+## degrees from the House, so the rooms are too. Layout numbers are in the
+## constants below. Rooms are Rect2s in (x, z), each with its own four walls set
+## just inside its edges, so two rooms that share an edge stand back to back. A
+## door on a shared edge cuts both walls and hangs on the edge line.
 ##
 ## It also cuts the ground (terrain.gd, `terrain_holes`) where the stairs go down
-## and asks the House's shell to cut its floor there (`hatch_rect`). The ground
+## and asks the garage's shell to cut its floor there (`hatch_rect`). The ground
 ## stays whole over the rest of the shelter, which sits below it with its own
 ## floors, walls and ceilings.
 
@@ -28,13 +30,13 @@ const WALL_T := 0.15
 ## Top of the shelter's floors and the rooms' clear height.
 const FLOOR_Y := -3.2
 const ROOM_H := 2.6
-## Top of the House's floor (building_shell.gd FLOOR_TOP).
+## Top of the garage's floor (building_shell.gd FLOOR_TOP).
 const HOUSE_FLOOR := 0.05
 ## The stairs: inner width, where the top step starts (z), the run and how many
 ## risers. The hatch over them is `HATCH_LEN` long.
-const STAIR_X0 := 3.0
+const STAIR_X0 := 2.25
 const STAIR_W := 1.2
-const STAIR_Z0 := -6.2
+const STAIR_Z0 := -2.85
 const STAIR_RUN := 4.2
 const RISERS := 16
 const HATCH_LEN := 3.0
@@ -44,17 +46,19 @@ const DOOR_H := 2.1
 
 ## Rooms: name -> Rect2(x, z, width, depth) of the outside of the walls.
 const ROOMS := {
-	"stairwell": Rect2(2.85, -6.35, 1.5, 4.5),
-	"corridor": Rect2(-21.0, -1.85, 26.0, 2.2),
-	"munitions": Rect2(-5.0, -6.35, 7.85, 4.5),
-	"armory": Rect2(-9.5, -6.35, 4.5, 4.5),
-	"pantry": Rect2(-13.0, -6.35, 3.5, 4.5),
-	"command": Rect2(-21.0, -6.35, 8.0, 4.5),
-	"utility": Rect2(0.5, 0.35, 4.5, 6.0),
-	"bunks": Rect2(-5.0, 0.35, 5.5, 6.0),
-	"bathroom": Rect2(-9.0, 0.35, 4.0, 6.0),
-	"medical": Rect2(-13.0, 0.35, 4.0, 6.0),
-	"mess": Rect2(-21.0, 0.35, 8.0, 6.0),
+	"stairwell": Rect2(2.1, -3.0, 1.5, 6.0),
+	"tunnel": Rect2(2.1, 3.0, 6.1, 2.0),
+	"passage": Rect2(6.7, 5.0, 1.5, 4.5),
+	"corridor": Rect2(-17.15, 9.5, 26.0, 2.2),
+	"munitions": Rect2(-1.15, 5.0, 7.85, 4.5),
+	"armory": Rect2(-5.65, 5.0, 4.5, 4.5),
+	"pantry": Rect2(-9.15, 5.0, 3.5, 4.5),
+	"command": Rect2(-17.15, 5.0, 8.0, 4.5),
+	"utility": Rect2(4.35, 11.7, 4.5, 6.0),
+	"bunks": Rect2(-1.15, 11.7, 5.5, 6.0),
+	"bathroom": Rect2(-5.15, 11.7, 4.0, 6.0),
+	"medical": Rect2(-9.15, 11.7, 4.0, 6.0),
+	"mess": Rect2(-17.15, 11.7, 8.0, 6.0),
 }
 ## What each room's door plate says.
 const ROOM_TITLES := {
@@ -63,22 +67,25 @@ const ROOM_TITLES := {
 	"mess": "Mess hall",
 }
 ## Doors on shared edges: x along the edge, z the edge line (all on z lines),
-## which room the leaf swings into and that room's wall.
+## which room the leaf swings into and that room's wall. An `open` entry is a
+## doorless opening (the tunnel from the stairs to the blast door).
 const DOORS := [
-	{x = 3.6, z = -1.85, w = 1.2, room = "corridor", wall = "north", label = "blast door", blast = true},
-	{x = -1.0, z = -1.85, w = 1.0, room = "munitions", wall = "south", label = "munitions store door"},
-	{x = -2.0, z = 0.35, w = 1.0, room = "bunks", wall = "north", label = "bunk room door"},
-	{x = -7.25, z = -1.85, w = 1.0, room = "armory", wall = "south", label = "armory door"},
-	{x = -11.25, z = -1.85, w = 1.0, room = "pantry", wall = "south", label = "pantry door"},
-	{x = -17.0, z = -1.85, w = 1.0, room = "command", wall = "south", label = "command room door"},
-	{x = 2.75, z = 0.35, w = 1.0, room = "utility", wall = "north", label = "utility room door"},
-	{x = -7.0, z = 0.35, w = 1.0, room = "bathroom", wall = "north", label = "bathroom door"},
-	{x = -11.0, z = 0.35, w = 1.0, room = "medical", wall = "north", label = "medical bay door"},
-	{x = -17.0, z = 0.35, w = 1.0, room = "mess", wall = "north", label = "mess hall door"},
+	{x = 2.85, z = 3.0, w = 1.2, room = "tunnel", wall = "north", label = "tunnel", open = true},
+	{x = 7.45, z = 5.0, w = 1.2, room = "passage", wall = "north", label = "passage", open = true},
+	{x = 7.45, z = 9.5, w = 1.2, room = "corridor", wall = "north", label = "blast door", blast = true},
+	{x = 2.85, z = 9.5, w = 1.0, room = "munitions", wall = "south", label = "munitions store door"},
+	{x = 1.85, z = 11.7, w = 1.0, room = "bunks", wall = "north", label = "bunk room door"},
+	{x = -3.4, z = 9.5, w = 1.0, room = "armory", wall = "south", label = "armory door"},
+	{x = -7.4, z = 9.5, w = 1.0, room = "pantry", wall = "south", label = "pantry door"},
+	{x = -13.15, z = 9.5, w = 1.0, room = "command", wall = "south", label = "command room door"},
+	{x = 6.6, z = 11.7, w = 1.0, room = "utility", wall = "north", label = "utility room door"},
+	{x = -3.15, z = 11.7, w = 1.0, room = "bathroom", wall = "north", label = "bathroom door"},
+	{x = -7.15, z = 11.7, w = 1.0, room = "medical", wall = "north", label = "medical bay door"},
+	{x = -13.15, z = 11.7, w = 1.0, room = "mess", wall = "north", label = "mess hall door"},
 ]
 
 ## The building whose floor the hatch is in (building_shell.gd reads this).
-@export var hatch_building := "House"
+@export var hatch_building := "House Garage"
 
 var trap_door: Node3D
 var _box: Node3D
@@ -90,7 +97,7 @@ func _enter_tree() -> void:
 	add_to_group("terrain_hole")
 	add_to_group("floor_hatch")
 
-## The hatch in the House's floor, in the shell's (x, z).
+## The hatch in the garage's floor, in the garage shell's (x, z).
 func hatch_rect() -> Rect2:
 	return Rect2(STAIR_X0, STAIR_Z0, STAIR_W, HATCH_LEN)
 
@@ -101,7 +108,7 @@ static func tread() -> float:
 static func rise() -> float:
 	return (HOUSE_FLOOR - FLOOR_Y) / RISERS
 
-## The walking ramp's slope (rise over run). It leaves the House's floor level
+## The walking ramp's slope (rise over run). It leaves the garage's floor level
 ## with the top step's edge, so there is no lip to catch on at the top, and
 ## reaches the stairwell floor half a tread before the last step ends, so
 ## lower down it runs a little under the nosings and feet land on the treads.
@@ -166,7 +173,7 @@ func _ready() -> void:
 	_build_probe()
 
 ## Lights only while the camera is down here or near the hatch: unshadowed,
-## they would otherwise light the House's walls from below.
+## they would otherwise light the garage's walls from below.
 func _process(_delta: float) -> void:
 	if _lights.is_empty():
 		return
@@ -244,7 +251,7 @@ func _build_rooms() -> void:
 			_add_box(Vector3(r.get_center().x, FLOOR_Y + h + 0.1, r.get_center().y), Vector3(r.size.x, 0.2, r.size.y), _mats.wall, true)
 		for wall in ["north", "south", "east", "west"]:
 			_build_wall(room, wall, r, h)
-	# The stairwell's ceiling where the House's floor is over it (past the hatch).
+	# The stairwell's ceiling where the garage's floor is over it (past the hatch).
 	var s: Rect2 = ROOMS.stairwell
 	var z0 := STAIR_Z0 + HATCH_LEN
 	_add_box(Vector3(s.get_center().x, -0.05, (z0 + s.end.y) / 2.0), Vector3(s.size.x, 0.1, s.end.y - z0), _mats.wall, true)
@@ -304,7 +311,7 @@ func _build_stairs() -> void:
 	cs.position = (top + bottom) / 2.0 + Vector3(0, -cos(angle), -sin(angle)) * (thick / 2.0)
 	_walls_body.add_child(cs)
 	# A steel handrail down the west wall, 0.9 m over the nosings; it starts
-	# where it is under the House's floor, so a closed trap door clears it.
+	# where it is under the garage's floor, so a closed trap door clears it.
 	var rail_x := STAIR_X0 + 0.07
 	var rail_start := 1.45
 	var a := Vector3(rail_x, HOUSE_FLOOR - rail_start * rise() / tread() + 0.9, STAIR_Z0 + rail_start)
@@ -326,6 +333,8 @@ func _build_trap_door() -> void:
 
 func _build_doors() -> void:
 	for d: Dictionary in DOORS:
+		if d.get("open", false):
+			continue
 		var spec: Dictionary = Shell.WALLS[d.wall]
 		var door := DoorScript.new()
 		var w := float(d.w)
@@ -384,7 +393,7 @@ func _furnish_corridor() -> void:
 	_add_cyl(Vector3(i.end.x - 0.25, FLOOR_Y + 0.35, i.end.y - 0.2), 0.09, 0.6, _mats.red)
 	# A name plate over every room's door, on the corridor side.
 	for d: Dictionary in DOORS:
-		if d.get("blast", false):
+		if d.get("blast", false) or d.get("open", false):
 			continue
 		var north := float(d.z) < r.get_center().y
 		var z := float(d.z) + (WALL_T + 0.012 if north else -WALL_T - 0.012)
@@ -722,7 +731,8 @@ func _bunk(base: Vector3) -> void:
 ## A ceiling LED strip down each room's long axis and an omni light every few
 ## metres along it; the stairwell has one light partway down.
 func _build_lights() -> void:
-	_add_light(Vector3(3.6, -1.0, -3.0))
+	var sw: Rect2 = ROOMS.stairwell
+	_add_light(Vector3(sw.get_center().x, -1.0, sw.get_center().y))
 	for room: String in ROOMS:
 		if room == "stairwell":
 			continue

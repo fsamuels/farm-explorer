@@ -13,7 +13,7 @@ extends Node3D
 ## fire table; a table-top counter, a sink optional, and the owner's Traeger
 ## pellet grill. Realistic ideas come first, best fit first; a handful at the
 ## end are just for fun. Every tub can be got into (hot_tub_soak.gd). Nothing
-## is ever built over a tub: the owner wants to see the stars from it (D-195).
+## is ever built over a tub: the owner wants to see the stars from it (D-196).
 ##
 ## Everything is built in the House's frame (building_shell.gd's frame_for):
 ## the west wall at x = WALL (-5.67), +z south. Each idea is built the first
@@ -765,7 +765,7 @@ func _gravel_steel_canopy(root: Node3D, body: StaticBody3D) -> void:
 	# A steel carport canopy over the fire and the Traeger: the cheapest roof.
 	_cook_and_fire(root, body, Rect2(-15.4, -7.0, 5.4, 4.6), "flat", GALVANISED, K.CHARCOAL, false, 2)
 
-# --- open-sky ideas (D-195) ----------------------------------------------------
+# --- open-sky ideas (D-196) ----------------------------------------------------
 #
 # Thirty realistic ideas in all, the newer ones below. Nothing stands over a
 # tub or its deck: the owner wants to see the stars from the water. Roofs stop
@@ -1074,7 +1074,7 @@ func _west_end_pavilion(root: Node3D, body: StaticBody3D) -> void:
 	_cook_and_fire(root, body, pav, "gable", GALVANISED, Color(0.55, 0.16, 0.12), true, 3)
 	K.tub_on_deck(root, body, TUB, 2.3, K.boards(K.CEDAR), ["north", "west"], K.CEDAR_DARK)
 
-# --- filling the yard (D-196) --------------------------------------------------
+# --- filling the yard (D-197) --------------------------------------------------
 #
 # Every realistic idea gets more than its tub, roof, fire and kitchen: things at
 # the tub (a towel post, step lights, a side table) found from its tub-deck
