@@ -1,8 +1,10 @@
 extends RefCounted
-## A paper birch made in code (D-192): a tall, slender white trunk with dark
-## horizontal scars, a light crown of thin up-swept branches, and small
-## yellow-green leaves in clusters at the branch tips. Each tree grows from a
-## seed, so a stand of them is not a row of copies.
+## A tall poplar-type tree made in code (D-192, reworked in D-196 after the
+## owner's photos showed these are not birches): a straight grey-brown trunk
+## with deep vertical furrows and a flared base, bare of branches low down, a
+## narrow crown of up-swept branches, and broad heart-shaped yellow-green
+## leaves in clusters at the branch tips. The script keeps its first name. Each
+## tree grows from a seed, so a stand of them is not a row of copies.
 ##
 ## build() returns a Node3D whose origin is the base of the trunk on the
 ## ground: one bark mesh, one leaf mesh (crossed cards with an alpha-scissor
@@ -10,14 +12,14 @@ extends RefCounted
 ## the trunk. The crown is walk-through.
 
 const SIDES := 7
-const BARK_COLOR := Color(0.93, 0.91, 0.85)
-const LEAF_COLOR := Color(0.52, 0.62, 0.25)
+const BARK_COLOR := Color(0.52, 0.47, 0.41)
+const LEAF_COLOR := Color(0.5, 0.66, 0.2)
 ## Radius of the solid part of the trunk, metres, for a REF_HEIGHT tree; wood
 ## thickness scales with the tree's height.
-const TRUNK_RADIUS := 0.14
+const TRUNK_RADIUS := 0.2
 const REF_HEIGHT := 12.0
 ## How far up the trunk the lowest branch is, as a share of the height.
-const CROWN_START := 0.3
+const CROWN_START := 0.5
 ## A metre of trunk is this much of the bark texture's height.
 const BARK_TILE := 1.6
 
@@ -47,7 +49,7 @@ static func build(seed: int, height: float) -> Node3D:
 		var t := float(i) / steps
 		var wander := Vector3(sin(wobble + t * 5.0), 0, cos(wobble * 1.3 + t * 4.0)) * 0.12 * scale * t
 		trunk.append(Vector3(0, -0.1 + (height * 0.96 + 0.1) * t, 0) + drift * height * t * t + wander)
-		radii.append(TRUNK_RADIUS * girth * lerpf(1.0, 0.18, pow(t, 0.8)) * (1.0 + 0.35 * pow(1.0 - t, 6.0)))
+		radii.append(TRUNK_RADIUS * girth * lerpf(1.0, 0.2, pow(t, 0.9)) * (1.0 + 0.6 * pow(1.0 - t, 9.0)))
 	_tube(bark, trunk, radii)
 
 	# Branches spiral up from CROWN_START; they are longest low in the crown and
@@ -59,9 +61,9 @@ static func build(seed: int, height: float) -> Node3D:
 		var at := CROWN_START + (0.93 - CROWN_START) * t
 		az += rng.randf_range(2.0, 2.8)
 		var base := _along(trunk, at)
-		var reach := height * lerpf(0.26, 0.06, pow(t, 1.2)) * rng.randf_range(0.8, 1.15)
+		var reach := height * lerpf(0.2, 0.06, pow(t, 1.1)) * rng.randf_range(0.8, 1.15)
 		reach *= lerpf(0.75, 1.0, minf(t * 3.0, 1.0))
-		var up := deg_to_rad(rng.randf_range(32.0, 58.0))
+		var up := deg_to_rad(rng.randf_range(24.0, 50.0))
 		var dir := Vector3(sin(up) * cos(az), cos(up), sin(up) * sin(az))
 		_branch(rng, bark, leaves, base, dir, reach, TRUNK_RADIUS * girth * lerpf(0.4, 0.2, t), scale, true)
 	# The leader carries a cluster of its own.
@@ -194,38 +196,35 @@ static func leaf_material() -> StandardMaterial3D:
 		_leaf_material = m
 	return _leaf_material
 
-## White bark, a little warm and grey in patches, with short dark horizontal
-## scars (lenticels). Tiles in both directions.
+## Grey-brown bark with deep vertical furrows: darker grooves between paler
+## ridges, patchy, and a few short cracks across. Tiles in both directions.
 static func bark_image() -> Image:
 	var w := 64
 	var h := 128
 	var img := Image.create(w, h, true, Image.FORMAT_RGB8)
 	var noise := FastNoiseLite.new()
 	noise.seed = 192
-	noise.frequency = 0.06
-	for y in h:
-		for x in w:
-			var a := TAU * float(x) / w
-			var v := noise.get_noise_3d(cos(a) * 9.0, sin(a) * 9.0, y * 0.7)
-			var c := BARK_COLOR * (0.93 + 0.14 * v)
-			c.a = 1.0
-			img.set_pixel(x, y, c)
+	noise.frequency = 0.05
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1921
-	for i in 26:
+	for y in h:
+		for x in w:
+			# Furrows run up the trunk: noise that changes fast across and slowly along.
+			var a := TAU * float(x) / w
+			var furrow := noise.get_noise_3d(cos(a) * 14.0, sin(a) * 14.0, y * 0.18)
+			var patch := noise.get_noise_3d(cos(a) * 3.0 + 40.0, sin(a) * 3.0, y * 0.5)
+			var c := BARK_COLOR * (1.0 + 0.55 * furrow + 0.15 * patch)
+			c.a = 1.0
+			img.set_pixel(x, y, c)
+	for i in 14:
 		var y0 := rng.randi_range(0, h - 1)
 		var x0 := rng.randi_range(0, w - 1)
-		var run := rng.randi_range(5, 16)
-		var tone := rng.randf_range(0.12, 0.3)
-		for k in run:
-			var px := (x0 + k) % w
-			var edge := 0.25 if (k == 0 or k == run - 1) else 0.0
-			for dy in 2:
-				img.set_pixel(px, (y0 + dy) % h, Color(tone + edge, tone + edge, tone + edge * 0.9, 1))
+		for k in rng.randi_range(3, 9):
+			img.set_pixel((x0 + k) % w, y0, BARK_COLOR * 0.45)
 	img.generate_mipmaps()
 	return img
 
-## A spray of small leaves, transparent between them.
+## A spray of broad heart-shaped leaves on short stalks, transparent between them.
 static func cluster_image() -> Image:
 	var size := 128
 	var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
@@ -233,14 +232,14 @@ static func cluster_image() -> Image:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1922
 	var centre := Vector2(size / 2.0, size / 2.0)
-	for i in 70:
+	for i in 38:
 		# Leaves cluster toward the middle of the card, thinning at the rim.
 		var ang := rng.randf() * TAU
 		var r := sqrt(rng.randf()) * size * 0.4
 		var p := centre + Vector2(cos(ang), sin(ang)) * r
 		var heading := rng.randf() * TAU
-		var length := rng.randf_range(9.0, 14.0)
-		var half_w := length * rng.randf_range(0.34, 0.46)
+		var length := rng.randf_range(13.0, 19.0)
+		var half_w := length * rng.randf_range(0.45, 0.58)
 		var along := Vector2(cos(heading), sin(heading))
 		var across := Vector2(-along.y, along.x)
 		var tone := LEAF_COLOR * rng.randf_range(0.8, 1.25)
@@ -253,8 +252,8 @@ static func cluster_image() -> Image:
 				var s := d.dot(along) / length
 				if s < 0.0 or s > 1.0:
 					continue
-				# Ovate: broad near the stalk, pointed at the tip.
-				var width := half_w * (1.0 - s * 0.6) * sin(PI * pow(s, 0.6))
+				# Heart-shaped: widest close to the stalk, tapering to a point.
+				var width := half_w * pow(1.0 - s, 0.7) * sin(PI * pow(minf(s * 3.0, 1.0), 1.0) * 0.5) * 1.15
 				if absf(d.dot(across)) <= width:
 					img.set_pixel(px, py, tone.lightened(0.2 * s))
 	img.generate_mipmaps()
