@@ -1,7 +1,8 @@
 extends SceneTree
-## Tests for the Russian olives (D-194): the line they follow, their 15 to
-## 25 ft heights, thin at the west and thick at the east, clear of fences and
-## buildings, and the tree itself (leaves, solid trunk). Run headless from
+## Tests for the Russian olives (D-194, D-199): the line they follow, their 15
+## to 25 ft heights, thin at the west, an old-growth forest with young trees
+## under it along the House, thick at the east, clear of fences and buildings,
+## and the tree itself (leaves, solid trunk). Run headless from
 ## project/:
 ##   godot --headless -s res://tests/test_russian_olives.gd
 
@@ -25,25 +26,34 @@ func _seg_dist(p: Vector2, a: Vector2, b: Vector2) -> float:
 
 func _run() -> void:
 	var spots := Olives.spots()
-	_check(spots.size() >= 20 and spots.size() <= 45, "a stand of trees (%d)" % spots.size())
+	_check(spots.size() >= 60 and spots.size() <= 130, "a stand of trees (%d)" % spots.size())
 	_check(spots == Olives.spots(), "the same spots every run")
 	var line := Olives.END - Olives.START
+	var across := Vector2(-line.normalized().y, line.normalized().x)
 	var west := 0
-	var mid := 0
+	var forest := 0
 	var east := 0
+	var deep := 0
 	for p in spots:
-		var off := (p - Olives.START).cross(line.normalized())
-		_check(absf(off) <= 5.0, "%s is within 5 m of the line (%.1f)" % [p, off])
+		var off := (p - Olives.START).dot(across)
+		var stretch: Dictionary = Olives.stretch_at(p.x)
+		_check(off >= -stretch.north - 0.01 and off <= stretch.south + 0.01, "%s stands in its band (%.1f m off the line)" % [p, off])
 		_check(p.x >= Olives.START.x - 0.5 and p.x <= Olives.END.x + 5.0, "%s is within the line's length" % p)
-		if p.x < -5.0:
+		if p.x <= -5.0:
 			west += 1
-		elif p.x < 75.0:
-			mid += 1
+		elif p.x <= 95.0:
+			forest += 1
+			if off < -6.0:
+				deep += 1
 		else:
 			east += 1
-	# Per 100 m of line: thin to the west, sparse through the middle, thick at the east.
-	_check(float(east) / 66.0 > float(mid) / 80.0 * 2.0, "thicker at the east end than the middle (%d vs %d)" % [east, mid])
-	_check(west > 0 and mid > 0 and east > 8, "trees in every stretch (%d, %d, %d)" % [west, mid, east])
+	# Per metre of line: thin in the west, a forest along the House, thick in the east.
+	var w_rate := west / 49.0
+	var f_rate := forest / 100.0
+	var e_rate := east / 47.0
+	_check(f_rate > e_rate * 2.0 and f_rate > w_rate * 4.0, "a forest along the House (%.2f per m, east %.2f, west %.2f)" % [f_rate, e_rate, w_rate])
+	_check(e_rate > w_rate, "thicker at the east end than the west (%.2f vs %.2f)" % [e_rate, w_rate])
+	_check(deep > 10, "the forest runs deep over the grove (%d trees more than 6 m north of the line)" % deep)
 
 	var tree := Olive.build(7, 6.0)
 	var bark := (tree.get_node("Bark") as MeshInstance3D).mesh.get_aabb()
@@ -62,13 +72,18 @@ func _run() -> void:
 	_check(stand.get_child_count() == spots.size(), "a tree at every spot")
 	var tallest := 0.0
 	var shortest := INF
+	var young := 0
 	for i in stand.get_child_count():
 		var t := stand.get_child(i) as Node3D
-		var top := (t.get_node("Leaves") as MeshInstance3D).mesh.get_aabb().end.y
+		var leaves_mi := t.get_node("Leaves") as MeshInstance3D
+		var top := leaves_mi.mesh.get_aabb().end.y * leaves_mi.scale.y
 		tallest = maxf(tallest, top)
 		shortest = minf(shortest, top)
+		if top < 4.6 and Olives.stretch_at(spots[i].x).get("forest", false):
+			young += 1
 	_check(tallest < 8.3 * 1.25 and tallest > 6.0, "the tallest is about 25 ft (%.1f m to the leaf tops)" % tallest)
-	_check(shortest > 3.5, "the shortest is about 15 ft (%.1f m to the leaf tops)" % shortest)
+	_check(shortest > 2.6, "the shortest, a young tree, is about 10 ft (%.1f m to the leaf tops)" % shortest)
+	_check(young >= 8, "young trees coming up in the forest (%d)" % young)
 	# Clear of every fence and building.
 	var segs: Array = []
 	for group_name in ["BackFences", "PastureFences", "TrackTeamFences"]:
