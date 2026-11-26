@@ -36,7 +36,7 @@ const CONTROLS := [
 	["P", "Music on / off (it starts off); [ and ] turn it down and up. There is a button for it in the bottom bar"],
 	["L / J", "In a hot tub (E on the water to get in): L cycles the lights, J turns the jets on and off"],
 	["O", "Back yard ideas: step through mockups of a new outdoor space behind the House (Shift+O goes back)"],
-	["Esc", "Release the mouse (click to recapture)"],
+	["Esc", "Release the mouse (click to recapture). The game starts with the mouse free: click or press a key to take control"],
 	["Controller", "Left stick move, right stick look, A jump (handbrake), X get in / out and open doors, Y sky menu, Start things to do, Back map"],
 	["Controller", "Hold left trigger to super sprint, click the left stick to walk, right trigger burns with the torch, bumpers zoom the camera"],
 	["Controller", "D-pad: up torch, down dump bed, left time of day, right weather; click the right stick for this help; B closes a menu"],

@@ -79,9 +79,13 @@ var _water: Node
 var _skeleton: Skeleton3D
 var _hip_local := Vector3.ZERO
 var _swim_time := 0.0
+## False until the player first takes the mouse (or frees it with Esc).
+var _took_control := false
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	# Launch with the mouse free: a click or key press takes control (below). That
+	# keeps the editor, tests and scripted runs from grabbing the user's mouse.
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	drive_hud = DriveHud.new()
 	$HUD.add_child(drive_hud)
 	_set_body_layer(model)
@@ -136,6 +140,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		# free the mouse, which a controller player has no way to recapture.
 		if not event is InputEventJoypadButton:
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+			_took_control = true
+	elif not _took_control and event is InputEventKey and event.pressed and not event.echo:
+		# First launch only: any key (that no menu used) takes the mouse; after Esc
+		# it takes a click, so typing doesn't grab the mouse back.
+		_took_control = true
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	elif event is InputEventMouseButton and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
 		# A click recaptures the mouse; scrolling over the window doesn't.
 		var button := (event as InputEventMouseButton).button_index
