@@ -6,6 +6,8 @@ extends RefCounted
 ## collision in. Positions are in that parent's frame (the House's frame in
 ## the mockups: +x east-ish, +z south-ish, y up from the ground).
 
+const Soak := preload("res://scripts/hot_tub_soak.gd")
+
 const FIRE_COLOR := Color(1.0, 0.55, 0.15)
 
 # Colours used across the mockups.
@@ -228,7 +230,15 @@ static func hot_tub(parent: Node3D, body: StaticBody3D, center: Vector2, size :=
 	box(parent, base + Vector3(0, height / 2.0, 0), Vector3(size, height, size), mat(cabinet, 0.8), body)
 	# Rim, shell and water.
 	box(parent, base + Vector3(0, height + 0.02, 0), Vector3(size, 0.04, size), mat(Color(0.85, 0.85, 0.83), 0.4))
-	box(parent, base + Vector3(0, height + 0.045, 0), Vector3(size - 0.25, 0.02, size - 0.25), mat(WATER, 0.05, 0.1, 0.25))
+	var water := box(parent, base + Vector3(0, height + 0.045, 0), Vector3(size - 0.25, 0.02, size - 0.25), mat(WATER, 0.05, 0.1, 0.25))
+	var soak := Soak.new()
+	soak.name = "Soak"
+	soak.size = size - 0.25
+	soak.water_y = height + 0.045
+	soak.position = base
+	parent.add_child(soak)
+	soak.set_water_material(water.material_override as StandardMaterial3D)
+	water.material_override = soak.get_water_material()
 	# Headrests in the corners.
 	for sx in [-1, 1]:
 		for sz in [-1, 1]:
@@ -459,10 +469,6 @@ static func string_lights(parent: Node3D, body: StaticBody3D, points: Array, hei
 		for p in points:
 			box(parent, Vector3(p.x, height / 2.0, p.y), Vector3(0.1, height, 0.1), mat(CHARCOAL, 0.6), body)
 
-## A round shrub.
-static func shrub(parent: Node3D, at: Vector2, radius := 0.5) -> void:
-	ball(parent, Vector3(at.x, radius * 0.8, at.y), radius, mat(GREEN, 0.95), 0.85)
-
 ## A tiki torch.
 static func torch(parent: Node3D, at: Vector2) -> void:
 	cyl(parent, Vector3(at.x, 0.9, at.y), 0.03, 1.8, mat(CEDAR_DARK, 0.9))
@@ -559,3 +565,38 @@ static func power_run(parent: Node3D, pts: Array) -> float:
 	var last: Vector2 = pts[pts.size() - 1]
 	mark(parent, Vector3(first.x, 0, first.y), "power_run", {"from": first, "to": last, "length": length})
 	return length
+
+## The owner's Traeger pellet grill, standing free: a black drum on four legs
+## with a lower shelf, the pellet hopper on its left, a chimney on its right, a
+## front shelf and two wheels. Its front (shelf side) faces `facing` (x, z).
+static func traeger(parent: Node3D, body: StaticBody3D, at: Vector2, facing: Vector2) -> void:
+	var holder := Node3D.new()
+	holder.position = Vector3(at.x, 0, at.y)
+	holder.rotation.y = atan2(facing.x, facing.y)
+	parent.add_child(holder)
+	mark(parent, Vector3(at.x, 0, at.y), "traeger")
+	var black := mat(Color(0.08, 0.08, 0.09), 0.5, 0.4)
+	var steel := mat(STEEL, 0.35, 0.8)
+	for sx in [-0.38, 0.38]:
+		for sz in [-0.2, 0.2]:
+			box(holder, Vector3(sx, 0.36, sz), Vector3(0.04, 0.72, 0.04), black)
+	box(holder, Vector3(0, 0.22, 0), Vector3(0.8, 0.02, 0.42), black)
+	var drum := cyl(holder, Vector3(0, 0.92, 0), 0.27, 0.95, black, null, -1.0, 20)
+	drum.rotation.z = PI / 2.0
+	box(holder, Vector3(0, 0.92, 0.27), Vector3(0.9, 0.03, 0.02), steel)
+	box(holder, Vector3(0, 1.0, 0.31), Vector3(0.5, 0.03, 0.03), steel)
+	box(holder, Vector3(-0.62, 0.95, 0), Vector3(0.3, 0.5, 0.38), black)
+	box(holder, Vector3(-0.62, 0.92, 0.2), Vector3(0.12, 0.07, 0.01), mat(Color(0.15, 0.55, 0.85), 0.4, 0.0, 1.0))
+	cyl(holder, Vector3(0.38, 1.38, -0.05), 0.05, 0.45, black)
+	box(holder, Vector3(0.38, 1.62, -0.05), Vector3(0.16, 0.03, 0.16), black)
+	box(holder, Vector3(0, 0.75, 0.38), Vector3(0.8, 0.02, 0.26), steel)
+	for sz in [-0.2, 0.2]:
+		var w := cyl(holder, Vector3(0.42, 0.09, sz), 0.09, 0.05, black, null, -1.0, 12)
+		w.rotation.z = PI / 2.0
+	if body:
+		var shape := BoxShape3D.new()
+		shape.size = Vector3(1.4, 1.3, 0.7)
+		var cs := CollisionShape3D.new()
+		cs.shape = shape
+		cs.transform = body.global_transform.affine_inverse() * holder.global_transform * Transform3D(Basis(), Vector3(-0.1, 0.65, 0.05))
+		body.add_child(cs)
