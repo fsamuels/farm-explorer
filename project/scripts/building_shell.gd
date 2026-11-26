@@ -59,9 +59,9 @@ extends Node3D
 ##
 ## A door entry with `"start_open": true` is built open (E still closes it),
 ## and one with `"leaf": false` is a bare opening with no door in it (the
-## garage's side of the House's pantry door, D-194).
+## garage's side of the House's pantry door, D-195).
 ##
-## `paint` (D-194) colours stretches of the inside walls: each entry is a
+## `paint` (D-195) colours stretches of the inside walls: each entry is a
 ## Dictionary of wall, `from` and `to` (along the wall's axis in this frame,
 ## metres from the footprint centre) and `color`. A thin coat goes on the
 ## liner's inside face, cut round the wall's openings like the liner itself.

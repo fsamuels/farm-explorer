@@ -1,6 +1,6 @@
 extends SceneTree
 ## Tests for the House's front door, the trap door in the House Garage and the
-## bomb shelter under them (D-145, D-186, D-194): the layout numbers hang
+## bomb shelter under them (D-145, D-186, D-195): the layout numbers hang
 ## together, the ground has a hole only at the stairs, and the real player can
 ## walk in the front door, stand on the closed trap door, go down the stairs,
 ## along the tunnel, through the blast door into every room, and back up. Run headless from project/:

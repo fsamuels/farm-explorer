@@ -1,5 +1,5 @@
 extends Node3D
-## The bomb shelter under the House (D-145, D-186, D-194): a wooden trap door
+## The bomb shelter under the House (D-145, D-186, D-195): a wooden trap door
 ## in the House Garage's floor opens on concrete stairs down to a short tunnel
 ## that turns east and then south, under the House's north end, to a steel
 ## blast door. Past it a long corridor runs west under the back yard, with nine

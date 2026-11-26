@@ -17,6 +17,13 @@ const DATA := {
 		},
 		{
 			"bullets": [
+				"**Russian olives.** About thirty trees, 15 to 25 feet tall, with several crooked stems, dark rough bark and silvery-green leaves, stand along the north side of the farm where they show in the aerial imagery. You can walk under the branches but not through the trunks."
+			],
+			"summary": "Old silvery Russian olive trees now line the farm's north side, thin at the west end and thick toward the round corral.",
+			"title": "November 25: Russian olive trees"
+		},
+		{
+			"bullets": [
 				"**Birch trees.** Seven paper birches, about forty feet tall, with white bark, dark scars and small yellow-green leaves. Four stand in a line in the middle-west of the back yard and three more in a line just west of them. You can walk under the branches but not through the trunks.",
 				"**A view to the wind farm.** The trees close off the north-west of the yard and leave a gap to the south-west.",
 				"**The little shed.** A small weathered shed with a shingled roof and a red door stands in the yard's north-west corner, with a low deck in front you can walk up onto. It is closed up for now, so you can't go inside."
@@ -373,14 +380,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 22263,
-		"commits": 59,
-		"decisions": 194,
+		"code_lines": 22504,
+		"commits": 67,
+		"decisions": 195,
 		"models": 14,
 		"scenes": 26,
-		"scripts": 89,
-		"size_kb": 123733,
-		"test_lines": 6958,
+		"scripts": 91,
+		"size_kb": 123748,
+		"test_lines": 7059,
 		"textures": 49,
 		"vehicles": 3
 	}
