@@ -29,6 +29,7 @@ func _run() -> void:
 	_test_props(room, shell)
 	_test_clear(main, room)
 	await _test_walk(main, shell)
+	await _test_table_blocks(main, shell)
 	print("garage interior: %s" % ("OK" if _failures == 0 else "%d FAILED" % _failures))
 	quit(1 if _failures else 0)
 
@@ -87,6 +88,8 @@ func _test_clear(main: Node, room: Node3D) -> void:
 	for name in zones:
 		for r in room.colliders:
 			_check(not r.intersects(zones[name]), "a prop at %s blocks the %s" % [r, name])
+	var table := Rect2(Garage.TABLE_AT - Garage.TABLE_SIZE / 2.0, Garage.TABLE_SIZE)
+	_check(room.colliders.any(func(r: Rect2) -> bool: return r.encloses(table.grow(-0.01))), "the work table's top is solid")
 	for r in room.colliders:
 		_check(r.position.x > -room.half_x - 0.05 and r.end.x < room.half_x + 0.05 and r.position.y > -room.half_z - 0.05 and r.end.y < room.half_z + 0.05, "prop %s is inside the garage" % r)
 
@@ -103,3 +106,19 @@ func _test_walk(main: Node, shell: Node3D) -> void:
 	await _step(5)
 	var p := shell.to_local(player.global_position)
 	_check(p.z < -1.5, "walked the length of the garage past the table and the counter (z %.2f)" % p.z)
+	_check(p.x > -3.3 and p.x < -1.9, "and stayed in the lane between them (x %.2f)" % p.x)
+
+## Walking at the work table from the east stops at it, and does not go under it.
+func _test_table_blocks(main: Node, shell: Node3D) -> void:
+	var player: CharacterBody3D = main.get_node("Player")
+	var at := Garage.TABLE_AT
+	var start := shell.to_global(Vector3(at.x + 2.0, 0.0, at.y))
+	player.global_position = start + Vector3(0, 0.1, 0)
+	player.velocity = Vector3.ZERO
+	player.global_basis = Basis.looking_at(shell.to_global(Vector3(at.x, 0, at.y)) - start, Vector3.UP)
+	Input.action_press("move_forward")
+	await _step(150)
+	Input.action_release("move_forward")
+	await _step(5)
+	var p := shell.to_local(player.global_position)
+	_check(p.x > at.x + Garage.TABLE_SIZE.x / 2.0, "the work table stops the player (x %.2f, table edge %.2f)" % [p.x, at.x + Garage.TABLE_SIZE.x / 2.0])

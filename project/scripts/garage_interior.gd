@@ -76,6 +76,10 @@ var props := {}
 var _body: StaticBody3D
 var _mats := {}
 var _ink: StandardMaterial3D
+## Primitive meshes already made, by shape and size, so props share them; and
+## the outline meshes made from them.
+var _meshes := {}
+var _outlines := {}
 
 func _ready() -> void:
 	var box := get_node_or_null("../" + building_name) as Node3D
@@ -135,6 +139,13 @@ func _m(key: String) -> StandardMaterial3D:
 ## A slightly larger copy of a primitive mesh, for the outline (its back faces
 ## are drawn in black behind the prop).
 func _expand(mesh: Mesh) -> Mesh:
+	if _outlines.has(mesh):
+		return _outlines[mesh]
+	var out := _expand_new(mesh)
+	_outlines[mesh] = out
+	return out
+
+func _expand_new(mesh: Mesh) -> Mesh:
 	if mesh is BoxMesh:
 		var b := BoxMesh.new()
 		b.size = (mesh as BoxMesh).size + Vector3.ONE * INK * 2.0
@@ -173,28 +184,40 @@ func _add(node_name: String, mesh: Mesh, pos: Vector3, mat: Material, ink: bool,
 	return mi
 
 func _box(node_name: String, pos: Vector3, size: Vector3, key: String, solid := false, ink := true, parent: Node3D = null) -> MeshInstance3D:
-	var mesh := BoxMesh.new()
-	mesh.size = size
+	var cache_key := "box%s" % size
+	var mesh: BoxMesh = _meshes.get(cache_key)
+	if mesh == null:
+		mesh = BoxMesh.new()
+		mesh.size = size
+		_meshes[cache_key] = mesh
 	var mi := _add(node_name, mesh, pos, _m(key), ink, parent)
 	if solid:
 		_collide(pos, size)
 	return mi
 
 func _cyl(node_name: String, pos: Vector3, radius: float, height: float, key: String, ink := true, top := -1.0, segments := 12) -> MeshInstance3D:
-	var mesh := CylinderMesh.new()
-	mesh.bottom_radius = radius
-	mesh.top_radius = radius if top < 0.0 else top
-	mesh.height = height
-	mesh.radial_segments = segments
-	mesh.rings = 1
+	var cache_key := "cyl%s/%s/%s/%s" % [radius, top, height, segments]
+	var mesh: CylinderMesh = _meshes.get(cache_key)
+	if mesh == null:
+		mesh = CylinderMesh.new()
+		mesh.bottom_radius = radius
+		mesh.top_radius = radius if top < 0.0 else top
+		mesh.height = height
+		mesh.radial_segments = segments
+		mesh.rings = 1
+		_meshes[cache_key] = mesh
 	return _add(node_name, mesh, pos, _m(key), ink)
 
 func _ball(node_name: String, pos: Vector3, radius: float, key: String, ink := true) -> MeshInstance3D:
-	var mesh := SphereMesh.new()
-	mesh.radius = radius
-	mesh.height = radius * 2.0
-	mesh.radial_segments = 12
-	mesh.rings = 6
+	var cache_key := "ball%s" % radius
+	var mesh: SphereMesh = _meshes.get(cache_key)
+	if mesh == null:
+		mesh = SphereMesh.new()
+		mesh.radius = radius
+		mesh.height = radius * 2.0
+		mesh.radial_segments = 12
+		mesh.rings = 6
+		_meshes[cache_key] = mesh
 	return _add(node_name, mesh, pos, _m(key), ink)
 
 func _collide(pos: Vector3, size: Vector3) -> void:
@@ -372,7 +395,7 @@ func _build_tanks() -> void:
 func _build_table() -> void:
 	var c := TABLE_AT
 	var top_y := FLOOR_Y + COUNTER_H
-	var top := _box("TableTop", Vector3(c.x, top_y - 0.03, c.y), Vector3(TABLE_SIZE.x, 0.06, TABLE_SIZE.y), "lilac")
+	var top := _box("TableTop", Vector3(c.x, top_y - 0.03, c.y), Vector3(TABLE_SIZE.x, 0.06, TABLE_SIZE.y), "lilac", true)
 	props["table"] = top
 	for sx in [-1.0, 1.0]:
 		for sz in [-1.0, 1.0]:
@@ -478,7 +501,7 @@ func _build_rack() -> void:
 	props["jar"] = jar
 	_cyl("TopBucket", Vector3(x, y3 + 0.13, c.z + 0.3), 0.16, 0.26, "bucket", true, 0.19)
 	# On the floor beside it: the trash bucket, a shovel and a broom.
-	var bucket := _cyl("TrashBucket", Vector3(half_x - 0.3, FLOOR_Y + 0.17, 0.55), 0.17, 0.34, "bucket", true, 0.2)
+	var bucket := _cyl("TrashBucket", Vector3(half_x - 0.8, FLOOR_Y + 0.17, 1.2), 0.17, 0.34, "bucket", true, 0.2)
 	props["bucket"] = bucket
 	var shovel := _box("ShovelBlade", Vector3(half_x - 0.1, FLOOR_Y + 0.2, -3.4), Vector3(0.03, 0.34, 0.26), "vise", false, true)
 	shovel.rotation_degrees.x = 10.0
