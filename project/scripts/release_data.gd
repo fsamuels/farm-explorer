@@ -6,6 +6,14 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**Old-growth olives.** Along the north side by the House the scattered trees are now a deep stand of about seventy, most of them big old 20 to 25 foot trees, with younger ones coming up underneath. From the back yard they make a solid wall of crooked trunks and silvery leaves.",
+				"**Still thick to the east.** The band toward the round corral is a little denser too, and the west end is unchanged."
+			],
+			"summary": "North of the House and its back yard, the Russian olives are now a thick old forest of tall trees with young ones growing up between.",
+			"title": "November 26: An old Russian olive forest"
+		},
+		{
+			"bullets": [
 				"**Thirty ideas.** Stand in the back yard and press O to step through them, best fit first, with the five just-for-fun ones still at the end.",
 				"**Open sky over the tub.** Every roof, pavilion and gazebo stops short of the water. The idea with a roof over the tub is gone.",
 				"**New ideas.** A stargazing deck with loungers, a fire beside the tub, a bar facing the tub, a run-in shed, a winter windbreak, a sauna a step from the tub, a cold plunge and shower, a dark-sky yard with a hammock, and more.",
@@ -397,14 +405,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 23215,
-		"commits": 322,
-		"decisions": 198,
+		"code_lines": 23271,
+		"commits": 321,
+		"decisions": 199,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 91,
-		"size_kb": 123788,
-		"test_lines": 7062,
+		"size_kb": 123792,
+		"test_lines": 7077,
 		"textures": 49,
 		"vehicles": 3
 	}
