@@ -6,6 +6,13 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**Poplar-style trees.** The seven tall trees in the back yard were built with white birch bark. They now have thick, furrowed grey-brown trunks that flare at the base, bare lower trunks, a narrower crown and broad heart-shaped leaves."
+			],
+			"summary": "The tall back-yard trees now look like your poplars: grey-brown furrowed trunks and broad green leaves, not white birch bark.",
+			"title": "November 25: The back-yard trees, corrected"
+		},
+		{
+			"bullets": [
 				"**Russian olives.** About thirty trees, 15 to 25 feet tall, with several crooked stems, dark rough bark and silvery-green leaves, stand along the north side of the farm where they show in the aerial imagery. You can walk under the branches but not through the trunks."
 			],
 			"summary": "Old silvery Russian olive trees now line the farm's north side, thin at the west end and thick toward the round corral.",
@@ -369,14 +376,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 22096,
-		"commits": 317,
-		"decisions": 194,
+		"code_lines": 22016,
+		"commits": 318,
+		"decisions": 195,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 90,
-		"size_kb": 123725,
-		"test_lines": 6928,
+		"size_kb": 123720,
+		"test_lines": 6931,
 		"textures": 49,
 		"vehicles": 3
 	}
