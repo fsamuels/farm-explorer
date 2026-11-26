@@ -6,6 +6,13 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**Play with a controller.** Plug in or pair an Xbox, PlayStation or similar gamepad. Left stick moves (a light push is a slow walk) and drives, right stick looks, A jumps, X opens doors and gets in and out of cars, and the right trigger burns with the torch. Y opens the sky menu, Start opens Things to do, and Back opens the map. Press the right stick to see every button. B closes a menu, and the D-pad and A work the menus."
+			],
+			"summary": "Play with a gamepad: sticks to move and look, buttons for doors, torch, sky menu and map, so it works on a TV.",
+			"title": "November 25: Controller support"
+		},
+		{
+			"bullets": [
 				"**A long corridor.** Past the blast door the corridor now runs west under the back yard, with a yellow name plate over every door.",
 				"**Nine rooms.** Command room, pantry, armory and munitions store on one side; mess hall, medical bay, bathroom, bunk room and utility room on the other.",
 				"**No more sleeping where you eat.** The kitchen moved out of the bunk room into a mess hall with long tables; the bunk room now has four bunks and lockers.",
@@ -24,6 +31,7 @@ const DATA := {
 		},
 		{
 			"bullets": [
+				"**Back yard ideas.** Walk up to the House's back deck and press O to try 23 ideas for a new back yard, from a simple hot-tub patio to a Roman bathhouse. Shift+O goes back.",
 				"**Back yard ideas.** Walk up to the House's back deck and press O to try 53 ideas for a new back yard, from a simple hot-tub patio to a Roman bathhouse. Shift+O goes back.",
 				"**New kinds of back yard.** A ranch corral with a chuckwagon, a games lawn with bocce, an outdoor cinema, a glasshouse lounge, a shipping-container spa, a Viking longhouse and more.",
 				"**Different layouts.** Five ideas move the hot tub and everything else round the yard: by the slider, out on the lawn, at the garage end, under the willows, or at the end of a long walk.",
@@ -341,14 +349,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 21715,
+		"code_lines": 21771,
 		"commits": 310,
-		"decisions": 188,
+		"decisions": 189,
 		"models": 14,
 		"scenes": 26,
-		"scripts": 83,
-		"size_kb": 123700,
-		"test_lines": 6432,
+		"scripts": 84,
+		"size_kb": 123713,
+		"test_lines": 6553,
 		"textures": 49,
 		"vehicles": 3
 	}

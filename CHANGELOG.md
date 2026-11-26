@@ -10,6 +10,10 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 25: Controller support
+> Play with a gamepad: sticks to move and look, buttons for doors, torch, sky menu and map, so it works on a TV.
+- **Play with a controller.** Plug in or pair an Xbox, PlayStation or similar gamepad. Left stick moves (a light push is a slow walk) and drives, right stick looks, A jumps, X opens doors and gets in and out of cars, and the right trigger burns with the torch. Y opens the sky menu, Start opens Things to do, and Back opens the map. Press the right stick to see every button. B closes a menu, and the D-pad and A work the menus.
+
 ## November 25: A bigger bomb shelter
 > The shelter under the House now runs under the back yard: nine rooms, including a mess hall well away from where you sleep.
 - **A long corridor.** Past the blast door the corridor now runs west under the back yard, with a yellow name plate over every door.
@@ -24,6 +28,7 @@ fails if the two disagree.
 
 ## November 24: Things to do
 > Start with a list of things to try, press H for buttons that take you to each one, and watch the stars fill in.
+- **Back yard ideas.** Walk up to the House's back deck and press O to try 23 ideas for a new back yard, from a simple hot-tub patio to a Roman bathhouse. Shift+O goes back.
 - **Back yard ideas.** Walk up to the House's back deck and press O to try 53 ideas for a new back yard, from a simple hot-tub patio to a Roman bathhouse. Shift+O goes back.
 - **New kinds of back yard.** A ranch corral with a chuckwagon, a games lawn with bocce, an outdoor cinema, a glasshouse lounge, a shipping-container spa, a Viking longhouse and more.
 - **Different layouts.** Five ideas move the hot tub and everything else round the yard: by the slider, out on the lawn, at the garage end, under the willows, or at the end of a long walk.
