@@ -6,6 +6,15 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**Birch trees.** Seven paper birches, about forty feet tall, with white bark, dark scars and small yellow-green leaves. Four stand in a line in the middle-west of the back yard and three more in a line just west of them. You can walk under the branches but not through the trunks.",
+				"**A view to the wind farm.** The trees close off the north-west of the yard and leave a gap to the south-west.",
+				"**The little shed.** A small weathered shed with a shingled roof and a red door stands in the yard's north-west corner, with a low deck in front you can walk up onto. It is closed up for now, so you can't go inside."
+			],
+			"summary": "Seven tall white birches and a little grey shed with a red door now stand in the back yard, leaving the south-west view open.",
+			"title": "November 25: Birches and a shed in the back yard"
+		},
+		{
+			"bullets": [
 				"**Play with a controller.** Plug in or pair an Xbox, PlayStation or similar gamepad. Left stick moves (a light push is a slow walk) and drives, right stick looks, A jumps, X opens doors and gets in and out of cars, and the right trigger burns with the torch. Y opens the sky menu, Start opens Things to do, and Back opens the map. Press the right stick to see every button. B closes a menu, and the D-pad and A work the menus."
 			],
 			"summary": "Play with a gamepad: sticks to move and look, buttons for doors, torch, sky menu and map, so it works on a TV.",
@@ -353,14 +362,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 21234,
-		"commits": 314,
-		"decisions": 191,
+		"code_lines": 21776,
+		"commits": 316,
+		"decisions": 193,
 		"models": 14,
 		"scenes": 26,
-		"scripts": 85,
-		"size_kb": 123677,
-		"test_lines": 6701,
+		"scripts": 88,
+		"size_kb": 123705,
+		"test_lines": 6827,
 		"textures": 49,
 		"vehicles": 3
 	}
