@@ -1,5 +1,5 @@
 extends SceneTree
-## Tests for controller support (D-185): the stick curve (scripts/gamepad_math.gd),
+## Tests for controller support (D-189): the stick curve (scripts/gamepad_math.gd),
 ## that every game action has a controller binding, and that a pushed stick or
 ## pressed trigger reaches the same actions as the keys. Run headless from project/:
 ##   godot --headless -s res://tests/test_gamepad.gd
@@ -7,7 +7,7 @@ extends SceneTree
 const GamepadMath := preload("res://scripts/gamepad_math.gd")
 
 ## Every action a controller needs to play the whole game, with the face button
-## or stick that does it written out in docs/project/decisions.md (D-185).
+## or stick that does it written out in docs/project/decisions.md (D-189).
 const PAD_ACTIONS := [
 	"move_forward", "move_back", "move_left", "move_right", "look_left", "look_right",
 	"look_up", "look_down", "jump", "interact", "walk", "super_sprint", "torch",

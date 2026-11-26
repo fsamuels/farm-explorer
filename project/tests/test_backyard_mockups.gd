@@ -58,7 +58,7 @@ func _test_brief() -> void:
 	for idea in Mockups.IDEAS.slice(1):
 		tiers[idea.tier] = tiers.get(idea.tier, 0) + 1
 	var n := Mockups.IDEAS.size() - 1
-	_check(n >= 3 and n <= 40, "between 3 and 40 ideas (%d)" % n)
+	_check(n >= 3 and n <= 60, "between 3 and 60 ideas (%d)" % n)
 	_check(tiers.get("reasonable", 0) >= tiers.get("extravagant", 0) and tiers.get("reasonable", 0) >= 3, "most are reasonable %s" % str(tiers))
 	_check(tiers.get("extravagant", 0) >= 1, "some are extravagant")
 	_check(tiers.get("absurdly over the top", 0) == 1, "exactly one is absurd")
@@ -78,8 +78,17 @@ func _test_idea(mock: Node3D, yard: Node3D, holder: Node3D, i: int, leaves: Pack
 	for k in _marks(holder, "kitchen"):
 		grill = grill or (k.get_meta("items") as Array).has("grill")
 	_check(grill, "%s has an outdoor kitchen with a grill" % name)
-	# A sauna wherever the card promises one.
-	if " ".join(Mockups.IDEAS[i].notes).to_lower().contains("sauna") or name.to_lower().contains("sauna"):
+	# A sauna wherever the card promises one, or room left for one: a spot
+	# at least 2.4 m square with nothing solid standing in it.
+	var card := " ".join(Mockups.IDEAS[i].notes).to_lower()
+	if card.contains("room for a sauna"):
+		var spots := _marks(holder, "sauna_spot")
+		_check(spots.size() >= 1, "%s leaves room for a sauna" % name)
+		for sp in spots:
+			var r: Rect2 = sp.get_meta("rect")
+			_check(r.size.x >= 2.4 and r.size.y >= 2.4, "%s: the sauna spot is at least 2.4 m square (%s)" % [name, r.size])
+			_check(_clear(holder, r.grow(-0.1), float(sp.get_meta("top"))), "%s: nothing stands in the sauna spot" % name)
+	elif card.contains("sauna") or name.to_lower().contains("sauna"):
 		_check(_marks(holder, "sauna").size() >= 1, "%s has the sauna its card lists" % name)
 	var near_plug := false
 	for t in tubs:
@@ -91,7 +100,17 @@ func _test_idea(mock: Node3D, yard: Node3D, holder: Node3D, i: int, leaves: Pack
 				over += 1
 		_check(over == 0, "%s: no willow leaves over the tub at %s (%d)" % [name, p, over])
 		near_plug = near_plug or p.distance_to(PLUG) < 6.0
-	_check(near_plug, "%s: a tub within 6 m of the 50 A plug" % name)
+	# A tub by the plug, or a power line from the plug to a tub that stands
+	# further off.
+	if not near_plug:
+		var fed := false
+		for run in _marks(holder, "power_run"):
+			var from: Vector2 = run.get_meta("from")
+			var to: Vector2 = run.get_meta("to")
+			for t in tubs:
+				var tp := Vector2((t as Node3D).position.x, (t as Node3D).position.z)
+				fed = fed or (from.distance_to(PLUG) < 1.0 and to.distance_to(tp) < 2.5)
+		_check(fed, "%s: a tub within 6 m of the 50 A plug, or a power line out to one" % name)
 	# Every tub stands in a deck: a tub-deck marker at its centre, its rim at
 	# sitting height above the deck.
 	var decks := _marks(holder, "tub_deck")
@@ -170,6 +189,7 @@ func _test_hint(mock: Node3D, player: CharacterBody3D) -> void:
 	_check(Mockups.in_hint_area(Vector3(-7.0, 1.6, 0.0)), "the deck is in the hint area")
 	_check(not Mockups.in_hint_area(Vector3(-7.0, 30.0, 0.0)), "not when flying high over it")
 	_check(not Mockups.in_hint_area(Vector3(10.0, 1.6, 0.0)), "not inside or east of the House")
+	_check(not Mockups.in_hint_area(Vector3(-7.0, -1.6, 0.0)), "not from the bomb shelter under the yard")
 	player.global_position = mock.to_global(Vector3(-9.0, 0.5, 0.0))
 	player.velocity = Vector3.ZERO
 	await process_frame
@@ -179,6 +199,18 @@ func _test_hint(mock: Node3D, player: CharacterBody3D) -> void:
 	await process_frame
 	await process_frame
 	_check(not mock.hint_visible(), "far away, no hint")
+
+## Whether the idea's own collision leaves plan rectangle `r` empty from
+## 0.3 m above `top` to head height.
+func _clear(holder: Node3D, r: Rect2, top: float) -> bool:
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(r.size.x, 2.0, r.size.y)
+	var q := PhysicsShapeQueryParameters3D.new()
+	q.shape = shape
+	q.transform = holder.global_transform * Transform3D(Basis(), Vector3(r.get_center().x, top + 1.3, r.get_center().y))
+	var body := holder.get_node("Body")
+	var hits := holder.get_world_3d().direct_space_state.intersect_shape(q, 16)
+	return hits.filter(func(h: Dictionary) -> bool: return h.collider == body).is_empty()
 
 ## Nothing solid stands outside the garage door (bar the low foot of a step
 ## hull): a box query over the patch every idea keeps clear.

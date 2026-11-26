@@ -1,5 +1,5 @@
 extends RefCounted
-## Controller look (D-185), pure so it can be tested. The right stick turns the
+## Controller look (D-189), pure so it can be tested. The right stick turns the
 ## view: a squared response so a small push is a slow, fine turn and a full push
 ## is a quick one.
 

@@ -164,7 +164,7 @@ func set_open(open: bool) -> void:
 		_notice.text = ""
 		refresh()
 		_fit_to_window()
-		_close_button.grab_focus.call_deferred()  # a controller steers by focus (D-185)
+		_close_button.grab_focus.call_deferred()  # a controller steers by focus (D-189)
 		_mouse_before = Input.mouse_mode
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	else:

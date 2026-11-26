@@ -517,3 +517,45 @@ static func lantern(parent: Node3D, at: Vector2) -> void:
 	box(parent, Vector3(at.x, 0.3, at.y), Vector3(0.3, 0.6, 0.3), mat(STONE, 0.95))
 	box(parent, Vector3(at.x, 0.75, at.y), Vector3(0.45, 0.3, 0.45), mat(Color(1.0, 0.85, 0.55), 0.6, 0.0, 1.5))
 	cyl(parent, Vector3(at.x, 1.05, at.y), 0.45, 0.3, mat(STONE, 0.95), null, 0.0, 4)
+
+## Room left for a sauna to come later: plan rectangle `r` (x, z), a gravel
+## pad edged in timber (or, with `gravel` off, just the marks, for a spot on a
+## deck `top` high), stakes at the corners, a power stub for the heater's
+## circuit, and SAUNA HERE written on the ground. Nothing solid stands in it.
+static func sauna_spot(parent: Node3D, r: Rect2, top := 0.0, gravel := true) -> void:
+	var c := r.get_center()
+	mark(parent, Vector3(c.x, top, c.y), "sauna_spot", {"rect": r, "top": top})
+	if gravel:
+		slab(parent, r, top + 0.06, paving(Color(0.62, 0.60, 0.56), 0.15, "sauna_gravel"))
+	var edge := mat(CEDAR_DARK, 0.9)
+	box(parent, Vector3(c.x, top + 0.05, r.position.y), Vector3(r.size.x, 0.1, 0.06), edge)
+	box(parent, Vector3(c.x, top + 0.05, r.end.y), Vector3(r.size.x, 0.1, 0.06), edge)
+	box(parent, Vector3(r.position.x, top + 0.05, c.y), Vector3(0.06, 0.1, r.size.y), edge)
+	box(parent, Vector3(r.end.x, top + 0.05, c.y), Vector3(0.06, 0.1, r.size.y), edge)
+	for p in [r.position, Vector2(r.end.x, r.position.y), r.end, Vector2(r.position.x, r.end.y)]:
+		box(parent, Vector3(p.x, top + 0.3, p.y), Vector3(0.05, 0.6, 0.05), mat(CEDAR, 0.9))
+		box(parent, Vector3(p.x, top + 0.62, p.y), Vector3(0.06, 0.06, 0.06), mat(Color(1.0, 0.45, 0.1), 0.6))
+	# The power stub just outside the pad's north-east corner.
+	var stub := Vector2(r.end.x + 0.25, r.position.y - 0.25)
+	box(parent, Vector3(stub.x, top + 0.5, stub.y), Vector3(0.1, 1.0, 0.1), mat(CEDAR_DARK, 0.9))
+	box(parent, Vector3(stub.x, top + 0.85, stub.y + 0.07), Vector3(0.18, 0.24, 0.08), mat(Color(0.55, 0.57, 0.6), 0.5, 0.4))
+	var l := label(parent, Vector3(c.x, top + 0.1, c.y), "SAUNA HERE", 96, Color(1.0, 0.9, 0.7))
+	l.rotation.x = -PI / 2.0
+
+## A buried power line from the 50 A plug to a hot tub that stands away from
+## it: a narrow strip of trench cover along `pts` (x, z), the first point at
+## the plug, the last at the tub. Returns its length in metres.
+static func power_run(parent: Node3D, pts: Array) -> float:
+	var length := 0.0
+	var m := mat(Color(0.35, 0.30, 0.26), 1.0)
+	for i in pts.size() - 1:
+		var a: Vector2 = pts[i]
+		var b: Vector2 = pts[i + 1]
+		var d := b - a
+		var mid := (a + b) / 2.0
+		box(parent, Vector3(mid.x, 0.035, mid.y), Vector3(d.length() + 0.15, 0.02, 0.15), m, null, atan2(-d.y, d.x))
+		length += d.length()
+	var first: Vector2 = pts[0]
+	var last: Vector2 = pts[pts.size() - 1]
+	mark(parent, Vector3(first.x, 0, first.y), "power_run", {"from": first, "to": last, "length": length})
+	return length

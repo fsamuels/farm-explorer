@@ -90,6 +90,12 @@ func _test_overlay_keys() -> void:
 		e.echo = true
 		_check(not ControlsOverlay.is_action_key(e), "a held key's echo does not")
 
+func _key(code: Key) -> InputEventKey:
+	var e := InputEventKey.new()
+	e.keycode = code
+	e.physical_keycode = code
+	return e
+
 func _test_scene() -> void:
 	var main: Node = (load("res://scenes/main.tscn") as PackedScene).instantiate()
 	root.add_child(main)
@@ -107,6 +113,18 @@ func _test_scene() -> void:
 	_check(not menu.is_open() and not paused, "the menu starts closed")
 	menu.set_open(true)
 	_check(menu.is_open() and paused, "opening the menu pauses the game")
+	await process_frame
+	_check(menu._close_button.has_focus(), "opening the menu focuses Close, so a controller can steer it")
+	# B (ui_cancel on a pad) must close the menu without freeing the mouse.
+	var back := InputEventJoypadButton.new()
+	back.button_index = JOY_BUTTON_B
+	back.pressed = true
+	_check(back.is_action("ui_cancel"), "B is ui_cancel, so it closes menus")
+	var a_button := InputEventJoypadButton.new()
+	a_button.button_index = JOY_BUTTON_A
+	a_button.pressed = true
+	_check(a_button.is_action("ui_accept"), "A is ui_accept, so it presses the focused button")
+	_check(InputMap.action_has_event("ui_accept", _key(KEY_ENTER)) and InputMap.action_has_event("ui_cancel", _key(KEY_ESCAPE)), "Enter and Esc still work")
 	menu.choose_time("night")
 	menu.choose_weather("snow")
 	_check(tod.current == "night" and weather.current == "snow", "the menu picks the time and weather directly: %s %s" % [tod.current, weather.current])
