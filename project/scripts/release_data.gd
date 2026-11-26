@@ -6,6 +6,16 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**A long workbench wall.** Navy cabinets with a door hanging open, a pegboard of gears and spools, a big corkboard of notes joined by red-pinned string, a wall clock and a mountain calendar, and on the counter a pickle, flasks on tripods, a parts cabinet and a radio.",
+				"**Odds and ends.** Two gas cylinders, a work table with a vise, a utility sink, metal shelves with a \"TIME TRAVEL STUFF\" box, an eyeball, a spiked mace and a crown, a washer and dryer, a shovel and a broom.",
+				"**Cartoon look.** Every prop has a thick black outline. There are heavy beams, fluorescent lights, puddles and a stray sock on the floor.",
+				"**Still clear.** The stairs down to the shelter, the two garage doors and the door to the house are all kept clear."
+			],
+			"summary": "The garage is now a cluttered mad-scientist workshop, drawn like a cartoon with thick black outlines.",
+			"title": "November 26: A cartoon workshop in the garage"
+		},
+		{
+			"bullets": [
 				"**A covered porch.** White posts hold up a shallow shingle roof over a porch the length of the front, with two steps down to the front door.",
 				"**More windows.** The front wall gets the windows the real one has, either side of the door, on the same pale blue siding as the back.",
 				"**Two garage doors.** The garage's north end has two ribbed roll-up doors; press E at one to roll it up. A strip of concrete runs out in front of them."
@@ -414,14 +424,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 23440,
-		"commits": 324,
-		"decisions": 200,
+		"code_lines": 24078,
+		"commits": 323,
+		"decisions": 201,
 		"models": 14,
 		"scenes": 26,
-		"scripts": 92,
-		"size_kb": 123804,
-		"test_lines": 7206,
+		"scripts": 93,
+		"size_kb": 123841,
+		"test_lines": 7311,
 		"textures": 49,
 		"vehicles": 3
 	}

@@ -10,6 +10,13 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 26: A cartoon workshop in the garage
+> The garage is now a cluttered mad-scientist workshop, drawn like a cartoon with thick black outlines.
+- **A long workbench wall.** Navy cabinets with a door hanging open, a pegboard of gears and spools, a big corkboard of notes joined by red-pinned string, a wall clock and a mountain calendar, and on the counter a pickle, flasks on tripods, a parts cabinet and a radio.
+- **Odds and ends.** Two gas cylinders, a work table with a vise, a utility sink, metal shelves with a "TIME TRAVEL STUFF" box, an eyeball, a spiked mace and a crown, a washer and dryer, a shovel and a broom.
+- **Cartoon look.** Every prop has a thick black outline. There are heavy beams, fluorescent lights, puddles and a stray sock on the floor.
+- **Still clear.** The stairs down to the shelter, the two garage doors and the door to the house are all kept clear.
+
 ## November 26: The House's front porch and garage doors
 > The front of the House now has its covered porch and more windows, and the garage has its two doors, like the photos.
 - **A covered porch.** White posts hold up a shallow shingle roof over a porch the length of the front, with two steps down to the front door.
