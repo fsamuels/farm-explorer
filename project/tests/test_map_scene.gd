@@ -118,11 +118,14 @@ func _test_teleport(main: Node, map) -> void:
 		# Overlapping footprints resolve to the first one under the cursor.
 		var target: Dictionary = data.buildings[MapMath.footprint_at(building.center, data.footprints)]
 		_double_click(map, map._full.to_screen(building.center))
+		# The teleport is immediate; read where it put you before a physics
+		# tick can move you (a spot on the back-yard deck's ramp slides).
+		var landed := player.global_position
 		await process_frame
-		var here := MapMath.flatten(player.global_position)
+		var here := MapMath.flatten(landed)
 		_check(not map.is_open() and not paused, "%s: teleport closes the map and unpauses" % target.name)
 		_check(here.distance_to(target.front) < 0.01, "%s: lands on its front spot" % target.name)
-		_check(absf(player.global_position.y - (WorldMath.height_at(here.x, here.y) + 0.2)) < 0.01, "%s: lands on the ground, whatever height you left from" % target.name)
+		_check(absf(landed.y - (WorldMath.height_at(here.x, here.y) + 0.2)) < 0.01, "%s: lands on the ground, whatever height you left from" % target.name)
 		_check(not Geometry2D.is_point_in_polygon(here, target.poly), "%s: lands outside the footprint" % target.name)
 		var facing := Vector2(-sin(player.global_rotation.y), -cos(player.global_rotation.y))
 		_check(facing.dot((target.center - here).normalized()) > 0.99, "%s: faces the building" % target.name)

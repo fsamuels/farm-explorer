@@ -10,6 +10,14 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 26: Inside the House
+> The House now has real rooms inside: a kitchen, dining area and living room. The bomb shelter's trap door has moved to the garage.
+- **Kitchen.** In through the back slider, the kitchen is on your left: oak cabinets on green walls, a black stove and fridge, a sink under the window, a peninsula with a stool and a brown-and-beige tile floor.
+- **Dining and living.** The dining table and chairs stand on the right, under a navy accent wall. The living room is ahead and to the left, with a sofa, futon, rug, cedar chest and TV, all on wood floors with yellow walls.
+- **Front door.** The front door is slate blue now, with glass panels either side and more windows along the front wall.
+- **Pantry and garage.** A small pantry off the north side of the kitchen has shelves and a door into the garage.
+- **Shelter hatch moved.** The trap door to the bomb shelter is now in the garage floor. A short tunnel leads under the House to the same blast door and rooms.
+
 ## November 25: The back-yard trees, corrected
 > The tall back-yard trees now look like your poplars: grey-brown furrowed trunks and broad green leaves, not white birch bark.
 - **Poplar-style trees.** The seven tall trees in the back yard were built with white birch bark. They now have thick, furrowed grey-brown trunks that flare at the base, bare lower trunks, a narrower crown and broad heart-shaped leaves.

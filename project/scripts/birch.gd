@@ -1,5 +1,5 @@
 extends RefCounted
-## A tall poplar-type tree made in code (D-192, reworked in D-195 after the
+## A tall poplar-type tree made in code (D-192, reworked in D-196 after the
 ## owner's photos showed these are not birches): a straight grey-brown trunk
 ## with deep vertical furrows and a flared base, bare of branches low down, a
 ## narrow crown of up-swept branches, and broad heart-shaped yellow-green
