@@ -10,6 +10,10 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 25: Russian olive trees
+> Old silvery Russian olive trees now line the farm's north side, thin at the west end and thick toward the round corral.
+- **Russian olives.** About thirty trees, 15 to 25 feet tall, with several crooked stems, dark rough bark and silvery-green leaves, stand along the north side of the farm where they show in the aerial imagery. You can walk under the branches but not through the trunks.
+
 ## November 25: Birches and a shed in the back yard
 > Seven tall white birches and a little grey shed with a red door now stand in the back yard, leaving the south-west view open.
 - **Birch trees.** Seven paper birches, about forty feet tall, with white bark, dark scars and small yellow-green leaves. Four stand in a line in the middle-west of the back yard and three more in a line just west of them. You can walk under the branches but not through the trunks.

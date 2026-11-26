@@ -126,6 +126,8 @@ farm-sim/
     │   ├── birch.gd               # a paper birch grown in code from a seed (white scarred trunk, up-swept branches, leaf clusters) — see D-192
     │   ├── back_yard_birches.gd   # the seven back-yard birches at their world spots, a view south-west left open — see D-192
     │   ├── back_yard_shed.gd      # the little grey shed with a red door in the back yard's north-west corner, built from primitives — see D-193
+    │   ├── russian_olive.gd       # an older Russian olive grown in code from a seed (crooked stems, wide crown, silvery leaves) — see D-194
+    │   ├── russian_olives.gd      # the ~28 Russian olives along the farm's north side, thin west to thick east — see D-194
     │   ├── backyard_mockups.gd    # 15 back-yard ideas behind the House, best fit first, O to step through them, a card and a hint — see D-184, D-190
     │   ├── mockup_kit.gd          # the mockups' building blocks: hot tubs on decks, fire tables, pavilions, counters, the Traeger, saunas, seating — see D-184, D-190
     │   ├── hot_tub_soak.gd        # get into a back-yard hot tub: underwear, a seat facing west, L lights, J jets, K sky scenes, steam — see D-190, D-191
