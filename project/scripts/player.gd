@@ -26,6 +26,7 @@ const MODEL_TURN_RATE := 10.0
 const DriveHud := preload("res://scripts/drive_hud.gd")
 const SwimMath := preload("res://scripts/swim_math.gd")
 const SwimPose := preload("res://scripts/swim_pose.gd")
+const GamepadMath := preload("res://scripts/gamepad_math.gd")
 
 ## Mouse-wheel camera distance (D-91). Scrolling back from first person drops
 ## into third person at the closest distance; scrolling forward past it returns
@@ -71,14 +72,20 @@ var _prompt_flash := ""
 var _prompt_flash_left := 0.0
 ## True while swimming in the pond (D-152), and where the freestyle stroke is.
 var swimming := false
+## True while stripped to underwear for the hot tub (D-190).
+var underwear := false
 var swim_phase := 0.0
 var _water: Node
 var _skeleton: Skeleton3D
 var _hip_local := Vector3.ZERO
 var _swim_time := 0.0
+## False until the player first takes the mouse (or frees it with Esc).
+var _took_control := false
 
 func _ready() -> void:
-	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	# Launch with the mouse free: a click or key press takes control (below). That
+	# keeps the editor, tests and scripted runs from grabbing the user's mouse.
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	drive_hud = DriveHud.new()
 	$HUD.add_child(drive_hud)
 	_set_body_layer(model)
@@ -118,10 +125,27 @@ func _apply_view() -> void:
 	tp_camera.current = third_person
 	interact_ray.enabled = not third_person
 	tp_interact_ray.enabled = third_person
+	# In a seat that shows the body (the hot tub, D-190), it shows in third
+	# person and hides in first, where the camera is inside the head.
+	if vehicle and vehicle.get("show_body"):
+		model.visible = third_person
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventJoypadButton and event.pressed and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE and not get_tree().paused:
+		# A controller has no click to give the mouse back, so a button does.
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+		return
 	if event.is_action_pressed("ui_cancel"):
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+		# B on a controller is also ui_cancel (it closes menus); it must not
+		# free the mouse, which a controller player has no way to recapture.
+		if not event is InputEventJoypadButton:
+			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+			_took_control = true
+	elif not _took_control and event is InputEventKey and event.pressed and not event.echo:
+		# First launch only: any key (that no menu used) takes the mouse; after Esc
+		# it takes a click, so typing doesn't grab the mouse back.
+		_took_control = true
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	elif event is InputEventMouseButton and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
 		# A click recaptures the mouse; scrolling over the window doesn't.
 		var button := (event as InputEventMouseButton).button_index
@@ -159,25 +183,42 @@ func _unhandled_input(event: InputEvent) -> void:
 				target.interact(self)
 
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		if vehicle:
-			drive_look_yaw = clamp(drive_look_yaw - event.relative.x * MOUSE_SENSITIVITY,
-					-DRIVE_LOOK_LIMIT, DRIVE_LOOK_LIMIT)
-		else:
-			rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
-		head.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
-		head.rotation.x = clamp(head.rotation.x, deg_to_rad(-89.0), deg_to_rad(89.0))
+		_turn_view(event.relative * MOUSE_SENSITIVITY)
 
 ## Shows `text` in the prompt for a moment while driving (why E did nothing).
 func _flash_prompt(text: String) -> void:
 	_prompt_flash = text
 	_prompt_flash_left = 1.5
 
+## Turn the view with the controller's right stick, the same way the mouse does.
+func _gamepad_look(delta: float) -> void:
+	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED or get_tree().paused:
+		return
+	var stick := Input.get_vector("look_left", "look_right", "look_up", "look_down")
+	if stick == Vector2.ZERO:
+		return
+	_turn_view(GamepadMath.look_step(stick, delta))
+
+## Turn the view by `step` radians (x right, y down): the body, or the head
+## inside a car. Shared by the mouse and the controller's right stick.
+func _turn_view(step: Vector2) -> void:
+	if vehicle:
+		drive_look_yaw = clamp(drive_look_yaw - step.x, -DRIVE_LOOK_LIMIT, DRIVE_LOOK_LIMIT)
+	else:
+		rotate_y(-step.x)
+	head.rotate_x(-step.y)
+	head.rotation.x = clamp(head.rotation.x, deg_to_rad(-89.0), deg_to_rad(89.0))
+
 func _process(delta: float) -> void:
+	_gamepad_look(delta)
 	if vehicle:
 		# Driving: the big yellow prompt gives way to a quiet readout (D-113).
 		interact_prompt.visible = false
 		_prompt_flash_left -= delta
-		drive_hud.show_drive(vehicle.speed_mph(), vehicle.engine_rpm if vehicle.has_engine else -1.0, _prompt_flash if _prompt_flash_left > 0.0 else "")
+		if vehicle.has_method("speed_mph"):
+			drive_hud.show_drive(vehicle.speed_mph(), vehicle.engine_rpm if vehicle.has_engine else -1.0, _prompt_flash if _prompt_flash_left > 0.0 else "")
+		else:
+			drive_hud.hide_drive()
 		return
 	drive_hud.hide_drive()
 	var target := _interact_target()
@@ -263,6 +304,43 @@ func leave_vehicle() -> void:
 	model_yaw = 0.0
 	collision_shape.set_deferred("disabled", false)
 
+## Strip to underwear for the hot tub (D-190), or dress again: the body's
+## skin-and-clothes surface becomes plain skin with dark boxer shorts at the
+## hips, and the boots and cap are hidden. Off puts the clothes back.
+func set_underwear(on: bool) -> void:
+	var body_mesh := model.find_child("Forrest", true, false) as MeshInstance3D
+	if body_mesh == null:
+		return
+	underwear = on
+	for s in body_mesh.mesh.get_surface_count():
+		body_mesh.set_surface_override_material(s, null)
+	if not on:
+		return
+	var shader := Shader.new()
+	shader.code = """
+shader_type spatial;
+uniform vec4 skin : source_color = vec4(0.86, 0.66, 0.53, 1.0);
+uniform vec4 shorts : source_color = vec4(0.11, 0.14, 0.26, 1.0);
+uniform float band_lo = 0.78;
+uniform float band_hi = 1.02;
+varying float height;
+void vertex() { height = VERTEX.y; }
+void fragment() {
+	bool in_shorts = height > band_lo && height < band_hi;
+	ALBEDO = in_shorts ? shorts.rgb : skin.rgb;
+	ROUGHNESS = in_shorts ? 0.9 : 0.6;
+}
+"""
+	var skin := ShaderMaterial.new()
+	skin.shader = shader
+	body_mesh.set_surface_override_material(0, skin)
+	var hidden := StandardMaterial3D.new()
+	hidden.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	hidden.albedo_color = Color(0, 0, 0, 0)
+	# Surfaces 2 to 6 are the boots and the cap (surface 1 is the hair).
+	for s in range(2, body_mesh.mesh.get_surface_count()):
+		body_mesh.set_surface_override_material(s, hidden)
+
 ## Ground speed for the held keys: walking (Shift) wins over super sprinting
 ## (Ctrl) so holding both never speeds you up.
 static func move_speed(walking: bool, super_sprinting: bool) -> float:
@@ -285,7 +363,8 @@ func _physics_process(delta: float) -> void:
 		velocity.y = JUMP_VELOCITY
 
 	var input_dir := Input.get_vector("move_left", "move_right", "move_forward", "move_back")
-	var direction := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	# Keep the stick's push (a light push is a slow walk); keys are already full length.
+	var direction := transform.basis * Vector3(input_dir.x, 0, input_dir.y)
 	var speed := move_speed(Input.is_action_pressed("walk"), Input.is_action_pressed("super_sprint"))
 	if direction:
 		velocity.x = direction.x * speed

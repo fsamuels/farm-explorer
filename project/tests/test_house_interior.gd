@@ -1,5 +1,5 @@
 extends SceneTree
-## Tests for the House's ground floor (D-188): the kitchen, pantry, dining and
+## Tests for the House's ground floor (D-194): the kitchen, pantry, dining and
 ## living rooms are built, the pantry's door lines up with the garage's
 ## opening, and the real player can cross from the sliding door to the front
 ## door, walk through the pantry into the garage once its door is open, and is

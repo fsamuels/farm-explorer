@@ -18,6 +18,16 @@ fails if the two disagree.
 - **Pantry and garage.** A small pantry off the north side of the kitchen has shelves and a door into the garage.
 - **Shelter hatch moved.** The trap door to the bomb shelter is now in the garage floor. A short tunnel leads under the House to the same blast door and rooms.
 
+## November 25: Birches and a shed in the back yard
+> Seven tall white birches and a little grey shed with a red door now stand in the back yard, leaving the south-west view open.
+- **Birch trees.** Seven paper birches, about forty feet tall, with white bark, dark scars and small yellow-green leaves. Four stand in a line in the middle-west of the back yard and three more in a line just west of them. You can walk under the branches but not through the trunks.
+- **A view to the wind farm.** The trees close off the north-west of the yard and leave a gap to the south-west.
+- **The little shed.** A small weathered shed with a shingled roof and a red door stands in the yard's north-west corner, with a low deck in front you can walk up onto. It is closed up for now, so you can't go inside.
+
+## November 25: Controller support
+> Play with a gamepad: sticks to move and look, buttons for doors, torch, sky menu and map, so it works on a TV.
+- **Play with a controller.** Plug in or pair an Xbox, PlayStation or similar gamepad. Left stick moves (a light push is a slow walk) and drives, right stick looks, A jumps, X opens doors and gets in and out of cars, and the right trigger burns with the torch. Y opens the sky menu, Start opens Things to do, and Back opens the map. Press the right stick to see every button. B closes a menu, and the D-pad and A work the menus.
+
 ## November 25: A bigger bomb shelter
 > The shelter under the House now runs under the back yard: nine rooms, including a mess hall well away from where you sleep.
 - **A long corridor.** Past the blast door the corridor now runs west under the back yard, with a yellow name plate over every door.
@@ -25,6 +35,10 @@ fails if the two disagree.
 - **No more sleeping where you eat.** The kitchen moved out of the bunk room into a mess hall with long tables; the bunk room now has four bunks and lockers.
 - **Command room.** A wall of screens over a console, a lit map table and a radio rack.
 - **Armory.** The gun rack moved here from the munitions store, with a pistol board, a workbench and a safe.
+- **Get in the hot tub.** In the back-yard ideas, look at the hot tub's water and press E: you strip to your underwear, hop in and sit looking west. L changes the lights, J turns the jets on (bubbles and more steam), E gets you out. Try it at night for the stars.
+- **Hot tub skies.** In the tub, K steps through four scenes: a clear night, night with light snow falling round the tub, night with the aurora, and sunset.
+- **Back yard ideas, take two.** Fifteen ideas now, best fit first: ten practical ones and five just for fun. The hot tub stays by its plug in a deck, some with a deck from the master bedroom's slider, each with a counter, the Traeger and a fire table under a roof.
+- **The game no longer grabs your mouse at launch.** Click or press a key to take control; Esc still lets go.
 
 ## November 24: A better Cub Cadet
 > The Cub Cadet UTV is now a detailed Polaris Ranger EV in yellow and black, with a working dump bed.
@@ -32,8 +46,10 @@ fails if the two disagree.
 
 ## November 24: Things to do
 > Start with a list of things to try, press H for buttons that take you to each one, and watch the stars fill in.
-- **Back yard ideas.** Walk up to the House's back deck and press O to try 48 ideas for a new back yard, from a simple hot-tub patio to a Roman bathhouse. Shift+O goes back.
+- **Back yard ideas.** Walk up to the House's back deck and press O to try 23 ideas for a new back yard, from a simple hot-tub patio to a Roman bathhouse. Shift+O goes back.
+- **Back yard ideas.** Walk up to the House's back deck and press O to try 53 ideas for a new back yard, from a simple hot-tub patio to a Roman bathhouse. Shift+O goes back.
 - **New kinds of back yard.** A ranch corral with a chuckwagon, a games lawn with bocce, an outdoor cinema, a glasshouse lounge, a shipping-container spa, a Viking longhouse and more.
+- **Different layouts.** Five ideas move the hot tub and everything else round the yard: by the slider, out on the lawn, at the garage end, under the willows, or at the end of a long walk.
 - **Room for a sauna.** Twelve of the simpler ideas leave a gravel pad marked SAUNA HERE, with a power post, so a sauna can be added later.
 - **What's in them.** Every idea has a hot tub sunk into a deck by the plug on the south wing, a covered place to sit round a fire table and an outdoor kitchen. Many have a sauna. A card names each one and lists what is in it.
 - **The garage's back door.** The garage now has its door onto the back yard, by the deck. Press E to open it and walk inside.

@@ -47,6 +47,8 @@ func _run() -> void:
 		await _test_sliders(main.get_node("Player"), main, mock.idea_name(i))
 		_test_door_clear(holder, mock.idea_name(i))
 		await _test_garage_door(main.get_node("Player"), main, mock.idea_name(i))
+		if not _marks(holder, "master_deck").is_empty():
+			await _test_master_walk(main.get_node("Player"), main, mock.idea_name(i))
 	await _test_hint(mock, main.get_node("Player"))
 	await _test_cycling(mock, yard)
 	print("backyard mockups: %s" % ("OK" if _failures == 0 else "%d FAILED" % _failures))
@@ -54,14 +56,20 @@ func _run() -> void:
 
 ## The tiers asked for: mostly reasonable, a few extravagant, one absurd.
 func _test_brief() -> void:
+	# Realistic ideas first, best fit first; a handful just for fun at the end.
 	var tiers := {}
+	var seen_fun := false
+	var ordered := true
 	for idea in Mockups.IDEAS.slice(1):
 		tiers[idea.tier] = tiers.get(idea.tier, 0) + 1
-	var n := Mockups.IDEAS.size() - 1
-	_check(n >= 3 and n <= 60, "between 3 and 60 ideas (%d)" % n)
-	_check(tiers.get("reasonable", 0) >= tiers.get("extravagant", 0) and tiers.get("reasonable", 0) >= 3, "most are reasonable %s" % str(tiers))
-	_check(tiers.get("extravagant", 0) >= 1, "some are extravagant")
-	_check(tiers.get("absurdly over the top", 0) == 1, "exactly one is absurd")
+		if idea.tier == "fun":
+			seen_fun = true
+		elif seen_fun:
+			ordered = false
+	_check(tiers.keys().all(func(t: String) -> bool: return t == "realistic" or t == "fun"), "ideas are realistic or just for fun %s" % str(tiers))
+	_check(tiers.get("fun", 0) >= 3 and tiers.get("fun", 0) <= 6, "a handful just for fun (%d)" % tiers.get("fun", 0))
+	_check(tiers.get("realistic", 0) > tiers.get("fun", 0), "mostly realistic %s" % str(tiers))
+	_check(ordered, "the realistic ideas come first")
 
 func _marks(holder: Node3D, kind: String) -> Array:
 	return holder.find_children("Mark_*", "Marker3D", true, false).filter(func(m: Node) -> bool: return m.get_meta("kind") == kind)
@@ -74,10 +82,32 @@ func _test_idea(mock: Node3D, yard: Node3D, holder: Node3D, i: int, leaves: Pack
 	_check(tubs.size() >= 1, "%s has a hot tub" % name)
 	_check(_marks(holder, "cover").size() >= 1, "%s has a covered place to hang out" % name)
 	_check(_marks(holder, "fire_table").size() >= 1, "%s has a fire table" % name)
+	# Realistic: a table-top counter and the owner's Traeger. Just for fun:
+	# any kitchen with a grill, or the Traeger.
+	var counter := false
 	var grill := false
 	for k in _marks(holder, "kitchen"):
+		counter = counter or (k.get_meta("items") as Array).has("counter")
 		grill = grill or (k.get_meta("items") as Array).has("grill")
-	_check(grill, "%s has an outdoor kitchen with a grill" % name)
+	var traeger := _marks(holder, "traeger").size() >= 1
+	if Mockups.IDEAS[i].tier == "realistic":
+		_check(counter and traeger, "%s has a table-top counter and the Traeger" % name)
+	else:
+		_check(grill or traeger, "%s has a grill" % name)
+	# Nothing decorative and green and round, anywhere.
+	var balls := 0
+	for mi in holder.find_children("*", "MeshInstance3D", true, false):
+		var m := (mi as MeshInstance3D).material_override as StandardMaterial3D
+		if (mi as MeshInstance3D).mesh is SphereMesh and m and m.albedo_color.g > m.albedo_color.r + 0.05 and m.albedo_color.g > m.albedo_color.b + 0.05:
+			balls += 1
+	_check(balls == 0, "%s: no green decorative balls (%d)" % [name, balls])
+	# A deck from the master-bedroom slider to the tub wherever the card says.
+	if " ".join(Mockups.IDEAS[i].notes).to_lower().contains("master-bedroom"):
+		var md := _marks(holder, "master_deck")
+		_check(md.size() >= 1, "%s has a deck from the master-bedroom slider" % name)
+		for d in md:
+			var r: Rect2 = d.get_meta("rect")
+			_check(r.has_point(Vector2(-6.95, 7.0)) and r.has_point(Vector2(-11.7, 3.9)), "%s: the deck reaches from the master-bedroom slider to the tub" % name)
 	# A sauna wherever the card promises one, or room left for one: a spot
 	# at least 2.4 m square with nothing solid standing in it.
 	var card := " ".join(Mockups.IDEAS[i].notes).to_lower()
@@ -100,7 +130,7 @@ func _test_idea(mock: Node3D, yard: Node3D, holder: Node3D, i: int, leaves: Pack
 				over += 1
 		_check(over == 0, "%s: no willow leaves over the tub at %s (%d)" % [name, p, over])
 		near_plug = near_plug or p.distance_to(PLUG) < 6.0
-	_check(near_plug, "%s: a tub within 6 m of the 50 A plug" % name)
+	_check(near_plug, "%s: the tub is within 6 m of the 50 A plug" % name)
 	# Every tub stands in a deck: a tub-deck marker at its centre, its rim at
 	# sitting height above the deck.
 	var decks := _marks(holder, "tub_deck")
@@ -201,6 +231,22 @@ func _clear(holder: Node3D, r: Rect2, top: float) -> bool:
 	var body := holder.get_node("Body")
 	var hits := holder.get_world_3d().direct_space_state.intersect_shape(q, 16)
 	return hits.filter(func(h: Dictionary) -> bool: return h.collider == body).is_empty()
+
+## From outside the master-bedroom slider, along the deck past the tub, without
+## stepping down: the deck is one level from the bedroom door to the water.
+func _test_master_walk(player: CharacterBody3D, main: Node, name: String) -> void:
+	var frame: Node3D = main.get_node("Buildings/BackyardMockups")
+	player.global_position = frame.to_global(Vector3(-6.9, 0.5, 6.0))
+	player.velocity = Vector3.ZERO
+	var dir := frame.to_global(Vector3(-12.5, 0.5, 5.6)) - player.global_position
+	dir.y = 0.0
+	player.global_basis = Basis.looking_at(dir.normalized(), Vector3.UP)
+	Input.action_press("move_forward")
+	await _step(28)
+	Input.action_release("move_forward")
+	await _step(5)
+	var p := frame.to_local(player.global_position)
+	_check(p.x < -10.0 and p.y > 0.3, "%s: from the master-bedroom door along the deck to the tub, all on the level (at %s)" % [name, p])
 
 ## Nothing solid stands outside the garage door (bar the low foot of a step
 ## hull): a box query over the patch every idea keeps clear.

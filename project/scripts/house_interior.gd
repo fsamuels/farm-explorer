@@ -1,5 +1,5 @@
 extends Node3D
-## The main House's ground floor (D-188), after the owner's photos taken from
+## The main House's ground floor (D-194), after the owner's photos taken from
 ## the west sliding door: an open plan with the kitchen on the left (north-west),
 ## the dining table on the right (south-west) under a navy accent wall, and the
 ## living room ahead and to the left (north-east), by the front door. A small
