@@ -87,7 +87,7 @@ func _test_built(main: Node, shell: Node3D, wing: Node3D, yard: Node3D) -> void:
 	_check(absf(nw.x - (yard.wall_x - Backyard.PAD_REACH)) < 0.1, "the pad reaches the Wing's west end (%.2f)" % nw.x)
 	# The House's west wall has four windows and the slider; the ramp inside
 	# the slider is clear of the trap door.
-	_check(shell.windows.size() == 4, "four windows on the back wall")
+	_check(shell.windows.filter(func(w): return w.wall == "west").size() == 4, "four windows on the back wall")
 	var hatch: Rect2 = main.get_node("Buildings/HouseBunker").hatch_rect()
 	var ramp := Rect2(-shell.width / 2.0, -1.6, Shell.WALL_T + Shell.RAMP_RUN, 3.2)
 	_check(not ramp.intersects(hatch), "slider ramp clear of the trap door")

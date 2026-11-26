@@ -70,6 +70,7 @@
 [ext_resource type="Script" path="res://scripts/bunker.gd" id="bunker_script"]
 [ext_resource type="Script" path="res://scripts/chicken_coop.gd" id="101_chicken_coop"]
 [ext_resource type="Script" path="res://scripts/house_backyard.gd" id="102_house_backyard"]
+[ext_resource type="Script" path="res://scripts/house_porch.gd" id="105_house_porch"]
 [ext_resource type="Script" path="res://scripts/music_player.gd" id="103_music"]
 [ext_resource type="Script" path="res://scripts/backyard_mockups.gd" id="104_backyard_mockups"]
 
@@ -1554,8 +1555,8 @@ floor_color = Color(0.9, 0.9, 0.88, 1)
 rise = 2.29095
 ridge_along_z = true
 light_count = 3
-doors = [{"wall": "east", "u": 0.637, "width": 0.95, "height": 2.1, "label": "front door"}, {"wall": "west", "along": -0.3, "width": 2.44, "height": 2.45, "sill": 0.36, "glass": true, "label": "sliding door"}]
-windows = [{"wall": "west", "along": -5.99, "width": 0.95, "y0": 1.15, "y1": 2.35}, {"wall": "west", "along": -4.14, "width": 1.0, "y0": 1.15, "y1": 2.35}, {"wall": "west", "along": 3.2, "width": 1.9, "y0": 0.95, "y1": 2.35, "panes": 2}, {"wall": "west", "along": 6.0, "width": 0.85, "y0": 1.15, "y1": 2.35}]
+doors = [{"wall": "east", "along": -0.4, "width": 0.95, "height": 2.1, "label": "front door", "color": Color(0.96, 0.96, 0.94, 1)}, {"wall": "west", "along": -0.3, "width": 2.44, "height": 2.45, "sill": 0.36, "glass": true, "label": "sliding door"}]
+windows = [{"wall": "west", "along": -5.99, "width": 0.95, "y0": 1.15, "y1": 2.35}, {"wall": "west", "along": -4.14, "width": 1.0, "y0": 1.15, "y1": 2.35}, {"wall": "west", "along": 3.2, "width": 1.9, "y0": 0.95, "y1": 2.35, "panes": 2}, {"wall": "west", "along": 6.0, "width": 0.85, "y0": 1.15, "y1": 2.35}, {"wall": "east", "along": 3.93, "width": 0.9, "y0": 0.95, "y1": 2.2}, {"wall": "east", "along": 1.72, "width": 0.9, "y0": 0.95, "y1": 2.2}, {"wall": "east", "along": -2.7, "width": 0.9, "y0": 0.95, "y1": 2.2}, {"wall": "east", "along": -5.03, "width": 0.9, "y0": 0.95, "y1": 2.2}]
 
 [node name="WingShell" type="Node3D" parent="Buildings"]
 script = ExtResource("58_building_shell")
@@ -1576,10 +1577,13 @@ liner_color = Color(0.86, 0.85, 0.82, 1)
 floor_color = Color(0.55, 0.55, 0.53, 1)
 rise = 1.68652
 ridge_along_z = true
-doors = [{"wall": "south", "along": -2.43, "width": 0.9, "height": 2.05, "label": "door", "color": Color(0.93, 0.93, 0.91, 1)}]
+doors = [{"wall": "south", "along": -2.43, "width": 0.9, "height": 2.05, "label": "door", "color": Color(0.93, 0.93, 0.91, 1)}, {"wall": "north", "along": -2.0, "width": 3.3, "height": 2.2, "kind": 2, "label": "garage door", "ribbed": true, "color": Color(0.95, 0.95, 0.93, 1)}, {"wall": "north", "along": 2.0, "width": 3.3, "height": 2.2, "kind": 2, "label": "garage door", "ribbed": true, "color": Color(0.95, 0.95, 0.93, 1)}]
 
 [node name="HouseBackyard" type="Node3D" parent="Buildings"]
 script = ExtResource("102_house_backyard")
+
+[node name="HousePorch" type="Node3D" parent="Buildings"]
+script = ExtResource("105_house_porch")
 
 [node name="BackyardMockups" type="Node3D" parent="Buildings"]
 script = ExtResource("104_backyard_mockups")
