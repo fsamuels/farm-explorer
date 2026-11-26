@@ -74,6 +74,7 @@
 [ext_resource type="Script" path="res://scripts/backyard_mockups.gd" id="104_backyard_mockups"]
 [ext_resource type="Script" path="res://scripts/back_yard_birches.gd" id="105_back_yard_birches"]
 [ext_resource type="Script" path="res://scripts/back_yard_shed.gd" id="106_back_yard_shed"]
+[ext_resource type="Script" path="res://scripts/russian_olives.gd" id="107_russian_olives"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -1592,6 +1593,9 @@ script = ExtResource("105_back_yard_birches")
 [node name="BackYardShed" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19.4, 0, -47.9)
 script = ExtResource("106_back_yard_shed")
+
+[node name="RussianOlives" type="Node3D" parent="."]
+script = ExtResource("107_russian_olives")
 
 [node name="HouseBunker" type="Node3D" parent="Buildings"]
 script = ExtResource("bunker_script")
