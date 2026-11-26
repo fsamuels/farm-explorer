@@ -57,7 +57,14 @@ extends Node3D
 ## unused, z) where the map's teleport puts you, facing compass bearing
 ## `teleport_bearing`, instead of outside a door.
 ##
-## A door entry with `"start_open": true` is built open (E still closes it).
+## A door entry with `"start_open": true` is built open (E still closes it),
+## and one with `"leaf": false` is a bare opening with no door in it (the
+## garage's side of the House's pantry door, D-195).
+##
+## `paint` (D-195) colours stretches of the inside walls: each entry is a
+## Dictionary of wall, `from` and `to` (along the wall's axis in this frame,
+## metres from the footprint centre) and `color`. A thin coat goes on the
+## liner's inside face, cut round the wall's openings like the liner itself.
 @export var has_teleport_spot := false
 @export var teleport_spot := Vector3.ZERO
 @export var teleport_bearing := 0.0
@@ -98,10 +105,12 @@ const WALLS := {
 @export var light_count := 1
 @export var doors: Array = []
 @export var windows: Array = []
+@export var paint: Array = []
 
 ## How far into the room a sill ramp runs (D-170).
 const RAMP_RUN := 0.9
 const TRIM := 0.08
+const PAINT_T := 0.004
 
 var width := 1.0
 var depth := 1.0
@@ -112,6 +121,7 @@ var _liner: StandardMaterial3D
 var _skin: StandardMaterial3D
 var _floor: StandardMaterial3D
 var _lights: Array[OmniLight3D] = []
+var _paints := {}
 
 ## Where a door's centre sits along a wall's axis (local x or z, from the
 ## footprint centre), for fraction `u` left to right seen from outside.
@@ -250,7 +260,8 @@ func _build() -> void:
 		by_wall[d.wall].append({c = c, w = w + 0.04, y0 = sill, y1 = h})
 		if d.has("plane"):
 			_cut_hole(d, c, w, h)
-		_add_door(d, c, w, h)
+		if d.get("leaf", true):
+			_add_door(d, c, w, h)
 		if sill > 0.0:
 			_add_sill_ramp(d.wall, c, w + 0.04, sill)
 	for win: Dictionary in windows:
@@ -292,6 +303,29 @@ func _build_wall(wall: String, openings: Array, with_skin: bool) -> void:
 			_add_box(Vector3(outward.x * body_off, y, along), Vector3(body_t, r.size.y, r.size.x), _liner, true)
 			if with_skin:
 				_add_box(Vector3(outward.x * skin_off, y, along), Vector3(SKIN_T, r.size.y, r.size.x), _skin, false)
+		_paint_piece(wall, r, offset - WALL_T - PAINT_T / 2.0)
+
+## The coats of `paint` over one liner piece (Rect2 in along-wall, height).
+func _paint_piece(wall: String, r: Rect2, face: float) -> void:
+	var spec: Dictionary = WALLS[wall]
+	var out: Vector3 = spec.out
+	for p: Dictionary in paint:
+		if p.wall != wall:
+			continue
+		var a := maxf(r.position.x, minf(float(p.from), float(p.to)))
+		var b := minf(r.end.x, maxf(float(p.from), float(p.to)))
+		if b - a < 0.005:
+			continue
+		var mat: StandardMaterial3D = _paints.get(p.color)
+		if mat == null:
+			mat = _material(p.color, false)
+			_paints[p.color] = mat
+		var along := (a + b) / 2.0
+		var y := r.get_center().y
+		if spec.along_x:
+			_add_box(Vector3(along, y, out.z * face), Vector3(b - a, r.size.y, PAINT_T), mat, false)
+		else:
+			_add_box(Vector3(out.x * face, y, along), Vector3(PAINT_T, r.size.y, b - a), mat, false)
 
 func _add_door(d: Dictionary, c: float, w: float, h: float) -> void:
 	var spec: Dictionary = WALLS[d.wall]

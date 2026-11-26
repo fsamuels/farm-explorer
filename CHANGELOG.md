@@ -10,6 +10,14 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 26: Inside the House
+> The House now has real rooms inside: a kitchen, dining area and living room. The bomb shelter's trap door has moved to the garage.
+- **Kitchen.** In through the back slider, the kitchen is on your left: oak cabinets on green walls, a black stove and fridge, a sink under the window, a peninsula with a stool and a brown-and-beige tile floor.
+- **Dining and living.** The dining table and chairs stand on the right, under a navy accent wall. The living room is ahead and to the left, with a sofa, futon, rug, cedar chest and TV, all on wood floors with yellow walls.
+- **Front door.** The front door is slate blue now, with glass panels either side and more windows along the front wall.
+- **Pantry and garage.** A small pantry off the north side of the kitchen has shelves and a door into the garage.
+- **Shelter hatch moved.** The trap door to the bomb shelter is now in the garage floor. A short tunnel leads under the House to the same blast door and rooms.
+
 ## November 25: Russian olive trees
 > Old silvery Russian olive trees now line the farm's north side, thin at the west end and thick toward the round corral.
 - **Russian olives.** About thirty trees, 15 to 25 feet tall, with several crooked stems, dark rough bark and silvery-green leaves, stand along the north side of the farm where they show in the aerial imagery. You can walk under the branches but not through the trunks.

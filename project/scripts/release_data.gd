@@ -6,6 +6,17 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**Kitchen.** In through the back slider, the kitchen is on your left: oak cabinets on green walls, a black stove and fridge, a sink under the window, a peninsula with a stool and a brown-and-beige tile floor.",
+				"**Dining and living.** The dining table and chairs stand on the right, under a navy accent wall. The living room is ahead and to the left, with a sofa, futon, rug, cedar chest and TV, all on wood floors with yellow walls.",
+				"**Front door.** The front door is slate blue now, with glass panels either side and more windows along the front wall.",
+				"**Pantry and garage.** A small pantry off the north side of the kitchen has shelves and a door into the garage.",
+				"**Shelter hatch moved.** The trap door to the bomb shelter is now in the garage floor. A short tunnel leads under the House to the same blast door and rooms."
+			],
+			"summary": "The House now has real rooms inside: a kitchen, dining area and living room. The bomb shelter's trap door has moved to the garage.",
+			"title": "November 26: Inside the House"
+		},
+		{
+			"bullets": [
 				"**Russian olives.** About thirty trees, 15 to 25 feet tall, with several crooked stems, dark rough bark and silvery-green leaves, stand along the north side of the farm where they show in the aerial imagery. You can walk under the branches but not through the trunks."
 			],
 			"summary": "Old silvery Russian olive trees now line the farm's north side, thin at the west end and thick toward the round corral.",
@@ -369,14 +380,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 22096,
-		"commits": 317,
-		"decisions": 194,
+		"code_lines": 22504,
+		"commits": 67,
+		"decisions": 195,
 		"models": 14,
 		"scenes": 26,
-		"scripts": 90,
-		"size_kb": 123725,
-		"test_lines": 6928,
+		"scripts": 91,
+		"size_kb": 123748,
+		"test_lines": 7059,
 		"textures": 49,
 		"vehicles": 3
 	}
