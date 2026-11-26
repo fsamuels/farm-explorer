@@ -34,7 +34,7 @@ const CONTROLS := [
 	["N", "Show / hide constellation lines (and, at night, their names)"],
 	["R", "Change the weather: rain, storm, fog, snow, rainbow, aurora, clear"],
 	["P", "Music on / off (it starts off); [ and ] turn it down and up. There is a button for it in the bottom bar"],
-	["L / J", "In a hot tub (E on the water to get in): L cycles the lights, J turns the jets on and off"],
+	["L / J / K", "In a hot tub (E on the water to get in): L cycles the lights, J turns the jets on and off, K steps through sky scenes (night, light snow, aurora, sunset)"],
 	["O", "Back yard ideas: step through mockups of a new outdoor space behind the House (Shift+O goes back)"],
 	["Esc", "Release the mouse (click to recapture)"],
 	["Controller", "Left stick move, right stick look, A jump (handbrake), X get in / out and open doors, Y sky menu, Start things to do, Back map"],

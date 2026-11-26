@@ -78,6 +78,19 @@ func _run() -> void:
 	_press(soak, "tub_jets")
 	_check(not soak.jets and not soak._bubbles.emitting, "J again turns them off")
 
+	# Sky scenes: K steps through night, night with light snow, night with
+	# the aurora, and sunset, setting the time of day and the weather.
+	var tod: Node = main.get_node("TimeOfDay")
+	var weather: Node = main.get_node("Weather")
+	_check(InputMap.has_action("tub_scene"), "a K action for the sky scenes")
+	for expect in [["Night", "night", "clear"], ["Night, light snow", "night", "snow"], ["Night, aurora", "night", "aurora"], ["Sunset", "sunset", "clear"], ["Night", "night", "clear"]]:
+		_press(soak, "tub_scene")
+		_check(soak.scene_name() == expect[0] and tod.current == expect[1] and weather.current == expect[2],
+				"K: %s (got %s, %s, %s)" % [expect[0], soak.scene_name(), tod.current, weather.current])
+		_check(soak.hud_text().contains(expect[0]), "the tub's bar names the scene (%s)" % soak.hud_text())
+		_check(soak.flakes_falling() == (expect[2] == "snow"), "snow falls round the tub only in the snow scene (%s)" % expect[0])
+	_check(not tod.clock_running, "a scene holds the time (the clock stops)")
+
 	# Third person shows you in the water.
 	var toggle := InputEventAction.new()
 	toggle.action = "toggle_view"
