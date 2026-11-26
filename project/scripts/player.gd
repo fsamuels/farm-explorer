@@ -72,6 +72,8 @@ var _prompt_flash := ""
 var _prompt_flash_left := 0.0
 ## True while swimming in the pond (D-152), and where the freestyle stroke is.
 var swimming := false
+## True while stripped to underwear for the hot tub (D-190).
+var underwear := false
 var swim_phase := 0.0
 var _water: Node
 var _skeleton: Skeleton3D
@@ -119,6 +121,10 @@ func _apply_view() -> void:
 	tp_camera.current = third_person
 	interact_ray.enabled = not third_person
 	tp_interact_ray.enabled = third_person
+	# In a seat that shows the body (the hot tub, D-190), it shows in third
+	# person and hides in first, where the camera is inside the head.
+	if vehicle and vehicle.get("show_body"):
+		model.visible = third_person
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventJoypadButton and event.pressed and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE and not get_tree().paused:
@@ -199,7 +205,10 @@ func _process(delta: float) -> void:
 		# Driving: the big yellow prompt gives way to a quiet readout (D-113).
 		interact_prompt.visible = false
 		_prompt_flash_left -= delta
-		drive_hud.show_drive(vehicle.speed_mph(), vehicle.engine_rpm if vehicle.has_engine else -1.0, _prompt_flash if _prompt_flash_left > 0.0 else "")
+		if vehicle.has_method("speed_mph"):
+			drive_hud.show_drive(vehicle.speed_mph(), vehicle.engine_rpm if vehicle.has_engine else -1.0, _prompt_flash if _prompt_flash_left > 0.0 else "")
+		else:
+			drive_hud.hide_drive()
 		return
 	drive_hud.hide_drive()
 	var target := _interact_target()
@@ -284,6 +293,43 @@ func leave_vehicle() -> void:
 	model.visible = true
 	model_yaw = 0.0
 	collision_shape.set_deferred("disabled", false)
+
+## Strip to underwear for the hot tub (D-190), or dress again: the body's
+## skin-and-clothes surface becomes plain skin with dark boxer shorts at the
+## hips, and the boots and cap are hidden. Off puts the clothes back.
+func set_underwear(on: bool) -> void:
+	var body_mesh := model.find_child("Forrest", true, false) as MeshInstance3D
+	if body_mesh == null:
+		return
+	underwear = on
+	for s in body_mesh.mesh.get_surface_count():
+		body_mesh.set_surface_override_material(s, null)
+	if not on:
+		return
+	var shader := Shader.new()
+	shader.code = """
+shader_type spatial;
+uniform vec4 skin : source_color = vec4(0.86, 0.66, 0.53, 1.0);
+uniform vec4 shorts : source_color = vec4(0.11, 0.14, 0.26, 1.0);
+uniform float band_lo = 0.78;
+uniform float band_hi = 1.02;
+varying float height;
+void vertex() { height = VERTEX.y; }
+void fragment() {
+	bool in_shorts = height > band_lo && height < band_hi;
+	ALBEDO = in_shorts ? shorts.rgb : skin.rgb;
+	ROUGHNESS = in_shorts ? 0.9 : 0.6;
+}
+"""
+	var skin := ShaderMaterial.new()
+	skin.shader = shader
+	body_mesh.set_surface_override_material(0, skin)
+	var hidden := StandardMaterial3D.new()
+	hidden.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	hidden.albedo_color = Color(0, 0, 0, 0)
+	# Surfaces 2 to 6 are the boots and the cap (surface 1 is the hair).
+	for s in range(2, body_mesh.mesh.get_surface_count()):
+		body_mesh.set_surface_override_material(s, hidden)
 
 ## Ground speed for the held keys: walking (Shift) wins over super sprinting
 ## (Ctrl) so holding both never speeds you up.

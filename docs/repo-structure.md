@@ -123,8 +123,9 @@ farm-sim/
     │   ├── music_player.gd        # the looping soundtrack, P to toggle — see D-184
     │   ├── house_backyard.gd      # the House's back yard: deck and steps, concrete pad, AC unit, willows and mulch, siding on garage and gables — see D-170, D-171
     │   ├── willow.gd              # a tree-form willow grown in code from a seed (forking limbs, hanging leaf strands) — see D-171
-    │   ├── backyard_mockups.gd    # 48 back-yard ideas behind the House, O to step through them, a card and a hint — see D-184, D-185, D-187, D-188
-    │   ├── mockup_kit.gd          # the mockups' building blocks: hot tubs on decks, fire tables, pavilions, kitchens, saunas, seating — see D-184
+    │   ├── backyard_mockups.gd    # 15 back-yard ideas behind the House, best fit first, O to step through them, a card and a hint — see D-184, D-190
+    │   ├── mockup_kit.gd          # the mockups' building blocks: hot tubs on decks, fire tables, pavilions, counters, the Traeger, saunas, seating — see D-184, D-190
+    │   ├── hot_tub_soak.gd        # get into a back-yard hot tub: underwear, a seat facing west, L lights, J jets, steam — see D-190
     │   ├── world_terrain.gd       # the driveable world: builds and drops 320 m chunks (ground mesh, collider, road ribbons) around the camera — see D-148
     │   ├── world_math.gd          # pure world-ground maths (grid heights on the mesh's own triangles, farm blend, chunk meshes), covered by tests/ — see D-148
     │   ├── road_math.gd           # pure road maths (resample, ribbon geometry, nearest road), covered by tests/ — see D-148
@@ -160,6 +161,7 @@ farm-sim/
     │   ├── test_buildings.gd      # Sally's House and Front Barn shells: built, doors placed, the player walks in through doorways and not walls
     │   ├── test_things_to_do.gd   # the Things to Do card: list, saved ticks, teleports, what counts as done
     │   ├── test_backyard_mockups.gd # every back-yard idea meets the brief, stays in the yard, and the doors and sliders still let you out
+    │   ├── test_hot_tub.gd        # getting into a hot tub: underwear, seat facing west, lights, jets, steam, and out onto the deck
     │   ├── test_sky_menu.gd       # start position / third person, constellation name labels, sky menu picks and pause
     │   ├── test_toast.gd          # toast queue, fade, de-duplication, works while paused — see D-142
     │   ├── test_decisions.gd      # decisions.md: row IDs unique, in order, none skipped (catches parallel branches claiming the same D-number) — see D-146

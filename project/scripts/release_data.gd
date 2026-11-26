@@ -17,7 +17,9 @@ const DATA := {
 				"**Nine rooms.** Command room, pantry, armory and munitions store on one side; mess hall, medical bay, bathroom, bunk room and utility room on the other.",
 				"**No more sleeping where you eat.** The kitchen moved out of the bunk room into a mess hall with long tables; the bunk room now has four bunks and lockers.",
 				"**Command room.** A wall of screens over a console, a lit map table and a radio rack.",
-				"**Armory.** The gun rack moved here from the munitions store, with a pistol board, a workbench and a safe."
+				"**Armory.** The gun rack moved here from the munitions store, with a pistol board, a workbench and a safe.",
+				"**Get in the hot tub.** In the back-yard ideas, look at the hot tub's water and press E: you strip to your underwear, hop in and sit looking west. L changes the lights, J turns the jets on (bubbles and more steam), E gets you out. Try it at night for the stars.",
+				"**Back yard ideas, take two.** Fifteen ideas now, best fit first: ten practical ones and five just for fun. The hot tub stays by its plug in a deck, some with a deck from the master bedroom's slider, each with a counter, the Traeger and a fire table under a roof."
 			],
 			"summary": "The shelter under the House now runs under the back yard: nine rooms, including a mess hall well away from where you sleep.",
 			"title": "November 25: A bigger bomb shelter"
@@ -349,14 +351,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 21771,
-		"commits": 310,
-		"decisions": 189,
+		"code_lines": 21146,
+		"commits": 312,
+		"decisions": 190,
 		"models": 14,
 		"scenes": 26,
-		"scripts": 84,
-		"size_kb": 123713,
-		"test_lines": 6553,
+		"scripts": 85,
+		"size_kb": 123668,
+		"test_lines": 6688,
 		"textures": 49,
 		"vehicles": 3
 	}

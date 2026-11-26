@@ -21,6 +21,8 @@ fails if the two disagree.
 - **No more sleeping where you eat.** The kitchen moved out of the bunk room into a mess hall with long tables; the bunk room now has four bunks and lockers.
 - **Command room.** A wall of screens over a console, a lit map table and a radio rack.
 - **Armory.** The gun rack moved here from the munitions store, with a pistol board, a workbench and a safe.
+- **Get in the hot tub.** In the back-yard ideas, look at the hot tub's water and press E: you strip to your underwear, hop in and sit looking west. L changes the lights, J turns the jets on (bubbles and more steam), E gets you out. Try it at night for the stars.
+- **Back yard ideas, take two.** Fifteen ideas now, best fit first: ten practical ones and five just for fun. The hot tub stays by its plug in a deck, some with a deck from the master bedroom's slider, each with a counter, the Traeger and a fire table under a roof.
 
 ## November 24: A better Cub Cadet
 > The Cub Cadet UTV is now a detailed Polaris Ranger EV in yellow and black, with a working dump bed.
