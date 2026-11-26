@@ -124,7 +124,7 @@ farm-sim/
     │   ├── house_interior.gd      # the House's ground floor from the owner's photos: kitchen, pantry to the garage, dining, living room, a closed south-east block — see D-195
     │   ├── house_backyard.gd      # the House's back yard: deck and steps, concrete pad, AC unit, willows and mulch, siding on garage and gables — see D-170, D-171
     │   ├── willow.gd              # a tree-form willow grown in code from a seed (forking limbs, hanging leaf strands) — see D-171
-    │   ├── birch.gd               # a paper birch grown in code from a seed (white scarred trunk, up-swept branches, leaf clusters) — see D-192
+    │   ├── birch.gd               # a tall poplar-type tree grown in code from a seed (furrowed grey-brown trunk, bare below, narrow crown, heart-shaped leaves); first built as a birch — see D-192, D-196
     │   ├── back_yard_birches.gd   # the seven back-yard birches at their world spots, a view south-west left open — see D-192
     │   ├── back_yard_shed.gd      # the little grey shed with a red door in the back yard's north-west corner, built from primitives — see D-193
     │   ├── russian_olive.gd       # an older Russian olive grown in code from a seed (crooked stems, wide crown, silvery leaves) — see D-194

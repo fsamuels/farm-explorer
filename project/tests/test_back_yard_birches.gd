@@ -41,9 +41,12 @@ func _run() -> void:
 	_check(bark.end.y > 10.5 and bark.end.y < 13.0, "a 12 m tree (%.1f)" % bark.end.y)
 	_check(leaves.position.y > 1.8, "leaves no lower than 1.8 m (%.2f)" % leaves.position.y)
 	_check(leaves.end.y > 9.5, "leaves reach the top (%.1f)" % leaves.end.y)
-	_check(leaves.size.x < 9.0 and bark.size.x < 6.0, "a slender tree (crown %.1f m across)" % leaves.size.x)
-	var colour := Birch.bark_image().get_pixel(3, 3)
-	_check(colour.get_luminance() > 0.6, "white bark (%.2f)" % colour.get_luminance())
+	_check(leaves.size.x < 9.0 and bark.size.x < 6.0, "a tall narrow tree (crown %.1f m across)" % leaves.size.x)
+	var img := Birch.bark_image()
+	var lum := 0.0
+	for k in 64:
+		lum += img.get_pixel(k, k).get_luminance() / 64.0
+	_check(lum > 0.25 and lum < 0.6, "grey-brown bark, not white (%.2f)" % lum)
 	_check(Birch.build(1, 12.0).get_node("Bark").mesh.get_aabb().is_equal_approx(bark), "the same seed grows the same tree")
 	_check(not Birch.build(2, 12.0).get_node("Bark").mesh.get_aabb().is_equal_approx(bark), "another seed grows another tree")
 

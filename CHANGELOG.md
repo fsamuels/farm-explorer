@@ -18,6 +18,10 @@ fails if the two disagree.
 - **Pantry and garage.** A small pantry off the north side of the kitchen has shelves and a door into the garage.
 - **Shelter hatch moved.** The trap door to the bomb shelter is now in the garage floor. A short tunnel leads under the House to the same blast door and rooms.
 
+## November 25: The back-yard trees, corrected
+> The tall back-yard trees now look like your poplars: grey-brown furrowed trunks and broad green leaves, not white birch bark.
+- **Poplar-style trees.** The seven tall trees in the back yard were built with white birch bark. They now have thick, furrowed grey-brown trunks that flare at the base, bare lower trunks, a narrower crown and broad heart-shaped leaves.
+
 ## November 25: Russian olive trees
 > Old silvery Russian olive trees now line the farm's north side, thin at the west end and thick toward the round corral.
 - **Russian olives.** About thirty trees, 15 to 25 feet tall, with several crooked stems, dark rough bark and silvery-green leaves, stand along the north side of the farm where they show in the aerial imagery. You can walk under the branches but not through the trunks.
