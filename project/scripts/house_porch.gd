@@ -9,8 +9,8 @@ extends Node3D
 ##  - a low concrete porch slab along the front, `REACH` deep;
 ##  - two steps down in front of the door;
 ##  - six white posts under a shallow porch roof of dark shingles with a white
-##    fascia, at the same fractions of the wall as in the photo (`POST_US`).
-## The five windows and the pale blue siding on that wall come from the House's
+##    fascia, placed as in the photo (`POST_ZS`).
+## The windows and the pale blue siding on that wall come from the House's
 ## building_shell node (`windows`, `siding`), as on the back.
 ##
 ## The slab and steps are visual only (5 cm and 10 cm proud of the ground), so
@@ -18,16 +18,17 @@ extends Node3D
 
 const Shell := preload("res://scripts/building_shell.gd")
 
-## Fractions along the front wall, left to right seen from outside (south to
-## north: standing on the lawn facing west, south is on your left), measured off
-## the drone photo: the six posts, then the front door.
-const POST_US := [0.075, 0.25, 0.41, 0.566, 0.756, 0.95]
-## The porch runs from `SPAN_U0` to `SPAN_U1` of the wall.
-const SPAN_U0 := 0.06
-const SPAN_U1 := 0.99
-## The front door's fraction (the House shell's `front door`), and the steps' width.
-const DOOR_U := 0.529
+## Where the front door is along the wall, z in the House's frame (the House
+## shell's `front door`, u 0.637 of a 14.24 m wall), and the steps' width.
+const DOOR_Z := 1.95
 const STEP_WIDTH := 1.8
+## The six posts, z in the House's frame, measured off the drone photo from the
+## door (about 61 px a metre on the wall; south, on your left as you face the
+## house, is +z). The photo's porch reaches 4.5 m north of the door and, south of
+## it, to the end of the wall; the southmost post is pulled in to stand on it.
+const POST_ZS := [7.0, 5.9, 3.6, 1.43, -1.3, -4.1]
+## The slab's north end; its south end is the wall's own.
+const SPAN_NORTH := -4.6
 const REACH := 2.3
 const SLAB := 0.05
 const STEP_RISE := 0.05
@@ -71,31 +72,22 @@ func _ready() -> void:
 	_build_roof()
 	_build_apron()
 
-## A fraction along the front wall (left to right seen from outside) as a z in
-## the House's frame: left is south, which is +z.
-static func z_at(u: float, length: float) -> float:
-	return (0.5 - u) * length
-
-## The slab's rectangle in the House's (x, z).
+## The slab's rectangle in the House's (x, z), from `SPAN_NORTH` to the south
+## end of the wall.
 static func slab_rect(wall: float, length: float) -> Rect2:
-	var z0 := z_at(SPAN_U1, length)
-	return Rect2(wall, z0, REACH, z_at(SPAN_U0, length) - z0)
+	return Rect2(wall, SPAN_NORTH, REACH, length / 2.0 - SPAN_NORTH)
 
 ## The two steps, top one first, in the House's (x, z): each reaches a tread
 ## further out than the one above and is as wide as `STEP_WIDTH`.
 static func step_rects(wall: float, length: float) -> Array[Rect2]:
-	var zc := z_at(DOOR_U, length)
 	var out: Array[Rect2] = []
 	for k in 2:
-		out.append(Rect2(wall + REACH + k * STEP_TREAD, zc - STEP_WIDTH / 2.0, STEP_TREAD, STEP_WIDTH))
+		out.append(Rect2(wall + REACH + k * STEP_TREAD, DOOR_Z - STEP_WIDTH / 2.0, STEP_TREAD, STEP_WIDTH))
 	return out
 
-## Post positions, z in the House's frame, one per `POST_US`.
-static func post_zs(length: float) -> PackedFloat32Array:
-	var out := PackedFloat32Array()
-	for u: float in POST_US:
-		out.append(z_at(u, length))
-	return out
+## Post positions, z in the House's frame.
+static func post_zs() -> PackedFloat32Array:
+	return PackedFloat32Array(POST_ZS)
 
 func _material(color: Color, rough := 0.9) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
@@ -132,7 +124,7 @@ func _build_posts() -> void:
 	var x := wall_x + REACH - POST
 	var h := POST_TOP - SLAB
 	var i := 0
-	for z in post_zs(wall_len):
+	for z in post_zs():
 		i += 1
 		_box("Post%d" % i, Vector3(x, SLAB + h / 2.0, z), Vector3(POST, h, POST), m)
 		var shape := BoxShape3D.new()

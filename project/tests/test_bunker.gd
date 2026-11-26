@@ -1,9 +1,9 @@
 extends SceneTree
-## Tests for the House's front door, white room, trap door and the bomb shelter
-## under it (D-145): the layout numbers hang together, the ground has a hole
-## only at the stairs, and the real player can walk in the front door, stand on
-## the closed trap door, go down the stairs, through the blast door into every
-## room, and back up. Run headless from project/:
+## Tests for the House's front door, the trap door in the House Garage and the
+## bomb shelter under them (D-145, D-186, D-195): the layout numbers hang
+## together, the ground has a hole only at the stairs, and the real player can
+## walk in the front door, stand on the closed trap door, go down the stairs,
+## along the tunnel, through the blast door into every room, and back up. Run headless from project/:
 ##   godot --headless -s res://tests/test_bunker.gd
 
 const Bunker := preload("res://scripts/bunker.gd")
@@ -33,7 +33,8 @@ func _run() -> void:
 	var player: CharacterBody3D = main.get_node("Player")
 	var shell: Node3D = main.get_node("Buildings/HouseShell")
 	var bunker: Node3D = main.get_node("Buildings/HouseBunker")
-	_test_built(main, shell, bunker)
+	var garage: Node3D = main.get_node("Buildings/GarageShell")
+	_test_built(main, shell, garage, bunker)
 	_test_ground(main, shell, bunker)
 	await _test_front_door(player, shell)
 	await _test_trap_door(player, bunker)
@@ -69,20 +70,32 @@ func _test_layout() -> void:
 			var b: Rect2 = Bunker.ROOMS[names[j]]
 			_check(not a.grow(-0.01).intersects(b.grow(-0.01)), "rooms %s and %s do not overlap" % [names[i], names[j]])
 
-func _test_built(main: Node, shell: Node3D, bunker: Node3D) -> void:
+## The rooms behind doors (not the stairwell, corridor or the tunnel to it).
+func _rooms() -> Array:
+	return Bunker.ROOMS.keys().filter(func(k): return not k in ["stairwell", "corridor", "tunnel", "passage"])
+
+func _test_built(main: Node, shell: Node3D, garage: Node3D, bunker: Node3D) -> void:
 	var box: Node3D = main.get_node("Buildings/House")
 	_check(not (box.get_node("MeshInstance3D") as Node3D).visible, "House: placeholder box hidden")
 	_check((box.get_node("CollisionShape3D") as CollisionShape3D).disabled, "House: placeholder collision off")
 	_check(shell.get_node("Ceiling") != null, "House: has a ceiling")
 	_check(shell.front_door_spot(3.0) != null, "House: the map has a way in")
-	_check(bunker.global_transform.is_equal_approx(shell.global_transform), "shelter and shell share a frame")
-	# The hatch and the whole shelter sit inside the House's walls.
+	_check(bunker.global_transform.is_equal_approx(garage.global_transform), "shelter and garage share a frame")
+	# The hatch and the stairwell sit inside the garage's walls.
+	var g_inner := Rect2(-garage.width / 2.0 + Shell.WALL_T, -garage.depth / 2.0 + Shell.WALL_T, garage.width - 2 * Shell.WALL_T, garage.depth - 2 * Shell.WALL_T)
+	_check(g_inner.encloses(bunker.hatch_rect().grow(0.5)), "the hatch is inside the garage with room to stand round it")
+	_check(g_inner.encloses(Bunker.ROOMS.stairwell), "the stairwell is under the garage")
+	# The garage's way in from the House's pantry is clear of the hatch.
+	var opening: Vector3 = Vector3.ZERO
+	for d: Dictionary in garage.doors:
+		if not d.get("leaf", true):
+			opening = Vector3(float(d.along), 0, garage.depth / 2.0)
+	_check(opening != Vector3.ZERO, "the garage has an opening from the pantry")
+	_check(not bunker.hatch_rect().grow(0.8).has_point(Vector2(opening.x, opening.z - 0.8)), "the pantry's way in is clear of the hatch")
 	var inner := Rect2(-shell.width / 2.0 + Shell.WALL_T, -shell.depth / 2.0 + Shell.WALL_T, shell.width - 2 * Shell.WALL_T, shell.depth - 2 * Shell.WALL_T)
-	_check(inner.encloses(bunker.hatch_rect().grow(0.5)), "the hatch is inside the House with room to stand round it")
-	_check(inner.encloses(Bunker.ROOMS.stairwell), "the stairwell is under the House")
 	# The shelter has 6-10 rooms off its corridor, each with a door, and the
 	# bunk room is not the mess hall's neighbour (D-186).
-	var rooms := Bunker.ROOMS.keys().filter(func(k): return k != "stairwell" and k != "corridor")
+	var rooms := _rooms()
 	_check(rooms.size() >= 6 and rooms.size() <= 10, "6 to 10 rooms (%d)" % rooms.size())
 	for room in rooms:
 		_check(bunker.doors().has(room), "%s has a door" % room)
@@ -90,8 +103,10 @@ func _test_built(main: Node, shell: Node3D, bunker: Node3D) -> void:
 	var bunks: Rect2 = Bunker.ROOMS.bunks
 	var mess: Rect2 = Bunker.ROOMS.mess
 	_check(not bunks.grow(0.01).intersects(mess), "the bunks and the mess hall do not share a wall")
-	_check(shell.floor_holes().size() == 1, "the House's floor is cut for the hatch")
-	_check(bunker.doors().size() == Bunker.DOORS.size(), "a door for every doorway (%d)" % bunker.doors().size())
+	_check(garage.floor_holes().size() == 1, "the garage's floor is cut for the hatch")
+	_check(shell.floor_holes().is_empty(), "the House's floor has no hatch any more")
+	var leaves := Bunker.DOORS.filter(func(d): return not d.get("open", false)).size()
+	_check(bunker.doors().size() == leaves, "a door for every doorway (%d)" % bunker.doors().size())
 	_check(bunker.trap_door != null and not bunker.trap_door.is_open, "the trap door starts closed")
 	# The garage and south wing no longer push into the white room.
 	for other in ["House Garage", "House South Wing"]:
@@ -186,25 +201,33 @@ func _test_trap_door(player: CharacterBody3D, bunker: Node3D) -> void:
 	bunker.trap_door.interact(player)
 	await _step(80)
 	_check(bunker.trap_door.is_open and bunker.trap_door.get_interact_prompt() == "Close trap door", "the trap door opens")
-	# Walk from the north end of the hatch down the stairs: the closed blast door stops you at the bottom.
-	var top := Vector3(hatch.get_center().x, 0.05, hatch.position.y - 0.6)
-	var bottom := Vector3(hatch.get_center().x, Bunker.FLOOR_Y, 2.0)
-	p = await _walk(player, bunker, top, bottom, 160)
+	# Walk from the north end of the hatch down the stairs into the tunnel,
+	# east along it and south down the passage: the closed blast door stops you.
+	var x := hatch.get_center().x
+	var t: Rect2 = Bunker.ROOMS.tunnel
+	var pas: Rect2 = Bunker.ROOMS.passage
+	var top := Vector3(x, 0.05, hatch.position.y - 0.6)
+	p = await _walk(player, bunker, top, Vector3(x, Bunker.FLOOR_Y, t.get_center().y), 170)
 	_check(absf(p.y - Bunker.FLOOR_Y) < 0.3, "down the stairs to the shelter floor (y %.2f)" % p.y)
-	var s: Rect2 = Bunker.ROOMS.stairwell
-	_check(p.z < s.end.y and p.z > s.end.y - 1.0, "the closed blast door stops you at the foot of the stairs (z %.2f)" % p.z)
+	_check(_in_room(bunker, "tunnel", p), "on into the tunnel (at %s)" % p)
+	p = await _walk(player, bunker, Vector3(x, Bunker.FLOOR_Y, t.get_center().y), Vector3(pas.get_center().x, Bunker.FLOOR_Y, t.get_center().y), 90)
+	_check(_in_room(bunker, "tunnel", p) and p.x > pas.position.x, "along the tunnel to its east end (at %s)" % p)
+	var start := Vector3(pas.get_center().x, Bunker.FLOOR_Y, t.get_center().y)
+	p = await _walk(player, bunker, start, Vector3(start.x, Bunker.FLOOR_Y, Bunker.ROOMS.corridor.end.y), 110)
+	_check(_in_room(bunker, "passage", p) and p.z > pas.end.y - 1.0, "the closed blast door stops you at the end of the passage (at %s)" % p)
 
 func _test_rooms(player: CharacterBody3D, bunker: Node3D) -> void:
 	var doors: Dictionary = bunker.doors()
 	var hatch: Rect2 = bunker.hatch_rect()
 	var x := hatch.get_center().x
-	var foot := Vector3(x, Bunker.FLOOR_Y, Bunker.STAIR_Z0 + Bunker.STAIR_RUN - 0.3)
+	var pas: Rect2 = Bunker.ROOMS.passage
+	var foot := Vector3(pas.get_center().x, Bunker.FLOOR_Y, pas.end.y - 0.7)
 	var corridor: Rect2 = Bunker.ROOMS.corridor
 	doors.corridor.set_open(true)
 	await _step(120)
-	var p := await _walk(player, bunker, foot, Vector3(x, Bunker.FLOOR_Y, corridor.get_center().y), 50)
+	var p := await _walk(player, bunker, foot, Vector3(foot.x, Bunker.FLOOR_Y, corridor.get_center().y), 50)
 	_check(_in_room(bunker, "corridor", p), "through the blast door into the corridor (at %s)" % p)
-	for room in Bunker.ROOMS.keys().filter(func(k): return k != "stairwell" and k != "corridor"):
+	for room in _rooms():
 		var d: Dictionary = {}
 		for entry: Dictionary in Bunker.DOORS:
 			if entry.room == room:
@@ -224,13 +247,19 @@ func _test_rooms(player: CharacterBody3D, bunker: Node3D) -> void:
 		p = await _walk(player, bunker, wall_from, wall_from + (into - from), 60)
 		_check(_in_room(bunker, "corridor", p), "%s: the wall beside the door blocks (at %s)" % [room, p])
 
-## From the foot of the stairs, walk back up into the House.
+## From the passage, back along the tunnel and up the stairs into the garage.
 func _test_back_up(player: CharacterBody3D, bunker: Node3D) -> void:
 	var hatch: Rect2 = bunker.hatch_rect()
 	var x := hatch.get_center().x
-	var foot := Vector3(x, Bunker.FLOOR_Y, Bunker.STAIR_Z0 + Bunker.STAIR_RUN - 0.2)
-	var p := await _walk(player, bunker, foot, Vector3(x, 0.0, -20.0), 150)
-	_check(p.y > 0.0 and p.y < 0.3 and p.z < hatch.position.y, "back up the stairs into the House (at %s)" % p)
+	var t: Rect2 = Bunker.ROOMS.tunnel
+	var pas: Rect2 = Bunker.ROOMS.passage
+	var mid := Vector3(pas.get_center().x, Bunker.FLOOR_Y, t.get_center().y)
+	var p := await _walk(player, bunker, Vector3(mid.x, Bunker.FLOOR_Y, pas.get_center().y), mid, 60)
+	_check(_in_room(bunker, "tunnel", p), "back up the passage into the tunnel (at %s)" % p)
+	p = await _walk(player, bunker, mid, Vector3(x, Bunker.FLOOR_Y, t.get_center().y), 90)
+	_check(_in_room(bunker, "tunnel", p) and p.x < pas.position.x, "back along the tunnel (at %s)" % p)
+	p = await _walk(player, bunker, Vector3(x, Bunker.FLOOR_Y, t.get_center().y), Vector3(x, 0.0, -20.0), 200)
+	_check(p.y > 0.0 and p.y < 0.3 and p.z < hatch.position.y, "back up the stairs into the garage (at %s)" % p)
 	bunker.trap_door.set_open(false)
 	await _step(80)
 	_check(not bunker.trap_door.is_open, "the trap door closes")

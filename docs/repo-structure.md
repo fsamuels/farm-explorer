@@ -121,9 +121,16 @@ farm-sim/
     │   ├── corrugated.gd          # the shared blue corrugated-metal material (triplanar, mipmapped) — see D-98
     │   ├── siding.gd              # the farmhouse's pale blue lap siding, made in code (world triplanar) — see D-170
     │   ├── music_player.gd        # the looping soundtrack, P to toggle — see D-184
+    │   ├── house_interior.gd      # the House's ground floor from the owner's photos: kitchen, pantry to the garage, dining, living room, a closed south-east block — see D-195
+    │   ├── house_porch.gd         # the House's front porch: slab, steps, posts and roof; the concrete apron by the garage doors — see D-199
     │   ├── house_backyard.gd      # the House's back yard: deck and steps, concrete pad, AC unit, willows and mulch, siding on garage and gables — see D-170, D-171
     │   ├── willow.gd              # a tree-form willow grown in code from a seed (forking limbs, hanging leaf strands) — see D-171
-    │   ├── backyard_mockups.gd    # 15 back-yard ideas behind the House, best fit first, O to step through them, a card and a hint — see D-184, D-190
+    │   ├── birch.gd               # a tall poplar-type tree grown in code from a seed (furrowed grey-brown trunk, bare below, narrow crown, heart-shaped leaves); first built as a birch — see D-192, D-196
+    │   ├── back_yard_birches.gd   # the seven back-yard birches at their world spots, a view south-west left open — see D-192
+    │   ├── back_yard_shed.gd      # the little grey shed with a red door in the back yard's north-west corner, built from primitives — see D-193
+    │   ├── russian_olive.gd       # an older Russian olive grown in code from a seed (crooked stems, wide crown, silvery leaves) — see D-194
+    │   ├── russian_olives.gd      # the ~28 Russian olives along the farm's north side, thin west to thick east — see D-194
+    │   ├── backyard_mockups.gd    # 35 back-yard ideas behind the House (30 realistic, 5 for fun), none roofed over the tub, O to step through them, a card and a hint — see D-184, D-190, D-197, D-198
     │   ├── mockup_kit.gd          # the mockups' building blocks: hot tubs on decks, fire tables, pavilions, counters, the Traeger, saunas, seating — see D-184, D-190
     │   ├── hot_tub_soak.gd        # get into a back-yard hot tub: underwear, a seat facing west, L lights, J jets, K sky scenes, steam — see D-190, D-191
     │   ├── world_terrain.gd       # the driveable world: builds and drops 320 m chunks (ground mesh, collider, road ribbons) around the camera — see D-148
@@ -160,6 +167,8 @@ farm-sim/
     │   ├── test_horizon.gd        # distant terrain: real geography in the data, the maths, DistantTerrain in main.tscn, Season button
     │   ├── test_buildings.gd      # Sally's House and Front Barn shells: built, doors placed, the player walks in through doorways and not walls
     │   ├── test_things_to_do.gd   # the Things to Do card: list, saved ticks, teleports, what counts as done
+    │   ├── test_house_front.gd    # the porch, the front windows and the garage's two roll-up doors; the player walks in the front door — see D-199
+    │   ├── test_house_interior.gd # the House's rooms are built, the pantry door meets the garage, the player walks slider to front door and pantry to garage — see D-195
     │   ├── test_backyard_mockups.gd # every back-yard idea meets the brief, stays in the yard, and the doors and sliders still let you out
     │   ├── test_hot_tub.gd        # getting into a hot tub: underwear, seat facing west, lights, jets, steam, and out onto the deck
     │   ├── test_sky_menu.gd       # start position / third person, constellation name labels, sky menu picks and pause

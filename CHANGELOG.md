@@ -10,6 +10,41 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 26: The House's front porch and garage doors
+> The front of the House now has its covered porch and more windows, and the garage has its two doors, like the photos.
+- **A covered porch.** White posts hold up a shallow shingle roof over a porch the length of the front, with two steps down to the front door.
+- **More windows.** The front wall gets the windows the real one has, either side of the door, on the same pale blue siding as the back.
+- **Two garage doors.** The garage's north end has two ribbed roll-up doors; press E at one to roll it up. A strip of concrete runs out in front of them.
+
+## November 26: Thirty back-yard ideas under open sky
+> Thirty new back-yard ideas to step through with O, and not one puts a roof over the hot tub, so you can soak under the stars.
+- **Thirty ideas.** Stand in the back yard and press O to step through them, best fit first, with the five just-for-fun ones still at the end.
+- **Open sky over the tub.** Every roof, pavilion and gazebo stops short of the water. The idea with a roof over the tub is gone.
+- **New ideas.** A stargazing deck with loungers, a fire beside the tub, a bar facing the tub, a run-in shed, a winter windbreak, a sauna a step from the tub, a cold plunge and shower, a dark-sky yard with a hammock, and more.
+- **Fuller yards.** Each idea now fills the whole yard: a vegetable garden, a greenhouse or a firewood and propane corner by the garage; Adirondack chairs round a fire ring, cornhole, horseshoes or hay bales on the lawn; a long table, picnic tables or a pergola in the middle; and loungers, a towel line or a hammock to the south. Every tub has a towel post, step lights and a side table.
+
+## November 26: Inside the House
+> The House now has real rooms inside: a kitchen, dining area and living room. The bomb shelter's trap door has moved to the garage.
+- **Kitchen.** In through the back slider, the kitchen is on your left: oak cabinets on green walls, a black stove and fridge, a sink under the window, a peninsula with a stool and a brown-and-beige tile floor.
+- **Dining and living.** The dining table and chairs stand on the right, under a navy accent wall. The living room is ahead and to the left, with a sofa, futon, rug, cedar chest and TV, all on wood floors with yellow walls.
+- **Front door.** The front door is slate blue now, with glass panels either side and more windows along the front wall.
+- **Pantry and garage.** A small pantry off the north side of the kitchen has shelves and a door into the garage.
+- **Shelter hatch moved.** The trap door to the bomb shelter is now in the garage floor. A short tunnel leads under the House to the same blast door and rooms.
+
+## November 25: The back-yard trees, corrected
+> The tall back-yard trees now look like your poplars: grey-brown furrowed trunks and broad green leaves, not white birch bark.
+- **Poplar-style trees.** The seven tall trees in the back yard were built with white birch bark. They now have thick, furrowed grey-brown trunks that flare at the base, bare lower trunks, a narrower crown and broad heart-shaped leaves.
+
+## November 25: Russian olive trees
+> Old silvery Russian olive trees now line the farm's north side, thin at the west end and thick toward the round corral.
+- **Russian olives.** About thirty trees, 15 to 25 feet tall, with several crooked stems, dark rough bark and silvery-green leaves, stand along the north side of the farm where they show in the aerial imagery. You can walk under the branches but not through the trunks.
+
+## November 25: Birches and a shed in the back yard
+> Seven tall white birches and a little grey shed with a red door now stand in the back yard, leaving the south-west view open.
+- **Birch trees.** Seven paper birches, about forty feet tall, with white bark, dark scars and small yellow-green leaves. Four stand in a line in the middle-west of the back yard and three more in a line just west of them. You can walk under the branches but not through the trunks.
+- **A view to the wind farm.** The trees close off the north-west of the yard and leave a gap to the south-west.
+- **The little shed.** A small weathered shed with a shingled roof and a red door stands in the yard's north-west corner, with a low deck in front you can walk up onto. It is closed up for now, so you can't go inside.
+
 ## November 25: Controller support
 > Play with a gamepad: sticks to move and look, buttons for doors, torch, sky menu and map, so it works on a TV.
 - **Play with a controller.** Plug in or pair an Xbox, PlayStation or similar gamepad. Left stick moves (a light push is a slow walk) and drives, right stick looks, A jumps, X opens doors and gets in and out of cars, and the right trigger burns with the torch. Y opens the sky menu, Start opens Things to do, and Back opens the map. Press the right stick to see every button. B closes a menu, and the D-pad and A work the menus.
@@ -24,6 +59,7 @@ fails if the two disagree.
 - **Get in the hot tub.** In the back-yard ideas, look at the hot tub's water and press E: you strip to your underwear, hop in and sit looking west. L changes the lights, J turns the jets on (bubbles and more steam), E gets you out. Try it at night for the stars.
 - **Hot tub skies.** In the tub, K steps through four scenes: a clear night, night with light snow falling round the tub, night with the aurora, and sunset.
 - **Back yard ideas, take two.** Fifteen ideas now, best fit first: ten practical ones and five just for fun. The hot tub stays by its plug in a deck, some with a deck from the master bedroom's slider, each with a counter, the Traeger and a fire table under a roof.
+- **The game no longer grabs your mouse at launch.** Click or press a key to take control; Esc still lets go.
 
 ## November 24: A better Cub Cadet
 > The Cub Cadet UTV is now a detailed Polaris Ranger EV in yellow and black, with a working dump bed.
