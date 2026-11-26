@@ -122,6 +122,7 @@ farm-sim/
     │   ├── siding.gd              # the farmhouse's pale blue lap siding, made in code (world triplanar) — see D-170
     │   ├── music_player.gd        # the looping soundtrack, P to toggle — see D-184
     │   ├── house_interior.gd      # the House's ground floor from the owner's photos: kitchen, pantry to the garage, dining, living room, a closed south-east block — see D-195
+    │   ├── house_porch.gd         # the House's front porch: slab, steps, posts and roof; the concrete apron by the garage doors — see D-199
     │   ├── house_backyard.gd      # the House's back yard: deck and steps, concrete pad, AC unit, willows and mulch, siding on garage and gables — see D-170, D-171
     │   ├── willow.gd              # a tree-form willow grown in code from a seed (forking limbs, hanging leaf strands) — see D-171
     │   ├── birch.gd               # a tall poplar-type tree grown in code from a seed (furrowed grey-brown trunk, bare below, narrow crown, heart-shaped leaves); first built as a birch — see D-192, D-196
@@ -166,6 +167,7 @@ farm-sim/
     │   ├── test_horizon.gd        # distant terrain: real geography in the data, the maths, DistantTerrain in main.tscn, Season button
     │   ├── test_buildings.gd      # Sally's House and Front Barn shells: built, doors placed, the player walks in through doorways and not walls
     │   ├── test_things_to_do.gd   # the Things to Do card: list, saved ticks, teleports, what counts as done
+    │   ├── test_house_front.gd    # the porch, the front windows and the garage's two roll-up doors; the player walks in the front door — see D-199
     │   ├── test_house_interior.gd # the House's rooms are built, the pantry door meets the garage, the player walks slider to front door and pantry to garage — see D-195
     │   ├── test_backyard_mockups.gd # every back-yard idea meets the brief, stays in the yard, and the doors and sliders still let you out
     │   ├── test_hot_tub.gd        # getting into a hot tub: underwear, seat facing west, lights, jets, steam, and out onto the deck

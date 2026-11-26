@@ -10,6 +10,11 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 26: The House's front porch and garage doors
+> The front of the House now has its covered porch and more windows, and the garage has its two doors, like the photos.
+- **A covered porch.** White posts hold up a shallow shingle roof over a porch the length of the front, with two steps down to the front door.
+- **More windows.** The front wall gets the windows the real one has, either side of the door, on the same pale blue siding as the back.
+- **Two garage doors.** The garage's north end has two ribbed roll-up doors; press E at one to roll it up. A strip of concrete runs out in front of them.
 ## November 26: An old Russian olive forest
 > North of the House and its back yard, the Russian olives are now a thick old forest of tall trees with young ones growing up between.
 - **Old-growth olives.** Along the north side by the House the scattered trees are now a deep stand of about seventy, most of them big old 20 to 25 foot trees, with younger ones coming up underneath. From the back yard they make a solid wall of crooked trunks and silvery leaves.

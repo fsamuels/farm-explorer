@@ -6,6 +6,15 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**A covered porch.** White posts hold up a shallow shingle roof over a porch the length of the front, with two steps down to the front door.",
+				"**More windows.** The front wall gets the windows the real one has, either side of the door, on the same pale blue siding as the back.",
+				"**Two garage doors.** The garage's north end has two ribbed roll-up doors; press E at one to roll it up. A strip of concrete runs out in front of them."
+			],
+			"summary": "The front of the House now has its covered porch and more windows, and the garage has its two doors, like the photos.",
+			"title": "November 26: The House's front porch and garage doors"
+		},
+		{
+			"bullets": [
 				"**Old-growth olives.** Along the north side by the House the scattered trees are now a deep stand of about seventy, most of them big old 20 to 25 foot trees, with younger ones coming up underneath. From the back yard they make a solid wall of crooked trunks and silvery leaves.",
 				"**Still thick to the east.** The band toward the round corral is a little denser too, and the west end is unchanged."
 			],
@@ -405,14 +414,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 23271,
-		"commits": 321,
-		"decisions": 199,
+		"code_lines": 23440,
+		"commits": 324,
+		"decisions": 200,
 		"models": 14,
 		"scenes": 26,
-		"scripts": 91,
-		"size_kb": 123792,
-		"test_lines": 7077,
+		"scripts": 92,
+		"size_kb": 123804,
+		"test_lines": 7206,
 		"textures": 49,
 		"vehicles": 3
 	}
