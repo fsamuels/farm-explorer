@@ -10,6 +10,13 @@ players. Every release block is a `## Date: Title` heading, then a one-line
 regenerated `project/scripts/release_data.gd`; `tests/test_release_notes.gd`
 fails if the two disagree.
 
+## November 26: Thirty back-yard ideas under open sky
+> Thirty new back-yard ideas to step through with O, and not one puts a roof over the hot tub, so you can soak under the stars.
+- **Thirty ideas.** Stand in the back yard and press O to step through them, best fit first, with the five just-for-fun ones still at the end.
+- **Open sky over the tub.** Every roof, pavilion and gazebo stops short of the water. The idea with a roof over the tub is gone.
+- **New ideas.** A stargazing deck with loungers, a fire beside the tub, a bar facing the tub, a run-in shed, a winter windbreak, a sauna a step from the tub, a cold plunge and shower, a dark-sky yard with a hammock, and more.
+- **Fuller yards.** Each idea now fills the whole yard: a vegetable garden, a greenhouse or a firewood and propane corner by the garage; Adirondack chairs round a fire ring, cornhole, horseshoes or hay bales on the lawn; a long table, picnic tables or a pergola in the middle; and loungers, a towel line or a hammock to the south. Every tub has a towel post, step lights and a side table.
+
 ## November 26: Inside the House
 > The House now has real rooms inside: a kitchen, dining area and living room. The bomb shelter's trap door has moved to the garage.
 - **Kitchen.** In through the back slider, the kitchen is on your left: oak cabinets on green walls, a black stove and fridge, a sink under the window, a peninsula with a stool and a brown-and-beige tile floor.
