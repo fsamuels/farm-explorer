@@ -19,6 +19,7 @@ const DATA := {
 				"**Command room.** A wall of screens over a console, a lit map table and a radio rack.",
 				"**Armory.** The gun rack moved here from the munitions store, with a pistol board, a workbench and a safe.",
 				"**Get in the hot tub.** In the back-yard ideas, look at the hot tub's water and press E: you strip to your underwear, hop in and sit looking west. L changes the lights, J turns the jets on (bubbles and more steam), E gets you out. Try it at night for the stars.",
+				"**Hot tub skies.** In the tub, K steps through four scenes: a clear night, night with light snow falling round the tub, night with the aurora, and sunset.",
 				"**Back yard ideas, take two.** Fifteen ideas now, best fit first: ten practical ones and five just for fun. The hot tub stays by its plug in a deck, some with a deck from the master bedroom's slider, each with a counter, the Traeger and a fire table under a roof."
 			],
 			"summary": "The shelter under the House now runs under the back yard: nine rooms, including a mess hall well away from where you sleep.",
@@ -351,14 +352,14 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 21146,
-		"commits": 312,
-		"decisions": 190,
+		"code_lines": 21224,
+		"commits": 313,
+		"decisions": 191,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 85,
-		"size_kb": 123668,
-		"test_lines": 6688,
+		"size_kb": 123672,
+		"test_lines": 6701,
 		"textures": 49,
 		"vehicles": 3
 	}
