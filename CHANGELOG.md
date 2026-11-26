@@ -15,6 +15,7 @@ fails if the two disagree.
 - **Thirty ideas.** Stand in the back yard and press O to step through them, best fit first, with the five just-for-fun ones still at the end.
 - **Open sky over the tub.** Every roof, pavilion and gazebo stops short of the water. The idea with a roof over the tub is gone.
 - **New ideas.** A stargazing deck with loungers, a fire beside the tub, a bar facing the tub, a run-in shed, a winter windbreak, a sauna a step from the tub, a cold plunge and shower, a dark-sky yard with a hammock, and more.
+- **Fuller yards.** Each idea now fills the whole yard: a vegetable garden, a greenhouse or a firewood and propane corner by the garage; Adirondack chairs round a fire ring, cornhole, horseshoes or hay bales on the lawn; a long table, picnic tables or a pergola in the middle; and loungers, a towel line or a hammock to the south. Every tub has a towel post, step lights and a side table.
 
 ## November 25: Russian olive trees
 > Old silvery Russian olive trees now line the farm's north side, thin at the west end and thick toward the round corral.

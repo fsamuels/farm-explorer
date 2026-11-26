@@ -8,7 +8,8 @@ const DATA := {
 			"bullets": [
 				"**Thirty ideas.** Stand in the back yard and press O to step through them, best fit first, with the five just-for-fun ones still at the end.",
 				"**Open sky over the tub.** Every roof, pavilion and gazebo stops short of the water. The idea with a roof over the tub is gone.",
-				"**New ideas.** A stargazing deck with loungers, a fire beside the tub, a bar facing the tub, a run-in shed, a winter windbreak, a sauna a step from the tub, a cold plunge and shower, a dark-sky yard with a hammock, and more."
+				"**New ideas.** A stargazing deck with loungers, a fire beside the tub, a bar facing the tub, a run-in shed, a winter windbreak, a sauna a step from the tub, a cold plunge and shower, a dark-sky yard with a hammock, and more.",
+				"**Fuller yards.** Each idea now fills the whole yard: a vegetable garden, a greenhouse or a firewood and propane corner by the garage; Adirondack chairs round a fire ring, cornhole, horseshoes or hay bales on the lawn; a long table, picnic tables or a pergola in the middle; and loungers, a towel line or a hammock to the south. Every tub has a towel post, step lights and a side table."
 			],
 			"summary": "Thirty new back-yard ideas to step through with O, and not one puts a roof over the hot tub, so you can soak under the stars.",
 			"title": "November 25: Thirty back-yard ideas under open sky"
@@ -378,13 +379,13 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 22404,
-		"commits": 318,
-		"decisions": 195,
+		"code_lines": 22729,
+		"commits": 319,
+		"decisions": 196,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 90,
-		"size_kb": 123741,
+		"size_kb": 123757,
 		"test_lines": 6928,
 		"textures": 49,
 		"vehicles": 3

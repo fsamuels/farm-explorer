@@ -341,6 +341,8 @@ func _build(i: int) -> Node3D:
 	holder.add_child(body)
 	if IDEAS[i].has("build"):
 		call(IDEAS[i].build, holder, body)
+		if IDEAS[i].tier == "realistic":
+			_dense(holder, body, i)
 	return holder
 
 ## A Node3D under `parent` raised to `y` (for things standing on a deck).
@@ -611,7 +613,7 @@ func _master_deck(root: Node3D, body: StaticBody3D, deck: Material, tub_sides :=
 ## A pavilion over `pav` holding the cooking and the fire: a table-top counter
 ## along its back (with a sink when `sink`), the Traeger at the counter's end,
 ## and a propane fire table with chairs in front.
-func _cook_and_fire(root: Node3D, body: StaticBody3D, pav: Rect2, roof := "shed", roof_color := Color(0.72, 0.74, 0.76), post := K.CEDAR, sink := true, posts := 2) -> void:
+func _cook_and_fire(root: Node3D, body: StaticBody3D, pav: Rect2, roof := "shed", roof_color := Color(0.72, 0.74, 0.76), post := K.CEDAR, sink := true, posts := 2, lights := true) -> void:
 	K.pavilion(root, body, pav, 2.7, roof, post, roof_color, posts)
 	var items := ["counter", "sink", "counter"] if sink else ["counter", "counter"]
 	K.kitchen(root, body, Vector2(pav.position.x + 0.3, pav.position.y + 0.7), Vector2(1, 0), Vector2(0, 1), 2.4, items, K.CEDAR_DARK, Color(0.55, 0.54, 0.52))
@@ -620,6 +622,10 @@ func _cook_and_fire(root: Node3D, body: StaticBody3D, pav: Rect2, roof := "shed"
 	K.fire_table(root, body, c, Vector2(1.3, 0.8), false, 0.6, K.CONCRETE)
 	for p in [[c + Vector2(-1.4, 0), Vector2(1, 0)], [c + Vector2(1.4, 0), Vector2(-1, 0)], [c + Vector2(0, 1.25), Vector2(0, -1)]]:
 		K.chair(root, p[0], p[1])
+	_side_table(root, c + Vector2(-1.4, 0.75))
+	_side_table(root, c + Vector2(1.4, 0.75))
+	if lights:
+		K.string_lights(root, body, [Vector2(pav.position.x + 0.2, pav.end.y - 0.2), Vector2(pav.end.x - 0.2, pav.end.y - 0.2)], 2.5, false)
 
 const GALVANISED := Color(0.72, 0.74, 0.76)
 
@@ -1043,7 +1049,7 @@ func _tub_benches(root: Node3D, body: StaticBody3D) -> void:
 
 func _dark_sky(root: Node3D, body: StaticBody3D) -> void:
 	_base(root, body, -15.4, -1.4, ["north", "west"])
-	_cook_and_fire(root, body, Rect2(-15.0, -7.0, 5.0, 4.4), "shed", K.CHARCOAL)
+	_cook_and_fire(root, body, Rect2(-15.0, -7.0, 5.0, 4.4), "shed", K.CHARCOAL, K.CEDAR, true, 2, false)
 	# A hammock slung between two posts on the lawn west of the tub.
 	var a := Vector2(-20.4, 3.4)
 	var b := Vector2(-16.6, 3.4)
@@ -1067,3 +1073,322 @@ func _west_end_pavilion(root: Node3D, body: StaticBody3D) -> void:
 	K.slab(root, pav.grow(0.6), 0.05, K.paving(Color(0.62, 0.58, 0.52), 0.12, "west_gravel"))
 	_cook_and_fire(root, body, pav, "gable", GALVANISED, Color(0.55, 0.16, 0.12), true, 3)
 	K.tub_on_deck(root, body, TUB, 2.3, K.boards(K.CEDAR), ["north", "west"], K.CEDAR_DARK)
+
+# --- filling the yard (D-196) --------------------------------------------------
+#
+# Every realistic idea gets more than its tub, roof, fire and kitchen: things at
+# the tub (a towel post, step lights, a side table) found from its tub-deck
+# marker, and three clusters on ground no idea uses, which change from idea to
+# idea so no two yards look alike. None is near a tub, so the sky stays open.
+
+## Ground every realistic idea leaves empty, in the House's frame: a strip by
+## the garage's line on the north, the north-west lawn clear of the trees, the
+## middle of the lawn, and the south lawn short of the willows and the fence.
+## A cluster is only put down where nothing of the idea stands in its zone.
+const ZONE_N := Rect2(-21.0, -11.0, 10.4, 3.2)
+const ZONE_W := Rect2(-30.0, -6.6, 7.0, 5.0)
+const ZONE_C := Rect2(-22.4, -6.6, 5.6, 5.0)
+const ZONE_S := Rect2(-17.0, 7.6, 6.5, 4.4)
+const FILL_N := ["garden", "utility", "greenhouse"]
+const FILL_W := ["adirondack", "cornhole", "horseshoes", "hay_bales"]
+const FILL_S := ["loungers", "towel_line", "hammock"]
+const FILL_C := ["dining", "picnic", "pergola_table"]
+## Ideas that already have their own of these at the tub.
+const OWN_TOWEL_POST := ["_tub_kit"]
+const OWN_STEP_LIGHTS := ["_stargazer_deck", "_tub_kit", "_tub_benches"]
+const NO_SIDE_TABLE := ["_tub_benches"]
+
+## The fill for idea `i`: what goes in each zone, as [north, west, south, middle].
+static func fill_for(i: int) -> Array:
+	var r := i - 1
+	return [FILL_N[r % 3], FILL_W[r % 4], FILL_S[(r + 1) % 3], FILL_C[(r + 2) % 3]]
+
+## Set while filling the Dark-Sky Yard, which strings no lights.
+var _dark := false
+
+func _dense(root: Node3D, body: StaticBody3D, i: int) -> void:
+	var build: String = IDEAS[i].build
+	_dark = build == "_dark_sky"
+	for m in root.find_children("Mark_*", "Marker3D", true, false):
+		if m.get_meta("kind") != "tub_deck":
+			continue
+		var top: float = m.get_meta("top")
+		var half: float = m.get_meta("half")
+		var t := Vector2((m as Node3D).position.x, (m as Node3D).position.z)
+		var on := _raised(root, top)
+		if not OWN_TOWEL_POST.has(build):
+			_towel_post(on, t + Vector2(half - 0.25, -half + 0.25))
+		if not OWN_STEP_LIGHTS.has(build):
+			_step_lights(root, Rect2(t.x - half, t.y - half, half * 2.0, half * 2.0), top)
+		if not NO_SIDE_TABLE.has(build):
+			_side_table(on, t + Vector2(-half + 0.35, half - 0.35))
+			K.box(on, Vector3(t.x - half + 0.35, 0.52, t.y + half - 0.35), Vector3(0.3, 0.08, 0.22), K.mat(Color(0.9, 0.9, 0.86), 0.95))
+	var fill := fill_for(i)
+	var placed := []
+	var zones := [ZONE_N, ZONE_W, ZONE_S, ZONE_C]
+	var clear := zones.map(func(z: Rect2) -> bool: return _zone_clear(root, z))
+	for k in zones.size():
+		if clear[k]:
+			call("_fill_" + fill[k], root, body, zones[k])
+			placed.append(fill[k])
+	K.mark(root, Vector3(0, 0, 0), "fill", {"zones": placed})
+
+## Whether nothing of the idea built so far stands in `z` (a little grown),
+## leaving out flat things on the ground (paving, gravel and paths) and
+## things overhead (the eaves of a roof next to it).
+func _zone_clear(root: Node3D, z: Rect2) -> bool:
+	var r := z.grow(0.15)
+	var inv := root.global_transform.affine_inverse()
+	for mi in root.find_children("*", "MeshInstance3D", true, false):
+		var bb: AABB = (inv * (mi as Node3D).global_transform) * (mi as MeshInstance3D).get_aabb()
+		if bb.end.y < 0.15 or bb.position.y > 2.2:
+			continue
+		if Rect2(bb.position.x, bb.position.z, bb.size.x, bb.size.z).intersects(r):
+			return false
+	return true
+
+## A small cedar side table.
+func _side_table(parent: Node3D, at: Vector2, color := K.CEDAR_DARK) -> void:
+	K.box(parent, Vector3(at.x, 0.47, at.y), Vector3(0.45, 0.04, 0.45), K.mat(color, 0.8))
+	K.box(parent, Vector3(at.x, 0.23, at.y), Vector3(0.08, 0.46, 0.08), K.mat(color, 0.8))
+
+## An Adirondack chair facing `facing`: a sloped seat, wide flat arms and a
+## tall fan of back slats.
+func _adirondack(parent: Node3D, at: Vector2, facing: Vector2, color: Color) -> void:
+	var holder := Node3D.new()
+	holder.position = Vector3(at.x, 0, at.y)
+	holder.rotation.y = atan2(facing.x, facing.y)
+	parent.add_child(holder)
+	var m := K.mat(color, 0.8)
+	K.box(holder, Vector3(0, 0.33, 0.1), Vector3(0.62, 0.05, 0.6), m).rotation.x = 0.12
+	for k in 5:
+		var slat := K.box(holder, Vector3(-0.24 + k * 0.12, 0.72, -0.3), Vector3(0.09, 0.85, 0.03), m)
+		slat.rotation.x = -0.35
+	for sx in [-0.38, 0.38]:
+		K.box(holder, Vector3(sx, 0.58, 0.05), Vector3(0.14, 0.03, 0.75), m)
+		K.box(holder, Vector3(sx, 0.29, 0.32), Vector3(0.05, 0.58, 0.05), m)
+		K.box(holder, Vector3(sx, 0.18, -0.2), Vector3(0.05, 0.36, 0.05), m)
+
+## A ring of fieldstone round a wood fire, with its glow.
+func _fire_ring(root: Node3D, body: StaticBody3D, c: Vector2) -> void:
+	K.cyl(root, Vector3(c.x, 0.17, c.y), 0.75, 0.34, K.mat(K.STONE, 0.95), body, -1.0, 12)
+	K.cyl(root, Vector3(c.x, 0.345, c.y), 0.6, 0.02, K.mat(Color(0.12, 0.1, 0.09), 1.0), null, -1.0, 12)
+	for k in 3:
+		var lg := K.cyl(root, Vector3(c.x, 0.4, c.y), 0.06, 0.8, K.mat(Color(0.35, 0.24, 0.15), 0.95), null, -1.0, 6)
+		lg.rotation = Vector3(PI / 2.0, k * PI / 3.0, 0.0)
+	K.flames(root, Vector3(c.x, 0.38, c.y), 0.25, 4, 0.45)
+
+func _raised_bed(root: Node3D, body: StaticBody3D, c: Vector2, size: Vector2) -> void:
+	K.box(root, Vector3(c.x, 0.2, c.y), Vector3(size.x, 0.4, size.y), K.boards(K.CEDAR), body)
+	K.box(root, Vector3(c.x, 0.41, c.y), Vector3(size.x - 0.1, 0.02, size.y - 0.1), K.mat(Color(0.28, 0.2, 0.14), 1.0))
+	var rows := 3
+	for k in rows:
+		var z := c.y - size.y / 2.0 + (k + 0.5) * size.y / rows
+		K.box(root, Vector3(c.x, 0.5, z), Vector3(size.x - 0.3, 0.18 + 0.06 * k, 0.22), K.mat(K.GREEN.lerp(Color(0.45, 0.55, 0.25), k * 0.4), 0.9))
+
+func _bins(root: Node3D, body: StaticBody3D, start: Vector2) -> void:
+	var colors := [Color(0.15, 0.35, 0.18), Color(0.15, 0.3, 0.55), Color(0.12, 0.12, 0.13)]
+	for k in 3:
+		var p := start + Vector2(k * 0.68, 0)
+		K.box(root, Vector3(p.x, 0.5, p.y), Vector3(0.6, 1.0, 0.7), K.mat(colors[k], 0.7), body)
+		K.box(root, Vector3(p.x, 1.02, p.y + 0.02), Vector3(0.62, 0.04, 0.74), K.mat(colors[k].darkened(0.2), 0.7))
+
+# North strip.
+
+func _fill_garden(root: Node3D, body: StaticBody3D, z: Rect2) -> void:
+	for k in 4:
+		_raised_bed(root, body, Vector2(z.position.x + 0.8 + k * 1.8, z.get_center().y), Vector2(1.2, 2.4))
+	# A potting bench, a rain barrel and a compost bin.
+	var pb := Vector2(z.end.x - 2.6, z.position.y + 0.45)
+	K.box(root, Vector3(pb.x, 0.9, pb.y), Vector3(1.6, 0.05, 0.6), K.boards(K.CEDAR), body)
+	K.box(root, Vector3(pb.x, 0.3, pb.y), Vector3(1.5, 0.04, 0.5), K.boards(K.CEDAR_DARK))
+	K.box(root, Vector3(pb.x, 1.3, pb.y - 0.28), Vector3(1.6, 0.8, 0.04), K.boards(K.CEDAR_DARK))
+	for k in 3:
+		K.cyl(root, Vector3(pb.x - 0.5 + k * 0.4, 1.0, pb.y + 0.05), 0.09, 0.16, K.mat(Color(0.7, 0.38, 0.25), 0.9), null, 0.12, 10)
+	K.cyl(root, Vector3(z.end.x - 0.9, 0.45, z.position.y + 0.5), 0.32, 0.9, K.mat(Color(0.2, 0.3, 0.45), 0.6), body)
+	K.box(root, Vector3(z.end.x - 1.6, 0.4, z.end.y - 0.7), Vector3(1.1, 0.8, 1.0), K.boards(Color(0.5, 0.42, 0.34)), body)
+
+func _fill_utility(root: Node3D, body: StaticBody3D, z: Rect2) -> void:
+	# Two covered firewood racks along the back.
+	var bark := K.mat(Color(0.42, 0.3, 0.2), 0.95)
+	var grain := K.mat(Color(0.72, 0.58, 0.4), 0.9)
+	for k in 2:
+		var x := z.position.x + 1.4 + k * 2.8
+		var c := Vector3(x, 0, z.position.y + 0.55)
+		K.box(root, c + Vector3(0, 0.62, 0), Vector3(2.4, 1.1, 0.5), bark, body)
+		K.box(root, c + Vector3(0, 0.62, 0.26), Vector3(2.3, 1.0, 0.02), grain)
+		for sx in [-1.25, 1.25]:
+			K.box(root, c + Vector3(sx, 0.7, 0), Vector3(0.08, 1.4, 0.55), K.mat(K.CHARCOAL, 0.6, 0.4))
+		K.box(root, c + Vector3(0, 1.45, 0), Vector3(2.7, 0.04, 0.8), K.mat(GALVANISED, 0.5, 0.5))
+	# A propane cage with two tanks, the bins and a hose reel.
+	var cage := Vector2(z.position.x + 6.6, z.position.y + 0.6)
+	K.box(root, Vector3(cage.x, 0.65, cage.y), Vector3(1.0, 1.3, 0.7), K.mat(Color(0.3, 0.3, 0.32, 0.35), 0.6, 0.5), body)
+	for dx in [-0.22, 0.22]:
+		K.cyl(root, Vector3(cage.x + dx, 0.5, cage.y), 0.18, 1.0, K.mat(Color(0.92, 0.92, 0.9), 0.5))
+	_bins(root, body, Vector2(z.end.x - 1.9, z.position.y + 0.6))
+	var reel := Vector3(z.end.x - 3.2, 0.45, z.end.y - 0.6)
+	K.box(root, reel, Vector3(0.5, 0.9, 0.5), K.mat(K.CHARCOAL, 0.6), body)
+	K.cyl(root, reel + Vector3(0, 0.25, 0.27), 0.28, 0.12, K.mat(Color(0.2, 0.45, 0.2), 0.7), null, -1.0, 16).rotation.x = PI / 2.0
+	# A wheelbarrow and a bench to sit on and pull boots off.
+	var wb := Vector3(z.position.x + 4.5, 0, z.end.y - 0.7)
+	K.box(root, wb + Vector3(0, 0.45, 0), Vector3(1.0, 0.3, 0.65), K.mat(Color(0.6, 0.12, 0.1), 0.5, 0.3))
+	K.cyl(root, wb + Vector3(0.6, 0.18, 0), 0.18, 0.08, K.mat(K.CHARCOAL, 0.8), null, -1.0, 12).rotation.x = PI / 2.0
+	K.box(root, Vector3(z.position.x + 1.6, 0.45, z.end.y - 0.4), Vector3(1.6, 0.06, 0.4), K.boards(K.CEDAR), body)
+
+func _fill_greenhouse(root: Node3D, body: StaticBody3D, z: Rect2) -> void:
+	# A hoop greenhouse: a half barrel of clear film on steel hoops, ends
+	# framed, a door on the east.
+	var c := Vector2(z.position.x + 3.0, z.get_center().y)
+	var r := minf(1.5, z.size.y / 2.0 - 0.05)
+	var length := 5.0
+	var film := K.cyl(root, Vector3(c.x, 0, c.y), r, length, K.mat(Color(0.92, 0.95, 0.95, 0.35), 0.2), null, -1.0, 20)
+	film.rotation.z = PI / 2.0
+	for k in 6:
+		var hoop := K.cyl(root, Vector3(c.x - length / 2.0 + k * length / 5.0, 0, c.y), r + 0.02, 0.05, K.mat(K.STEEL, 0.4, 0.7), null, -1.0, 20)
+		hoop.rotation.z = PI / 2.0
+	K.box(root, Vector3(c.x, 0.04, c.y), Vector3(length, 0.08, r * 2.0), K.mat(Color(0.3, 0.22, 0.15), 1.0))
+	for sx in [-1.0, 1.0]:
+		K.box(root, Vector3(c.x + sx * length / 2.0, r / 2.0, c.y), Vector3(0.05, r, r * 1.6), K.mat(K.CEDAR, 0.8))
+	K.box(root, Vector3(c.x, r * 0.6, c.y), Vector3(length, r * 1.2, r * 1.8), K.mat(Color(0, 0, 0, 0)), body).visible = false
+	for k in 2:
+		_raised_bed(root, body, Vector2(z.position.x + 6.8 + k * 1.8, z.get_center().y), Vector2(1.2, 2.4))
+	K.cyl(root, Vector3(z.end.x - 0.5, 0.45, z.position.y + 0.5), 0.32, 0.9, K.mat(Color(0.2, 0.3, 0.45), 0.6), body)
+
+# West lawn.
+
+func _fill_adirondack(root: Node3D, body: StaticBody3D, z: Rect2) -> void:
+	var c := z.get_center()
+	_fire_ring(root, body, c)
+	var colors := [Color(0.55, 0.16, 0.12), Color(0.9, 0.88, 0.82), Color(0.25, 0.38, 0.5), Color(0.55, 0.16, 0.12), Color(0.9, 0.88, 0.82), Color(0.25, 0.38, 0.5)]
+	for k in 6:
+		var a := TAU * k / 6.0 + 0.3
+		var d := Vector2(cos(a), sin(a) * 0.85)
+		_adirondack(root, c + d * 2.0, -d, colors[k])
+	for k in 3:
+		var a := TAU * (k * 2 + 1) / 6.0 + 0.3
+		var p := c + Vector2(cos(a), sin(a) * 0.85) * 2.1
+		K.cyl(root, Vector3(p.x, 0.22, p.y), 0.2, 0.44, K.mat(Color(0.45, 0.32, 0.2), 0.95), null, -1.0, 10)
+	K.box(root, Vector3(z.position.x + 0.6, 0.35, z.end.y - 0.4), Vector3(0.9, 0.7, 0.5), K.mat(Color(0.42, 0.3, 0.2), 0.95), body)
+
+func _fill_cornhole(root: Node3D, body: StaticBody3D, z: Rect2) -> void:
+	var c := z.get_center()
+	var boards := K.mat(Color(0.85, 0.75, 0.55), 0.7)
+	for sx in [-1.0, 1.0]:
+		var b := K.box(root, Vector3(c.x + sx * 3.2, 0.17, c.y), Vector3(1.2, 0.05, 0.6), boards)
+		b.rotation.z = sx * -0.2
+		K.cyl(root, Vector3(c.x + sx * 3.5, 0.255, c.y), 0.08, 0.02, K.mat(Color(0.05, 0.05, 0.05), 0.9), null, -1.0, 12)
+		for k in 4:
+			K.box(root, Vector3(c.x + sx * (2.2 - k * 0.15), 0.03, c.y + (k - 1.5) * 0.25), Vector3(0.15, 0.04, 0.15), K.mat([Color(0.7, 0.12, 0.1), Color(0.15, 0.3, 0.6)][k % 2], 0.95))
+	for p in [[Vector2(c.x - 3.0, z.end.y - 0.6), Vector2(0.4, -1)], [Vector2(c.x - 1.8, z.end.y - 0.6), Vector2(-0.2, -1)],
+			[Vector2(c.x + 1.8, z.end.y - 0.6), Vector2(0.2, -1)], [Vector2(c.x + 3.0, z.end.y - 0.6), Vector2(-0.4, -1)]]:
+		_adirondack(root, p[0], p[1], Color(0.9, 0.88, 0.82))
+	K.box(root, Vector3(c.x, 0.25, z.end.y - 0.6), Vector3(0.7, 0.45, 0.45), K.mat(Color(0.7, 0.12, 0.1), 0.5), body)
+	K.box(root, Vector3(c.x, 0.48, z.end.y - 0.6), Vector3(0.72, 0.04, 0.47), K.mat(K.WHITE, 0.5))
+
+func _fill_horseshoes(root: Node3D, body: StaticBody3D, z: Rect2) -> void:
+	var c := z.get_center()
+	var sand := K.mat(Color(0.82, 0.74, 0.58), 1.0)
+	for sx in [-1.0, 1.0]:
+		var p := Vector3(c.x + sx * 3.4, 0, c.y - 0.6)
+		K.box(root, p + Vector3(0, 0.03, 0), Vector3(1.0, 0.06, 1.8), sand)
+		K.box(root, p + Vector3(0, 0.08, 0.95), Vector3(1.1, 0.16, 0.1), K.boards(K.CEDAR_DARK))
+		K.box(root, p + Vector3(0, 0.08, -0.95), Vector3(1.1, 0.16, 0.1), K.boards(K.CEDAR_DARK))
+		K.box(root, p + Vector3(sx * 0.75, 0.5, 0), Vector3(0.08, 1.0, 1.8), K.boards(K.CEDAR_DARK), body)
+		K.cyl(root, p + Vector3(0, 0.2, 0), 0.015, 0.36, K.mat(K.STEEL, 0.4, 0.7))
+	var iron := K.mat(Color(0.3, 0.3, 0.32), 0.6, 0.6)
+	for k in 4:
+		var h := K.cyl(root, Vector3(c.x + 3.1 + (k % 2) * 0.3, 0.07, c.y - 0.4 + k * 0.15), 0.1, 0.02, iron, null, -1.0, 10)
+		h.rotation.x = 0.2
+	K.box(root, Vector3(c.x, 0.45, z.end.y - 0.5), Vector3(2.4, 0.06, 0.4), K.boards(K.CEDAR), body)
+	K.box(root, Vector3(c.x, 0.75, z.end.y - 0.3), Vector3(2.4, 0.5, 0.05), K.boards(K.CEDAR))
+	K.box(root, Vector3(c.x - 1.8, 0.6, z.end.y - 0.5), Vector3(0.08, 1.2, 0.08), K.mat(K.CEDAR_DARK, 0.8))
+	K.label(root, Vector3(c.x - 1.8, 1.3, z.end.y - 0.45), "40 FT\n(ROUGHLY)", 28, Color(0.95, 0.9, 0.8))
+
+func _fill_hay_bales(root: Node3D, body: StaticBody3D, z: Rect2) -> void:
+	var c := z.get_center()
+	_fire_ring(root, body, c)
+	var hay := K.mat(Color(0.85, 0.72, 0.38), 1.0)
+	for k in 7:
+		var a := PI * 0.15 + TAU * k / 7.0
+		var d := Vector2(cos(a), sin(a) * 0.8)
+		K.box(root, Vector3(c.x + d.x * 2.0, 0.23, c.y + d.y * 2.0), Vector3(0.9, 0.45, 0.45), hay, body, -a)
+	# A spare stack and a wagon wheel leaning on it.
+	K.box(root, Vector3(z.position.x + 0.6, 0.23, z.position.y + 0.5), Vector3(0.9, 0.45, 0.45), hay, body)
+	K.box(root, Vector3(z.position.x + 0.6, 0.68, z.position.y + 0.5), Vector3(0.9, 0.45, 0.45), hay)
+	var wheel := K.cyl(root, Vector3(z.position.x + 0.6, 0.5, z.position.y + 0.85), 0.5, 0.06, K.mat(Color(0.35, 0.24, 0.15), 0.9), null, -1.0, 14)
+	wheel.rotation.x = PI / 2.0 - 0.15
+
+# South lawn.
+
+func _fill_loungers(root: Node3D, body: StaticBody3D, z: Rect2) -> void:
+	for k in 4:
+		var x := z.position.x + 0.8 + k * 1.6
+		_lounger(root, Vector2(x, z.get_center().y + 0.4), Vector2(0, -1), K.CEDAR)
+		if k < 3:
+			_side_table(root, Vector2(x + 0.8, z.get_center().y + 0.9))
+	_path_light(root, Vector2(z.position.x + 0.2, z.position.y + 0.3))
+	_path_light(root, Vector2(z.end.x - 0.2, z.position.y + 0.3))
+
+func _fill_towel_line(root: Node3D, body: StaticBody3D, z: Rect2) -> void:
+	var a := Vector2(z.position.x + 0.5, z.end.y - 1.2)
+	var b := Vector2(z.end.x - 0.5, z.end.y - 1.2)
+	for p in [a, b]:
+		K.box(root, Vector3(p.x, 1.0, p.y), Vector3(0.1, 2.0, 0.1), K.mat(K.CEDAR_DARK, 0.8), body)
+		K.box(root, Vector3(p.x, 1.9, p.y), Vector3(0.08, 0.08, 0.9), K.mat(K.CEDAR_DARK, 0.8))
+	var colors := [Color(0.9, 0.9, 0.86), Color(0.35, 0.45, 0.6), Color(0.9, 0.9, 0.86), Color(0.6, 0.2, 0.18), Color(0.35, 0.45, 0.6)]
+	for line in [-0.3, 0.3]:
+		K.box(root, Vector3((a.x + b.x) / 2.0, 1.88, a.y + line), Vector3(b.x - a.x, 0.01, 0.01), K.mat(K.WHITE, 0.5))
+	for k in 5:
+		var x := lerpf(a.x + 0.8, b.x - 0.8, k / 4.0)
+		K.box(root, Vector3(x, 1.5, a.y + (0.3 if k % 2 else -0.3)), Vector3(0.6, 0.75, 0.02), K.mat(colors[k], 0.95))
+	K.box(root, Vector3(z.get_center().x, 0.45, z.position.y + 0.6), Vector3(2.0, 0.06, 0.45), K.boards(K.CEDAR), body)
+	K.box(root, Vector3(z.get_center().x, 0.22, z.position.y + 0.6), Vector3(1.8, 0.44, 0.06), K.boards(K.CEDAR_DARK))
+	K.box(root, Vector3(z.get_center().x + 1.6, 0.2, z.position.y + 0.6), Vector3(0.8, 0.4, 0.35), K.boards(K.CEDAR_DARK), body)
+	for k in 3:
+		K.box(root, Vector3(z.get_center().x + 1.4 + k * 0.2, 0.43, z.position.y + 0.6), Vector3(0.14, 0.06, 0.3), K.mat(Color(0.12, 0.1, 0.08), 0.8))
+
+func _fill_hammock(root: Node3D, body: StaticBody3D, z: Rect2) -> void:
+	var a := Vector2(z.position.x + 0.6, z.get_center().y + 0.6)
+	var b := Vector2(a.x + 3.8, a.y)
+	for p in [a, b]:
+		K.box(root, Vector3(p.x, 0.9, p.y), Vector3(0.14, 1.8, 0.14), K.mat(K.CEDAR_DARK, 0.8), body)
+	var cloth := K.mat(Color(0.75, 0.3, 0.2), 0.95)
+	for k in 8:
+		var t := (k + 0.5) / 8.0
+		var p := a.lerp(b, t)
+		K.box(root, Vector3(p.x, 1.45 - 0.6 * 4.0 * t * (1.0 - t), p.y), Vector3(a.distance_to(b) / 8.0 + 0.02, 0.04, 0.9), cloth)
+	_side_table(root, b + Vector2(0.8, -0.8))
+	_lounger(root, Vector2(z.end.x - 0.6, z.position.y + 1.0), Vector2(0, -1), K.CEDAR)
+	_adirondack(root, Vector2(a.x + 1.9, z.position.y + 0.6), Vector2(0, -1), Color(0.9, 0.88, 0.82))
+	_path_light(root, Vector2(z.end.x - 0.2, z.end.y - 0.3))
+
+# Middle of the lawn.
+
+func _fill_dining(root: Node3D, body: StaticBody3D, z: Rect2) -> void:
+	var c := z.get_center()
+	K.dining(root, c, 3.0)
+	for sx in [-1.0, 1.0]:
+		K.chair(root, c + Vector2(sx * 2.0, 0), Vector2(-sx, 0), K.CEDAR_DARK)
+	var corners := [z.position + Vector2(0.3, 0.3), Vector2(z.end.x - 0.3, z.position.y + 0.3), z.end - Vector2(0.3, 0.3), Vector2(z.position.x + 0.3, z.end.y - 0.3)]
+	if not _dark:
+		K.string_lights(root, body, corners + [corners[0]], 2.8)
+	K.box(root, Vector3(c.x + 0.6, 0.8, c.y), Vector3(0.35, 0.12, 0.35), K.mat(Color(0.95, 0.85, 0.55), 0.6, 0.0, 0.8))
+
+func _fill_picnic(root: Node3D, body: StaticBody3D, z: Rect2) -> void:
+	for k in 2:
+		var c := Vector2(z.position.x + 1.6 + k * 2.6, z.get_center().y + (k * 2 - 1) * 1.1)
+		K.dining(root, c, 1.9, K.CEDAR)
+		K.cyl(root, Vector3(c.x, 1.25, c.y), 0.025, 2.5, K.mat(K.CHARCOAL, 0.6))
+		K.cyl(root, Vector3(c.x, 2.35, c.y), 1.3, 0.4, K.mat([Color(0.6, 0.15, 0.12), Color(0.85, 0.82, 0.72)][k], 0.9), null, 0.05, 8)
+	K.box(root, Vector3(z.end.x - 0.5, 0.25, z.position.y + 0.5), Vector3(0.7, 0.45, 0.45), K.mat(Color(0.15, 0.3, 0.6), 0.5), body)
+	K.box(root, Vector3(z.end.x - 0.5, 0.48, z.position.y + 0.5), Vector3(0.72, 0.04, 0.47), K.mat(K.WHITE, 0.5))
+
+func _fill_pergola_table(root: Node3D, body: StaticBody3D, z: Rect2) -> void:
+	var r := Rect2(z.position.x + 0.5, z.position.y + 0.6, z.size.x - 1.0, z.size.y - 1.2)
+	K.pergola(root, body, r, 2.6, K.CEDAR_DARK)
+	var c := r.get_center()
+	K.dining(root, c, 2.4, K.CEDAR)
+	for sx in [-1.0, 1.0]:
+		K.chair(root, c + Vector2(sx * 1.7, 0), Vector2(-sx, 0), K.CEDAR)
+	if not _dark:
+		K.string_lights(root, body, [Vector2(r.position.x + 0.1, c.y), Vector2(r.end.x - 0.1, c.y)], 2.55, false)
