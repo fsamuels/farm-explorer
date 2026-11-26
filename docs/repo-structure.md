@@ -125,7 +125,7 @@ farm-sim/
     │   ├── willow.gd              # a tree-form willow grown in code from a seed (forking limbs, hanging leaf strands) — see D-171
     │   ├── backyard_mockups.gd    # 15 back-yard ideas behind the House, best fit first, O to step through them, a card and a hint — see D-184, D-190
     │   ├── mockup_kit.gd          # the mockups' building blocks: hot tubs on decks, fire tables, pavilions, counters, the Traeger, saunas, seating — see D-184, D-190
-    │   ├── hot_tub_soak.gd        # get into a back-yard hot tub: underwear, a seat facing west, L lights, J jets, steam — see D-190
+    │   ├── hot_tub_soak.gd        # get into a back-yard hot tub: underwear, a seat facing west, L lights, J jets, K sky scenes, steam — see D-190, D-191
     │   ├── world_terrain.gd       # the driveable world: builds and drops 320 m chunks (ground mesh, collider, road ribbons) around the camera — see D-148
     │   ├── world_math.gd          # pure world-ground maths (grid heights on the mesh's own triangles, farm blend, chunk meshes), covered by tests/ — see D-148
     │   ├── road_math.gd           # pure road maths (resample, ribbon geometry, nearest road), covered by tests/ — see D-148

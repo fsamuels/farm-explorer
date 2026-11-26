@@ -1,5 +1,59 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
-  <rect width="128" height="128" rx="16" fill="#355e3b"/>
-  <path d="M20 96 L64 40 L108 96 Z" fill="#8b5a2b"/>
-  <rect x="52" y="64" width="24" height="32" fill="#5c3a21"/>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4fb3e8"/>
+      <stop offset="1" stop-color="#bfeaf5"/>
+    </linearGradient>
+    <linearGradient id="pond" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4ec3d9"/>
+      <stop offset="1" stop-color="#1f86b5"/>
+    </linearGradient>
+    <clipPath id="tile"><rect width="128" height="128" rx="22"/></clipPath>
+  </defs>
+  <g clip-path="url(#tile)">
+    <!-- sky -->
+    <rect width="128" height="128" fill="url(#sky)"/>
+    <!-- sun -->
+    <circle cx="101" cy="26" r="13" fill="#ffd23f"/>
+    <circle cx="101" cy="26" r="19" fill="#ffd23f" opacity=".3"/>
+    <!-- clouds -->
+    <g fill="#fff">
+      <ellipse cx="30" cy="22" rx="14" ry="6"/>
+      <ellipse cx="40" cy="17" rx="9" ry="7"/>
+      <ellipse cx="68" cy="34" rx="10" ry="4.5" opacity=".9"/>
+    </g>
+    <!-- far hills -->
+    <path d="M0 70 Q30 50 62 66 T128 60 V128 H0 Z" fill="#7cc46a"/>
+    <!-- near hill -->
+    <path d="M0 84 Q40 68 84 82 T128 78 V128 H0 Z" fill="#5aa84a"/>
+    <!-- barn -->
+    <g>
+      <rect x="22" y="56" width="44" height="34" fill="#c8332b"/>
+      <path d="M17 58 L26 38 Q44 30 62 38 L71 58 Z" fill="#8f1f1f"/>
+      <path d="M17 58 L26 38 Q44 30 62 38 L71 58" fill="none" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/>
+      <rect x="32" y="64" width="24" height="26" fill="#fff"/>
+      <rect x="34.5" y="66.5" width="19" height="21" fill="#c8332b"/>
+      <path d="M34.5 66.5 L53.5 87.5 M53.5 66.5 L34.5 87.5" stroke="#fff" stroke-width="2.5"/>
+      <rect x="39" y="45" width="10" height="7" fill="#ffe9a8" stroke="#fff" stroke-width="2"/>
+    </g>
+    <!-- willow -->
+    <g>
+      <rect x="100" y="60" width="4" height="26" fill="#6b4423"/>
+      <ellipse cx="102" cy="58" rx="16" ry="11" fill="#3f8f3a"/>
+      <g stroke="#3f8f3a" stroke-width="2.6" stroke-linecap="round">
+        <path d="M89 62v18M94 66v18M99 68v14M105 68v16M110 66v18M115 62v16"/>
+      </g>
+    </g>
+    <!-- pond -->
+    <path d="M-4 104 Q30 90 72 96 Q112 100 132 94 V132 H-4 Z" fill="url(#pond)"/>
+    <path d="M14 112 h20 M60 120 h24 M92 108 h18" stroke="#d8f4fb" stroke-width="2.4" stroke-linecap="round" opacity=".8"/>
+    <!-- kayak -->
+    <g>
+      <path d="M36 104 Q64 110 92 102 Q84 120 64 120 Q44 120 36 104 Z" fill="#3fae5a" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+      <ellipse cx="64" cy="107" rx="9" ry="3.5" fill="#1f6b36"/>
+      <circle cx="64" cy="100" r="5" fill="#fbd5a5"/>
+      <path d="M57 108 Q64 94 71 108 Z" fill="#2b6cb0"/>
+      <path d="M48 96 L82 114" stroke="#6b4423" stroke-width="2.4" stroke-linecap="round"/>
+    </g>
+  </g>
 </svg>

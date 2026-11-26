@@ -5,7 +5,9 @@ extends StaticBody3D
 ## on the deck), sit down in the tub facing west, and the view goes to first
 ## person, so on a clear night you look straight out at the western sky and
 ## its stars. L cycles the underwater lights, J turns the jets on and off
-## (bubbles, and much more steam), E gets you out onto the deck.
+## (bubbles, and much more steam), K steps through sky scenes for a soak
+## (night, night with light snow, night with the aurora, sunset), E gets you
+## out onto the deck.
 ##
 ## It works like a car seat (vehicle.gd): the player's `enter_vehicle` calls
 ## `board`, carries the body to `seat_transform` every frame and asks
@@ -23,6 +25,14 @@ const LIGHTS := [
 	{"name": "purple", "color": Color(0.65, 0.3, 1.0), "energy": 1.5},
 	{"name": "warm white", "color": Color(1.0, 0.85, 0.6), "energy": 1.3},
 ]
+## The sky scenes K steps through: a time-of-day preset (time_of_day.gd) and
+## a weather (weather.gd). The time goes first: the aurora needs a dark sky.
+const SCENES := [
+	{"name": "Night", "time": "night", "weather": "clear"},
+	{"name": "Night, light snow", "time": "night", "weather": "snow"},
+	{"name": "Night, aurora", "time": "night", "weather": "aurora"},
+	{"name": "Sunset", "time": "sunset", "weather": "clear"},
+]
 const STEAM_CALM := 14
 const STEAM_JETS := 50
 
@@ -34,12 +44,15 @@ var eye_offset := Vector3(0, 1.65, 0)
 var driver: Node3D
 var light_index := 1
 var jets := false
+## Which of SCENES is showing, or -1 before K is first pressed.
+var scene_index := -1
 
 var _light: OmniLight3D
 var _water_mat: StandardMaterial3D
 var _steam: CPUParticles3D
 var _steam_jets: CPUParticles3D
 var _bubbles: CPUParticles3D
+var _flakes: CPUParticles3D
 var _foam: MeshInstance3D
 var _clothes: Node3D
 var _hud: CanvasLayer
@@ -65,6 +78,7 @@ func _ready() -> void:
 	_steam_jets = _make_steam(STEAM_JETS, 0.55)
 	_steam_jets.emitting = false
 	_bubbles = _make_bubbles()
+	_flakes = _make_flakes()
 	_foam = MeshInstance3D.new()
 	var foam_mesh := PlaneMesh.new()
 	foam_mesh.size = Vector2(size - 0.3, size - 0.3)
@@ -163,6 +177,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed("tub_jets") and not event.is_echo():
 		set_jets(not jets)
 		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("tub_scene") and not event.is_echo():
+		cycle_scene()
+		get_viewport().set_input_as_handled()
 
 func cycle_lights() -> void:
 	light_index = (light_index + 1) % LIGHTS.size()
@@ -175,6 +192,37 @@ func set_jets(on: bool) -> void:
 	_bubbles.emitting = on
 	_foam.visible = on
 	_update_hud()
+
+## Step to the next sky scene: set the time of day, then the weather.
+func cycle_scene() -> void:
+	scene_index = (scene_index + 1) % SCENES.size()
+	var sc: Dictionary = SCENES[scene_index]
+	var tod := _world_node("TimeOfDay")
+	if tod:
+		tod.set_preset(sc.time)
+	var weather := _world_node("Weather")
+	if weather:
+		weather.set_weather(sc.weather)
+	# The game's snow is unlit, faint at night; flakes round the tub, caught
+	# in the light off the water, make the snow scene read.
+	_flakes.emitting = sc.weather == "snow"
+	_update_hud()
+
+func flakes_falling() -> bool:
+	return _flakes.emitting
+
+func scene_name() -> String:
+	return SCENES[scene_index].name if scene_index >= 0 else "pick one"
+
+## A node of the main scene (TimeOfDay, Weather): the nearest ancestor that
+## has a child of that name has it.
+func _world_node(node_name: String) -> Node:
+	var n := get_parent()
+	while n:
+		if n.has_node(node_name):
+			return n.get_node(node_name)
+		n = n.get_parent()
+	return null
 
 func light_name() -> String:
 	return LIGHTS[light_index].name
@@ -251,6 +299,36 @@ func _make_bubbles() -> CPUParticles3D:
 	add_child(p)
 	return p
 
+## Snowflakes drifting down round the tub, in the snow scene.
+func _make_flakes() -> CPUParticles3D:
+	var p := CPUParticles3D.new()
+	p.amount = 260
+	p.lifetime = 6.0
+	p.preprocess = 6.0
+	p.position = Vector3(0, water_y + 4.0, 0)
+	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	p.emission_box_extents = Vector3(5.0, 0.2, 5.0)
+	p.direction = Vector3.DOWN
+	p.spread = 20.0
+	p.gravity = Vector3(0.1, -0.25, 0.05)
+	p.initial_velocity_min = 0.4
+	p.initial_velocity_max = 0.7
+	p.scale_amount_min = 0.6
+	p.scale_amount_max = 1.2
+	var quad := QuadMesh.new()
+	quad.size = Vector2(0.05, 0.05)
+	var m := StandardMaterial3D.new()
+	m.albedo_texture = _puff_texture()
+	m.albedo_color = Color(1, 1, 1, 0.9)
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	quad.material = m
+	p.mesh = quad
+	p.emitting = false
+	add_child(p)
+	return p
+
 static var _puff: ImageTexture
 
 ## A soft round puff, white fading to clear at the edge.
@@ -315,7 +393,7 @@ func _build_hud() -> void:
 
 func _update_hud() -> void:
 	if _hud_label:
-		_hud_label.text = "In the hot tub   ·   L lights (%s)   ·   J jets (%s)   ·   T night sky   ·   E get out" % [light_name(), "on" if jets else "off"]
+		_hud_label.text = "In the hot tub   ·   L lights (%s)   ·   J jets (%s)   ·   K sky (%s)   ·   E get out" % [light_name(), "on" if jets else "off", scene_name()]
 
 func hud_text() -> String:
 	return _hud_label.text if _hud_label else ""
