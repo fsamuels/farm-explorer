@@ -6,6 +6,15 @@ const DATA := {
 	"entries": [
 		{
 			"bullets": [
+				"**Thirty ideas.** Stand in the back yard and press O to step through them, best fit first, with the five just-for-fun ones still at the end.",
+				"**Open sky over the tub.** Every roof, pavilion and gazebo stops short of the water. The idea with a roof over the tub is gone.",
+				"**New ideas.** A stargazing deck with loungers, a fire beside the tub, a bar facing the tub, a run-in shed, a winter windbreak, a sauna a step from the tub, a cold plunge and shower, a dark-sky yard with a hammock, and more."
+			],
+			"summary": "Thirty new back-yard ideas to step through with O, and not one puts a roof over the hot tub, so you can soak under the stars.",
+			"title": "November 25: Thirty back-yard ideas under open sky"
+		},
+		{
+			"bullets": [
 				"**Russian olives.** About thirty trees, 15 to 25 feet tall, with several crooked stems, dark rough bark and silvery-green leaves, stand along the north side of the farm where they show in the aerial imagery. You can walk under the branches but not through the trunks."
 			],
 			"summary": "Old silvery Russian olive trees now line the farm's north side, thin at the west end and thick toward the round corral.",
@@ -369,13 +378,13 @@ const DATA := {
 		}
 	],
 	"stats": {
-		"code_lines": 22096,
-		"commits": 317,
-		"decisions": 194,
+		"code_lines": 22404,
+		"commits": 318,
+		"decisions": 195,
 		"models": 14,
 		"scenes": 26,
 		"scripts": 90,
-		"size_kb": 123725,
+		"size_kb": 123741,
 		"test_lines": 6928,
 		"textures": 49,
 		"vehicles": 3
